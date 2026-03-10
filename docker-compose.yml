@@ -39,26 +39,26 @@ services:
       WORDPRESS_ADMIN_USER: ${WORDPRESS_ADMIN_USER:-admin}
       WORDPRESS_ADMIN_PASSWORD: ${WORDPRESS_ADMIN_PASSWORD:-admin}
       WORDPRESS_ADMIN_EMAIL: ${WORDPRESS_ADMIN_EMAIL:-admin@localhost}
-    command: >
-      sh -c "
-      echo 'Waiting for wp-config.php...';
-      until [ -f /var/www/html/wp-config.php ]; do sleep 2; done;
-      if wp core is-installed 2>/dev/null; then
-        echo 'WordPress already installed.';
-      else
-        wp core install
-          --url=$${WORDPRESS_URL:-http://localhost:8080}
-          --title=$${WORDPRESS_TITLE:-Local WordPress}
-          --admin_user=$${WORDPRESS_ADMIN_USER:-admin}
-          --admin_password=$${WORDPRESS_ADMIN_PASSWORD:-admin}
-          --admin_email=$${WORDPRESS_ADMIN_EMAIL:-admin@localhost}
-          --skip-email;
-        echo 'WordPress installed.';
-      fi
-      "
+      WORDPRESS_LOCALE: ${WORDPRESS_LOCALE:-en_US}
+    command:
+      - sh
+      - -c
+      - |
+        echo 'Waiting for wp-config.php...'
+        until [ -f /var/www/html/wp-config.php ]; do sleep 2; done
+        echo 'Waiting for database...'
+        until wp db check 2>/dev/null; do sleep 2; done
+        if wp core is-installed 2>/dev/null; then
+          echo 'WordPress already installed.'
+        else
+          wp core install --url="$$WORDPRESS_URL" --title="$$WORDPRESS_TITLE" --admin_user="$$WORDPRESS_ADMIN_USER" --admin_password="$$WORDPRESS_ADMIN_PASSWORD" --admin_email="$$WORDPRESS_ADMIN_EMAIL" --locale="$$WORDPRESS_LOCALE" --skip-email
+          echo 'WordPress installed.'
+        fi
     depends_on:
       wordpress:
         condition: service_started
+      db:
+        condition: service_healthy
     networks:
       - wp-network
     restart: "no"
