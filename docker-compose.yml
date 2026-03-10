@@ -27,6 +27,7 @@ services:
   wp-install:
     image: wordpress:cli
     container_name: wp-install
+    user: "0:0"
     volumes:
       - wordpress_data:/var/www/html
     environment:
@@ -44,16 +45,19 @@ services:
       - sh
       - -c
       - |
+        cd /var/www/html
         echo 'Waiting for wp-config.php...'
-        until [ -f /var/www/html/wp-config.php ]; do sleep 2; done
+        until [ -f wp-config.php ]; do sleep 2; done
         echo 'Waiting for database...'
-        until wp db check 2>/dev/null; do sleep 2; done
-        if wp core is-installed 2>/dev/null; then
+        until php -r '$$m=new mysqli(getenv("WORDPRESS_DB_HOST"),getenv("WORDPRESS_DB_USER"),getenv("WORDPRESS_DB_PASSWORD"),getenv("WORDPRESS_DB_NAME"));exit($$m->connect_error?1:0);' 2>/dev/null; do sleep 2; done
+        echo 'Database ready.'
+        if wp core is-installed --allow-root 2>/dev/null; then
           echo 'WordPress already installed.'
         else
-          wp core install --url="$$WORDPRESS_URL" --title="$$WORDPRESS_TITLE" --admin_user="$$WORDPRESS_ADMIN_USER" --admin_password="$$WORDPRESS_ADMIN_PASSWORD" --admin_email="$$WORDPRESS_ADMIN_EMAIL" --locale="$$WORDPRESS_LOCALE" --skip-email
+          wp core install --allow-root --url="$$WORDPRESS_URL" --title="$$WORDPRESS_TITLE" --admin_user="$$WORDPRESS_ADMIN_USER" --admin_password="$$WORDPRESS_ADMIN_PASSWORD" --admin_email="$$WORDPRESS_ADMIN_EMAIL" --locale="$$WORDPRESS_LOCALE" --skip-email
           echo 'WordPress installed.'
         fi
+        mkdir -p /var/www/html/wp-content/uploads && chown -R www-data:www-data /var/www/html/wp-content
     depends_on:
       wordpress:
         condition: service_started
