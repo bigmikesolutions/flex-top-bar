@@ -31,6 +31,14 @@ WP plugins
 - View logs: `docker compose logs -f`
 - Shell into WordPress container: `docker compose exec wordpress bash`
 
-### Using local plugins/themes
+### Custom plugins
 
-To develop plugins or themes on your machine, uncomment the `wp-content` volume in `docker-compose.yml` under the wordpress service, then put your plugins/themes in a `wp-content` folder in this repo. The container will use that directory instead of the default one.
+Custom plugins live in **`plugins/`** at the repo root and are mounted into the container as `wp-content/plugins`. Each plugin is in its own subdirectory (e.g. `plugins/top-bar/`). Activate them in **WP Admin → Plugins**.
+
+**Unit tests** (PHPUnit) run from the project root:
+
+```bash
+composer install
+composer test
+# or only Top Bar:  composer test:top-bar
+```

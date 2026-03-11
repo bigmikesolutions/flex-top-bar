@@ -16,8 +16,8 @@ services:
         define('WP_DEBUG_DISPLAY', true);
     volumes:
       - wordpress_data:/var/www/html
-      # Mount local wp-content for themes/plugins (optional - uncomment to use)
-      # - ./wp-content:/var/www/html/wp-content
+      # Custom plugins (develop locally; container plugins dir is replaced)
+      - ./plugins:/var/www/html/wp-content/plugins
     depends_on:
       - db
     networks:

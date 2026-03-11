@@ -1,0 +1,29 @@
+{
+  "name": "bigmikesolutions/wordpress",
+  "description": "Local WordPress and custom plugins",
+  "license": "GPL-2.0-or-later",
+  "config": {
+    "allow-plugins": true
+  },
+  "autoload": {
+    "psr-4": {
+      "TopBar\\": "plugins/top-bar/",
+      "TopBar\\Tests\\": "plugins/top-bar/tests/"
+    },
+    "classmap": [
+      "plugins/top-bar/"
+    ]
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "TopBar\\Tests\\": "plugins/top-bar/tests/"
+    }
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^10.0"
+  },
+  "scripts": {
+    "test": "phpunit",
+    "test:top-bar": "phpunit plugins/top-bar/tests"
+  }
+}

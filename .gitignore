@@ -21,6 +21,10 @@
 wp-config.php
 .env
 
+# Composer & PHPUnit
+/vendor/
+.phpunit.cache/
+
 # Example themes
 /wp-content/themes/twenty*/
 

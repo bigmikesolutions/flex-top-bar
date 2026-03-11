@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.0/phpunit.xsd"
+         bootstrap="plugins/top-bar/tests/bootstrap.php"
+         colors="true"
+         cacheDirectory=".phpunit.cache">
+  <testsuites>
+    <testsuite name="plugins">
+      <directory>plugins/*/tests</directory>
+    </testsuite>
+  </testsuites>
+  <source>
+    <include>
+      <directory>plugins</directory>
+    </include>
+    <exclude>
+      <directory>plugins/*/tests</directory>
+    </exclude>
+    <coverage>
+      <report>
+        <clover outputFile=".phpunit.cache/clover.xml"/>
+      </report>
+    </coverage>
+  </source>
+</phpunit>
