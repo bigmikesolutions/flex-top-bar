@@ -30,6 +30,7 @@ services:
     user: "0:0"
     volumes:
       - wordpress_data:/var/www/html
+      - ./plugins:/var/www/html/wp-content/plugins
     environment:
       WORDPRESS_DB_HOST: db
       WORDPRESS_DB_USER: ${MYSQL_USER:-wordpress}
@@ -58,6 +59,10 @@ services:
           echo 'WordPress installed.'
         fi
         mkdir -p /var/www/html/wp-content/uploads && chown -R www-data:www-data /var/www/html/wp-content
+        if [ -d /var/www/html/wp-content/plugins/top-bar ]; then
+          wp plugin activate top-bar --allow-root 2>/dev/null || true
+          echo 'Top Bar plugin activated.'
+        fi
     depends_on:
       wordpress:
         condition: service_started
