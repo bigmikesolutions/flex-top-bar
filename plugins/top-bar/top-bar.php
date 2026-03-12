@@ -33,6 +33,7 @@ final class Plugin {
 
 	private function __construct() {
 		add_action( 'wp_body_open', [ $this, 'maybe_render_bar' ], 5 );
+		add_action( 'wp_footer', [ $this, 'maybe_output_bar_fallback' ], 1 );
 		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_assets' ] );
 		add_action( 'admin_menu', [ $this, 'add_settings_page' ] );
 		add_action( 'admin_init', [ $this, 'register_settings' ] );
@@ -67,6 +68,10 @@ final class Plugin {
 		return $this->sanitize_hex_color( $color ) ?: 'transparent';
 	}
 
+	private function get_hide_on_scroll(): bool {
+		return get_option( 'top_bar_hide_on_scroll', '0' ) === '1';
+	}
+
 	private function sanitize_hex_color( string $color ): string {
 		$color = ltrim( $color, '#' );
 		if ( preg_match( '/^([A-Fa-f0-9]{3}){1,2}$/', $color ) ) {
@@ -79,13 +84,46 @@ final class Plugin {
 		$position = $this->get_position();
 		$message  = $this->get_message();
 		$classes  = [ 'top-bar', 'top-bar--' . sanitize_html_class( $position ) ];
+		$hide_on_scroll = $this->get_hide_on_scroll();
+		if ( $hide_on_scroll ) {
+			$classes[] = 'top-bar--hide-on-scroll';
+		}
 		?>
-		<div class="<?php echo esc_attr( implode( ' ', $classes ) ); ?>" role="banner">
+		<div id="top-bar" class="<?php echo esc_attr( implode( ' ', $classes ) ); ?>" role="banner"<?php echo $hide_on_scroll ? ' data-top-bar-hide-threshold="20"' : ''; ?>>
 			<div class="top-bar__inner">
 				<?php echo wp_kses_post( $message ); ?>
 			</div>
 		</div>
 		<?php
+		if ( $hide_on_scroll ) {
+			$this->print_hide_on_scroll_script_inline();
+		}
+	}
+
+	/** Fallback when theme does not call wp_body_open: inject bar at start of body and run hide script. */
+	public function maybe_output_bar_fallback(): void {
+		if ( ! $this->should_show_bar() ) {
+			return;
+		}
+		$hide_on_scroll = $this->get_hide_on_scroll();
+		$position       = $this->get_position();
+		$message        = $this->get_message();
+		$classes        = [ 'top-bar', 'top-bar--' . sanitize_html_class( $position ) ];
+		if ( $hide_on_scroll ) {
+			$classes[] = 'top-bar--hide-on-scroll';
+		}
+		$bar_html = '<div id="top-bar" class="' . esc_attr( implode( ' ', $classes ) ) . '" role="banner"' . ( $hide_on_scroll ? ' data-top-bar-hide-threshold="20"' : '' ) . '><div class="top-bar__inner">' . wp_kses_post( $message ) . '</div></div>';
+		?>
+		<script id="top-bar-fallback">
+		(function(){
+			if(document.getElementById('top-bar')) return;
+			document.body.insertAdjacentHTML('afterbegin', <?php echo wp_json_encode( $bar_html ); ?>);
+		})();
+		</script>
+		<?php
+		if ( $hide_on_scroll ) {
+			$this->print_hide_on_scroll_script_inline();
+		}
 	}
 
 	public function enqueue_assets(): void {
@@ -105,6 +143,27 @@ final class Plugin {
 			$inline .= ' .top-bar { border: 1px solid ' . esc_attr( $frame ) . '; }';
 		}
 		wp_add_inline_style( 'top-bar', $inline );
+	}
+
+	private function print_hide_on_scroll_script_inline(): void {
+		?>
+		<script id="top-bar-hide-on-scroll">(function(){
+			var t=30;
+			function find(){ return document.getElementById('top-bar'); }
+			function scrollY(){ return window.pageYOffset||document.documentElement.scrollTop; }
+			function update(){
+				var bar=find();
+				if(!bar) return;
+				bar.style.display=scrollY()>t?'none':'';
+			}
+			function go(){
+				update();
+				window.addEventListener('scroll',function(){ update(); },{passive:1});
+			}
+			if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',go);
+			else go();
+		})();</script>
+		<?php
 	}
 
 	/** Admin settings */
@@ -149,16 +208,23 @@ final class Plugin {
 				return preg_match( '/^([A-Fa-f0-9]{3}){1,2}$/', $v ) ? '#' . $v : '';
 			},
 		] );
+		register_setting( 'top_bar_settings', 'top_bar_hide_on_scroll', [
+			'type'              => 'string',
+			'sanitize_callback' => function ( $v ) {
+				return ( $v === '1' || $v === 1 ) ? '1' : '0';
+			},
+		] );
 	}
 
 	public function render_settings_page(): void {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return;
 		}
-		$position     = get_option( 'top_bar_position', 'top' );
-		$message      = get_option( 'top_bar_message', __( 'Welcome!', 'top-bar' ) );
-		$bg_color     = get_option( 'top_bar_bg_color', '#1d2327' );
-		$frame_color  = get_option( 'top_bar_frame_color', '' );
+		$position        = get_option( 'top_bar_position', 'top' );
+		$message         = get_option( 'top_bar_message', __( 'Welcome!', 'top-bar' ) );
+		$bg_color        = get_option( 'top_bar_bg_color', '#1d2327' );
+		$frame_color     = get_option( 'top_bar_frame_color', '' );
+		$hide_on_scroll  = get_option( 'top_bar_hide_on_scroll', '0' ) === '1';
 		?>
 		<div class="wrap">
 			<h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
@@ -203,6 +269,16 @@ final class Plugin {
 							<input type="color" id="top_bar_frame_color" name="top_bar_frame_color" value="<?php echo esc_attr( $frame_color ?: '#000000' ); ?>" />
 							<input type="checkbox" id="top_bar_frame_disable" name="top_bar_frame_disable" value="1" <?php checked( empty( $frame_color ) ); ?> />
 							<label for="top_bar_frame_disable"><?php esc_html_e( 'No border', 'top-bar' ); ?></label>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row"><?php esc_html_e( 'Scroll behaviour', 'top-bar' ); ?></th>
+						<td>
+							<input type="hidden" name="top_bar_hide_on_scroll" value="0" />
+							<label>
+								<input type="checkbox" name="top_bar_hide_on_scroll" value="1" <?php checked( $hide_on_scroll ); ?> />
+								<?php esc_html_e( 'Hide bar when user scrolls down; show again when scrolling up', 'top-bar' ); ?>
+							</label>
 						</td>
 					</tr>
 				</table>
