@@ -18,11 +18,17 @@ WP plugins
    docker compose up -d
    ```
 
-3. **Open WordPress** (install runs automatically; no browser setup wizard):
+3. **Restart word press:**
+   ```bash
+   docker compose restart wordpress
+   ```
+
+4. **Open WordPress** (install runs automatically; no browser setup wizard):
    - **WordPress:** http://localhost:8080  
+   - **WordPress admin:** http://localhost:8080/wp-admin  
    - **phpMyAdmin:** http://localhost:8081 (DB user/password from `.env` or defaults)
 
-   Default admin login (override via `.env`): **admin** / **admin**
+   Default admin login (override via `.env`): **admin** / **admin**   
 
 ### Useful commands
 
