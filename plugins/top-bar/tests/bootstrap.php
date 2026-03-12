@@ -5,7 +5,7 @@
  * @package TopBar
  */
 
-$autoload = dirname( __DIR__, 2 ) . '/vendor/autoload.php';
+$autoload = dirname( __DIR__, 3 ) . '/vendor/autoload.php';
 if ( ! file_exists( $autoload ) ) {
 	throw new RuntimeException( 'Run composer install from the project root.' );
 }
