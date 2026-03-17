@@ -1,0 +1,370 @@
+// Settings
+
+.transition (@transition) {
+	-webkit-transition: @transition;
+	-moz-transition: @transition;
+	-ms-transition: @transition;
+	-o-transition:@transition;
+  transition: @transition;
+}
+
+&:hover  {
+  -webkit-transition: all 0.5s ease;
+  -moz-transition: all 0.5s ease;
+  -ms-transition: all 0.5s ease;
+  -o-transition: all 0.5s ease;
+  transition: all 0.5s ease;
+}
+
+
+
+// Colors 
+
+@mintGreen: #00FBCD;
+@white: #FFF;
+@zuccini: #063821;
+@black: #000;
+@blue: #2150ed;
+@amber: #FBBF01;
+
+// #2150ed
+
+// #3d42ff
+
+
+#top-bar {
+  width: 98%;
+
+  // Nav
+
+  #top-bar-nav {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    padding: 10px 15px;
+    box-sizing: border-box;
+
+    .item {
+      width: 49%;
+    }
+  }
+
+  // Options
+
+  #top-bar-options {
+    display: none;
+    border-top: 1px solid fade(@black,5);
+    padding-top: 20px;
+    width: 100%;
+
+    &.active {
+      display: inline-block;
+    }
+  }
+
+  // Row
+
+  .top-bar-row {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 0 10px;
+    box-sizing: border-box;
+    width: 100%;
+    margin-top: 20px;
+  
+
+    &.center {
+      justify-content: center;
+    }
+
+    &.lt {
+      justify-content: flex-start;
+    }
+
+    &.rt {
+      justify-content: flex-end;
+    }
+
+    &.empty {
+      padding: 100px 0;
+
+      p {
+        width: 100%;
+        margin-bottom: 20px;
+        text-align: center;
+      }
+    }
+
+    &.bg {
+      background: @white;
+      border-radius: 16px;
+      padding: 12px 20px 20px 20px;
+      margin: 12px 0;
+      box-sizing: border-box;
+      border:1px solid fade(@black,10)
+    }
+  }
+
+  // Grid
+
+  .top-bar-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+    gap: 10px 0;
+    width: 100%;
+    padding: 5px 0;
+
+    &.line-top {
+      border-top:1px solid @black;
+    }
+
+    &.line-bottom {
+      border-bottom:1px solid fade(@black,10);
+      padding-bottom: 20px;
+      margin-bottom: 20px;
+    }
+
+    &.title {
+      margin:20px 0 0;
+
+      input {
+        margin-right: 10px;
+      }
+    }
+
+    .item, .item-creator {
+      border-left:1px solid fade(@black,10);
+      padding: 0 8px;
+      box-sizing: border-box;
+
+      &:first-child {
+        border-left: 0;
+        padding-left: 0;
+      }     
+    }  
+        
+    
+    &.bg-blue {
+      background: fade(@blue,20);
+      padding: 10px;
+      box-sizing: border-box;
+      border:1px solid fade(@black,5);
+      border-radius: 10px;
+    }
+
+    &.bg-amber {
+      background: fade(@amber,20);
+      padding: 10px;
+      box-sizing: border-box;
+      border:1px solid fade(@black,5);
+      border-radius: 10px;
+    }
+  }
+
+  // Column generator
+
+  #top-bar-column-creator {
+    box-sizing: border-box;
+    border:1px solid fade(@black,20);
+    border-bottom: 0;
+
+   .top-bar-column-creator-grid {
+      grid-template-columns: 40px repeat(auto-fit, minmax(200px, 1fr));
+      display: grid;
+      border-bottom:1px solid fade(@black,20);
+      width: 100%;
+    }
+
+    .item-creator {
+      padding: 20px;
+      box-sizing: border-box;
+      padding:20px;
+
+      &:first-child {
+        background: fade(@black,5);
+        align-items: center;
+        text-align: center;
+      }
+
+      &.vertical {
+        flex-wrap: nowrap;
+        display: flex;
+      }
+
+      
+      &.lg {
+        grid-column: span 3;
+      }
+
+      &.no {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: grab;
+        height: 100%;
+      }
+    }
+
+    .tmce-active {
+      width: 100%;
+    }
+  }
+
+  // Paragraph 
+
+  p,legend {
+    font-size: 14px;
+    margin:5px 0 10px;
+
+    &.bold {
+      font-weight: 600;
+    }
+
+    &.xs {
+      font-size: 12px;
+    }
+
+    &.sm {
+      font-size: 14px;
+    }
+
+    &.md {
+      font-size: 16px;
+    }
+
+    &.lg {
+      font-size: 18px;
+    }
+  }
+
+  // Form elements, Input, Select, etc
+
+  fieldset {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 20px;
+
+    &.vertical {
+      flex-wrap: nowrap;
+    }
+
+    &.line {
+      border-top: 1px solid fade(@black,10);
+
+      legend {
+        padding: 0 10px 0 0;
+        box-sizing: border-box;
+        background: @white;
+      }
+    }
+
+    &.clear {
+      margin: 0;
+    }
+
+    &.revers {
+      flex-direction: row-reverse;
+
+      legend {
+        order:2
+      }
+
+      div {
+        order: 1;
+      }
+    }
+  }
+
+  input {
+    outline: none;
+    box-shadow: none;
+  }
+
+  select {
+    width: 100%;
+    max-height: 30px;
+  }
+
+  label {
+    margin:4px 0;
+    display: flex;
+    width: 100%;
+    align-items: center;
+  }
+
+  input[type=text] {
+    width: 100%;
+    padding: 10px;
+    border:1px solid fade(@black,20);
+    padding: 8px 10px;
+    box-sizing: border-box;
+
+    &:focus {
+      border:1px solid fade(@black,60);
+    }
+  }
+
+  // Buttons
+
+  .top-bar-btn {
+    padding: 10px 20px;
+    color:@white;
+    text-decoration: none;
+    font-weight: 600;
+    border-radius: 5px;
+    outline: none;
+
+    &.sm {
+      font-size: 14px;
+       padding: 10px 18px;
+    }
+
+    &.md {
+      font-size: 16px;
+       padding: 14px 24px;
+    }
+
+    &.lg {
+      font-size: 18px;
+       padding: 16px 28px;
+    }
+
+    &.mint {
+      background: @mintGreen; 
+      color:@black;
+
+      &:hover {
+        background: darken(@mintGreen,5);
+      }
+    }
+
+     &.amber {
+      background: @amber; 
+      color:@black;
+
+      &:hover {
+        background: darken(@amber,5);
+      }
+    }
+  }
+
+  // Icons 
+
+  .top-bar-icons {
+    width: 40px;
+    height: 40px;
+    mask-size: 100% auto;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    display: inline-block;
+    background-color: @black;
+
+    &.arrow-down {
+      --ic-arrow:  url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' height='24px' viewBox='0 -960 960 960' width='24px' fill='%231f1f1f'%3E%3Cpath d='M560-240 320-480l240-240 56 56-184 184 184 184-56 56Z'/%3E%3C/svg%3E");
+      -webkit-mask-image:var(--ic-arrow);
+      mask-image:var(--ic-arrow);
+      transform: rotate(-90deg);
+    }
+  }
+}

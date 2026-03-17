@@ -18,7 +18,11 @@ final class Frontend {
 	public function __construct() {
 		add_action( 'wp_body_open', [ $this, 'maybe_render_bar' ], 5 );
 		add_action( 'wp_footer', [ $this, 'maybe_output_bar_fallback' ], 1 );
+		// frontend CSS
 		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_assets' ] );
+
+		// admin CSS
+		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
 	}
 
 	private function should_show_bar(): bool {
@@ -84,7 +88,7 @@ final class Frontend {
 		}
 		wp_enqueue_style(
 			'top-bar',
-			plugin_dir_url( TOP_BAR_PLUGIN_FILE ) . 'assets/css/top-bar.css',
+			( TOP_BAR_PLUGIN_FILE ) . 'assets/css/top-bar.css',
 			[],
 			TOP_BAR_VERSION
 		);
@@ -97,6 +101,16 @@ final class Frontend {
 		wp_add_inline_style( 'top-bar', $inline );
 	}
 
+	public function enqueue_admin_assets(): void {
+		wp_enqueue_style(
+			'top-bar-admin',
+			plugins_url( 'assets/css/top-bar-admin.css', TOP_BAR_PLUGIN_FILE ),
+			[],
+			TOP_BAR_VERSION
+		);
+	}
+
+	
 	private function print_hide_on_scroll_script_inline(): void {
 		?>
 		<script id="top-bar-hide-on-scroll">(function(){
