@@ -34,6 +34,8 @@ final class Options {
 			'name'           => __( 'Top Bar', 'top-bar' ),
 			'enabled'        => true,
 			'visible'        => true,
+			// Whether the bar's options details are expanded in the admin panel.
+			'admin_visibile' => true,
 			'position'       => 'top',
 			'message'        => __( 'Welcome!', 'top-bar' ),
 			'bg_color'       => '#1d2327',
@@ -115,6 +117,17 @@ final class Options {
 			$visible    = $raw_status === 'on';
 		}
 
+		$admin_visibile = $defaults['admin_visibile'];
+		if ( array_key_exists( 'admin_visibile', $bar ) ) {
+			$av = $bar['admin_visibile'];
+			if ( is_bool( $av ) ) {
+				$admin_visibile = $av;
+			} else {
+				$raw = is_string( $av ) ? strtolower( trim( (string) $av ) ) : '';
+				$admin_visibile = $raw === 'true' || $raw === '1' || $av === 1;
+			}
+		}
+
 		// Hide on scroll behavior: controlled by `hide_on_scroll` (bool).
 		$hide_on_scroll = false;
 		if ( array_key_exists( 'hide_on_scroll', $bar ) ) {
@@ -136,6 +149,7 @@ final class Options {
 			'name'           => isset( $bar['name'] ) ? sanitize_text_field( (string) $bar['name'] ) : $defaults['name'],
 			'enabled'        => true,
 			'visible'        => $visible,
+			'admin_visibile' => $admin_visibile,
 			'position'       => $pos,
 			'message'        => wp_kses_post( $msg ),
 			'bg_color'       => $bg ?: '#1d2327',

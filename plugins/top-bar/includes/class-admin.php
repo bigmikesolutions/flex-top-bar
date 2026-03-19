@@ -171,6 +171,8 @@ final class Admin {
 				$hide_on_scroll = ! empty( $bar['hide_on_scroll'] );
 				// `Options::normalize_bar()` already stores `visible` as a real boolean.
 				$visible = ! empty( $bar['visible'] );
+				// Whether the bar's settings details are expanded in the admin UI.
+				$admin_visibile = ! empty( $bar['admin_visibile'] );
 				$pf             = Options::OPTION_BARS . '[' . (int) $i . ']';
 				$remove_url     = wp_nonce_url(
 					add_query_arg(
@@ -217,12 +219,14 @@ final class Admin {
 							type="button"
 							class="top-bar-icons arrow-down top-bar-toggle-options"
 							data-options-panel-id="<?php echo esc_attr( 'top-bar-options-' . (int) $i ); ?>"
-							aria-expanded="true"
+							data-admin-visible-input-id="<?php echo esc_attr( 'top-bar-admin-visibile-' . (int) $i ); ?>"
+							aria-expanded="<?php echo esc_attr( $admin_visibile ? 'true' : 'false' ); ?>"
 							aria-controls="<?php echo esc_attr( 'top-bar-options-' . (int) $i ); ?>"
 						><?php esc_html_e( 'Open/Close', 'top-bar' ); ?></button>
+						<input type="hidden" id="<?php echo esc_attr( 'top-bar-admin-visibile-' . (int) $i ); ?>" name="<?php echo esc_attr( $pf ); ?>[admin_visibile]" value="<?php echo esc_attr( $admin_visibile ? '1' : '0' ); ?>" />
 					</div>
 				</div>
-				<div id="<?php echo esc_attr( 'top-bar-options-' . (int) $i ); ?>" class="top-bar-options active">
+				<div id="<?php echo esc_attr( 'top-bar-options-' . (int) $i ); ?>" class="top-bar-options<?php echo $admin_visibile ? ' active' : ''; ?>">
 					<div class="top-bar-grid">
 						<div class="item">			
 							<fieldset class="clear">
@@ -754,6 +758,12 @@ final class Admin {
 					panel.classList.toggle('active');
 					var open = panel.classList.contains('active');
 					btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+
+					var inputId = btn.getAttribute('data-admin-visible-input-id');
+					if(inputId){
+						var hidden = document.getElementById(inputId);
+						if(hidden){ hidden.value = open ? '1' : '0'; }
+					}
 				});
 			});
 		})();
