@@ -159,8 +159,15 @@ final class Admin {
 				$bar_name       = isset( $bar['name'] ) ? (string) $bar['name'] : '';
 				$position       = isset( $bar['position'] ) ? (string) $bar['position'] : 'top';
 				$message        = isset( $bar['message'] ) ? (string) $bar['message'] : __( 'Welcome!', 'top-bar' );
-				$bg_color       = isset( $bar['bg_color'] ) ? (string) $bar['bg_color'] : '#1d2327';
-				$frame_color    = isset( $bar['frame_color'] ) ? (string) $bar['frame_color'] : '';
+				$bg_color       = isset( $bar['bg_color'] ) ? Options::sanitize_hex_color( (string) $bar['bg_color'] ) : '#1d2327';
+				$frame_color    = isset( $bar['frame_color'] ) ? Options::sanitize_hex_color( (string) $bar['frame_color'] ) : '';
+				$frame_width    = isset( $bar['frame_width'] ) ? (int) $bar['frame_width'] : 1;
+				if ( $frame_width < 0 ) {
+					$frame_width = 0;
+				}
+				if ( $frame_width > 10 ) {
+					$frame_width = 10;
+				}
 				$hide_on_scroll = ! empty( $bar['hide_on_scroll'] );
 				$status         = isset( $bar['status'] ) ? (string) $bar['status'] : 'on';
 				$enabled        = ! empty( $bar['enabled'] );
@@ -251,18 +258,15 @@ final class Admin {
 						</div>
 						<div class="item column">
 							<div class="row">
-								<label class="clear">				
-									<input type="checkbox" id="top_bar_frame_disable_<?php echo (int) $i; ?>" name="<?php echo esc_attr( $pf ); ?>[frame_disable]" value="1" <?php checked( empty( $frame_color ) ); ?> />
-									<p class="bold clear"><?php esc_html_e( 'Border frame', 'top-bar' ); ?></p>
-								</label>
+								<p class="bold clear"><?php esc_html_e( 'Border frame', 'top-bar' ); ?></p>
 							</div>
 							<div class="row">
 								<label class="clear">				
 									<input type="color" id="top_bar_frame_color_<?php echo (int) $i; ?>" name="<?php echo esc_attr( $pf ); ?>[frame_color]" value="<?php echo esc_attr( $frame_color ?: '#000000' ); ?>" />
-									<select>
+									<select name="<?php echo esc_attr( $pf ); ?>[frame_width]" aria-label="<?php esc_attr_e( 'Border width', 'top-bar' ); ?>">
 										<?php
 										for ( $px = 0; $px <= 10; $px += 1 ) {
-											echo '<option value="' . (int) $px . '">' . (int) $px . 'px</option>';
+											echo '<option value="' . (int) $px . '"' . selected( $frame_width, $px, false ) . '>' . (int) $px . 'px</option>';
 										}
 										?>
 									</select>
@@ -715,6 +719,7 @@ final class Admin {
 			$message        = isset( $legacy_bar['message'] ) ? (string) $legacy_bar['message'] : __( 'Welcome!', 'top-bar' );
 			$bg_color       = isset( $legacy_bar['bg_color'] ) ? (string) $legacy_bar['bg_color'] : '#1d2327';
 			$frame_color    = isset( $legacy_bar['frame_color'] ) ? (string) $legacy_bar['frame_color'] : '';
+			$frame_width    = isset( $legacy_bar['frame_width'] ) ? (int) $legacy_bar['frame_width'] : 1;
 			$hide_on_scroll = ! empty( $legacy_bar['hide_on_scroll'] );
 			?>
 
@@ -750,8 +755,6 @@ final class Admin {
 						<th scope="row"><label for="top_bar_frame_color"><?php esc_html_e( 'Frame (border) colour', 'top-bar' ); ?></label></th>
 						<td>
 							<input type="color" id="top_bar_frame_color_legacy" name="top_bar_frame_color__ui_mock_legacy" value="<?php echo esc_attr( $frame_color ?: '#000000' ); ?>" />
-							<input type="checkbox" id="top_bar_frame_disable_legacy" name="top_bar_frame_disable__ui_mock_legacy" value="1" <?php checked( empty( $frame_color ) ); ?> />
-							<label for="top_bar_frame_disable_legacy"><?php esc_html_e( 'No border', 'top-bar' ); ?></label>
 						</td>
 					</tr>
 					<tr>

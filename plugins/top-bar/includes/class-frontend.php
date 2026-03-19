@@ -136,8 +136,15 @@ final class Frontend {
 			}
 			$rules[] = $sel . ' { background-color: ' . esc_attr( $bg ) . '; }';
 			$frame   = isset( $bar['frame_color'] ) ? Options::sanitize_hex_color( (string) $bar['frame_color'] ) : '';
-			if ( $frame !== '' ) {
-				$rules[] = $sel . ' { border: 1px solid ' . esc_attr( $frame ) . '; }';
+			$width   = isset( $bar['frame_width'] ) ? (int) $bar['frame_width'] : 1;
+			if ( $width < 0 ) {
+				$width = 0;
+			}
+			if ( $width > 10 ) {
+				$width = 10;
+			}
+			if ( $frame !== '' && $width > 0 ) {
+				$rules[] = $sel . ' { border: ' . $width . 'px solid ' . esc_attr( $frame ) . '; }';
 			}
 		}
 		wp_add_inline_style( 'top-bar', implode( ' ', $rules ) );

@@ -38,6 +38,7 @@ final class Options {
 			'message'        => __( 'Welcome!', 'top-bar' ),
 			'bg_color'       => '#1d2327',
 			'frame_color'    => '',
+			'frame_width'    => 1,
 			'hide_on_scroll' => false,
 		];
 	}
@@ -79,6 +80,7 @@ final class Options {
 		$bar['message']         = (string) get_option( 'top_bar_message', $bar['message'] );
 		$bar['bg_color']        = self::sanitize_hex_color( (string) get_option( 'top_bar_bg_color', '#1d2327' ) ) ?: '#1d2327';
 		$bar['frame_color']     = self::sanitize_hex_color( (string) get_option( 'top_bar_frame_color', '' ) ) ?: '';
+		$bar['frame_width']     = 1;
 		$bar['hide_on_scroll']  = get_option( 'top_bar_hide_on_scroll', '0' ) === '1';
 		$legacy_status          = get_option( 'top_bar_status', 'on' );
 		$bar['status']          = in_array( $legacy_status, [ 'on', 'off' ], true ) ? $legacy_status : 'on';
@@ -99,6 +101,13 @@ final class Options {
 		$msg      = isset( $bar['message'] ) && is_string( $bar['message'] ) ? $bar['message'] : $defaults['message'];
 		$bg       = isset( $bar['bg_color'] ) ? self::sanitize_hex_color( (string) $bar['bg_color'] ) : '';
 		$frame    = isset( $bar['frame_color'] ) ? self::sanitize_hex_color( (string) $bar['frame_color'] ) : '';
+		$width    = isset( $bar['frame_width'] ) ? (int) $bar['frame_width'] : 1;
+		if ( $width < 0 ) {
+			$width = 0;
+		}
+		if ( $width > 10 ) {
+			$width = 10;
+		}
 
 		return [
 			'id'             => sanitize_key( (string) $id ) ?: (string) $id,
@@ -109,6 +118,7 @@ final class Options {
 			'message'        => wp_kses_post( $msg ),
 			'bg_color'       => $bg ?: '#1d2327',
 			'frame_color'    => $frame,
+			'frame_width'    => $width,
 			'hide_on_scroll' => ! empty( $bar['hide_on_scroll'] ),
 		];
 	}
@@ -126,8 +136,10 @@ final class Options {
 			if ( ! is_array( $row ) ) {
 				continue;
 			}
-			if ( ! empty( $row['frame_disable'] ) ) {
+			$width = isset( $row['frame_width'] ) ? (int) $row['frame_width'] : 0;
+			if ( $width <= 0 ) {
 				$row['frame_color'] = '';
+				$row['frame_width'] = 0;
 			}
 			$row['enabled']        = ! empty( $row['enabled'] );
 			$row['hide_on_scroll'] = ! empty( $row['hide_on_scroll'] );
