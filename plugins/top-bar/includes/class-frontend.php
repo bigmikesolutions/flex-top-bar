@@ -18,10 +18,7 @@ final class Frontend {
 	public function __construct() {
 		add_action( 'wp_body_open', [ $this, 'maybe_render_bar' ], 5 );
 		add_action( 'wp_footer', [ $this, 'maybe_output_bar_fallback' ], 1 );
-		// frontend CSS
 		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_assets' ] );
-
-		// admin CSS
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
 	}
 
@@ -101,15 +98,20 @@ final class Frontend {
 		wp_add_inline_style( 'top-bar', $inline );
 	}
 
+	// Admin assets
+
 	public function enqueue_admin_assets(): void {
 		wp_enqueue_style(
-			'top-bar-admin',
-			plugins_url( 'assets/css/top-bar-admin.css', TOP_BAR_PLUGIN_FILE ),
-			[],
-			TOP_BAR_VERSION
+			'jquery-ui-style', 'https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css'
+		);
+		wp_enqueue_style(
+			'top-bar-admin',plugins_url( 'assets/css/top-bar-admin.css', TOP_BAR_PLUGIN_FILE ),	[],	TOP_BAR_VERSION
+		);
+		wp_enqueue_script('jquery-ui-datepicker');
+		wp_enqueue_script(
+			'top-bar-admin', plugins_url( 'assets/js/top-bar-admin.js', TOP_BAR_PLUGIN_FILE ), [], TOP_BAR_VERSION
 		);
 	}
-
 	
 	private function print_hide_on_scroll_script_inline(): void {
 		?>

@@ -86,14 +86,15 @@ final class Admin {
 			<!-- Empty list  -->
 
 			<div class="top-bar-row center empty">
-				<p class="lg bold">Welcome to the best TopBar plugin ever</p>
-				<a href="#" class="top-bar-btn mint md">Add new button</a>	
+				<p class="xlg bold"><?php esc_html_e( 'Welcome to Top Bar plugin', 'top-bar' ); ?></p>
+				<p class="xs"><?php esc_html_e( 'Click the button to add your first Top Bar', 'top-bar' ); ?></p>	
+				<a href="#" class="top-bar-btn mint md"><?php esc_html_e( 'Add new Top Bar', 'top-bar' ); ?></a>	
 			</div>
 
 			<!-- List of buttons  -->
 
 			<div class="top-bar-row rt">
-				<a href="#" class="top-bar-btn mint sm">Add new button</a>	
+				<a href="#" class="top-bar-btn mint sm"><?php esc_html_e( 'Add new Top Bar', 'top-bar' ); ?></a>	
 			</div>
 
 
@@ -105,32 +106,38 @@ final class Admin {
 				
 				<!-- Navigation -->
 				<div id="top-bar-nav">
-					<div class="item">
-						<p class="lg bold">Name of TopBar
+					<div class="item name">
+						<p class="lg bold"><?php esc_html_e( 'Name of TopaBar', 'top-bar' ); ?>
 					</div>
-					<div class=""></div>
-					<div class="top-bar-icons arrow-down"></div>				
+
+					<div class="item nav">
+						<button type="button" class="top-bar-icons status-on"><?php esc_html_e( 'Visible On/Off', 'top-bar' ); ?></button>		
+						<button type="button" class="top-bar-icons delete"><?php esc_html_e( 'Delete', 'top-bar' ); ?></button>				
+						<button type="button" class="top-bar-icons arrow-down"><?php esc_html_e( 'Open/Close', 'top-bar' ); ?></button>		
+					</div>
 				</div>
 				<div id="top-bar-options" class="active">			<!-- The active class opens the options  -->
 					<div class="top-bar-grid">
 						<div class="item">			
 							<fieldset class="clear">
-								<legend class="bold lg">Name</legend>
-								<input type="text" id="top-bar-name" placeholder="Name of TopBar">
+								<legend class="bold lg"><?php esc_html_e( 'Name', 'top-bar' ); ?></legend>
+								<input type="text" id="top-bar-name" placeholder="Name of Top Bar">
 							</fieldset>
 						</div>
 					</div>
 					<div class="top-bar-grid title">
 						<div class="item">
-							<p class="bold lg">Basic settings</p>
+							<p class="bold lg"><?php esc_html_e( 'Basic settings', 'top-bar' ); ?></p>
 						</div>
 					</div>
 					<div class="top-bar-grid bg bg-blue">
 						<div class="item">
 							<fieldset class="clear">
-								<legend class="bold">Position</legend>
-								<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?> /> <?php esc_html_e( 'Top', 'top-bar' ); ?></label>
-								<label><input type="radio" name="top_bar_position" value="bottom" <?php checked( $position, 'bottom' ); ?> /> <?php esc_html_e( 'Bottom', 'top-bar' ); ?></label>
+								<legend class="bold"><?php esc_html_e( 'Position', 'top-bar' ); ?></legend>
+								<select>
+									<option value="<?php checked( $position, 'top' ); ?>" name="top_bar_position"><?php esc_html_e( 'Top', 'top-bar' ); ?></option>
+									<option value="<?php checked( $position, 'bottom' ); ?>" name="top_bar_position"><?php esc_html_e( 'Bottom', 'top-bar' ); ?></option>
+								</select>							
 							</fieldset>
 						</div>
 						<div class="item">
@@ -151,50 +158,61 @@ final class Admin {
 							</fieldset>
 						</div>
 						<div class="item">
-							<fieldset  class="clear">
-								<legend class="bold">Global Background</legend>
+							<fieldset class="clear">
+								<legend class="bold"><?php esc_html_e( 'Background', 'top-bar' ); ?></legend>
 								<input type="color" id="top_bar_bg_color" name="top_bar_bg_color" value="<?php echo esc_attr( $bg_color ?: '#1d2327' ); ?>" />
 							</fieldset>
 						</div>
-						<div class="item">
-						<label>								
-							
-							<input type="checkbox" id="top_bar_frame_disable" name="top_bar_frame_disable" value="1" <?php checked( empty( $frame_color ) ); ?> />
-							<p class="bold">Border frame</p>
-
-							<input type="color" id="top_bar_frame_color" name="top_bar_frame_color" value="<?php echo esc_attr( $frame_color ?: '#000000' ); ?>" />
-								<p class="bold">Size</p>
-								<select>
-									<option value="Roboto">1</option>
-									<option value="Open Sans">2</option>
-									<option value="Lato">3</option>
-									<option value="Montserrat">4</option>
-									<option value="Oswald">5</option>
-									<option value="Raleway">6</option>
-									<option value="Poppins">7</option>
-									<option value="Playfair Display">8</option>
-									<option value="Nunito">9</option>
-									<option value="Ubuntu">10</option>
-								</select>
-							</label>
+						<div class="item column">
+							<div class="row">
+								<label class="clear">				
+									<input type="checkbox" id="top_bar_frame_disable" name="top_bar_frame_disable" value="1" <?php checked( empty( $frame_color ) ); ?> />
+									<p class="bold clear"><?php esc_html_e( 'Border frame', 'top-bar' ); ?></p>
+								</label>
+							</div>
+							<div class="row">
+								<label class="clear">				
+									<input type="color" id="top_bar_frame_color" name="top_bar_frame_color" value="<?php echo esc_attr( $frame_color ?: '#000000' ); ?>" />
+									<select>
+										<?php
+											for ($i = 0; $i <= 10; $i += 1) {
+													echo '<option value="' . $i . '">' . $i . 'px</option>';
+											}
+										?>
+									</select>
+								</label>
+							</div>
+						</div>
+						<div class="item column">
+							<div class="row">
+								<label>		
+									<input type="hidden" name="top_bar_hide_on_scroll" value="0" />
+									<input type="checkbox" name="top_bar_hide_on_scroll" value="1" <?php checked( $hide_on_scroll ); ?> />
+									<p class="bold clear"><?php esc_html_e('Scroll behaviour', 'top-bar' ); ?></p>
+								</label>
+							</div>
+							<div class="row">
+								<p class="xs"><?php esc_html_e( 'Hide/Show bar when user scrolls page', 'top-bar' ); ?></p>
+							</div>
 						</div>
 						<div class="item">
-							<p class="bold">Scroll behaviour</p>
-						</div>
-						<div class="item">
-							<p class="bold">Status</p>
 							<fieldset class="clear">
-								<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?> /> <?php esc_html_e( 'On', 'top-bar' ); ?></label><br />
-								<label><input type="radio" name="top_bar_position" value="bottom" <?php checked( $position, 'bottom' ); ?> /> <?php esc_html_e( 'Off', 'top-bar' ); ?></label>
+								<legend class="bold"><?php esc_html_e( 'Status', 'top-bar' ); ?></legend>
+								<select>
+									<option value="<?php checked( $status, 'on' ); ?>" name="top_bar_status"><?php esc_html_e( 'On', 'top-bar' ); ?></option>
+									<option value="<?php checked( $status, 'off' ); ?>" name="top_bar_status"><?php esc_html_e( 'Off', 'top-bar' ); ?></option>
+								</select>							
 							</fieldset>
 						</div>
 					</div>
 
 					<div class="top-bar-grid title">
 						<div class="item">
-							<label>
+							<label class="check">
 								<input type="checkbox" name="top_bar_hide_on_scroll" value="1">
-								<p class="bold lg">Top bar lifetime (po zaznaczeniu radio  pokazuje sie ponizsze opcje) </p>
+								<span>
+									<p class="bold lg"><?php esc_html_e( 'Life time', 'top-bar' ); ?></p>
+								</span>
 							</label>
 						</div>
 					</div>
@@ -202,22 +220,29 @@ final class Admin {
 					<div class="top-bar-grid bg bg-amber">
 						<div class="item">
 							<fieldset class="clear">
-								<legend class="bold">Show</legend>
-								<label><input type="datetime-local" id="meeting-time" name="meeting-time" value="2018-06-12T19:30" min="2018-06-07T00:00" max="2018-06-14T00:00" /></label>
+								<legend class="bold"><?php esc_html_e( 'Show', 'top-bar' ); ?></legend>
+								<label>
+								<input type="text" id="datepicker1" size="30" class="datepicker">	
+				
+							</label>
 									<p class="xs">Krotkie wyjasnienie</p>
 							</fieldset>
 						</div>
 						<div class="item">
 							<fieldset class="clear">
-								<legend class="bold">Hide</legend>
-								<label><input type="datetime-local" id="meeting-time" name="meeting-time" value="2018-06-12T19:30" min="2018-06-07T00:00" max="2018-06-14T00:00" /></label>
+								<legend class="bold"><?php esc_html_e( 'Hide', 'top-bar' ); ?></legend>
+								<label>
+								<input type="text" id="datepicker2" size="30" class="datepicker">	
+								</label>
 								<p class="xs">Krotkie wyjasnienie</p>
 						</fieldset>
 						</div>
 						<div class="item">
 							<fieldset class="clear">
 								<legend class="bold">Repeat</legend>
-								<label><input type="datetime-local" id="meeting-time" name="meeting-time" value="2018-06-12T19:30" min="2018-06-07T00:00" max="2018-06-14T00:00" /></label>
+								<label>
+									<input type="text" id="datepicker3" size="30" class="datepicker">	
+								</label>
 								<p class="xs">Krotkie wyjasnienie</p>
 							</fieldset>
 						</div>
@@ -225,8 +250,8 @@ final class Admin {
 
 					<div class="top-bar-grid title">
 						<div class="item">
-							<p class="bold lg">Create a design</p>
-							<p class="xs">Create your own top bar. You can add a maximum of 4 columns, choosing different types of content.</p>
+							<p class="bold lg"><?php esc_html_e( 'Create a design', 'top-bar' ); ?></p>
+							<p class="xs"><?php esc_html_e( 'Create your own top bar. You can add a maximum of 4 columns, choosing different types of content.', 'top-bar' ); ?></p>
 						</div>
 					</div>
 
@@ -238,11 +263,10 @@ final class Admin {
 						<div class="top-bar-column-creator-grid">
 							<div class="item-creator no">								
 								<p class="bold lg">1</p>								
-							</div>
-					
+							</div>					
 							<div class="item-creator">
 								<fieldset>
-									<legend class="bold">Type</legend>
+									<legend class="bold"><?php esc_html_e( 'Type', 'top-bar' ); ?></legend>
 									<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?> /> <?php esc_html_e( 'Text Editor', 'top-bar' ); ?></label>
 									<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?> /> <?php esc_html_e( 'Social media', 'top-bar' ); ?></label>
 									<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?> /> <?php esc_html_e( 'Contact data', 'top-bar' ); ?></label>
@@ -251,7 +275,7 @@ final class Admin {
 						
 							<div class="item-creator lg">
 								<fieldset class="line">
-									<legend class="bold">Effect</legend>
+									<legend class="bold"><?php esc_html_e( 'Effect', 'top-bar' ); ?></legend>
 									<label>
 											<select>
 												<option value="Roboto">None</option>
@@ -262,7 +286,7 @@ final class Admin {
 									</label>
 								</fieldset>
 								<fieldset class="line">
-									<legend class="bold">Add multi fields</legend>
+									<legend class="bold"><?php esc_html_e( 'Add multi fields', 'top-bar' ); ?></legend>
 								
 									<div class="top-bar-column-creator-grid">
 										<div class="item-creator no">								
@@ -285,13 +309,7 @@ final class Admin {
 															'editor_css'    => '',
 															'dfw'           => false,
 														] );
-											?>
-											<!-- <div class="top-bar-column-options">
-												<label>
-													<p class="xs">Background</p>
-													<input type="color" id="top_bar_bg_color" name="top_bar_bg_color" value="<?php echo esc_attr( $bg_color ?: '#1d2327' ); ?>" />
-												</label>
-											</div> -->
+											?>									
 										</div>
 									</div>
 									<div class="top-bar-column-creator-grid">
@@ -315,26 +333,18 @@ final class Admin {
 															'editor_css'    => '',
 															'dfw'           => false,
 														] );
-											?>
-											<!-- <div class="top-bar-column-options">
-												<label>
-													<p class="xs">Background</p>
-													<input type="color" id="top_bar_bg_color" name="top_bar_bg_color" value="<?php echo esc_attr( $bg_color ?: '#1d2327' ); ?>" />
-												</label>
-											</div> -->
+											?>										
 										</div>
 									</div>
-
-								</fieldset>
-								
+								</fieldset>								
 								<div class="top-bar-row rt">
-									<a href="#" class="top-bar-btn amber sm right">Add new text</a>	
+									<a href="#" class="top-bar-btn amber sm right"><?php esc_html_e( 'Add new text', 'top-bar' ); ?></a>	
 								</div>
 							</div>
 
 							<div class="item item-creator">
 								<fieldset>
-									<legend class="bold">Size column</legend>
+									<legend class="bold"><?php esc_html_e( 'Size column', 'top-bar' ); ?></legend>
 									<label>
 										<select name="size">
 											<?php
@@ -347,10 +357,12 @@ final class Admin {
 									</label>
 								</fieldset>
 								<fieldset>
-									<legend class="bold">Visible on the mobile</legend>
-										<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?> /> <?php esc_html_e( 'Yes', 'top-bar' ); ?></label>
-									<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?> /> <?php esc_html_e( 'No', 'top-bar' ); ?></label>
-								</fieldset>
+									<legend class="bold"><?php esc_html_e( 'Visible on the mobile', 'top-bar' ); ?></legend>
+									<select>
+										<option value="<?php checked( $position, 'top' ); ?>" name="top_bar_position"><?php esc_html_e( 'On', 'top-bar' ); ?></option>
+										<option value="<?php checked( $position, 'bottom' ); ?>" name="top_bar_position"><?php esc_html_e( 'Off', 'top-bar' ); ?></option>
+									</select>							
+								</fieldset>							
 							</div>
 						</div>	
 
@@ -362,7 +374,7 @@ final class Admin {
 							</div>
 							<div class="item-creator">
 								<fieldset>
-									<legend class="bold">Type</legend>
+									<legend class="bold"><?php esc_html_e( 'Type', 'top-bar' ); ?></legend>
 									<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?> /> <?php esc_html_e( 'Text Editor', 'top-bar' ); ?></label><br />
 									<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?> /> <?php esc_html_e( 'Social media', 'top-bar' ); ?></label><br />
 									<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?> /> <?php esc_html_e( 'Contact data', 'top-bar' ); ?></label><br />
@@ -370,7 +382,7 @@ final class Admin {
 							</div>							
 							<div class="item-creator lg">
 								<fieldset class="line">
-									<legend class="bold">Design</legend>
+									<legend class="bold"><?php esc_html_e( 'Choose the icon appearance', 'top-bar' ); ?></legend>
 									<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?> /> Zaokraglony (tutaj podgląd ikon)</label><br />
 									<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?> /> Kwadratowy</label><br />
 									<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?> /> Sama ikona</label><br />
@@ -378,19 +390,19 @@ final class Admin {
 								<div class="top-bar-grid">
 									<div class="item">
 										<fieldset class="line">
-											<legend class="bold">Background color</legend>
+											<legend class="bold"><?php esc_html_e( 'Background color', 'top-bar' ); ?></legend>
 											<label><input type="color" id="top_bar_frame_color" name="top_bar_frame_color" value="<?php echo esc_attr( $frame_color ?: '#000000' ); ?>" /></label>
 										</fieldset>
 									</div>
 									<div class="item">
 										<fieldset class="line">
-											<legend class="bold">Color icon</legend>
+											<legend class="bold"><?php esc_html_e( 'Color icon', 'top-bar' ); ?></legend>
 											<label><input type="color" id="top_bar_frame_color" name="top_bar_frame_color" value="<?php echo esc_attr( $frame_color ?: '#000000' ); ?>" /></label>
 										</fieldset>
 									</div>
 								</div>
 								<fieldset class="line">
-									<legend class="bold">Add contact</legend>
+									<legend class="bold"><?php esc_html_e( 'Add contact', 'top-bar' ); ?></legend>
 									<div class="top-bar-column-creator-grid">
 										<div class="item-creator no">								
 											<p class="bold md">1</p>								
@@ -420,7 +432,7 @@ final class Admin {
 												<option value="behance">Behance</option>
 												<option value="flickr">Flickr</option>
 											</select>
-												<input type="text" name="top_bar_position" value="Your proflie link" <?php checked( $position, 'top' ); ?> />
+											<input type="text" name="top_bar_position" value="Your proflie link" <?php checked( $position, 'top' ); ?> />
 				
 									</div>
 								</div>
@@ -459,13 +471,13 @@ final class Admin {
 									</div>
 								</div>
 								<div class="top-bar-row rt">
-									<a href="#" class="top-bar-btn amber sm right">Add new social media</a>	
+									<a href="#" class="top-bar-btn amber sm right"><?php esc_html_e( 'Add new social media', 'top-bar' ); ?></a>	
 								</div>
 							</div>
 
 							<div class="item-creator">
 								<fieldset>
-									<legend class="bold">Size column</legend>
+									<legend class="bold"><?php esc_html_e( 'Size column', 'top-bar' ); ?></legend>
 									<label>
 										<select name="size">
 											<?php
@@ -478,10 +490,12 @@ final class Admin {
 									</label>
 								</fieldset>
 								<fieldset>
-									<legend class="bold">Visible on the mobile</legend>
-										<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?> /> <?php esc_html_e( 'Yes', 'top-bar' ); ?></label>
-									<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?> /> <?php esc_html_e( 'No', 'top-bar' ); ?></label>
-								</fieldset>
+									<legend class="bold"><?php esc_html_e( 'Visible on the mobile', 'top-bar' ); ?></legend>
+									<select>
+										<option value="<?php checked( $position, 'top' ); ?>" name="top_bar_position"><?php esc_html_e( 'On', 'top-bar' ); ?></option>
+										<option value="<?php checked( $position, 'bottom' ); ?>" name="top_bar_position"><?php esc_html_e( 'Off', 'top-bar' ); ?></option>
+									</select>							
+								</fieldset>					
 							</div>
 						</div>	
 
@@ -492,7 +506,7 @@ final class Admin {
 							</div>
 							<div class="item-creator">
 								<fieldset>
-									<legend class="bold">Type</legend>
+									<legend class="bold"><?php esc_html_e( 'Type', 'top-bar' ); ?></legend>
 									<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?> /> <?php esc_html_e( 'Text Editor', 'top-bar' ); ?></label><br />
 									<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?> /> <?php esc_html_e( 'Social media', 'top-bar' ); ?></label><br />
 									<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?> /> <?php esc_html_e( 'Contact data', 'top-bar' ); ?></label><br />
@@ -500,7 +514,7 @@ final class Admin {
 							</div>							
 							<div class="item-creator lg">
 								<fieldset class="line">
-									<legend class="bold">Design</legend>
+									<legend class="bold"><?php esc_html_e( 'Choose the icon appearance', 'top-bar' ); ?></legend>
 									<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?> /> Zaokraglony (tutaj podgląd ikon)</label><br />
 									<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?> /> Kwadratowy</label><br />
 									<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?> /> Sama ikona</label><br />
@@ -508,19 +522,19 @@ final class Admin {
 								<div class="top-bar-grid">
 									<div class="item">
 										<fieldset class="line">
-											<legend class="bold">Background color</legend>
+											<legend class="bold"><?php esc_html_e( 'Background color', 'top-bar' ); ?></legend>
 											<label><input type="color" id="top_bar_frame_color" name="top_bar_frame_color" value="<?php echo esc_attr( $frame_color ?: '#000000' ); ?>" /></label>
 										</fieldset>
 									</div>
 									<div class="item">
 										<fieldset class="line">
-											<legend class="bold">Color icon</legend>
+											<legend class="bold"><?php esc_html_e( 'Color icon', 'top-bar' ); ?></legend>
 											<label><input type="color" id="top_bar_frame_color" name="top_bar_frame_color" value="<?php echo esc_attr( $frame_color ?: '#000000' ); ?>" /></label>
 										</fieldset>
 									</div>
 								</div>
 								<fieldset class="line">
-									<legend class="bold">Add your contacts icons </legend>
+									<legend class="bold"><?php esc_html_e( 'Add your contact', 'top-bar' ); ?></legend>
 									<div class="top-bar-column-creator-grid">
 										<div class="item-creator no">								
 											<p class="bold md">1</p>								
@@ -528,7 +542,7 @@ final class Admin {
 										<div class="item-creator vertical">	
 
 											<select name="contact_type">
-												<option value="">Select contact type</option>
+												<option value="">Select type</option>
 												<option value="email">Email</option>
 												<option value="phone">Phone</option>
 												<option value="mobile">Mobile</option>
@@ -539,7 +553,7 @@ final class Admin {
 												<option value="support">Customer support</option>
 												<option value="calendar">Appointment / Booking</option>
 										</select>
-												<input type="text" name="top_bar_position" value="Your proflie link" <?php checked( $position, 'top' ); ?> />
+												<input type="text" name="top_bar_position" value="Your profile link" <?php checked( $position, 'top' ); ?> />
 				
 									</div>
 								</div>
@@ -552,7 +566,7 @@ final class Admin {
 										<fieldset class="vertical">					
 										
 											<select name="contact_type">
-												<option value="">Select contact type</option>
+												<option value="">Select type</option>
 												<option value="email">Email</option>
 												<option value="phone">Phone</option>
 												<option value="mobile">Mobile</option>
@@ -563,19 +577,18 @@ final class Admin {
 												<option value="support">Customer support</option>
 												<option value="calendar">Appointment / Booking</option>
 										</select>
-												<input type="text" name="top_bar_p
-											<input type="text" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?> />
+												<input type="text" name="top_bar_position" value="Your profile link" <?php checked( $position, 'top' ); ?> />
 										</fieldset>
 									</div>
 								</div>
 								<div class="top-bar-row rt">
-									<a href="#" class="top-bar-btn amber sm right">Add new contacts</a>	
+									<a href="#" class="top-bar-btn amber sm right"><?php esc_html_e( 'Add new contact', 'top-bar' ); ?></a>	
 								</div>
 							</div>
 
 							<div class="item-creator">
 								<fieldset>
-									<legend class="bold">Size column</legend>
+									<legend class="bold"><?php esc_html_e( 'Size column', 'top-bar' ); ?></legend>
 									<label>
 										<select name="size">
 											<?php
@@ -584,13 +597,14 @@ final class Admin {
 												}
 										?>
 									</select>
-
 									</label>
 								</fieldset>
 								<fieldset>
-									<legend class="bold">Visible on the mobile</legend>
-										<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?> /> <?php esc_html_e( 'Yes', 'top-bar' ); ?></label>
-									<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?> /> <?php esc_html_e( 'No', 'top-bar' ); ?></label>
+									<legend class="bold"><?php esc_html_e( 'Visible on the mobile', 'top-bar' ); ?></legend>
+									<select>
+										<option value="<?php checked( $position, 'top' ); ?>" name="top_bar_position"><?php esc_html_e( 'On', 'top-bar' ); ?></option>
+										<option value="<?php checked( $position, 'bottom' ); ?>" name="top_bar_position"><?php esc_html_e( 'Off', 'top-bar' ); ?></option>
+									</select>				
 								</fieldset>
 							</div>
 						</div>	
@@ -601,7 +615,7 @@ final class Admin {
 				
 
 				<div class="top-bar-row rt">
-					<a href="#" class="top-bar-btn mint sm">Add new column</a>	
+					<a href="#" class="top-bar-btn mint sm"><?php esc_html_e( 'Add new column', 'top-bar' ); ?>n</a>	
 				</div>
 
 			<!-- End options -->
