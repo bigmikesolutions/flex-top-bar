@@ -23,7 +23,8 @@ final class Frontend {
 	}
 
 	private function should_show_bar(): bool {
-		return apply_filters( 'top_bar_show', true );
+		$enabled = Options::get_status() !== 'off';
+		return (bool) apply_filters( 'top_bar_show', $enabled );
 	}
 
 	public function maybe_render_bar(): void {

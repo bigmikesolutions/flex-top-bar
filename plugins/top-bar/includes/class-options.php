@@ -38,6 +38,11 @@ final class Options {
 		return get_option( 'top_bar_hide_on_scroll', '0' ) === '1';
 	}
 
+	public static function get_status(): string {
+		$status = get_option( 'top_bar_status', 'on' );
+		return in_array( $status, [ 'on', 'off' ], true ) ? $status : 'on';
+	}
+
 	public static function sanitize_hex_color( string $color ): string {
 		$color = ltrim( $color, '#' );
 		if ( preg_match( '/^([A-Fa-f0-9]{3}){1,2}$/', $color ) ) {

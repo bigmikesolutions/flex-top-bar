@@ -67,6 +67,12 @@ final class Admin {
 				return ( $v === '1' || $v === 1 ) ? '1' : '0';
 			},
 		] );
+		register_setting( 'top_bar_settings', 'top_bar_status', [
+			'type'              => 'string',
+			'sanitize_callback' => function ( $v ) {
+				return in_array( $v, [ 'on', 'off' ], true ) ? $v : 'on';
+			},
+		] );
 	}
 
 	public function render_settings_page(): void {
@@ -78,6 +84,7 @@ final class Admin {
 		$bg_color       = get_option( 'top_bar_bg_color', '#1d2327' );
 		$frame_color    = get_option( 'top_bar_frame_color', '' );
 		$hide_on_scroll = get_option( 'top_bar_hide_on_scroll', '0' ) === '1';
+		$status         = get_option( 'top_bar_status', 'on' );
 		?>
 
 		<form action="options.php" method="post">
@@ -124,7 +131,7 @@ final class Admin {
 						<div class="item">			
 							<fieldset class="clear">
 								<legend class="bold lg"><?php esc_html_e( 'Name', 'top-bar' ); ?></legend>
-								<input type="text" id="top-bar-name" placeholder="Name of Top Bar">
+								<input type="text" id="top-bar-name" name="top_bar_name__ui_mock" placeholder="Name of Top Bar">
 							</fieldset>
 						</div>
 					</div>
@@ -201,9 +208,9 @@ final class Admin {
 						<div class="item">
 							<fieldset class="clear">
 								<legend class="bold"><?php esc_html_e( 'Status', 'top-bar' ); ?></legend>
-								<select>
-									<option value="<?php checked( $status, 'on' ); ?>" name="top_bar_status"><?php esc_html_e( 'On', 'top-bar' ); ?></option>
-									<option value="<?php checked( $status, 'off' ); ?>" name="top_bar_status"><?php esc_html_e( 'Off', 'top-bar' ); ?></option>
+								<select name="top_bar_status" aria-label="<?php esc_attr_e( 'Status', 'top-bar' ); ?>">
+									<option value="on" <?php selected( $status, 'on' ); ?>><?php esc_html_e( 'On', 'top-bar' ); ?></option>
+									<option value="off" <?php selected( $status, 'off' ); ?>><?php esc_html_e( 'Off', 'top-bar' ); ?></option>
 								</select>							
 							</fieldset>
 						</div>
@@ -212,7 +219,7 @@ final class Admin {
 					<div class="top-bar-grid title">
 						<div class="item">
 							<label class="check">
-								<input type="checkbox" name="top_bar_hide_on_scroll" value="1">
+								<input type="checkbox" name="top_bar_hide_on_scroll__ui_mock" value="1">
 								<span>
 									<p class="bold lg"><?php esc_html_e( 'Life time', 'top-bar' ); ?></p>
 								</span>
@@ -299,7 +306,7 @@ final class Admin {
 											<?php
 
 												wp_editor( $message, 'top_bar_message1', [
-															'textarea_name' => 'top_bar_message1',
+															'textarea_name' => 'top_bar_message',
 															'textarea_rows' => 2,
 															'media_buttons' => false,
 															'teeny'         => true,
@@ -394,13 +401,13 @@ final class Admin {
 									<div class="item">
 										<fieldset class="line">
 											<legend class="bold"><?php esc_html_e( 'Background color', 'top-bar' ); ?></legend>
-											<label><input type="color" id="top_bar_frame_color" name="top_bar_frame_color" value="<?php echo esc_attr( $frame_color ?: '#000000' ); ?>" /></label>
+											<label><input type="color" id="top_bar_frame_color_social_bg" name="top_bar_frame_color__ui_mock_social_bg" value="<?php echo esc_attr( $frame_color ?: '#000000' ); ?>" /></label>
 										</fieldset>
 									</div>
 									<div class="item">
 										<fieldset class="line">
 											<legend class="bold"><?php esc_html_e( 'Color icon', 'top-bar' ); ?></legend>
-											<label><input type="color" id="top_bar_frame_color" name="top_bar_frame_color" value="<?php echo esc_attr( $frame_color ?: '#000000' ); ?>" /></label>
+											<label><input type="color" id="top_bar_frame_color_social_icon" name="top_bar_frame_color__ui_mock_social_icon" value="<?php echo esc_attr( $frame_color ?: '#000000' ); ?>" /></label>
 										</fieldset>
 									</div>
 								</div>
@@ -526,13 +533,13 @@ final class Admin {
 									<div class="item">
 										<fieldset class="line">
 											<legend class="bold"><?php esc_html_e( 'Background color', 'top-bar' ); ?></legend>
-											<label><input type="color" id="top_bar_frame_color" name="top_bar_frame_color" value="<?php echo esc_attr( $frame_color ?: '#000000' ); ?>" /></label>
+											<label><input type="color" id="top_bar_frame_color_contact_bg" name="top_bar_frame_color__ui_mock_contact_bg" value="<?php echo esc_attr( $frame_color ?: '#000000' ); ?>" /></label>
 										</fieldset>
 									</div>
 									<div class="item">
 										<fieldset class="line">
 											<legend class="bold"><?php esc_html_e( 'Color icon', 'top-bar' ); ?></legend>
-											<label><input type="color" id="top_bar_frame_color" name="top_bar_frame_color" value="<?php echo esc_attr( $frame_color ?: '#000000' ); ?>" /></label>
+											<label><input type="color" id="top_bar_frame_color_contact_icon" name="top_bar_frame_color__ui_mock_contact_icon" value="<?php echo esc_attr( $frame_color ?: '#000000' ); ?>" /></label>
 										</fieldset>
 									</div>
 								</div>
@@ -634,7 +641,7 @@ final class Admin {
 						<td>
 							<?php
 							wp_editor( $message, 'top_bar_message', [
-								'textarea_name' => 'top_bar_message',
+								'textarea_name' => 'top_bar_message__ui_mock_legacy',
 								'textarea_rows' => 3,
 								'media_buttons' => false,
 								'teeny'         => true,
@@ -651,22 +658,22 @@ final class Admin {
 					</tr>
 					<tr>
 						<th scope="row"><label for="top_bar_bg_color"><?php esc_html_e( 'Background colour', 'top-bar' ); ?></label></th>
-						<td><input type="color" id="top_bar_bg_color" name="top_bar_bg_color" value="<?php echo esc_attr( $bg_color ?: '#1d2327' ); ?>" /></td>
+						<td><input type="color" id="top_bar_bg_color_legacy" name="top_bar_bg_color__ui_mock_legacy" value="<?php echo esc_attr( $bg_color ?: '#1d2327' ); ?>" /></td>
 					</tr>
 					<tr>
 						<th scope="row"><label for="top_bar_frame_color"><?php esc_html_e( 'Frame (border) colour', 'top-bar' ); ?></label></th>
 						<td>
-							<input type="color" id="top_bar_frame_color" name="top_bar_frame_color" value="<?php echo esc_attr( $frame_color ?: '#000000' ); ?>" />
-							<input type="checkbox" id="top_bar_frame_disable" name="top_bar_frame_disable" value="1" <?php checked( empty( $frame_color ) ); ?> />
-							<label for="top_bar_frame_disable"><?php esc_html_e( 'No border', 'top-bar' ); ?></label>
+							<input type="color" id="top_bar_frame_color_legacy" name="top_bar_frame_color__ui_mock_legacy" value="<?php echo esc_attr( $frame_color ?: '#000000' ); ?>" />
+							<input type="checkbox" id="top_bar_frame_disable_legacy" name="top_bar_frame_disable__ui_mock_legacy" value="1" <?php checked( empty( $frame_color ) ); ?> />
+							<label for="top_bar_frame_disable_legacy"><?php esc_html_e( 'No border', 'top-bar' ); ?></label>
 						</td>
 					</tr>
 					<tr>
 						<th scope="row"><?php esc_html_e( 'Scroll behaviour', 'top-bar' ); ?></th>
 						<td>
-							<input type="hidden" name="top_bar_hide_on_scroll" value="0" />
+							<input type="hidden" name="top_bar_hide_on_scroll__ui_mock_legacy" value="0" />
 							<label>
-								<input type="checkbox" name="top_bar_hide_on_scroll" value="1" <?php checked( $hide_on_scroll ); ?> />
+								<input type="checkbox" name="top_bar_hide_on_scroll__ui_mock_legacy" value="1" <?php checked( $hide_on_scroll ); ?> />
 								<?php esc_html_e( 'Hide bar when user scrolls down; show again when scrolling up', 'top-bar' ); ?>
 							</label>
 						</td>
