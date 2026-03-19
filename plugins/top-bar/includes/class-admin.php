@@ -169,6 +169,8 @@ final class Admin {
 					$frame_width = 10;
 				}
 				$hide_on_scroll = ! empty( $bar['hide_on_scroll'] );
+				// `Options::normalize_bar()` already stores `visible` as a real boolean.
+				$visible = ! empty( $bar['visible'] );
 				$pf             = Options::OPTION_BARS . '[' . (int) $i . ']';
 				$remove_url     = wp_nonce_url(
 					add_query_arg(
@@ -192,7 +194,20 @@ final class Admin {
 					</div>
 
 					<div class="item nav">
-						<button type="button" class="top-bar-icons <?php echo esc_attr( $hide_on_scroll ? 'status-off' : 'status-on' ); ?>"><?php esc_html_e( 'Visible On/Off', 'top-bar' ); ?></button>
+						<button
+							type="button"
+							class="top-bar-icons top-bar-visibility-toggle <?php echo esc_attr( $visible ? 'status-on' : 'status-off' ); ?>"
+							data-target-visible-id="<?php echo esc_attr( 'top_bar_visible_' . (int) $i ); ?>"
+							aria-label="<?php esc_attr_e( 'Toggle bar visibility on page', 'top-bar' ); ?>"
+						><?php esc_html_e( 'Visible On/Off', 'top-bar' ); ?></button>
+						<input type="hidden" name="<?php echo esc_attr( $pf ); ?>[visible]" value="0" />
+						<input
+							type="checkbox"
+							id="<?php echo esc_attr( 'top_bar_visible_' . (int) $i ); ?>"
+							name="<?php echo esc_attr( $pf ); ?>[visible]"
+							value="1"
+							<?php checked( $visible ); ?>
+						/>
 						<?php if ( $can_remove ) : ?>
 							<a href="<?php echo esc_url( $remove_url ); ?>" class="top-bar-icons delete" title="<?php esc_attr_e( 'Remove this bar', 'top-bar' ); ?>" aria-label="<?php esc_attr_e( 'Delete', 'top-bar' ); ?>"></a>
 						<?php else : ?>
@@ -699,6 +714,32 @@ final class Admin {
 		<div class="wrap">
 				<?php submit_button(); ?>
 		</div>
+
+		<script>
+		(function(){
+			function syncButton(btn){
+				var targetId = btn.getAttribute('data-target-visible-id');
+				if(!targetId) return;
+				var cb = document.getElementById(targetId);
+				if(!cb) return;
+				var visible = cb.checked;
+				btn.classList.toggle('status-off', !visible);
+				btn.classList.toggle('status-on', visible);
+			}
+			document.querySelectorAll('.top-bar-visibility-toggle').forEach(function(btn){
+				syncButton(btn);
+				btn.addEventListener('click', function(e){
+					var targetId = btn.getAttribute('data-target-visible-id');
+					if(!targetId) return;
+					var cb = document.getElementById(targetId);
+					if(!cb) return;
+					cb.checked = !cb.checked;
+					cb.dispatchEvent(new Event('change', { bubbles: true }));
+					syncButton(btn);
+				});
+			});
+		})();
+		</script>
 		</form>
 		<?php
 	}

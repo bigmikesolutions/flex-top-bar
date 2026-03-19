@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'TOP_BAR_VERSION', '1.0.3' );
+define( 'TOP_BAR_VERSION', '1.0.4' );
 define( 'TOP_BAR_PLUGIN_FILE', __FILE__ );
 define( 'TOP_BAR_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 

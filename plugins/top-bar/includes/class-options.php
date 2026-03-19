@@ -33,12 +33,12 @@ final class Options {
 			'id'             => self::new_bar_id(),
 			'name'           => __( 'Top Bar', 'top-bar' ),
 			'enabled'        => true,
-			'status'         => 'on',
+			'visible'        => true,
 			'position'       => 'top',
 			'message'        => __( 'Welcome!', 'top-bar' ),
 			'bg_color'       => '#1d2327',
 			'frame_color'    => '',
-			'frame_width'    => 1,
+			'frame_width'    => 0,
 			'hide_on_scroll' => false,
 		];
 	}
@@ -83,10 +83,9 @@ final class Options {
 		$bar['frame_width']     = 1;
 		$bar['hide_on_scroll']  = get_option( 'top_bar_hide_on_scroll', '0' ) === '1';
 		$legacy_status          = get_option( 'top_bar_status', 'on' );
-		$bar['status']          = in_array( $legacy_status, [ 'on', 'off' ], true ) ? $legacy_status : 'on';
-		if ( $bar['status'] === 'off' ) {
-			$bar['hide_on_scroll'] = true;
-		}
+		$legacy_status          = in_array( $legacy_status, [ 'on', 'off' ], true ) ? $legacy_status : 'on';
+		// Legacy mapping: `top_bar_status` used to mean "visible on the site".
+		$bar['visible']         = $legacy_status === 'on';
 		$legacy_name            = get_option( 'top_bar_name', '' );
 		$bar['name']            = is_string( $legacy_name ) && $legacy_name !== '' ? $legacy_name : $bar['name'];
 		update_option( self::OPTION_BARS, [ $bar ] );
@@ -100,17 +99,27 @@ final class Options {
 		$defaults = self::default_bar();
 		$id       = isset( $bar['id'] ) && is_string( $bar['id'] ) && $bar['id'] !== '' ? $bar['id'] : self::new_bar_id();
 		$pos      = isset( $bar['position'] ) && in_array( $bar['position'], [ 'top', 'bottom' ], true ) ? $bar['position'] : 'top';
+		// Visibility on the site: controlled by `visible` (true/false).
+		$visible = true;
+		if ( array_key_exists( 'visible', $bar ) ) {
+			$v = $bar['visible'];
+			if ( is_bool( $v ) ) {
+				$visible = $v;
+			} else {
+				$raw = is_string( $v ) ? strtolower( trim( (string) $v ) ) : '';
+				$visible = $raw === 'true' || $raw === '1' || $v === 1;
+			}
+		} elseif ( array_key_exists( 'status', $bar ) ) {
+			// Legacy: `status` used `on/off` strings.
+			$raw_status = is_string( $bar['status'] ) ? strtolower( trim( (string) $bar['status'] ) ) : '';
+			$visible    = $raw_status === 'on';
+		}
+
+		// Hide on scroll behavior: controlled by `hide_on_scroll` (bool).
 		$hide_on_scroll = false;
 		if ( array_key_exists( 'hide_on_scroll', $bar ) ) {
 			$hide_on_scroll = ! empty( $bar['hide_on_scroll'] );
-		} elseif ( isset( $bar['status'] ) ) {
-			// Legacy: status "off" meant hide-on-scroll in earlier versions.
-			$raw_status = is_string( $bar['status'] ) ? strtolower( trim( $bar['status'] ) ) : '';
-			if ( in_array( $raw_status, [ 'on', 'off' ], true ) ) {
-				$hide_on_scroll = ( $raw_status === 'off' );
-			}
 		}
-		$status = $hide_on_scroll ? 'off' : 'on';
 		$msg      = isset( $bar['message'] ) && is_string( $bar['message'] ) ? $bar['message'] : $defaults['message'];
 		$bg       = isset( $bar['bg_color'] ) ? self::sanitize_hex_color( (string) $bar['bg_color'] ) : '';
 		$frame    = isset( $bar['frame_color'] ) ? self::sanitize_hex_color( (string) $bar['frame_color'] ) : '';
@@ -126,7 +135,7 @@ final class Options {
 			'id'             => sanitize_key( (string) $id ) ?: (string) $id,
 			'name'           => isset( $bar['name'] ) ? sanitize_text_field( (string) $bar['name'] ) : $defaults['name'],
 			'enabled'        => true,
-			'status'         => $status,
+			'visible'        => $visible,
 			'position'       => $pos,
 			'message'        => wp_kses_post( $msg ),
 			'bg_color'       => $bg ?: '#1d2327',
@@ -178,7 +187,32 @@ final class Options {
 	 * @return list<array<string, mixed>>
 	 */
 	public static function get_active_bars(): array {
-		return self::get_bars();
+		return array_values(
+			array_filter(
+				self::get_bars(),
+				static function ( $bar ) {
+					if ( ! is_array( $bar ) ) {
+						return false;
+					}
+					$v = $bar['visible'] ?? null;
+					if ( is_bool( $v ) ) {
+						return $v;
+					}
+					if ( is_string( $v ) ) {
+						$raw = strtolower( trim( $v ) );
+						if ( in_array( $raw, [ 'true', 'false', '0', '1' ], true ) ) {
+							return $raw === 'true' || $raw === '1';
+						}
+					}
+					// Legacy fallback.
+					if ( isset( $bar['status'] ) ) {
+						$s = strtolower( trim( (string) $bar['status'] ) );
+						return $s === 'on';
+					}
+					return true;
+				}
+			)
+		);
 	}
 
 	// --- Back-compat: first bar (admin/legacy UI) ---
@@ -213,8 +247,14 @@ final class Options {
 
 	public static function get_status(): string {
 		$bars   = self::get_bars();
-		$status = isset( $bars[0]['status'] ) ? (string) $bars[0]['status'] : 'on';
-		return in_array( $status, [ 'on', 'off' ], true ) ? $status : 'on';
+		$v = $bars[0]['visible'] ?? true;
+		if ( is_string( $v ) ) {
+			$raw = strtolower( trim( $v ) );
+			if ( in_array( $raw, [ 'true', 'false', '0', '1' ], true ) ) {
+				$v = $raw === 'true' || $raw === '1';
+			}
+		}
+		return ! empty( $v ) ? 'on' : 'off';
 	}
 
 	public static function sanitize_hex_color( string $color ): string {
