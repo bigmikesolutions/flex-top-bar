@@ -173,19 +173,9 @@ final class Frontend {
 	}
 
 	/**
-	 * Status is the source of truth for scroll behavior:
-	 * - on: always visible on scroll
-	 * - off: hide on scroll
-	 *
 	 * @param array<string, mixed> $bar
 	 */
 	private function bar_hides_on_scroll( array $bar ): bool {
-		if ( ! isset( $bar['status'] ) ) {
-			return false;
-		}
-		$status = strtolower( trim( (string) $bar['status'] ) );
-		// Strip common invisible / odd whitespace so UI "on" always wins.
-		$status = preg_replace( '/[\x{200B}-\x{200D}\x{FEFF}]/u', '', $status );
-		return $status === 'off';
+		return ! empty( $bar['hide_on_scroll'] );
 	}
 }

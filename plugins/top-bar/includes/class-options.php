@@ -84,6 +84,9 @@ final class Options {
 		$bar['hide_on_scroll']  = get_option( 'top_bar_hide_on_scroll', '0' ) === '1';
 		$legacy_status          = get_option( 'top_bar_status', 'on' );
 		$bar['status']          = in_array( $legacy_status, [ 'on', 'off' ], true ) ? $legacy_status : 'on';
+		if ( $bar['status'] === 'off' ) {
+			$bar['hide_on_scroll'] = true;
+		}
 		$legacy_name            = get_option( 'top_bar_name', '' );
 		$bar['name']            = is_string( $legacy_name ) && $legacy_name !== '' ? $legacy_name : $bar['name'];
 		update_option( self::OPTION_BARS, [ $bar ] );
@@ -97,13 +100,17 @@ final class Options {
 		$defaults = self::default_bar();
 		$id       = isset( $bar['id'] ) && is_string( $bar['id'] ) && $bar['id'] !== '' ? $bar['id'] : self::new_bar_id();
 		$pos      = isset( $bar['position'] ) && in_array( $bar['position'], [ 'top', 'bottom' ], true ) ? $bar['position'] : 'top';
-		$status = 'on';
-		if ( isset( $bar['status'] ) ) {
+		$hide_on_scroll = false;
+		if ( array_key_exists( 'hide_on_scroll', $bar ) ) {
+			$hide_on_scroll = ! empty( $bar['hide_on_scroll'] );
+		} elseif ( isset( $bar['status'] ) ) {
+			// Legacy: status "off" meant hide-on-scroll in earlier versions.
 			$raw_status = is_string( $bar['status'] ) ? strtolower( trim( $bar['status'] ) ) : '';
 			if ( in_array( $raw_status, [ 'on', 'off' ], true ) ) {
-				$status = $raw_status;
+				$hide_on_scroll = ( $raw_status === 'off' );
 			}
 		}
+		$status = $hide_on_scroll ? 'off' : 'on';
 		$msg      = isset( $bar['message'] ) && is_string( $bar['message'] ) ? $bar['message'] : $defaults['message'];
 		$bg       = isset( $bar['bg_color'] ) ? self::sanitize_hex_color( (string) $bar['bg_color'] ) : '';
 		$frame    = isset( $bar['frame_color'] ) ? self::sanitize_hex_color( (string) $bar['frame_color'] ) : '';
@@ -118,7 +125,6 @@ final class Options {
 		return [
 			'id'             => sanitize_key( (string) $id ) ?: (string) $id,
 			'name'           => isset( $bar['name'] ) ? sanitize_text_field( (string) $bar['name'] ) : $defaults['name'],
-			// Bar is always rendered; Status controls scroll hide/show behavior.
 			'enabled'        => true,
 			'status'         => $status,
 			'position'       => $pos,
@@ -126,7 +132,7 @@ final class Options {
 			'bg_color'       => $bg ?: '#1d2327',
 			'frame_color'    => $frame,
 			'frame_width'    => $width,
-			'hide_on_scroll' => $status === 'off',
+			'hide_on_scroll' => $hide_on_scroll,
 		];
 	}
 
@@ -148,8 +154,13 @@ final class Options {
 				$row['frame_color'] = '';
 				$row['frame_width'] = 0;
 			}
-			$row['hide_on_scroll'] = ! empty( $row['hide_on_scroll'] );
-			$out[]                   = self::normalize_bar( $row );
+			$hos = $row['hide_on_scroll'] ?? '0';
+			if ( is_bool( $hos ) ) {
+				$row['hide_on_scroll'] = $hos;
+			} else {
+				$row['hide_on_scroll'] = (string) $hos === '1' || $hos === 1;
+			}
+			$out[] = self::normalize_bar( $row );
 		}
 		if ( $out === [] ) {
 			return [ self::default_bar() ];
@@ -196,7 +207,8 @@ final class Options {
 	}
 
 	public static function get_hide_on_scroll(): bool {
-		return self::get_status() === 'off';
+		$bars = self::get_bars();
+		return ! empty( $bars[0]['hide_on_scroll'] );
 	}
 
 	public static function get_status(): string {

@@ -169,10 +169,6 @@ final class Admin {
 					$frame_width = 10;
 				}
 				$hide_on_scroll = ! empty( $bar['hide_on_scroll'] );
-				$status         = isset( $bar['status'] ) ? strtolower( trim( (string) $bar['status'] ) ) : 'on';
-				if ( ! in_array( $status, [ 'on', 'off' ], true ) ) {
-					$status = 'on';
-				}
 				$pf             = Options::OPTION_BARS . '[' . (int) $i . ']';
 				$remove_url     = wp_nonce_url(
 					add_query_arg(
@@ -196,7 +192,7 @@ final class Admin {
 					</div>
 
 					<div class="item nav">
-						<button type="button" class="top-bar-icons <?php echo esc_attr( $status === 'off' ? 'status-off' : 'status-on' ); ?>"><?php esc_html_e( 'Visible On/Off', 'top-bar' ); ?></button>
+						<button type="button" class="top-bar-icons <?php echo esc_attr( $hide_on_scroll ? 'status-off' : 'status-on' ); ?>"><?php esc_html_e( 'Visible On/Off', 'top-bar' ); ?></button>
 						<?php if ( $can_remove ) : ?>
 							<a href="<?php echo esc_url( $remove_url ); ?>" class="top-bar-icons delete" title="<?php esc_attr_e( 'Remove this bar', 'top-bar' ); ?>" aria-label="<?php esc_attr_e( 'Delete', 'top-bar' ); ?>"></a>
 						<?php else : ?>
@@ -270,25 +266,14 @@ final class Admin {
 								</label>
 							</div>
 						</div>
-						<div class="item column">
-							<div class="row">
-								<label>		
-									<input type="hidden" name="<?php echo esc_attr( $pf ); ?>[hide_on_scroll]" value="0" />
-									<input type="checkbox" name="<?php echo esc_attr( $pf ); ?>[hide_on_scroll]" value="1" <?php checked( $hide_on_scroll ); ?> />
-									<p class="bold clear"><?php esc_html_e('Scroll behaviour', 'top-bar' ); ?></p>
-								</label>
-							</div>
-							<div class="row">
-								<p class="xs"><?php esc_html_e( 'Hide/Show bar when user scrolls page', 'top-bar' ); ?></p>
-							</div>
-						</div>
 						<div class="item">
 							<fieldset class="clear">
-								<legend class="bold"><?php esc_html_e( 'Status', 'top-bar' ); ?></legend>
-								<select name="<?php echo esc_attr( $pf ); ?>[status]" aria-label="<?php esc_attr_e( 'Status', 'top-bar' ); ?>">
-									<option value="on" <?php selected( $status, 'on' ); ?>><?php esc_html_e( 'On', 'top-bar' ); ?></option>
-									<option value="off" <?php selected( $status, 'off' ); ?>><?php esc_html_e( 'Off', 'top-bar' ); ?></option>
-								</select>							
+								<legend class="bold"><?php esc_html_e( 'On scroll', 'top-bar' ); ?></legend>
+								<select id="top_bar_hide_on_scroll_<?php echo (int) $i; ?>" name="<?php echo esc_attr( $pf ); ?>[hide_on_scroll]" aria-label="<?php esc_attr_e( 'On scroll', 'top-bar' ); ?>">
+									<option value="0" <?php selected( ! $hide_on_scroll ); ?>><?php esc_html_e( 'Keep showing', 'top-bar' ); ?></option>
+									<option value="1" <?php selected( $hide_on_scroll ); ?>><?php esc_html_e( 'Hide on scroll', 'top-bar' ); ?></option>
+								</select>
+								<p class="xs"><?php esc_html_e( 'Whether the bar stays visible or hides when the user scrolls the page.', 'top-bar' ); ?></p>
 							</fieldset>
 						</div>
 					</div>
@@ -711,60 +696,9 @@ final class Admin {
 
 			<?php endforeach; ?>
 
-			<?php
-			$legacy_bar     = $bars[0];
-			$message        = isset( $legacy_bar['message'] ) ? (string) $legacy_bar['message'] : __( 'Welcome!', 'top-bar' );
-			$bg_color       = isset( $legacy_bar['bg_color'] ) ? (string) $legacy_bar['bg_color'] : '#1d2327';
-			$frame_color    = isset( $legacy_bar['frame_color'] ) ? (string) $legacy_bar['frame_color'] : '';
-			$frame_width    = isset( $legacy_bar['frame_width'] ) ? (int) $legacy_bar['frame_width'] : 1;
-			$hide_on_scroll = ! empty( $legacy_bar['hide_on_scroll'] );
-			?>
-
 		</div>
 
 		<div class="wrap">
-				<table class="form-table" role="presentation">
-					<tr>
-						<th scope="row"><label for="top_bar_message"><?php esc_html_e( 'Message', 'top-bar' ); ?></label></th>
-						<td>
-							<?php
-							wp_editor( $message, 'top_bar_message', [
-								'textarea_name' => 'top_bar_message__ui_mock_legacy',
-								'textarea_rows' => 3,
-								'media_buttons' => false,
-								'teeny'         => true,
-								'quicktags'     => true,
-								'tinymce'       => [
-									'plugins'  => 'textcolor',
-									'toolbar1' => 'formatselect,bold,italic,forecolor,backcolor,link,unlink,bullist,numlist,blockquote,undo,redo',
-								],
-								'editor_css'    => '',
-								'dfw'           => false,
-							] );
-							?>
-						</td>
-					</tr>
-					<tr>
-						<th scope="row"><label for="top_bar_bg_color"><?php esc_html_e( 'Background colour', 'top-bar' ); ?></label></th>
-						<td><input type="color" id="top_bar_bg_color_legacy" name="top_bar_bg_color__ui_mock_legacy" value="<?php echo esc_attr( $bg_color ?: '#1d2327' ); ?>" /></td>
-					</tr>
-					<tr>
-						<th scope="row"><label for="top_bar_frame_color"><?php esc_html_e( 'Frame (border) colour', 'top-bar' ); ?></label></th>
-						<td>
-							<input type="color" id="top_bar_frame_color_legacy" name="top_bar_frame_color__ui_mock_legacy" value="<?php echo esc_attr( $frame_color ?: '#000000' ); ?>" />
-						</td>
-					</tr>
-					<tr>
-						<th scope="row"><?php esc_html_e( 'Scroll behaviour', 'top-bar' ); ?></th>
-						<td>
-							<input type="hidden" name="top_bar_hide_on_scroll__ui_mock_legacy" value="0" />
-							<label>
-								<input type="checkbox" name="top_bar_hide_on_scroll__ui_mock_legacy" value="1" <?php checked( $hide_on_scroll ); ?> />
-								<?php esc_html_e( 'Hide bar when user scrolls down; show again when scrolling up', 'top-bar' ); ?>
-							</label>
-						</td>
-					</tr>
-				</table>
 				<?php submit_button(); ?>
 		</div>
 		</form>
