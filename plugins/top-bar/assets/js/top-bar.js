@@ -1,30 +1,37 @@
 /**
- * Top Bar – visible only at the top of the page; hide when user scrolls down.
+ * Top Bar – hide specific bars after scrolling (only elements with data-top-bar-scroll-hide).
  */
 (function () {
 	'use strict';
 
-	var scrollThreshold = 20;
+	function scrollY() {
+		return window.pageYOffset || document.documentElement.scrollTop || 0;
+	}
+
+	function bars() {
+		return document.querySelectorAll('[data-top-bar-scroll-hide="1"]');
+	}
+
+	function thresholdFor(el) {
+		var t = parseInt(el.getAttribute('data-top-bar-hide-threshold'), 10);
+		return isNaN(t) ? 30 : t;
+	}
+
+	function update() {
+		var list = bars();
+		for (var i = 0; i < list.length; i++) {
+			var el = list[i];
+			var t = thresholdFor(el);
+			el.style.display = scrollY() > t ? 'none' : '';
+		}
+	}
 
 	function run() {
-		var bar = document.getElementById('top-bar');
-		if (!bar || !bar.classList.contains('top-bar--hide-on-scroll')) return;
-
-		function update() {
-			var scrollY = window.scrollY || document.documentElement.scrollTop;
-			if (scrollY <= scrollThreshold) {
-				bar.classList.remove('is-hidden');
-			} else {
-				bar.classList.add('is-hidden');
-			}
+		if (bars().length === 0) {
+			return;
 		}
-
-		function onScroll() {
-			window.requestAnimationFrame(update);
-		}
-
-		window.addEventListener('scroll', onScroll, { passive: true });
 		update();
+		window.addEventListener('scroll', update, { passive: true });
 	}
 
 	if (document.readyState === 'loading') {

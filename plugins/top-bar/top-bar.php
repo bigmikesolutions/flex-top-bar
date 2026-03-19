@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Top Bar
  * Description: Displays a simple info bar at the top or bottom of the menu.
- * Version:     1.0.0
+ * Version:     1.0.3
  * Author:      Big Mike Solutions
  * License:     GPL-2.0-or-later
  * Text Domain: top-bar
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'TOP_BAR_VERSION', '1.0.0' );
+define( 'TOP_BAR_VERSION', '1.0.4' );
 define( 'TOP_BAR_PLUGIN_FILE', __FILE__ );
 define( 'TOP_BAR_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 

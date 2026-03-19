@@ -17,7 +17,65 @@ final class Admin {
 
 	public function __construct() {
 		add_action( 'admin_menu', [ $this, 'add_settings_page' ] );
+		add_action( 'admin_init', [ $this, 'handle_bar_actions' ], 5 );
 		add_action( 'admin_init', [ $this, 'register_settings' ] );
+	}
+
+	/**
+	 * Add/remove bar (GET + nonce). Order is array order in `top_bars`.
+	 */
+	public function handle_bar_actions(): void {
+		if ( ! isset( $_GET['page'] ) || sanitize_key( (string) wp_unslash( $_GET['page'] ) ) !== 'top-bar' ) {
+			return;
+		}
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+
+		if ( isset( $_GET['top_bar_add'] ) ) {
+			check_admin_referer( 'top_bar_add' );
+			$bars = get_option( Options::OPTION_BARS, [] );
+			if ( ! is_array( $bars ) ) {
+				$bars = [];
+			}
+			$bars = array_values( array_filter( $bars, 'is_array' ) );
+			if ( count( $bars ) >= Options::MAX_BARS ) {
+				wp_safe_redirect( admin_url( 'options-general.php?page=top-bar&top_bar_max=1' ) );
+				exit;
+			}
+			$bars[] = Options::default_bar();
+			update_option( Options::OPTION_BARS, $bars );
+			wp_safe_redirect( admin_url( 'options-general.php?page=top-bar' ) );
+			exit;
+		}
+
+		if ( isset( $_GET['top_bar_remove'] ) ) {
+			$raw_id = isset( $_GET['top_bar_remove'] ) ? (string) wp_unslash( $_GET['top_bar_remove'] ) : '';
+			$id     = sanitize_text_field( $raw_id );
+			check_admin_referer( 'top_bar_remove_' . $id );
+			$bars = get_option( Options::OPTION_BARS, [] );
+			if ( ! is_array( $bars ) || count( $bars ) <= Options::MIN_BARS ) {
+				wp_safe_redirect( admin_url( 'options-general.php?page=top-bar&top_bar_min=1' ) );
+				exit;
+			}
+			$next = [];
+			foreach ( $bars as $row ) {
+				if ( ! is_array( $row ) ) {
+					continue;
+				}
+				$bid = isset( $row['id'] ) ? (string) $row['id'] : '';
+				if ( $bid !== $id ) {
+					$next[] = $row;
+				}
+			}
+			if ( count( $next ) < Options::MIN_BARS ) {
+				wp_safe_redirect( admin_url( 'options-general.php?page=top-bar&top_bar_min=1' ) );
+				exit;
+			}
+			update_option( Options::OPTION_BARS, array_values( $next ) );
+			wp_safe_redirect( admin_url( 'options-general.php?page=top-bar' ) );
+			exit;
+		}
 	}
 
 	public function add_settings_page(): void {
@@ -31,53 +89,33 @@ final class Admin {
 	}
 
 	public function register_settings(): void {
-		register_setting( 'top_bar_settings', 'top_bar_position', [
-			'type'              => 'string',
-			'sanitize_callback' => function ( $v ) {
-				return in_array( $v, [ 'top', 'bottom' ], true ) ? $v : 'top';
-			},
-		] );
-		register_setting( 'top_bar_settings', 'top_bar_message', [
-			'type'              => 'string',
-			'sanitize_callback' => 'wp_kses_post',
-		] );
-		register_setting( 'top_bar_settings', 'top_bar_bg_color', [
-			'type'              => 'string',
-			'sanitize_callback' => function ( $v ) {
-				$v = is_string( $v ) ? ltrim( $v, '#' ) : '';
-				return preg_match( '/^([A-Fa-f0-9]{3}){1,2}$/', $v ) ? '#' . $v : '#1d2327';
-			},
-		] );
-		register_setting( 'top_bar_settings', 'top_bar_frame_color', [
-			'type'              => 'string',
-			'sanitize_callback' => function ( $v ) {
-				if ( ! empty( $_POST['top_bar_frame_disable'] ) ) {
-					return '';
-				}
-				if ( empty( $v ) || ! is_string( $v ) ) {
-					return '';
-				}
-				$v = ltrim( $v, '#' );
-				return preg_match( '/^([A-Fa-f0-9]{3}){1,2}$/', $v ) ? '#' . $v : '';
-			},
-		] );
-		register_setting( 'top_bar_settings', 'top_bar_hide_on_scroll', [
-			'type'              => 'string',
-			'sanitize_callback' => function ( $v ) {
-				return ( $v === '1' || $v === 1 ) ? '1' : '0';
-			},
-		] );
+		register_setting(
+			'top_bar_settings',
+			Options::OPTION_BARS,
+			[
+				'type'              => 'array',
+				'sanitize_callback' => [ Options::class, 'sanitize_bars_input' ],
+				'default'           => [],
+			]
+		);
 	}
 
 	public function render_settings_page(): void {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return;
 		}
-		$position       = get_option( 'top_bar_position', 'top' );
-		$message        = get_option( 'top_bar_message', __( 'Welcome!', 'top-bar' ) );
-		$bg_color       = get_option( 'top_bar_bg_color', '#1d2327' );
-		$frame_color    = get_option( 'top_bar_frame_color', '' );
-		$hide_on_scroll = get_option( 'top_bar_hide_on_scroll', '0' ) === '1';
+		$bars = Options::get_bars();
+		$add_url = wp_nonce_url(
+			add_query_arg(
+				[
+					'page'        => 'top-bar',
+					'top_bar_add' => '1',
+				],
+				admin_url( 'options-general.php' )
+			),
+			'top_bar_add'
+		);
+		$can_add = count( $bars ) < Options::MAX_BARS;
 		?>
 
 		<form action="options.php" method="post">
@@ -85,19 +123,26 @@ final class Admin {
 
 		<div id="top-bar">
 			<h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
+
+			<?php if ( isset( $_GET['top_bar_max'] ) ) : ?>
+				<div class="notice notice-warning"><p><?php echo esc_html( sprintf( /* translators: %d: max bars */ __( 'You can add at most %d top bars.', 'top-bar' ), Options::MAX_BARS ) ); ?></p></div>
+			<?php endif; ?>
+			<?php if ( isset( $_GET['top_bar_min'] ) ) : ?>
+				<div class="notice notice-warning"><p><?php esc_html_e( 'At least one top bar must remain.', 'top-bar' ); ?></p></div>
+			<?php endif; ?>
 			
 			<!-- Empty list  -->
 
 			<div class="top-bar-row center empty">
 				<p class="xlg bold"><?php esc_html_e( 'Welcome to Top Bar plugin', 'top-bar' ); ?></p>
 				<p class="xs"><?php esc_html_e( 'Click the button to add your first Top Bar', 'top-bar' ); ?></p>	
-				<a href="#" class="top-bar-btn mint md"><?php esc_html_e( 'Add new Top Bar', 'top-bar' ); ?></a>	
+				<a href="<?php echo $can_add ? esc_url( $add_url ) : '#'; ?>" class="top-bar-btn mint md"<?php echo $can_add ? '' : ' aria-disabled="true" onclick="return false;"'; ?>><?php esc_html_e( 'Add new Top Bar', 'top-bar' ); ?></a>	
 			</div>
 
 			<!-- List of buttons  -->
 
 			<div class="top-bar-row rt">
-				<a href="#" class="top-bar-btn mint sm"><?php esc_html_e( 'Add new Top Bar', 'top-bar' ); ?></a>	
+				<a href="<?php echo $can_add ? esc_url( $add_url ) : '#'; ?>" class="top-bar-btn mint sm"<?php echo $can_add ? '' : ' aria-disabled="true" onclick="return false;"'; ?>><?php esc_html_e( 'Add new Top Bar', 'top-bar' ); ?></a>	
 			</div>
 
 
@@ -105,26 +150,89 @@ final class Admin {
 			 	Przenoszenie dodanych kolumn za pomca drag&drop			
 			-->
 
+			<?php
+			foreach ( $bars as $i => $bar ) :
+				if ( ! is_array( $bar ) ) {
+					continue;
+				}
+				$bar_id         = isset( $bar['id'] ) ? (string) $bar['id'] : '';
+				$bar_name       = isset( $bar['name'] ) ? (string) $bar['name'] : '';
+				$position       = isset( $bar['position'] ) ? (string) $bar['position'] : 'top';
+				$message        = isset( $bar['message'] ) ? (string) $bar['message'] : __( 'Welcome!', 'top-bar' );
+				$bg_color       = isset( $bar['bg_color'] ) ? Options::sanitize_hex_color( (string) $bar['bg_color'] ) : '#1d2327';
+				$frame_color    = isset( $bar['frame_color'] ) ? Options::sanitize_hex_color( (string) $bar['frame_color'] ) : '';
+				$frame_width    = isset( $bar['frame_width'] ) ? (int) $bar['frame_width'] : 0;
+				if ( $frame_width < 0 ) {
+					$frame_width = 0;
+				}
+				if ( $frame_width > 10 ) {
+					$frame_width = 10;
+				}
+				$hide_on_scroll = ! empty( $bar['hide_on_scroll'] );
+				// `Options::normalize_bar()` already stores `visible` as a real boolean.
+				$visible = ! empty( $bar['visible'] );
+				// Whether the bar's settings details are expanded in the admin UI.
+				$admin_visibile = ! empty( $bar['admin_visibile'] );
+				$pf             = Options::OPTION_BARS . '[' . (int) $i . ']';
+				$remove_url     = wp_nonce_url(
+					add_query_arg(
+						[
+							'page'            => 'top-bar',
+							'top_bar_remove' => $bar_id,
+						],
+						admin_url( 'options-general.php' )
+					),
+					'top_bar_remove_' . $bar_id
+				);
+				$can_remove     = count( $bars ) > Options::MIN_BARS;
+				?>
+
 			<div class="top-bar-row bg">		
 				
 				<!-- Navigation -->
-				<div id="top-bar-nav">
+				<div class="top-bar-nav">
 					<div class="item name">
-						<p class="lg bold"><?php esc_html_e( 'Name of TopaBar', 'top-bar' ); ?>
+						<p class="lg bold"><?php echo esc_html( $bar_name !== '' ? $bar_name : __( 'Name of TopaBar', 'top-bar' ) ); ?></p>
 					</div>
 
 					<div class="item nav">
-						<button type="button" class="top-bar-icons status-on"><?php esc_html_e( 'Visible On/Off', 'top-bar' ); ?></button>		
-						<button type="button" class="top-bar-icons delete"><?php esc_html_e( 'Delete', 'top-bar' ); ?></button>				
-						<button type="button" class="top-bar-icons arrow-down"><?php esc_html_e( 'Open/Close', 'top-bar' ); ?></button>		
+						<button
+							type="button"
+							class="top-bar-icons top-bar-visibility-toggle <?php echo esc_attr( $visible ? 'status-on' : 'status-off' ); ?>"
+							data-target-visible-id="<?php echo esc_attr( 'top_bar_visible_' . (int) $i ); ?>"
+							aria-label="<?php esc_attr_e( 'Toggle bar visibility on page', 'top-bar' ); ?>"
+						><?php esc_html_e( 'Visible On/Off', 'top-bar' ); ?></button>
+						<input type="hidden" name="<?php echo esc_attr( $pf ); ?>[visible]" value="0" />
+						<input
+							type="checkbox"
+							id="<?php echo esc_attr( 'top_bar_visible_' . (int) $i ); ?>"
+							name="<?php echo esc_attr( $pf ); ?>[visible]"
+							value="1"
+							<?php checked( $visible ); ?>
+						/>
+						<?php if ( $can_remove ) : ?>
+							<a href="<?php echo esc_url( $remove_url ); ?>" class="top-bar-icons delete" title="<?php esc_attr_e( 'Remove this bar', 'top-bar' ); ?>" aria-label="<?php esc_attr_e( 'Delete', 'top-bar' ); ?>"></a>
+						<?php else : ?>
+							<button type="button" class="top-bar-icons delete" disabled title="<?php esc_attr_e( 'At least one bar is required', 'top-bar' ); ?>"><?php esc_html_e( 'Delete', 'top-bar' ); ?></button>
+						<?php endif; ?>
+						<button
+							type="button"
+							class="top-bar-icons arrow-down top-bar-toggle-options"
+							data-options-panel-id="<?php echo esc_attr( 'top-bar-options-' . (int) $i ); ?>"
+							data-admin-visible-input-id="<?php echo esc_attr( 'top-bar-admin-visibile-' . (int) $i ); ?>"
+							aria-expanded="<?php echo esc_attr( $admin_visibile ? 'true' : 'false' ); ?>"
+							aria-controls="<?php echo esc_attr( 'top-bar-options-' . (int) $i ); ?>"
+						><?php esc_html_e( 'Open/Close', 'top-bar' ); ?></button>
+						<input type="hidden" id="<?php echo esc_attr( 'top-bar-admin-visibile-' . (int) $i ); ?>" name="<?php echo esc_attr( $pf ); ?>[admin_visibile]" value="<?php echo esc_attr( $admin_visibile ? '1' : '0' ); ?>" />
 					</div>
 				</div>
-				<div id="top-bar-options" class="active">			<!-- The active class opens the options  -->
+				<div id="<?php echo esc_attr( 'top-bar-options-' . (int) $i ); ?>" class="top-bar-options<?php echo $admin_visibile ? ' active' : ''; ?>">
 					<div class="top-bar-grid">
 						<div class="item">			
 							<fieldset class="clear">
 								<legend class="bold lg"><?php esc_html_e( 'Name', 'top-bar' ); ?></legend>
-								<input type="text" id="top-bar-name" placeholder="Name of Top Bar">
+								<input type="hidden" name="<?php echo esc_attr( $pf ); ?>[id]" value="<?php echo esc_attr( $bar_id ); ?>" />
+								<input type="text" id="top-bar-name" name="<?php echo esc_attr( $pf ); ?>[name]" value="<?php echo esc_attr( $bar_name ); ?>" placeholder="<?php esc_attr_e( 'Name of Top Bar', 'top-bar' ); ?>">
 							</fieldset>
 						</div>
 					</div>
@@ -137,7 +245,7 @@ final class Admin {
 						<div class="item">
 							<fieldset class="clear">
 								<legend class="bold"><?php esc_html_e( 'Position', 'top-bar' ); ?></legend>
-								<select id="top_bar_position" name="top_bar_position" aria-label="<?php esc_attr_e( 'Position', 'top-bar' ); ?>">
+								<select id="top_bar_position_<?php echo (int) $i; ?>" name="<?php echo esc_attr( $pf ); ?>[position]" aria-label="<?php esc_attr_e( 'Position', 'top-bar' ); ?>">
 									<option value="top" <?php selected( $position, 'top' ); ?>><?php esc_html_e( 'Top', 'top-bar' ); ?></option>
 									<option value="bottom" <?php selected( $position, 'bottom' ); ?>><?php esc_html_e( 'Bottom', 'top-bar' ); ?></option>
 								</select>
@@ -163,48 +271,32 @@ final class Admin {
 						<div class="item">
 							<fieldset class="clear">
 								<legend class="bold"><?php esc_html_e( 'Background', 'top-bar' ); ?></legend>
-								<input type="color" id="top_bar_bg_color" name="top_bar_bg_color" value="<?php echo esc_attr( $bg_color ?: '#1d2327' ); ?>" />
+								<input type="color" id="top_bar_bg_color_<?php echo (int) $i; ?>" name="<?php echo esc_attr( $pf ); ?>[bg_color]" value="<?php echo esc_attr( $bg_color ?: '#1d2327' ); ?>" />
 							</fieldset>
-						</div>
-						<div class="item column">
-							<div class="row">
-								<label class="clear">				
-									<input type="checkbox" id="top_bar_frame_disable" name="top_bar_frame_disable" value="1" <?php checked( empty( $frame_color ) ); ?> />
-									<p class="bold clear"><?php esc_html_e( 'Border frame', 'top-bar' ); ?></p>
-								</label>
-							</div>
-							<div class="row">
-								<label class="clear">				
-									<input type="color" id="top_bar_frame_color" name="top_bar_frame_color" value="<?php echo esc_attr( $frame_color ?: '#000000' ); ?>" />
-									<select>
-										<?php
-											for ($i = 0; $i <= 10; $i += 1) {
-													echo '<option value="' . $i . '">' . $i . 'px</option>';
-											}
-										?>
-									</select>
-								</label>
-							</div>
-						</div>
-						<div class="item column">
-							<div class="row">
-								<label>		
-									<input type="hidden" name="top_bar_hide_on_scroll" value="0" />
-									<input type="checkbox" name="top_bar_hide_on_scroll" value="1" <?php checked( $hide_on_scroll ); ?> />
-									<p class="bold clear"><?php esc_html_e('Scroll behaviour', 'top-bar' ); ?></p>
-								</label>
-							</div>
-							<div class="row">
-								<p class="xs"><?php esc_html_e( 'Hide/Show bar when user scrolls page', 'top-bar' ); ?></p>
-							</div>
 						</div>
 						<div class="item">
 							<fieldset class="clear">
-								<legend class="bold"><?php esc_html_e( 'Status', 'top-bar' ); ?></legend>
-								<select>
-									<option value="<?php checked( $status, 'on' ); ?>" name="top_bar_status"><?php esc_html_e( 'On', 'top-bar' ); ?></option>
-									<option value="<?php checked( $status, 'off' ); ?>" name="top_bar_status"><?php esc_html_e( 'Off', 'top-bar' ); ?></option>
-								</select>							
+								<legend class="bold"><?php esc_html_e( 'Border frame', 'top-bar' ); ?></legend>
+								<div class="top-bar-border-frame-controls">
+									<input type="color" id="top_bar_frame_color_<?php echo (int) $i; ?>" name="<?php echo esc_attr( $pf ); ?>[frame_color]" value="<?php echo esc_attr( $frame_color ?: '#000000' ); ?>" />
+									<select name="<?php echo esc_attr( $pf ); ?>[frame_width]" aria-label="<?php esc_attr_e( 'Border width', 'top-bar' ); ?>">
+										<?php
+										for ( $px = 0; $px <= 10; $px += 1 ) {
+											echo '<option value="' . (int) $px . '"' . selected( $frame_width, $px, false ) . '>' . (int) $px . 'px</option>';
+										}
+										?>
+									</select>
+								</div>
+							</fieldset>
+						</div>
+						<div class="item">
+							<fieldset class="clear">
+								<legend class="bold"><?php esc_html_e( 'On scroll', 'top-bar' ); ?></legend>
+								<select id="top_bar_hide_on_scroll_<?php echo (int) $i; ?>" name="<?php echo esc_attr( $pf ); ?>[hide_on_scroll]" aria-label="<?php esc_attr_e( 'On scroll', 'top-bar' ); ?>">
+									<option value="0" <?php selected( ! $hide_on_scroll ); ?>><?php esc_html_e( 'Keep showing', 'top-bar' ); ?></option>
+									<option value="1" <?php selected( $hide_on_scroll ); ?>><?php esc_html_e( 'Hide on scroll', 'top-bar' ); ?></option>
+								</select>
+								<p class="xs"><?php esc_html_e( 'Whether the bar stays visible or hides when the user scrolls the page.', 'top-bar' ); ?></p>
 							</fieldset>
 						</div>
 					</div>
@@ -212,7 +304,7 @@ final class Admin {
 					<div class="top-bar-grid title">
 						<div class="item">
 							<label class="check">
-								<input type="checkbox" name="top_bar_hide_on_scroll" value="1">
+								<input type="checkbox" name="top_bar_hide_on_scroll__ui_mock" value="1">
 								<span>
 									<p class="bold lg"><?php esc_html_e( 'Life time', 'top-bar' ); ?></p>
 								</span>
@@ -298,8 +390,8 @@ final class Admin {
 										<div class="item-creator">						
 											<?php
 
-												wp_editor( $message, 'top_bar_message1', [
-															'textarea_name' => 'top_bar_message1',
+												wp_editor( $message, 'top_bar_message_' . (int) $i, [
+															'textarea_name' => $pf . '[message]',
 															'textarea_rows' => 2,
 															'media_buttons' => false,
 															'teeny'         => true,
@@ -351,9 +443,9 @@ final class Admin {
 									<label>
 										<select name="size">
 											<?php
-												for ($i = 0; $i <= 100; $i += 5) {
-														echo '<option value="' . $i . '">' . $i . '%</option>';
-												}
+												for ( $pct = 0; $pct <= 100; $pct += 5 ) {
+												echo '<option value="' . (int) $pct . '">' . (int) $pct . '%</option>';
+											}
 										?>
 									</select>
 
@@ -394,13 +486,13 @@ final class Admin {
 									<div class="item">
 										<fieldset class="line">
 											<legend class="bold"><?php esc_html_e( 'Background color', 'top-bar' ); ?></legend>
-											<label><input type="color" id="top_bar_frame_color" name="top_bar_frame_color" value="<?php echo esc_attr( $frame_color ?: '#000000' ); ?>" /></label>
+											<label><input type="color" id="top_bar_frame_color_social_bg" name="top_bar_frame_color__ui_mock_social_bg" value="<?php echo esc_attr( $frame_color ?: '#000000' ); ?>" /></label>
 										</fieldset>
 									</div>
 									<div class="item">
 										<fieldset class="line">
 											<legend class="bold"><?php esc_html_e( 'Color icon', 'top-bar' ); ?></legend>
-											<label><input type="color" id="top_bar_frame_color" name="top_bar_frame_color" value="<?php echo esc_attr( $frame_color ?: '#000000' ); ?>" /></label>
+											<label><input type="color" id="top_bar_frame_color_social_icon" name="top_bar_frame_color__ui_mock_social_icon" value="<?php echo esc_attr( $frame_color ?: '#000000' ); ?>" /></label>
 										</fieldset>
 									</div>
 								</div>
@@ -484,9 +576,9 @@ final class Admin {
 									<label>
 										<select name="size">
 											<?php
-												for ($i = 0; $i <= 100; $i += 5) {
-														echo '<option value="' . $i . '">' . $i . '%</option>';
-												}
+												for ( $pct = 0; $pct <= 100; $pct += 5 ) {
+												echo '<option value="' . (int) $pct . '">' . (int) $pct . '%</option>';
+											}
 										?>
 									</select>
 
@@ -526,13 +618,13 @@ final class Admin {
 									<div class="item">
 										<fieldset class="line">
 											<legend class="bold"><?php esc_html_e( 'Background color', 'top-bar' ); ?></legend>
-											<label><input type="color" id="top_bar_frame_color" name="top_bar_frame_color" value="<?php echo esc_attr( $frame_color ?: '#000000' ); ?>" /></label>
+											<label><input type="color" id="top_bar_frame_color_contact_bg" name="top_bar_frame_color__ui_mock_contact_bg" value="<?php echo esc_attr( $frame_color ?: '#000000' ); ?>" /></label>
 										</fieldset>
 									</div>
 									<div class="item">
 										<fieldset class="line">
 											<legend class="bold"><?php esc_html_e( 'Color icon', 'top-bar' ); ?></legend>
-											<label><input type="color" id="top_bar_frame_color" name="top_bar_frame_color" value="<?php echo esc_attr( $frame_color ?: '#000000' ); ?>" /></label>
+											<label><input type="color" id="top_bar_frame_color_contact_icon" name="top_bar_frame_color__ui_mock_contact_icon" value="<?php echo esc_attr( $frame_color ?: '#000000' ); ?>" /></label>
 										</fieldset>
 									</div>
 								</div>
@@ -595,9 +687,9 @@ final class Admin {
 									<label>
 										<select name="size">
 											<?php
-												for ($i = 0; $i <= 100; $i += 5) {
-														echo '<option value="' . $i . '">' . $i . '%</option>';
-												}
+												for ( $pct = 0; $pct <= 100; $pct += 5 ) {
+												echo '<option value="' . (int) $pct . '">' . (int) $pct . '%</option>';
+											}
 										?>
 									</select>
 									</label>
@@ -625,55 +717,57 @@ final class Admin {
 			</div>
 			</div>
 
+			<?php endforeach; ?>
+
 		</div>
 
 		<div class="wrap">
-				<table class="form-table" role="presentation">
-					<tr>
-						<th scope="row"><label for="top_bar_message"><?php esc_html_e( 'Message', 'top-bar' ); ?></label></th>
-						<td>
-							<?php
-							wp_editor( $message, 'top_bar_message', [
-								'textarea_name' => 'top_bar_message',
-								'textarea_rows' => 3,
-								'media_buttons' => false,
-								'teeny'         => true,
-								'quicktags'     => true,
-								'tinymce'       => [
-									'plugins'  => 'textcolor',
-									'toolbar1' => 'formatselect,bold,italic,forecolor,backcolor,link,unlink,bullist,numlist,blockquote,undo,redo',
-								],
-								'editor_css'    => '',
-								'dfw'           => false,
-							] );
-							?>
-						</td>
-					</tr>
-					<tr>
-						<th scope="row"><label for="top_bar_bg_color"><?php esc_html_e( 'Background colour', 'top-bar' ); ?></label></th>
-						<td><input type="color" id="top_bar_bg_color" name="top_bar_bg_color" value="<?php echo esc_attr( $bg_color ?: '#1d2327' ); ?>" /></td>
-					</tr>
-					<tr>
-						<th scope="row"><label for="top_bar_frame_color"><?php esc_html_e( 'Frame (border) colour', 'top-bar' ); ?></label></th>
-						<td>
-							<input type="color" id="top_bar_frame_color" name="top_bar_frame_color" value="<?php echo esc_attr( $frame_color ?: '#000000' ); ?>" />
-							<input type="checkbox" id="top_bar_frame_disable" name="top_bar_frame_disable" value="1" <?php checked( empty( $frame_color ) ); ?> />
-							<label for="top_bar_frame_disable"><?php esc_html_e( 'No border', 'top-bar' ); ?></label>
-						</td>
-					</tr>
-					<tr>
-						<th scope="row"><?php esc_html_e( 'Scroll behaviour', 'top-bar' ); ?></th>
-						<td>
-							<input type="hidden" name="top_bar_hide_on_scroll" value="0" />
-							<label>
-								<input type="checkbox" name="top_bar_hide_on_scroll" value="1" <?php checked( $hide_on_scroll ); ?> />
-								<?php esc_html_e( 'Hide bar when user scrolls down; show again when scrolling up', 'top-bar' ); ?>
-							</label>
-						</td>
-					</tr>
-				</table>
 				<?php submit_button(); ?>
 		</div>
+
+		<script>
+		(function(){
+			function syncButton(btn){
+				var targetId = btn.getAttribute('data-target-visible-id');
+				if(!targetId) return;
+				var cb = document.getElementById(targetId);
+				if(!cb) return;
+				var visible = cb.checked;
+				btn.classList.toggle('status-off', !visible);
+				btn.classList.toggle('status-on', visible);
+			}
+			document.querySelectorAll('.top-bar-visibility-toggle').forEach(function(btn){
+				syncButton(btn);
+				btn.addEventListener('click', function(e){
+					var targetId = btn.getAttribute('data-target-visible-id');
+					if(!targetId) return;
+					var cb = document.getElementById(targetId);
+					if(!cb) return;
+					cb.checked = !cb.checked;
+					cb.dispatchEvent(new Event('change', { bubbles: true }));
+					syncButton(btn);
+				});
+			});
+
+			document.querySelectorAll('.top-bar-toggle-options').forEach(function(btn){
+				btn.addEventListener('click', function(){
+					var id = btn.getAttribute('data-options-panel-id');
+					if(!id) return;
+					var panel = document.getElementById(id);
+					if(!panel) return;
+					panel.classList.toggle('active');
+					var open = panel.classList.contains('active');
+					btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+
+					var inputId = btn.getAttribute('data-admin-visible-input-id');
+					if(inputId){
+						var hidden = document.getElementById(inputId);
+						if(hidden){ hidden.value = open ? '1' : '0'; }
+					}
+				});
+			});
+		})();
+		</script>
 		</form>
 		<?php
 	}

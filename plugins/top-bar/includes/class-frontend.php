@@ -23,34 +23,44 @@ final class Frontend {
 	}
 
 	private function should_show_bar(): bool {
-		return apply_filters( 'top_bar_show', true );
+		$has_active = Options::get_active_bars() !== [];
+		return (bool) apply_filters( 'top_bar_show', $has_active );
 	}
 
 	public function maybe_render_bar(): void {
 		if ( ! $this->should_show_bar() ) {
 			return;
 		}
-		$this->render_bar();
+		$this->render_bars();
 	}
 
-	private function render_bar(): void {
-		$position       = Options::get_position();
-		$message        = Options::get_message();
-		$classes        = [ 'top-bar', 'top-bar--' . sanitize_html_class( $position ) ];
-		$hide_on_scroll = Options::get_hide_on_scroll();
-		if ( $hide_on_scroll ) {
-			$classes[] = 'top-bar--hide-on-scroll';
+	private function render_bars(): void {
+		$bars = Options::get_active_bars();
+		if ( $bars === [] ) {
+			return;
 		}
+		foreach ( $bars as $bar ) {
+			$this->render_single_bar( $bar );
+		}
+	}
+
+	/**
+	 * @param array<string, mixed> $bar
+	 */
+	private function render_single_bar( array $bar ): void {
+		$raw_id         = isset( $bar['id'] ) ? (string) $bar['id'] : 'default';
+		$html_id        = 'top-bar-' . preg_replace( '/[^a-zA-Z0-9_-]/', '', $raw_id );
+		$position       = isset( $bar['position'] ) && $bar['position'] === 'bottom' ? 'bottom' : 'top';
+		$message        = isset( $bar['message'] ) ? (string) $bar['message'] : '';
+		$classes        = [ 'top-bar', 'top-bar--' . sanitize_html_class( $position ) ];
+		$hide_on_scroll = $this->bar_hides_on_scroll( $bar );
 		?>
-		<div id="top-bar" class="<?php echo esc_attr( implode( ' ', $classes ) ); ?>" role="banner" data-top-bar-position="<?php echo esc_attr( $position ); ?>"<?php echo $hide_on_scroll ? ' data-top-bar-hide-threshold="20"' : ''; ?>>
+		<div id="<?php echo esc_attr( $html_id ); ?>" class="<?php echo esc_attr( implode( ' ', $classes ) ); ?>" role="banner" data-top-bar-id="<?php echo esc_attr( $raw_id ); ?>" data-top-bar-position="<?php echo esc_attr( $position ); ?>"<?php echo $hide_on_scroll ? ' data-top-bar-scroll-hide="1" data-top-bar-hide-threshold="30"' : ''; ?>>
 			<div class="top-bar__inner">
 				<?php echo wp_kses_post( $message ); ?>
 			</div>
 		</div>
 		<?php
-		if ( $hide_on_scroll ) {
-			$this->print_hide_on_scroll_script_inline();
-		}
 	}
 
 	/** Fallback when theme does not call wp_body_open: inject bar at start of body and run hide script. */
@@ -58,29 +68,37 @@ final class Frontend {
 		if ( ! $this->should_show_bar() ) {
 			return;
 		}
-		$hide_on_scroll = Options::get_hide_on_scroll();
-		$position       = Options::get_position();
-		$message        = Options::get_message();
-		$classes        = [ 'top-bar', 'top-bar--' . sanitize_html_class( $position ) ];
-		if ( $hide_on_scroll ) {
-			$classes[] = 'top-bar--hide-on-scroll';
+		$bars = Options::get_active_bars();
+		if ( $bars === [] ) {
+			return;
 		}
-		$bar_html = '<div id="top-bar" class="' . esc_attr( implode( ' ', $classes ) ) . '" role="banner" data-top-bar-position="' . esc_attr( $position ) . '"' . ( $hide_on_scroll ? ' data-top-bar-hide-threshold="20"' : '' ) . '><div class="top-bar__inner">' . wp_kses_post( $message ) . '</div></div>';
+		$chunks = [];
+		foreach ( $bars as $bar ) {
+			$raw_id         = isset( $bar['id'] ) ? (string) $bar['id'] : 'default';
+			$html_id        = 'top-bar-' . preg_replace( '/[^a-zA-Z0-9_-]/', '', $raw_id );
+			$position       = isset( $bar['position'] ) && $bar['position'] === 'bottom' ? 'bottom' : 'top';
+			$message        = isset( $bar['message'] ) ? (string) $bar['message'] : '';
+			$classes        = [ 'top-bar', 'top-bar--' . sanitize_html_class( $position ) ];
+			$hide_on_scroll = $this->bar_hides_on_scroll( $bar );
+			$chunks[]       = '<div id="' . esc_attr( $html_id ) . '" class="' . esc_attr( implode( ' ', $classes ) ) . '" role="banner" data-top-bar-id="' . esc_attr( $raw_id ) . '" data-top-bar-position="' . esc_attr( $position ) . '"' . ( $hide_on_scroll ? ' data-top-bar-scroll-hide="1" data-top-bar-hide-threshold="30"' : '' ) . '><div class="top-bar__inner">' . wp_kses_post( $message ) . '</div></div>';
+		}
+		$bar_html = implode( '', $chunks );
 		?>
 		<script id="top-bar-fallback">
 		(function(){
-			if(document.getElementById('top-bar')) return;
+			if(document.querySelector('.top-bar')) return;
 			document.body.insertAdjacentHTML('afterbegin', <?php echo wp_json_encode( $bar_html ); ?>);
 		})();
 		</script>
 		<?php
-		if ( $hide_on_scroll ) {
-			$this->print_hide_on_scroll_script_inline();
-		}
 	}
 
 	public function enqueue_assets(): void {
 		if ( ! $this->should_show_bar() ) {
+			return;
+		}
+		$bars = Options::get_active_bars();
+		if ( $bars === [] ) {
 			return;
 		}
 		wp_enqueue_style(
@@ -89,48 +107,75 @@ final class Frontend {
 			[],
 			TOP_BAR_VERSION
 		);
-		$bg     = Options::get_bg_color();
-		$frame  = Options::get_frame_color();
-		$inline = '.top-bar { background-color: ' . esc_attr( $bg ) . '; }';
-		if ( $frame && $frame !== 'transparent' ) {
-			$inline .= ' .top-bar { border: 1px solid ' . esc_attr( $frame ) . '; }';
+		$needs_scroll_hide = false;
+		foreach ( $bars as $bar ) {
+			if ( $this->bar_hides_on_scroll( $bar ) ) {
+				$needs_scroll_hide = true;
+				break;
+			}
 		}
-		wp_add_inline_style( 'top-bar', $inline );
+		if ( $needs_scroll_hide ) {
+			// Distinct handle from stylesheet `top-bar` (avoids conflicts with optimizers / dequeues).
+			wp_enqueue_script(
+				'top-bar-scroll-hide',
+				plugin_dir_url( TOP_BAR_PLUGIN_FILE ) . 'assets/js/top-bar.js',
+				[],
+				TOP_BAR_VERSION,
+				true
+			);
+		}
+		$rules = [];
+		foreach ( $bars as $bar ) {
+			$raw_id  = isset( $bar['id'] ) ? (string) $bar['id'] : 'default';
+			$html_id = 'top-bar-' . preg_replace( '/[^a-zA-Z0-9_-]/', '', $raw_id );
+			$sel     = '#' . $html_id;
+			$bg      = isset( $bar['bg_color'] ) ? Options::sanitize_hex_color( (string) $bar['bg_color'] ) : '';
+			if ( ! $bg ) {
+				$bg = '#1d2327';
+			}
+			$rules[] = $sel . ' { background-color: ' . esc_attr( $bg ) . '; }';
+			$frame   = isset( $bar['frame_color'] ) ? Options::sanitize_hex_color( (string) $bar['frame_color'] ) : '';
+			$width   = isset( $bar['frame_width'] ) ? (int) $bar['frame_width'] : 1;
+			if ( $width < 0 ) {
+				$width = 0;
+			}
+			if ( $width > 10 ) {
+				$width = 10;
+			}
+			if ( $frame !== '' && $width > 0 ) {
+				$rules[] = $sel . ' { border: ' . $width . 'px solid ' . esc_attr( $frame ) . '; }';
+			}
+		}
+		wp_add_inline_style( 'top-bar', implode( ' ', $rules ) );
 	}
-
-	// Admin assets
 
 	public function enqueue_admin_assets(): void {
 		wp_enqueue_style(
-			'jquery-ui-style', 'https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css'
+			'jquery-ui-style',
+			'https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css',
+			[],
+			'1.13.2'
 		);
 		wp_enqueue_style(
-			'top-bar-admin',plugins_url( 'assets/css/top-bar-admin.css', TOP_BAR_PLUGIN_FILE ),	[],	TOP_BAR_VERSION
+			'top-bar-admin',
+			plugins_url( 'assets/css/top-bar-admin.css', TOP_BAR_PLUGIN_FILE ),
+			[],
+			TOP_BAR_VERSION
 		);
-		wp_enqueue_script('jquery-ui-datepicker');
+		wp_enqueue_script( 'jquery-ui-datepicker' );
 		wp_enqueue_script(
-			'top-bar-admin', plugins_url( 'assets/js/top-bar-admin.js', TOP_BAR_PLUGIN_FILE ), [], TOP_BAR_VERSION
+			'top-bar-admin',
+			plugins_url( 'assets/js/top-bar-admin.js', TOP_BAR_PLUGIN_FILE ),
+			[],
+			TOP_BAR_VERSION,
+			true
 		);
 	}
-	
-	private function print_hide_on_scroll_script_inline(): void {
-		?>
-		<script id="top-bar-hide-on-scroll">(function(){
-			var t=30;
-			function find(){ return document.getElementById('top-bar'); }
-			function scrollY(){ return window.pageYOffset||document.documentElement.scrollTop; }
-			function update(){
-				var bar=find();
-				if(!bar) return;
-				bar.style.display=scrollY()>t?'none':'';
-			}
-			function go(){
-				update();
-				window.addEventListener('scroll',function(){ update(); },{passive:1});
-			}
-			if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',go);
-			else go();
-		})();</script>
-		<?php
+
+	/**
+	 * @param array<string, mixed> $bar
+	 */
+	private function bar_hides_on_scroll( array $bar ): bool {
+		return ! empty( $bar['hide_on_scroll'] );
 	}
 }

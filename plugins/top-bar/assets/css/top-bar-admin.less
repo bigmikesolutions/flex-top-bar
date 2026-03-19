@@ -37,28 +37,56 @@
 
   // Nav
 
-  #top-bar-nav {
+  .top-bar-nav {
     display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
     justify-content: space-between;
+    gap: 12px;
     width: 100%;
+    max-width: 100%;
     padding: 10px 15px;
     box-sizing: border-box;
-    align-items: center;
+    position: relative;
+    z-index: 2;
 
     .item {
-      width: 49%;
+      min-width: 0;
 
-      &.nav {
-        display: flex;
-        justify-content: flex-end;
+      &.name {
+        flex: 1 1 auto;
+        min-width: 0;
+
+        p {
+          margin: 0;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
       }
 
-      button {
+      &.nav {
+        flex: 0 0 auto;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 0;
+      }
+
+      &.nav button,
+      &.nav a.top-bar-icons {
         outline: none;
-        width: 30px;
-        height: 30px;
-        margin:0 8px;
+        width: 40px;
+        height: 40px;
+        margin: 0 8px;
         font-size: 0;
+        display: inline-block;
+        box-sizing: border-box;
+        text-decoration: none;
+        flex-shrink: 0;
 
         &:last-child {
           margin-right: 0;
@@ -70,15 +98,24 @@
 
   // Options
 
-  #top-bar-options {
+  .top-bar-options {
     display: none;
     border-top: 1px solid fade(@black,5);
     padding-top: 20px;
     width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    position: relative;
+    z-index: 1;
 
     &.active {
-      display: inline-block;
+      display: block;
     }
+  }
+
+  /* Open/Close row: point chevron when panel is collapsed */
+  .top-bar-icons.arrow-down.top-bar-toggle-options[aria-expanded="false"] {
+    transform: rotate(90deg);
   }
 
   // Row
@@ -115,6 +152,9 @@
     }
 
     &.bg {
+      flex-direction: column;
+      flex-wrap: nowrap;
+      align-items: stretch;
       background: @white;
       border-radius: 16px;
       padding: 12px 20px 20px 20px;
@@ -269,6 +309,27 @@
 
     &.clear {
       margin: 0;
+    }
+  }
+
+  /* Border frame: same structure as Position / Background so controls align in the grid row */
+  .top-bar-border-frame-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    box-sizing: border-box;
+
+    select {
+      width: auto;
+      min-width: 72px;
+      flex: 1 1 auto;
+      max-width: 100%;
+    }
+
+    input[type="color"] {
+      flex: 0 0 auto;
     }
   }
 
