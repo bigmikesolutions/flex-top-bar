@@ -42,7 +42,7 @@ final class Frontend {
 			$classes[] = 'top-bar--hide-on-scroll';
 		}
 		?>
-		<div id="top-bar" class="<?php echo esc_attr( implode( ' ', $classes ) ); ?>" role="banner"<?php echo $hide_on_scroll ? ' data-top-bar-hide-threshold="20"' : ''; ?>>
+		<div id="top-bar" class="<?php echo esc_attr( implode( ' ', $classes ) ); ?>" role="banner" data-top-bar-position="<?php echo esc_attr( $position ); ?>"<?php echo $hide_on_scroll ? ' data-top-bar-hide-threshold="20"' : ''; ?>>
 			<div class="top-bar__inner">
 				<?php echo wp_kses_post( $message ); ?>
 			</div>
@@ -65,7 +65,7 @@ final class Frontend {
 		if ( $hide_on_scroll ) {
 			$classes[] = 'top-bar--hide-on-scroll';
 		}
-		$bar_html = '<div id="top-bar" class="' . esc_attr( implode( ' ', $classes ) ) . '" role="banner"' . ( $hide_on_scroll ? ' data-top-bar-hide-threshold="20"' : '' ) . '><div class="top-bar__inner">' . wp_kses_post( $message ) . '</div></div>';
+		$bar_html = '<div id="top-bar" class="' . esc_attr( implode( ' ', $classes ) ) . '" role="banner" data-top-bar-position="' . esc_attr( $position ) . '"' . ( $hide_on_scroll ? ' data-top-bar-hide-threshold="20"' : '' ) . '><div class="top-bar__inner">' . wp_kses_post( $message ) . '</div></div>';
 		?>
 		<script id="top-bar-fallback">
 		(function(){
@@ -85,7 +85,7 @@ final class Frontend {
 		}
 		wp_enqueue_style(
 			'top-bar',
-			( TOP_BAR_PLUGIN_FILE ) . 'assets/css/top-bar.css',
+			plugin_dir_url( TOP_BAR_PLUGIN_FILE ) . 'assets/css/top-bar.css',
 			[],
 			TOP_BAR_VERSION
 		);

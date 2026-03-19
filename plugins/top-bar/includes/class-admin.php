@@ -80,6 +80,9 @@ final class Admin {
 		$hide_on_scroll = get_option( 'top_bar_hide_on_scroll', '0' ) === '1';
 		?>
 
+		<form action="options.php" method="post">
+			<?php settings_fields( 'top_bar_settings' ); ?>
+
 		<div id="top-bar">
 			<h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
 			
@@ -134,10 +137,10 @@ final class Admin {
 						<div class="item">
 							<fieldset class="clear">
 								<legend class="bold"><?php esc_html_e( 'Position', 'top-bar' ); ?></legend>
-								<select>
-									<option value="<?php checked( $position, 'top' ); ?>" name="top_bar_position"><?php esc_html_e( 'Top', 'top-bar' ); ?></option>
-									<option value="<?php checked( $position, 'bottom' ); ?>" name="top_bar_position"><?php esc_html_e( 'Bottom', 'top-bar' ); ?></option>
-								</select>							
+								<select id="top_bar_position" name="top_bar_position" aria-label="<?php esc_attr_e( 'Position', 'top-bar' ); ?>">
+									<option value="top" <?php selected( $position, 'top' ); ?>><?php esc_html_e( 'Top', 'top-bar' ); ?></option>
+									<option value="bottom" <?php selected( $position, 'bottom' ); ?>><?php esc_html_e( 'Bottom', 'top-bar' ); ?></option>
+								</select>
 							</fieldset>
 						</div>
 						<div class="item">
@@ -267,9 +270,9 @@ final class Admin {
 							<div class="item-creator">
 								<fieldset>
 									<legend class="bold"><?php esc_html_e( 'Type', 'top-bar' ); ?></legend>
-									<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?> /> <?php esc_html_e( 'Text Editor', 'top-bar' ); ?></label>
-									<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?> /> <?php esc_html_e( 'Social media', 'top-bar' ); ?></label>
-									<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?> /> <?php esc_html_e( 'Contact data', 'top-bar' ); ?></label>
+									<label><input type="radio" name="top_bar_position__ui_mock" value="top" <?php checked( $position, 'top' ); ?> /> <?php esc_html_e( 'Text Editor', 'top-bar' ); ?></label>
+									<label><input type="radio" name="top_bar_position__ui_mock" value="top" <?php checked( $position, 'top' ); ?> /> <?php esc_html_e( 'Social media', 'top-bar' ); ?></label>
+									<label><input type="radio" name="top_bar_position__ui_mock" value="top" <?php checked( $position, 'top' ); ?> /> <?php esc_html_e( 'Contact data', 'top-bar' ); ?></label>
 								</fieldset>
 							</div>
 						
@@ -358,10 +361,10 @@ final class Admin {
 								</fieldset>
 								<fieldset>
 									<legend class="bold"><?php esc_html_e( 'Visible on the mobile', 'top-bar' ); ?></legend>
-									<select>
-										<option value="<?php checked( $position, 'top' ); ?>" name="top_bar_position"><?php esc_html_e( 'On', 'top-bar' ); ?></option>
-										<option value="<?php checked( $position, 'bottom' ); ?>" name="top_bar_position"><?php esc_html_e( 'Off', 'top-bar' ); ?></option>
-									</select>							
+									<select name="top_bar_visible_mobile_ui" aria-label="<?php esc_attr_e( 'Visible on the mobile', 'top-bar' ); ?>">
+										<option value="on"><?php esc_html_e( 'On', 'top-bar' ); ?></option>
+										<option value="off"><?php esc_html_e( 'Off', 'top-bar' ); ?></option>
+									</select>			
 								</fieldset>							
 							</div>
 						</div>	
@@ -375,17 +378,17 @@ final class Admin {
 							<div class="item-creator">
 								<fieldset>
 									<legend class="bold"><?php esc_html_e( 'Type', 'top-bar' ); ?></legend>
-									<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?> /> <?php esc_html_e( 'Text Editor', 'top-bar' ); ?></label><br />
-									<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?> /> <?php esc_html_e( 'Social media', 'top-bar' ); ?></label><br />
-									<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?> /> <?php esc_html_e( 'Contact data', 'top-bar' ); ?></label><br />
+									<label><input type="radio" name="top_bar_position__ui_mock" value="top" <?php checked( $position, 'top' ); ?> /> <?php esc_html_e( 'Text Editor', 'top-bar' ); ?></label><br />
+									<label><input type="radio" name="top_bar_position__ui_mock" value="top" <?php checked( $position, 'top' ); ?> /> <?php esc_html_e( 'Social media', 'top-bar' ); ?></label><br />
+									<label><input type="radio" name="top_bar_position__ui_mock" value="top" <?php checked( $position, 'top' ); ?> /> <?php esc_html_e( 'Contact data', 'top-bar' ); ?></label><br />
 								</fieldset>
 							</div>							
 							<div class="item-creator lg">
 								<fieldset class="line">
 									<legend class="bold"><?php esc_html_e( 'Choose the icon appearance', 'top-bar' ); ?></legend>
-									<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?> /> Zaokraglony (tutaj podgląd ikon)</label><br />
-									<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?> /> Kwadratowy</label><br />
-									<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?> /> Sama ikona</label><br />
+									<label><input type="radio" name="top_bar_position__ui_mock" value="top" <?php checked( $position, 'top' ); ?> /> Zaokraglony (tutaj podgląd ikon)</label><br />
+									<label><input type="radio" name="top_bar_position__ui_mock" value="top" <?php checked( $position, 'top' ); ?> /> Kwadratowy</label><br />
+									<label><input type="radio" name="top_bar_position__ui_mock" value="top" <?php checked( $position, 'top' ); ?> /> Sama ikona</label><br />
 								</fieldset>
 								<div class="top-bar-grid">
 									<div class="item">
@@ -432,7 +435,7 @@ final class Admin {
 												<option value="behance">Behance</option>
 												<option value="flickr">Flickr</option>
 											</select>
-											<input type="text" name="top_bar_position" value="Your proflie link" <?php checked( $position, 'top' ); ?> />
+											<input type="text" name="top_bar_position__ui_mock" value="Your proflie link" <?php checked( $position, 'top' ); ?> />
 				
 									</div>
 								</div>
@@ -466,7 +469,7 @@ final class Admin {
 												<option value="behance">Behance</option>
 												<option value="flickr">Flickr</option>
 											</select>
-											<input type="text" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?> />
+											<input type="text" name="top_bar_position__ui_mock" value="top" <?php checked( $position, 'top' ); ?> />
 										</fieldset>
 									</div>
 								</div>
@@ -491,10 +494,10 @@ final class Admin {
 								</fieldset>
 								<fieldset>
 									<legend class="bold"><?php esc_html_e( 'Visible on the mobile', 'top-bar' ); ?></legend>
-									<select>
-										<option value="<?php checked( $position, 'top' ); ?>" name="top_bar_position"><?php esc_html_e( 'On', 'top-bar' ); ?></option>
-										<option value="<?php checked( $position, 'bottom' ); ?>" name="top_bar_position"><?php esc_html_e( 'Off', 'top-bar' ); ?></option>
-									</select>							
+									<select name="top_bar_visible_mobile_ui" aria-label="<?php esc_attr_e( 'Visible on the mobile', 'top-bar' ); ?>">
+										<option value="on"><?php esc_html_e( 'On', 'top-bar' ); ?></option>
+										<option value="off"><?php esc_html_e( 'Off', 'top-bar' ); ?></option>
+									</select>			
 								</fieldset>					
 							</div>
 						</div>	
@@ -507,17 +510,17 @@ final class Admin {
 							<div class="item-creator">
 								<fieldset>
 									<legend class="bold"><?php esc_html_e( 'Type', 'top-bar' ); ?></legend>
-									<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?> /> <?php esc_html_e( 'Text Editor', 'top-bar' ); ?></label><br />
-									<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?> /> <?php esc_html_e( 'Social media', 'top-bar' ); ?></label><br />
-									<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?> /> <?php esc_html_e( 'Contact data', 'top-bar' ); ?></label><br />
+									<label><input type="radio" name="top_bar_position__ui_mock" value="top" <?php checked( $position, 'top' ); ?> /> <?php esc_html_e( 'Text Editor', 'top-bar' ); ?></label><br />
+									<label><input type="radio" name="top_bar_position__ui_mock" value="top" <?php checked( $position, 'top' ); ?> /> <?php esc_html_e( 'Social media', 'top-bar' ); ?></label><br />
+									<label><input type="radio" name="top_bar_position__ui_mock" value="top" <?php checked( $position, 'top' ); ?> /> <?php esc_html_e( 'Contact data', 'top-bar' ); ?></label><br />
 								</fieldset>
 							</div>							
 							<div class="item-creator lg">
 								<fieldset class="line">
 									<legend class="bold"><?php esc_html_e( 'Choose the icon appearance', 'top-bar' ); ?></legend>
-									<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?> /> Zaokraglony (tutaj podgląd ikon)</label><br />
-									<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?> /> Kwadratowy</label><br />
-									<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?> /> Sama ikona</label><br />
+									<label><input type="radio" name="top_bar_position__ui_mock" value="top" <?php checked( $position, 'top' ); ?> /> Zaokraglony (tutaj podgląd ikon)</label><br />
+									<label><input type="radio" name="top_bar_position__ui_mock" value="top" <?php checked( $position, 'top' ); ?> /> Kwadratowy</label><br />
+									<label><input type="radio" name="top_bar_position__ui_mock" value="top" <?php checked( $position, 'top' ); ?> /> Sama ikona</label><br />
 								</fieldset>
 								<div class="top-bar-grid">
 									<div class="item">
@@ -553,7 +556,7 @@ final class Admin {
 												<option value="support">Customer support</option>
 												<option value="calendar">Appointment / Booking</option>
 										</select>
-												<input type="text" name="top_bar_position" value="Your profile link" <?php checked( $position, 'top' ); ?> />
+												<input type="text" name="top_bar_position__ui_mock" value="Your profile link" <?php checked( $position, 'top' ); ?> />
 				
 									</div>
 								</div>
@@ -577,7 +580,7 @@ final class Admin {
 												<option value="support">Customer support</option>
 												<option value="calendar">Appointment / Booking</option>
 										</select>
-												<input type="text" name="top_bar_position" value="Your profile link" <?php checked( $position, 'top' ); ?> />
+												<input type="text" name="top_bar_position__ui_mock" value="Your profile link" <?php checked( $position, 'top' ); ?> />
 										</fieldset>
 									</div>
 								</div>
@@ -601,10 +604,10 @@ final class Admin {
 								</fieldset>
 								<fieldset>
 									<legend class="bold"><?php esc_html_e( 'Visible on the mobile', 'top-bar' ); ?></legend>
-									<select>
-										<option value="<?php checked( $position, 'top' ); ?>" name="top_bar_position"><?php esc_html_e( 'On', 'top-bar' ); ?></option>
-										<option value="<?php checked( $position, 'bottom' ); ?>" name="top_bar_position"><?php esc_html_e( 'Off', 'top-bar' ); ?></option>
-									</select>				
+									<select name="top_bar_visible_mobile_ui" aria-label="<?php esc_attr_e( 'Visible on the mobile', 'top-bar' ); ?>">
+										<option value="on"><?php esc_html_e( 'On', 'top-bar' ); ?></option>
+										<option value="off"><?php esc_html_e( 'Off', 'top-bar' ); ?></option>
+									</select>
 								</fieldset>
 							</div>
 						</div>	
@@ -620,25 +623,12 @@ final class Admin {
 
 			<!-- End options -->
 			</div>
-				
+			</div>
 
 		</div>
-	
-		<!-- // old frontend -->
+
 		<div class="wrap">
-			<h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
-			<form action="options.php" method="post">
-				<?php settings_fields( 'top_bar_settings' ); ?>
 				<table class="form-table" role="presentation">
-					<tr>
-						<th scope="row"><?php esc_html_e( 'Position', 'top-bar' ); ?></th>
-						<td>
-							<fieldset>
-								<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?> /> <?php esc_html_e( 'Top', 'top-bar' ); ?></label><br />
-								<label><input type="radio" name="top_bar_position" value="bottom" <?php checked( $position, 'bottom' ); ?> /> <?php esc_html_e( 'Bottom', 'top-bar' ); ?></label>
-							</fieldset>
-						</td>
-					</tr>
 					<tr>
 						<th scope="row"><label for="top_bar_message"><?php esc_html_e( 'Message', 'top-bar' ); ?></label></th>
 						<td>
@@ -683,8 +673,8 @@ final class Admin {
 					</tr>
 				</table>
 				<?php submit_button(); ?>
-			</form>
 		</div>
+		</form>
 		<?php
 	}
 }

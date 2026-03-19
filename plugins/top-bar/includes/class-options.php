@@ -16,7 +16,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class Options {
 
 	public static function get_position(): string {
-		return get_option( 'top_bar_position', 'top' );
+		$position = get_option( 'top_bar_position', 'top' );
+		return in_array( $position, [ 'top', 'bottom' ], true ) ? $position : 'top';
 	}
 
 	public static function get_message(): string {
