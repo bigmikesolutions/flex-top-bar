@@ -161,7 +161,7 @@ final class Admin {
 				$message        = isset( $bar['message'] ) ? (string) $bar['message'] : __( 'Welcome!', 'top-bar' );
 				$bg_color       = isset( $bar['bg_color'] ) ? Options::sanitize_hex_color( (string) $bar['bg_color'] ) : '#1d2327';
 				$frame_color    = isset( $bar['frame_color'] ) ? Options::sanitize_hex_color( (string) $bar['frame_color'] ) : '';
-				$frame_width    = isset( $bar['frame_width'] ) ? (int) $bar['frame_width'] : 1;
+				$frame_width    = isset( $bar['frame_width'] ) ? (int) $bar['frame_width'] : 0;
 				if ( $frame_width < 0 ) {
 					$frame_width = 0;
 				}
@@ -169,8 +169,10 @@ final class Admin {
 					$frame_width = 10;
 				}
 				$hide_on_scroll = ! empty( $bar['hide_on_scroll'] );
-				$status         = isset( $bar['status'] ) ? (string) $bar['status'] : 'on';
-				$enabled        = ! empty( $bar['enabled'] );
+				$status         = isset( $bar['status'] ) ? strtolower( trim( (string) $bar['status'] ) ) : 'on';
+				if ( ! in_array( $status, [ 'on', 'off' ], true ) ) {
+					$status = 'on';
+				}
 				$pf             = Options::OPTION_BARS . '[' . (int) $i . ']';
 				$remove_url     = wp_nonce_url(
 					add_query_arg(
@@ -194,7 +196,7 @@ final class Admin {
 					</div>
 
 					<div class="item nav">
-						<button type="button" class="top-bar-icons status-on"><?php esc_html_e( 'Visible On/Off', 'top-bar' ); ?></button>
+						<button type="button" class="top-bar-icons <?php echo esc_attr( $status === 'off' ? 'status-off' : 'status-on' ); ?>"><?php esc_html_e( 'Visible On/Off', 'top-bar' ); ?></button>
 						<?php if ( $can_remove ) : ?>
 							<a href="<?php echo esc_url( $remove_url ); ?>" class="top-bar-icons delete" title="<?php esc_attr_e( 'Remove this bar', 'top-bar' ); ?>" aria-label="<?php esc_attr_e( 'Delete', 'top-bar' ); ?>"></a>
 						<?php else : ?>
@@ -209,11 +211,6 @@ final class Admin {
 							<fieldset class="clear">
 								<legend class="bold lg"><?php esc_html_e( 'Name', 'top-bar' ); ?></legend>
 								<input type="hidden" name="<?php echo esc_attr( $pf ); ?>[id]" value="<?php echo esc_attr( $bar_id ); ?>" />
-								<label class="check">
-									<input type="hidden" name="<?php echo esc_attr( $pf ); ?>[enabled]" value="0" />
-									<input type="checkbox" name="<?php echo esc_attr( $pf ); ?>[enabled]" value="1" <?php checked( $enabled ); ?> />
-									<span><p class="bold"><?php esc_html_e( 'Enabled on site', 'top-bar' ); ?></p></span>
-								</label>
 								<input type="text" id="top-bar-name" name="<?php echo esc_attr( $pf ); ?>[name]" value="<?php echo esc_attr( $bar_name ); ?>" placeholder="<?php esc_attr_e( 'Name of Top Bar', 'top-bar' ); ?>">
 							</fieldset>
 						</div>

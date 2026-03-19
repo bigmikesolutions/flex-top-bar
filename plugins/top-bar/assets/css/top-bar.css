@@ -20,17 +20,33 @@
 	z-index: 9998;
 }
 
+/* Stay in view while scrolling (bottom bars use fixed; top used to be relative and scrolled away). */
 .top-bar--top {
-	position: relative;
+	position: sticky;
+	top: 0;
+	left: 0;
+	right: 0;
 	z-index: 9998;
+	box-sizing: border-box;
 }
 
-/* Hide on scroll down */
-.top-bar--hide-on-scroll {
+/* Logged-in WP toolbar */
+body.admin-bar .top-bar--top {
+	top: 32px;
+}
+
+@media screen and (max-width: 782px) {
+	body.admin-bar .top-bar--top {
+		top: 46px;
+	}
+}
+
+/* Optional transitions when using .is-hidden (JS uses display:none by default) */
+.top-bar[data-top-bar-scroll-hide='1'] {
 	transition: transform 0.25s ease, opacity 0.25s ease, height 0.25s ease, padding 0.25s ease;
 }
 
-.top-bar--hide-on-scroll.is-hidden {
+.top-bar[data-top-bar-scroll-hide='1'].is-hidden {
 	transform: translateY(-100%) !important;
 	opacity: 0 !important;
 	visibility: hidden !important;
@@ -42,6 +58,6 @@
 	min-height: 0 !important;
 }
 
-.top-bar--hide-on-scroll.top-bar--bottom.is-hidden {
+.top-bar[data-top-bar-scroll-hide='1'].top-bar--bottom.is-hidden {
 	transform: translateY(100%) !important;
 }

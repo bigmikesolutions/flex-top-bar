@@ -39,15 +39,8 @@ final class Frontend {
 		if ( $bars === [] ) {
 			return;
 		}
-		$any_hide = false;
 		foreach ( $bars as $bar ) {
 			$this->render_single_bar( $bar );
-			if ( ! empty( $bar['hide_on_scroll'] ) ) {
-				$any_hide = true;
-			}
-		}
-		if ( $any_hide ) {
-			$this->print_hide_on_scroll_script_inline();
 		}
 	}
 
@@ -60,12 +53,9 @@ final class Frontend {
 		$position       = isset( $bar['position'] ) && $bar['position'] === 'bottom' ? 'bottom' : 'top';
 		$message        = isset( $bar['message'] ) ? (string) $bar['message'] : '';
 		$classes        = [ 'top-bar', 'top-bar--' . sanitize_html_class( $position ) ];
-		$hide_on_scroll = ! empty( $bar['hide_on_scroll'] );
-		if ( $hide_on_scroll ) {
-			$classes[] = 'top-bar--hide-on-scroll';
-		}
+		$hide_on_scroll = $this->bar_hides_on_scroll( $bar );
 		?>
-		<div id="<?php echo esc_attr( $html_id ); ?>" class="<?php echo esc_attr( implode( ' ', $classes ) ); ?>" role="banner" data-top-bar-id="<?php echo esc_attr( $raw_id ); ?>" data-top-bar-position="<?php echo esc_attr( $position ); ?>"<?php echo $hide_on_scroll ? ' data-top-bar-hide-threshold="20"' : ''; ?>>
+		<div id="<?php echo esc_attr( $html_id ); ?>" class="<?php echo esc_attr( implode( ' ', $classes ) ); ?>" role="banner" data-top-bar-id="<?php echo esc_attr( $raw_id ); ?>" data-top-bar-position="<?php echo esc_attr( $position ); ?>"<?php echo $hide_on_scroll ? ' data-top-bar-scroll-hide="1" data-top-bar-hide-threshold="30"' : ''; ?>>
 			<div class="top-bar__inner">
 				<?php echo wp_kses_post( $message ); ?>
 			</div>
@@ -82,20 +72,15 @@ final class Frontend {
 		if ( $bars === [] ) {
 			return;
 		}
-		$chunks   = [];
-		$any_hide = false;
+		$chunks = [];
 		foreach ( $bars as $bar ) {
 			$raw_id         = isset( $bar['id'] ) ? (string) $bar['id'] : 'default';
 			$html_id        = 'top-bar-' . preg_replace( '/[^a-zA-Z0-9_-]/', '', $raw_id );
 			$position       = isset( $bar['position'] ) && $bar['position'] === 'bottom' ? 'bottom' : 'top';
 			$message        = isset( $bar['message'] ) ? (string) $bar['message'] : '';
 			$classes        = [ 'top-bar', 'top-bar--' . sanitize_html_class( $position ) ];
-			$hide_on_scroll = ! empty( $bar['hide_on_scroll'] );
-			if ( $hide_on_scroll ) {
-				$classes[] = 'top-bar--hide-on-scroll';
-				$any_hide  = true;
-			}
-			$chunks[] = '<div id="' . esc_attr( $html_id ) . '" class="' . esc_attr( implode( ' ', $classes ) ) . '" role="banner" data-top-bar-id="' . esc_attr( $raw_id ) . '" data-top-bar-position="' . esc_attr( $position ) . '"' . ( $hide_on_scroll ? ' data-top-bar-hide-threshold="20"' : '' ) . '><div class="top-bar__inner">' . wp_kses_post( $message ) . '</div></div>';
+			$hide_on_scroll = $this->bar_hides_on_scroll( $bar );
+			$chunks[]       = '<div id="' . esc_attr( $html_id ) . '" class="' . esc_attr( implode( ' ', $classes ) ) . '" role="banner" data-top-bar-id="' . esc_attr( $raw_id ) . '" data-top-bar-position="' . esc_attr( $position ) . '"' . ( $hide_on_scroll ? ' data-top-bar-scroll-hide="1" data-top-bar-hide-threshold="30"' : '' ) . '><div class="top-bar__inner">' . wp_kses_post( $message ) . '</div></div>';
 		}
 		$bar_html = implode( '', $chunks );
 		?>
@@ -106,9 +91,6 @@ final class Frontend {
 		})();
 		</script>
 		<?php
-		if ( $any_hide ) {
-			$this->print_hide_on_scroll_script_inline();
-		}
 	}
 
 	public function enqueue_assets(): void {
@@ -125,6 +107,23 @@ final class Frontend {
 			[],
 			TOP_BAR_VERSION
 		);
+		$needs_scroll_hide = false;
+		foreach ( $bars as $bar ) {
+			if ( $this->bar_hides_on_scroll( $bar ) ) {
+				$needs_scroll_hide = true;
+				break;
+			}
+		}
+		if ( $needs_scroll_hide ) {
+			// Distinct handle from stylesheet `top-bar` (avoids conflicts with optimizers / dequeues).
+			wp_enqueue_script(
+				'top-bar-scroll-hide',
+				plugin_dir_url( TOP_BAR_PLUGIN_FILE ) . 'assets/js/top-bar.js',
+				[],
+				TOP_BAR_VERSION,
+				true
+			);
+		}
 		$rules = [];
 		foreach ( $bars as $bar ) {
 			$raw_id  = isset( $bar['id'] ) ? (string) $bar['id'] : 'default';
@@ -173,26 +172,20 @@ final class Frontend {
 		);
 	}
 
-	private function print_hide_on_scroll_script_inline(): void {
-		?>
-		<script id="top-bar-hide-on-scroll">(function(){
-			var t=30;
-			function bars(){ return document.querySelectorAll('.top-bar--hide-on-scroll'); }
-			function scrollY(){ return window.pageYOffset||document.documentElement.scrollTop; }
-			function update(){
-				var list=bars();
-				var y=scrollY()>t;
-				for(var i=0;i<list.length;i++){
-					list[i].style.display=y?'none':'';
-				}
-			}
-			function go(){
-				update();
-				window.addEventListener('scroll',function(){ update(); },{passive:1});
-			}
-			if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',go);
-			else go();
-		})();</script>
-		<?php
+	/**
+	 * Status is the source of truth for scroll behavior:
+	 * - on: always visible on scroll
+	 * - off: hide on scroll
+	 *
+	 * @param array<string, mixed> $bar
+	 */
+	private function bar_hides_on_scroll( array $bar ): bool {
+		if ( ! isset( $bar['status'] ) ) {
+			return false;
+		}
+		$status = strtolower( trim( (string) $bar['status'] ) );
+		// Strip common invisible / odd whitespace so UI "on" always wins.
+		$status = preg_replace( '/[\x{200B}-\x{200D}\x{FEFF}]/u', '', $status );
+		return $status === 'off';
 	}
 }

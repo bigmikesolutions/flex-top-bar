@@ -97,7 +97,13 @@ final class Options {
 		$defaults = self::default_bar();
 		$id       = isset( $bar['id'] ) && is_string( $bar['id'] ) && $bar['id'] !== '' ? $bar['id'] : self::new_bar_id();
 		$pos      = isset( $bar['position'] ) && in_array( $bar['position'], [ 'top', 'bottom' ], true ) ? $bar['position'] : 'top';
-		$status   = isset( $bar['status'] ) && in_array( $bar['status'], [ 'on', 'off' ], true ) ? $bar['status'] : 'on';
+		$status = 'on';
+		if ( isset( $bar['status'] ) ) {
+			$raw_status = is_string( $bar['status'] ) ? strtolower( trim( $bar['status'] ) ) : '';
+			if ( in_array( $raw_status, [ 'on', 'off' ], true ) ) {
+				$status = $raw_status;
+			}
+		}
 		$msg      = isset( $bar['message'] ) && is_string( $bar['message'] ) ? $bar['message'] : $defaults['message'];
 		$bg       = isset( $bar['bg_color'] ) ? self::sanitize_hex_color( (string) $bar['bg_color'] ) : '';
 		$frame    = isset( $bar['frame_color'] ) ? self::sanitize_hex_color( (string) $bar['frame_color'] ) : '';
@@ -112,14 +118,15 @@ final class Options {
 		return [
 			'id'             => sanitize_key( (string) $id ) ?: (string) $id,
 			'name'           => isset( $bar['name'] ) ? sanitize_text_field( (string) $bar['name'] ) : $defaults['name'],
-			'enabled'        => ! empty( $bar['enabled'] ),
+			// Bar is always rendered; Status controls scroll hide/show behavior.
+			'enabled'        => true,
 			'status'         => $status,
 			'position'       => $pos,
 			'message'        => wp_kses_post( $msg ),
 			'bg_color'       => $bg ?: '#1d2327',
 			'frame_color'    => $frame,
 			'frame_width'    => $width,
-			'hide_on_scroll' => ! empty( $bar['hide_on_scroll'] ),
+			'hide_on_scroll' => $status === 'off',
 		];
 	}
 
@@ -141,7 +148,6 @@ final class Options {
 				$row['frame_color'] = '';
 				$row['frame_width'] = 0;
 			}
-			$row['enabled']        = ! empty( $row['enabled'] );
 			$row['hide_on_scroll'] = ! empty( $row['hide_on_scroll'] );
 			$out[]                   = self::normalize_bar( $row );
 		}
@@ -161,16 +167,7 @@ final class Options {
 	 * @return list<array<string, mixed>>
 	 */
 	public static function get_active_bars(): array {
-		return array_values(
-			array_filter(
-				self::get_bars(),
-				static function ( $bar ) {
-					return is_array( $bar )
-						&& ! empty( $bar['enabled'] )
-						&& ( ! isset( $bar['status'] ) || $bar['status'] !== 'off' );
-				}
-			)
-		);
+		return self::get_bars();
 	}
 
 	// --- Back-compat: first bar (admin/legacy UI) ---
@@ -199,8 +196,7 @@ final class Options {
 	}
 
 	public static function get_hide_on_scroll(): bool {
-		$bars = self::get_bars();
-		return ! empty( $bars[0]['hide_on_scroll'] );
+		return self::get_status() === 'off';
 	}
 
 	public static function get_status(): string {
