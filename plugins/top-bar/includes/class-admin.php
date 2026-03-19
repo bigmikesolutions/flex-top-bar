@@ -17,7 +17,22 @@ final class Admin {
 
 	public function __construct() {
 		add_action( 'admin_menu', [ $this, 'add_settings_page' ] );
+		add_action( 'admin_init', [ $this, 'persist_bar_name' ], 5 );
 		add_action( 'admin_init', [ $this, 'register_settings' ] );
+	}
+
+	public function persist_bar_name(): void {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+		if ( ! isset( $_POST['option_page'] ) || wp_unslash( (string) $_POST['option_page'] ) !== 'top_bar_settings' ) {
+			return;
+		}
+		if ( ! isset( $_POST['top_bar_name'] ) ) {
+			return;
+		}
+		$name = sanitize_text_field( wp_unslash( (string) $_POST['top_bar_name'] ) );
+		update_option( 'top_bar_name', $name );
 	}
 
 	public function add_settings_page(): void {
@@ -31,6 +46,10 @@ final class Admin {
 	}
 
 	public function register_settings(): void {
+		register_setting( 'top_bar_settings', 'top_bar_name', [
+			'type'              => 'string',
+			'sanitize_callback' => 'sanitize_text_field',
+		] );
 		register_setting( 'top_bar_settings', 'top_bar_position', [
 			'type'              => 'string',
 			'sanitize_callback' => function ( $v ) {
@@ -85,6 +104,7 @@ final class Admin {
 		$frame_color    = get_option( 'top_bar_frame_color', '' );
 		$hide_on_scroll = get_option( 'top_bar_hide_on_scroll', '0' ) === '1';
 		$status         = get_option( 'top_bar_status', 'on' );
+		$bar_name       = get_option( 'top_bar_name', '' );
 		?>
 
 		<form action="options.php" method="post">
@@ -117,7 +137,7 @@ final class Admin {
 				<!-- Navigation -->
 				<div id="top-bar-nav">
 					<div class="item name">
-						<p class="lg bold"><?php esc_html_e( 'Name of TopaBar', 'top-bar' ); ?>
+						<p class="lg bold"><?php echo esc_html( $bar_name !== '' ? $bar_name : __( 'Name of TopaBar', 'top-bar' ) ); ?>
 					</div>
 
 					<div class="item nav">
@@ -131,7 +151,7 @@ final class Admin {
 						<div class="item">			
 							<fieldset class="clear">
 								<legend class="bold lg"><?php esc_html_e( 'Name', 'top-bar' ); ?></legend>
-								<input type="text" id="top-bar-name" name="top_bar_name__ui_mock" placeholder="Name of Top Bar">
+								<input type="text" id="top-bar-name" name="top_bar_name" value="<?php echo esc_attr( $bar_name ); ?>" placeholder="Name of Top Bar">
 							</fieldset>
 						</div>
 					</div>
