@@ -188,9 +188,9 @@ final class Admin {
 			<div class="top-bar-row bg">		
 				
 				<!-- Navigation -->
-				<div id="top-bar-nav">
+				<div class="top-bar-nav">
 					<div class="item name">
-						<p class="lg bold"><?php echo esc_html( $bar_name !== '' ? $bar_name : __( 'Name of TopaBar', 'top-bar' ) ); ?>
+						<p class="lg bold"><?php echo esc_html( $bar_name !== '' ? $bar_name : __( 'Name of TopaBar', 'top-bar' ) ); ?></p>
 					</div>
 
 					<div class="item nav">
@@ -213,10 +213,16 @@ final class Admin {
 						<?php else : ?>
 							<button type="button" class="top-bar-icons delete" disabled title="<?php esc_attr_e( 'At least one bar is required', 'top-bar' ); ?>"><?php esc_html_e( 'Delete', 'top-bar' ); ?></button>
 						<?php endif; ?>
-						<button type="button" class="top-bar-icons arrow-down"><?php esc_html_e( 'Open/Close', 'top-bar' ); ?></button>
+						<button
+							type="button"
+							class="top-bar-icons arrow-down top-bar-toggle-options"
+							data-options-panel-id="<?php echo esc_attr( 'top-bar-options-' . (int) $i ); ?>"
+							aria-expanded="true"
+							aria-controls="<?php echo esc_attr( 'top-bar-options-' . (int) $i ); ?>"
+						><?php esc_html_e( 'Open/Close', 'top-bar' ); ?></button>
 					</div>
 				</div>
-				<div id="top-bar-options" class="active">			<!-- The active class opens the options  -->
+				<div id="<?php echo esc_attr( 'top-bar-options-' . (int) $i ); ?>" class="top-bar-options active">
 					<div class="top-bar-grid">
 						<div class="item">			
 							<fieldset class="clear">
@@ -736,6 +742,18 @@ final class Admin {
 					cb.checked = !cb.checked;
 					cb.dispatchEvent(new Event('change', { bubbles: true }));
 					syncButton(btn);
+				});
+			});
+
+			document.querySelectorAll('.top-bar-toggle-options').forEach(function(btn){
+				btn.addEventListener('click', function(){
+					var id = btn.getAttribute('data-options-panel-id');
+					if(!id) return;
+					var panel = document.getElementById(id);
+					if(!panel) return;
+					panel.classList.toggle('active');
+					var open = panel.classList.contains('active');
+					btn.setAttribute('aria-expanded', open ? 'true' : 'false');
 				});
 			});
 		})();
