@@ -249,12 +249,10 @@ final class Admin {
 								<input type="color" id="top_bar_bg_color_<?php echo (int) $i; ?>" name="<?php echo esc_attr( $pf ); ?>[bg_color]" value="<?php echo esc_attr( $bg_color ?: '#1d2327' ); ?>" />
 							</fieldset>
 						</div>
-						<div class="item column">
-							<div class="row">
-								<p class="bold clear"><?php esc_html_e( 'Border frame', 'top-bar' ); ?></p>
-							</div>
-							<div class="row">
-								<label class="clear">				
+						<div class="item">
+							<fieldset class="clear">
+								<legend class="bold"><?php esc_html_e( 'Border frame', 'top-bar' ); ?></legend>
+								<div class="top-bar-border-frame-controls">
 									<input type="color" id="top_bar_frame_color_<?php echo (int) $i; ?>" name="<?php echo esc_attr( $pf ); ?>[frame_color]" value="<?php echo esc_attr( $frame_color ?: '#000000' ); ?>" />
 									<select name="<?php echo esc_attr( $pf ); ?>[frame_width]" aria-label="<?php esc_attr_e( 'Border width', 'top-bar' ); ?>">
 										<?php
@@ -263,8 +261,8 @@ final class Admin {
 										}
 										?>
 									</select>
-								</label>
-							</div>
+								</div>
+							</fieldset>
 						</div>
 						<div class="item">
 							<fieldset class="clear">
