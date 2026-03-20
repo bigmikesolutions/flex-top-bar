@@ -3,6 +3,7 @@ import {
   addBars,
   getBarIds,
   loginAndOpenTopBarSettings,
+  MAX_BARS,
   openPanel,
   resetToSingleBar,
 } from './helpers/topBarHelpers';
@@ -66,5 +67,28 @@ test.describe('multi-bar', () => {
     await expect(page.locator(`[data-top-bar-id="${removedId}"]`)).toHaveCount(0);
     await expect(page.locator(`[data-top-bar-id="${createdIds[1]}"]`)).toHaveCount(1);
     await expect(page.locator(`[data-top-bar-id="${createdIds[2]}"]`)).toHaveCount(1);
+  });
+
+  test('should not allow creating more than max bars from UI', async ({ page }) => {
+    await loginAndOpenTopBarSettings(page);
+    await resetToSingleBar(page);
+
+    // Start from 1 bar and keep adding until the add control is disabled/hidden.
+    for (let i = 0; i < MAX_BARS + 2; i += 1) {
+      const enabledAdd = page.locator('a[href*="top_bar_add=1"]:not([aria-disabled="true"])').first();
+      if ((await enabledAdd.count()) === 0) {
+        break;
+      }
+      await enabledAdd.click({ force: true });
+      await page.waitForLoadState('domcontentloaded');
+    }
+
+    const barCount = await page.locator('.top-bar-row.bg').count();
+    const enabledAdd = page.locator('a[href*="top_bar_add=1"]:not([aria-disabled="true"])');
+    const disabledAdd = page.locator('a.top-bar-btn[aria-disabled="true"]');
+
+    expect(barCount).toBe(MAX_BARS);
+    await expect(enabledAdd).toHaveCount(0);
+    await expect(disabledAdd.first()).toBeVisible();
   });
 });
