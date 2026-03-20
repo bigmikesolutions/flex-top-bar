@@ -62,3 +62,11 @@ Optional env vars for login/base URL:
 - `WP_BASE_URL` (default `http://localhost:8080`)
 - `WP_ADMIN_USER` (default `admin`)
 - `WP_ADMIN_PASSWORD` (default `admin`)
+
+### Seed two demo bars (top + bottom)
+
+Creates `top_bars` in DB with exactly two entries (one `top`, one `bottom`):
+
+```bash
+composer seed:top-bars
+```

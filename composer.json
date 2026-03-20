@@ -24,6 +24,7 @@
   },
   "scripts": {
     "test": "phpunit",
-    "test:top-bar": "phpunit plugins/top-bar/tests"
+    "test:top-bar": "phpunit plugins/top-bar/tests",
+    "seed:top-bars": "bash scripts/seed-two-top-bars.sh"
   }
 }
