@@ -59,7 +59,6 @@ final class OptionsScheduleTest extends TestCase {
 
 	public function test_schedule_window_disabled_returns_true(): void {
 		$method = new \ReflectionMethod( Options::class, 'is_bar_in_schedule_window' );
-		$method->setAccessible( true );
 
 		$result = $method->invoke(
 			null,
@@ -75,7 +74,6 @@ final class OptionsScheduleTest extends TestCase {
 
 	public function test_schedule_window_enabled_with_missing_values_returns_false(): void {
 		$method = new \ReflectionMethod( Options::class, 'is_bar_in_schedule_window' );
-		$method->setAccessible( true );
 
 		$result = $method->invoke(
 			null,

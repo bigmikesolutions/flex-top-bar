@@ -16,10 +16,5 @@
     <exclude>
       <directory>plugins/*/tests</directory>
     </exclude>
-    <coverage>
-      <report>
-        <clover outputFile=".phpunit.cache/clover.xml"/>
-      </report>
-    </coverage>
   </source>
 </phpunit>

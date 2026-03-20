@@ -10,11 +10,12 @@ if ( ! file_exists( $autoload ) ) {
 	throw new RuntimeException( 'Run composer install from the project root.' );
 }
 require_once $autoload;
-require_once dirname( __DIR__ ) . '/includes/class-options.php';
 
 if ( ! defined( 'ABSPATH' ) ) {
 	define( 'ABSPATH', __DIR__ );
 }
+
+require_once dirname( __DIR__ ) . '/includes/class-options.php';
 
 // Minimal WordPress function shims for unit tests.
 if ( ! function_exists( '__' ) ) {
