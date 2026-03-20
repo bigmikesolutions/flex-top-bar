@@ -1,4 +1,4 @@
-name: Top Bar E2E
+name: Top Bar PR & main checks
 
 on:
   pull_request:
