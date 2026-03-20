@@ -14,6 +14,7 @@ jobs:
       WP_BASE_URL: http://localhost:8080
       WP_ADMIN_USER: admin
       WP_ADMIN_PASSWORD: admin
+      WP_ADMIN_EMAIL: admin@example.com
 
     steps:
       - name: Checkout
@@ -38,18 +39,19 @@ jobs:
         run: |
           timeout 90s docker compose run --rm wp-install sh -lc '
             cd /var/www/html
+            set -e
             if wp core is-installed --allow-root 2>/dev/null; then
               echo "WordPress already installed."
             else
               wp core install --allow-root \
                 --url="http://localhost:8080" \
                 --title="CI WordPress" \
-                --admin_user="admin" \
-                --admin_password="admin" \
-                --admin_email="admin@localhost" \
+                --admin_user="${WP_ADMIN_USER}" \
+                --admin_password="${WP_ADMIN_PASSWORD}" \
+                --admin_email="${WP_ADMIN_EMAIL}" \
                 --skip-email
             fi
-            wp plugin activate top-bar --allow-root || true
+            wp plugin activate top-bar --allow-root
           '
 
       - name: Wait for WordPress install to be ready
