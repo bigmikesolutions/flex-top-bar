@@ -177,57 +177,6 @@ final class Admin {
 				$scheduled_enabled     = ! empty( $bar['scheduled_enabled'] );
 				$scheduled_from_datetime = isset( $bar['scheduled_from_datetime'] ) ? (string) $bar['scheduled_from_datetime'] : '';
 				$scheduled_to_datetime   = isset( $bar['scheduled_to_datetime'] ) ? (string) $bar['scheduled_to_datetime'] : '';
-
-				// Split datetime back into date + time for the admin UI inputs.
-				$scheduled_from_date = '';
-				$scheduled_from_time = '';
-				$scheduled_to_date = '';
-				$scheduled_to_time = '';
-
-				if ( preg_match( '/^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})$/', $scheduled_from_datetime, $m ) === 1 ) {
-					$scheduled_from_date = (string) $m[1];
-					$scheduled_from_time = (string) $m[2];
-				}
-				if ( preg_match( '/^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})$/', $scheduled_to_datetime, $m ) === 1 ) {
-					$scheduled_to_date = (string) $m[1];
-					$scheduled_to_time = (string) $m[2];
-				}
-
-				// Back-compat: earlier stored separate date/time keys.
-				if ( $scheduled_from_date === '' && isset( $bar['scheduled_from_date'] ) ) {
-					$scheduled_from_date = (string) $bar['scheduled_from_date'];
-				}
-				if ( $scheduled_from_time === '' && isset( $bar['scheduled_from_time'] ) ) {
-					$scheduled_from_time = (string) $bar['scheduled_from_time'];
-				}
-				if ( $scheduled_to_date === '' && isset( $bar['scheduled_to_date'] ) ) {
-					$scheduled_to_date = (string) $bar['scheduled_to_date'];
-				}
-				if ( $scheduled_to_time === '' && isset( $bar['scheduled_to_time'] ) ) {
-					$scheduled_to_time = (string) $bar['scheduled_to_time'];
-				}
-				// Back-compat: earlier stored keys.
-				if ( ! isset( $bar['scheduled_enabled'] ) && isset( $bar['life_time_enabled'] ) ) {
-					$scheduled_enabled = ! empty( $bar['life_time_enabled'] );
-				}
-				if ( $scheduled_from_date === '' && isset( $bar['life_time_from_date'] ) ) {
-					$scheduled_from_date = (string) $bar['life_time_from_date'];
-				}
-				if ( $scheduled_from_time === '' && isset( $bar['life_time_from_time'] ) ) {
-					$scheduled_from_time = (string) $bar['life_time_from_time'];
-				}
-				if ( $scheduled_to_date === '' && isset( $bar['life_time_to_date'] ) ) {
-					$scheduled_to_date = (string) $bar['life_time_to_date'];
-				}
-				if ( $scheduled_to_time === '' && isset( $bar['life_time_to_time'] ) ) {
-					$scheduled_to_time = (string) $bar['life_time_to_time'];
-				}
-				if ( $scheduled_from_datetime === '' && $scheduled_from_date !== '' && $scheduled_from_time !== '' ) {
-					$scheduled_from_datetime = $scheduled_from_date . 'T' . $scheduled_from_time;
-				}
-				if ( $scheduled_to_datetime === '' && $scheduled_to_date !== '' && $scheduled_to_time !== '' ) {
-					$scheduled_to_datetime = $scheduled_to_date . 'T' . $scheduled_to_time;
-				}
 				$pf             = Options::OPTION_BARS . '[' . (int) $i . ']';
 				$remove_url     = wp_nonce_url(
 					add_query_arg(
