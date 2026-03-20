@@ -1,5 +1,10 @@
 import { type Page } from '@playwright/test';
 
+declare const process: { env: Record<string, string | undefined>; cwd: () => string };
+declare const require: (name: string) => any;
+
+const { execSync } = require('node:child_process');
+
 const ADMIN_USER = process.env.WP_ADMIN_USER ?? 'admin';
 const ADMIN_PASS = process.env.WP_ADMIN_PASSWORD ?? 'admin';
 
@@ -61,16 +66,13 @@ export async function addBars(page: Page, count: number): Promise<void> {
 }
 
 export async function resetToSingleBar(page: Page): Promise<void> {
-  for (let i = 0; i < 10; i += 1) {
-    const count = await page.locator('.top-bar-row.bg').count();
-    if (count <= 1) {
-      return;
-    }
+  const root = process.cwd();
+  const composeFile = `${root}/docker-compose.yml`;
+  const command = `docker compose -f "${composeFile}" exec -T wordpress php -r 'require_once "/var/www/html/wp-load.php"; $bars = [[ "id" => "bar_single", "name" => "Single bar", "enabled" => true, "visible" => true, "admin_visibile" => false, "scheduled_enabled" => false, "scheduled_from_datetime" => "", "scheduled_to_datetime" => "", "position" => "top", "message" => "Single bar for tests.", "bg_color" => "#389339", "frame_color" => "", "frame_width" => 0, "hide_on_scroll" => false ]]; update_option("top_bars", $bars);'`;
 
-    const deleteLink = page.locator('.top-bar-row.bg a.top-bar-icons.delete').first();
-    await deleteLink.click();
-    await page.waitForLoadState('domcontentloaded');
-  }
+  execSync(command, { stdio: 'pipe' });
+  await page.goto('/wp-admin/options-general.php?page=top-bar');
+  await page.waitForLoadState('domcontentloaded');
 }
 
 export async function getBarIds(page: Page): Promise<string[]> {
