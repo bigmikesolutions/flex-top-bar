@@ -132,6 +132,79 @@ test.describe('basic settings - hide on scroll', () => {
     await expect(topBar).toBeVisible();
     await expect(topBar).not.toHaveCSS('display', 'none');
   });
+
+  test('should save bottom position with hide-on-scroll and hide after window scroll', async ({ page }) => {
+    await loginAndOpenTopBarSettings(page);
+    await ensureAtLeastBars(page, 1);
+    await openPanel(page, 0);
+
+    const id0 = await page.locator('input[name="top_bars[0][id]"]').inputValue();
+    const position0 = page.locator('select[name="top_bars[0][position]"]');
+    const hideOnScroll0 = page.locator('select[name="top_bars[0][hide_on_scroll]"]');
+
+    await position0.evaluate((el: HTMLSelectElement) => {
+      el.value = 'bottom';
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+    await hideOnScroll0.evaluate((el: HTMLSelectElement) => {
+      el.value = '1';
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+
+    await page.getByRole('button', { name: 'Save Changes' }).click();
+    await expect(page.locator('#setting-error-settings_updated, .notice-success')).toBeVisible();
+
+    await page.goto('/');
+
+    const bottomBar = page.locator(`[data-top-bar-id="${id0}"]`);
+    await expect(bottomBar).toHaveCount(1);
+    await expect(bottomBar).toHaveAttribute('data-top-bar-position', 'bottom');
+    await expect(bottomBar).toHaveClass(/top-bar--bottom/);
+    await expect(bottomBar).toHaveAttribute('data-top-bar-scroll-hide', '1');
+
+    await expect(bottomBar).toBeVisible();
+    await expect(bottomBar).not.toHaveCSS('display', 'none');
+
+    await page.evaluate(() => window.scrollTo(0, 200));
+    await expect(bottomBar).toHaveCSS('display', 'none');
+  });
+
+  test('should save bottom position with hide-on-scroll disabled and stay visible after window scroll', async ({ page }) => {
+    await loginAndOpenTopBarSettings(page);
+    await ensureAtLeastBars(page, 1);
+    await openPanel(page, 0);
+
+    const id0 = await page.locator('input[name="top_bars[0][id]"]').inputValue();
+    const position0 = page.locator('select[name="top_bars[0][position]"]');
+    const hideOnScroll0 = page.locator('select[name="top_bars[0][hide_on_scroll]"]');
+
+    await position0.evaluate((el: HTMLSelectElement) => {
+      el.value = 'bottom';
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+    await hideOnScroll0.evaluate((el: HTMLSelectElement) => {
+      el.value = '0';
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+
+    await page.getByRole('button', { name: 'Save Changes' }).click();
+    await expect(page.locator('#setting-error-settings_updated, .notice-success')).toBeVisible();
+
+    await page.goto('/');
+
+    const bottomBar = page.locator(`[data-top-bar-id="${id0}"]`);
+    await expect(bottomBar).toHaveCount(1);
+    await expect(bottomBar).toHaveAttribute('data-top-bar-position', 'bottom');
+    await expect(bottomBar).toHaveClass(/top-bar--bottom/);
+    await expect(bottomBar).not.toHaveAttribute('data-top-bar-scroll-hide', '1');
+
+    await expect(bottomBar).toBeVisible();
+    await expect(bottomBar).not.toHaveCSS('display', 'none');
+
+    await page.evaluate(() => window.scrollTo(0, 200));
+    await expect(bottomBar).toBeVisible();
+    await expect(bottomBar).not.toHaveCSS('display', 'none');
+  });
 });
 
 test.describe('scheduled', () => {
