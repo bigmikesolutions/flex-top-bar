@@ -17,6 +17,8 @@
 /wp-*.php
 /xmlrpc.php
 composer.lock
+node_modules/
+test-results/
 
 # Configuration
 wp-config.php

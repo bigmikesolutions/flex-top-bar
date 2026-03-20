@@ -48,3 +48,17 @@ composer install
 composer test
 # or only Top Bar:  composer test:top-bar
 ```
+
+**E2E tests** (Playwright):
+
+```bash
+npm install
+npx playwright install --with-deps
+npm run test:e2e
+```
+
+Optional env vars for login/base URL:
+
+- `WP_BASE_URL` (default `http://localhost:8080`)
+- `WP_ADMIN_USER` (default `admin`)
+- `WP_ADMIN_PASSWORD` (default `admin`)
