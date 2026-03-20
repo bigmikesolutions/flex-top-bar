@@ -328,13 +328,19 @@ final class Admin {
 					>
 						<div class="item">
 							<fieldset class="clear">
-								<legend class="bold"><?php esc_html_e( 'Show', 'top-bar' ); ?></legend>
+								<legend class="bold"><?php esc_html_e( 'From', 'top-bar' ); ?></legend>
 								<label>
 								<input
 									type="text"
 									id="<?php echo esc_attr( 'top-bar-datepicker1-' . (int) $i ); ?>"
 									size="30"
-									class="datepicker"
+									class="datepicker top-bar-life-time-date"
+									disabled
+								>
+								<input
+									type="time"
+									id="<?php echo esc_attr( 'top-bar-time-from-' . (int) $i ); ?>"
+									class="top-bar-life-time-input"
 									disabled
 								>
 				
@@ -343,13 +349,19 @@ final class Admin {
 						</div>
 						<div class="item">
 							<fieldset class="clear">
-								<legend class="bold"><?php esc_html_e( 'Hide', 'top-bar' ); ?></legend>
+								<legend class="bold"><?php esc_html_e( 'To', 'top-bar' ); ?></legend>
 								<label>
 								<input
 									type="text"
 									id="<?php echo esc_attr( 'top-bar-datepicker2-' . (int) $i ); ?>"
 									size="30"
-									class="datepicker"
+									class="datepicker top-bar-life-time-date"
+									disabled
+								>
+								<input
+									type="time"
+									id="<?php echo esc_attr( 'top-bar-time-to-' . (int) $i ); ?>"
+									class="top-bar-life-time-input"
 									disabled
 								>
 								</label>
@@ -791,7 +803,7 @@ final class Admin {
 				function sync(){
 					var enabled = cb.checked;
 					panel.hidden = !enabled;
-					panel.querySelectorAll('input.datepicker').forEach(function(input){
+					panel.querySelectorAll('input.datepicker, input[type="time"]').forEach(function(input){
 						input.disabled = !enabled;
 					});
 				}

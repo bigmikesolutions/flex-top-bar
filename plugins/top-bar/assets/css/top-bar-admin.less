@@ -432,6 +432,37 @@
     }
   }
 
+  // Lifetime date/time inputs: keep them compact so the hour is visible.
+  .top-bar-life-time-date {
+    width: auto;
+    flex: 0 0 auto;
+    max-width: 180px;
+  }
+
+  input[type=time].top-bar-life-time-input {
+    flex: 0 0 auto;
+    width: 90px;
+  }
+
+  // For the "Life time" panel: keep date + time on one row.
+  .top-bar-lifetime-panel fieldset label {
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: nowrap;
+  }
+
+  .top-bar-lifetime-panel .top-bar-life-time-date {
+    flex: 1 1 auto !important;
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0;
+  }
+
+  .top-bar-lifetime-panel input[type=time].top-bar-life-time-input {
+    flex: 0 0 auto !important;
+    width: 90px !important;
+  }
+
   // Buttons
 
   .top-bar-btn {
