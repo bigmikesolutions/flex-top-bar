@@ -37,15 +37,33 @@ jobs:
       - name: Install WordPress and activate plugin
         run: docker compose run --rm wp-install
 
+      - name: Ensure WordPress is installed (idempotent)
+        run: |
+          docker compose run --rm wp-install sh -lc '
+            cd /var/www/html
+            if wp core is-installed --allow-root 2>/dev/null; then
+              echo "WordPress already installed."
+            else
+              wp core install --allow-root \
+                --url="http://localhost:8080" \
+                --title="CI WordPress" \
+                --admin_user="admin" \
+                --admin_password="admin" \
+                --admin_email="admin@localhost" \
+                --skip-email
+            fi
+            wp plugin activate top-bar --allow-root || true
+          '
+
       - name: Wait for WordPress to respond
         run: |
           for i in $(seq 1 60); do
-            if curl -fsS http://localhost:8080/wp-login.php >/dev/null; then
+            if curl -fsS http://localhost:8080/wp-login.php >/dev/null && ! curl -fsS http://localhost:8080/wp-admin/install.php >/dev/null; then
               exit 0
             fi
             sleep 2
           done
-          echo "WordPress did not become ready in time"
+          echo "WordPress did not finish installation in time"
           docker compose ps
           exit 1
 
