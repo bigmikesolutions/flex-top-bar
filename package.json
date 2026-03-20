@@ -6,6 +6,8 @@
   },
   "scripts": {
     "test:e2e": "playwright test",
+    "test:e2e:single-bar": "playwright test e2e/top-bar-single.spec.ts",
+    "test:e2e:multi-bar": "playwright test e2e/top-bar-multi.spec.ts",
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:ui": "playwright test --ui"
   }
