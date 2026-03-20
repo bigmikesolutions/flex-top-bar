@@ -1367,6 +1367,7 @@ jQuery( document ).ready(function( $ ) {
   $("select").chosen({no_results_text: "Error!", disable_search_threshold: 100});
 	
 	$('.datepicker').datepicker({
+		dateFormat: 'yy-mm-dd',
 		beforeShow: function(input, inst) {
 				setTimeout(() => {
 						inst.dpDiv.addClass('top-bar-datepicker');

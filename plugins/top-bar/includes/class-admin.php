@@ -173,6 +173,10 @@ final class Admin {
 				$visible = ! empty( $bar['visible'] );
 				// Whether the bar's settings details are expanded in the admin UI.
 				$admin_visibile = ! empty( $bar['admin_visibile'] );
+				// scheduling.
+				$scheduled_enabled     = ! empty( $bar['scheduled_enabled'] );
+				$scheduled_from_datetime = isset( $bar['scheduled_from_datetime'] ) ? (string) $bar['scheduled_from_datetime'] : '';
+				$scheduled_to_datetime   = isset( $bar['scheduled_to_datetime'] ) ? (string) $bar['scheduled_to_datetime'] : '';
 				$pf             = Options::OPTION_BARS . '[' . (int) $i . ']';
 				$remove_url     = wp_nonce_url(
 					add_query_arg(
@@ -303,43 +307,59 @@ final class Admin {
 
 					<div class="top-bar-grid title">
 						<div class="item">
-							<label class="check">
-								<input type="checkbox" name="top_bar_hide_on_scroll__ui_mock" value="1">
-								<span>
-									<p class="bold lg"><?php esc_html_e( 'Life time', 'top-bar' ); ?></p>
+							<label class="check top-bar-life-time-checkbox">
+								<input type="hidden" name="<?php echo esc_attr( $pf ); ?>[scheduled_enabled]" value="0" />
+								<input
+									type="checkbox"
+									class="top-bar-toggle-life-time"
+									name="<?php echo esc_attr( $pf ); ?>[scheduled_enabled]"
+									data-lifetime-panel-id="<?php echo esc_attr( 'top-bar-lifetime-panel-' . (int) $i ); ?>"
+									value="1"
+									<?php checked( $scheduled_enabled ); ?>
+								>
+								<span class="lifetime-label">
+									<p class="bold lg"><?php esc_html_e( 'Scheduled', 'top-bar' ); ?></p>
+								</span>
+								<span class="lifetime-description">
+									<p class="xs"><?php esc_html_e( 'Schedule when the bar should be visible.', 'top-bar' ); ?></p>
 								</span>
 							</label>
 						</div>
 					</div>
 					
-					<div class="top-bar-grid bg bg-amber">
+					<div
+						id="<?php echo esc_attr( 'top-bar-lifetime-panel-' . (int) $i ); ?>"
+						class="top-bar-grid bg bg-amber top-bar-lifetime-panel"
+						<?php echo $scheduled_enabled ? '' : 'hidden'; ?>
+					>
 						<div class="item">
 							<fieldset class="clear">
-								<legend class="bold"><?php esc_html_e( 'Show', 'top-bar' ); ?></legend>
+								<legend class="bold"><?php esc_html_e( 'From', 'top-bar' ); ?></legend>
 								<label>
-								<input type="text" id="datepicker1" size="30" class="datepicker">	
+								<input
+									type="datetime-local"
+									id="<?php echo esc_attr( 'top-bar-datetime-from-' . (int) $i ); ?>"
+									name="<?php echo esc_attr( $pf ); ?>[scheduled_from_datetime]"
+									class="top-bar-life-time-datetime"
+									value="<?php echo esc_attr( $scheduled_from_datetime ); ?>"
+								>
 				
 							</label>
-									<p class="xs">Krotkie wyjasnienie</p>
 							</fieldset>
 						</div>
 						<div class="item">
 							<fieldset class="clear">
-								<legend class="bold"><?php esc_html_e( 'Hide', 'top-bar' ); ?></legend>
+								<legend class="bold"><?php esc_html_e( 'To', 'top-bar' ); ?></legend>
 								<label>
-								<input type="text" id="datepicker2" size="30" class="datepicker">	
+								<input
+									type="datetime-local"
+									id="<?php echo esc_attr( 'top-bar-datetime-to-' . (int) $i ); ?>"
+									name="<?php echo esc_attr( $pf ); ?>[scheduled_to_datetime]"
+									class="top-bar-life-time-datetime"
+									value="<?php echo esc_attr( $scheduled_to_datetime ); ?>"
+								>
 								</label>
-								<p class="xs">Krotkie wyjasnienie</p>
 						</fieldset>
-						</div>
-						<div class="item">
-							<fieldset class="clear">
-								<legend class="bold">Repeat</legend>
-								<label>
-									<input type="text" id="datepicker3" size="30" class="datepicker">	
-								</label>
-								<p class="xs">Krotkie wyjasnienie</p>
-							</fieldset>
 						</div>
 					</div>
 
@@ -765,6 +785,22 @@ final class Admin {
 						if(hidden){ hidden.value = open ? '1' : '0'; }
 					}
 				});
+			});
+
+			// Life time (datepicker) UI mock: enable + show when checkbox is checked.
+			document.querySelectorAll('.top-bar-toggle-life-time').forEach(function(cb){
+				var panelId = cb.getAttribute('data-lifetime-panel-id');
+				if(!panelId) return;
+				var panel = document.getElementById(panelId);
+				if(!panel) return;
+
+				function sync(){
+					var enabled = cb.checked;
+					panel.hidden = !enabled;
+				}
+
+				sync();
+				cb.addEventListener('change', sync);
 			});
 		})();
 		</script>

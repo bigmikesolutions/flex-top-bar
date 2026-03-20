@@ -402,6 +402,21 @@
         padding-left: 30px;
       }
     }
+
+    // Only the "Life time" checkbox needs custom wrapping:
+    // keep the title on the first row, move the description to the next.
+    &.top-bar-life-time-checkbox {
+      flex-wrap: wrap !important;
+      align-items: flex-start;
+
+      .lifetime-description {
+        flex: 0 0 100% !important;
+        flex-basis: 100% !important;
+        width: 100% !important;
+        display: block !important;
+        padding-left: 0 !important;
+      }
+    }
   }
 
   input[type=text] {
@@ -415,6 +430,43 @@
     &:focus {
       border:1px solid fade(@black,60);
     }
+  }
+
+  // Lifetime date/time inputs: keep them compact so the hour is visible.
+  .top-bar-life-time-date {
+    width: auto;
+    flex: 0 0 auto;
+    max-width: 180px;
+  }
+
+  input[type=time].top-bar-life-time-input {
+    flex: 0 0 auto;
+    width: 90px;
+  }
+
+  // For the "Life time" panel: keep date + time on one row.
+  .top-bar-lifetime-panel fieldset label {
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: nowrap;
+  }
+
+  .top-bar-lifetime-panel .top-bar-life-time-date {
+    flex: 1 1 auto !important;
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0;
+  }
+
+  .top-bar-lifetime-panel input[type=time].top-bar-life-time-input {
+    flex: 0 0 auto !important;
+    width: 90px !important;
+  }
+
+  .top-bar-lifetime-panel .top-bar-life-time-datetime {
+    width: 100% !important;
+    max-width: none !important;
+    flex: 1 1 auto !important;
   }
 
   // Buttons
