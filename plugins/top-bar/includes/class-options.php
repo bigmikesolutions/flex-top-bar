@@ -36,6 +36,10 @@ final class Options {
 			'visible'        => true,
 			// Whether the bar's options details are expanded in the admin panel.
 			'admin_visibile' => true,
+			// Scheduling in admin panel.
+			'scheduled_enabled'   => false,
+			'scheduled_from_datetime' => '',
+			'scheduled_to_datetime'   => '',
 			'position'       => 'top',
 			'message'        => __( 'Welcome!', 'top-bar' ),
 			'bg_color'       => '#1d2327',
@@ -128,6 +132,93 @@ final class Options {
 			}
 		}
 
+		// Scheduling: read admin inputs (may be date+time or already combined datetime).
+		$scheduled_enabled = $defaults['scheduled_enabled'];
+		if ( array_key_exists( 'scheduled_enabled', $bar ) ) {
+			$se = $bar['scheduled_enabled'];
+			if ( is_bool( $se ) ) {
+				$scheduled_enabled = $se;
+			} else {
+				$raw = is_string( $se ) ? strtolower( trim( (string) $se ) ) : '';
+				$scheduled_enabled = $raw === 'true' || $raw === '1' || $se === 1;
+			}
+		} elseif ( array_key_exists( 'life_time_enabled', $bar ) ) {
+			// Back-compat for the earlier key name.
+			$se = $bar['life_time_enabled'];
+			if ( is_bool( $se ) ) {
+				$scheduled_enabled = $se;
+			} else {
+				$raw = is_string( $se ) ? strtolower( trim( (string) $se ) ) : '';
+				$scheduled_enabled = $raw === 'true' || $raw === '1' || $se === 1;
+			}
+		}
+
+		$scheduled_from_datetime = isset( $bar['scheduled_from_datetime'] )
+			? sanitize_text_field( (string) $bar['scheduled_from_datetime'] )
+			: '';
+		$scheduled_to_datetime = isset( $bar['scheduled_to_datetime'] )
+			? sanitize_text_field( (string) $bar['scheduled_to_datetime'] )
+			: '';
+
+		// Back-compat: earlier saved keys.
+		$scheduled_from_date = isset( $bar['scheduled_from_date'] )
+			? sanitize_text_field( (string) $bar['scheduled_from_date'] )
+			: '';
+		$scheduled_from_time = isset( $bar['scheduled_from_time'] )
+			? sanitize_text_field( (string) $bar['scheduled_from_time'] )
+			: '';
+		$scheduled_to_date = isset( $bar['scheduled_to_date'] )
+			? sanitize_text_field( (string) $bar['scheduled_to_date'] )
+			: '';
+		$scheduled_to_time = isset( $bar['scheduled_to_time'] )
+			? sanitize_text_field( (string) $bar['scheduled_to_time'] )
+			: '';
+
+		// Back-compat: map earlier keys if new ones are missing.
+		if ( $scheduled_from_datetime === '' && $scheduled_from_date === '' && isset( $bar['life_time_from_date'] ) ) {
+			$scheduled_from_date = sanitize_text_field( (string) $bar['life_time_from_date'] );
+		}
+		if ( $scheduled_from_datetime === '' && $scheduled_from_time === '' && isset( $bar['life_time_from_time'] ) ) {
+			$scheduled_from_time = sanitize_text_field( (string) $bar['life_time_from_time'] );
+		}
+		if ( $scheduled_to_datetime === '' && $scheduled_to_date === '' && isset( $bar['life_time_to_date'] ) ) {
+			$scheduled_to_date = sanitize_text_field( (string) $bar['life_time_to_date'] );
+		}
+		if ( $scheduled_to_datetime === '' && $scheduled_to_time === '' && isset( $bar['life_time_to_time'] ) ) {
+			$scheduled_to_time = sanitize_text_field( (string) $bar['life_time_to_time'] );
+		}
+
+		// Avoid keeping stale values when scheduling is disabled.
+		if ( ! $scheduled_enabled ) {
+			$scheduled_from_datetime = '';
+			$scheduled_to_datetime   = '';
+			$scheduled_from_date     = '';
+			$scheduled_from_time     = '';
+			$scheduled_to_date       = '';
+			$scheduled_to_time       = '';
+		}
+
+		// Normalize into ISO datetime strings.
+		// If date+time were provided, combine them; otherwise use provided datetime.
+		$scheduled_from_datetime = $scheduled_from_datetime !== ''
+			? self::sanitize_iso_datetime( $scheduled_from_datetime )
+			: '';
+		$scheduled_to_datetime = $scheduled_to_datetime !== ''
+			? self::sanitize_iso_datetime( $scheduled_to_datetime )
+			: '';
+
+		$scheduled_from_date = self::sanitize_iso_date( $scheduled_from_date );
+		$scheduled_to_date   = self::sanitize_iso_date( $scheduled_to_date );
+		$scheduled_from_time = self::sanitize_iso_time( $scheduled_from_time );
+		$scheduled_to_time   = self::sanitize_iso_time( $scheduled_to_time );
+
+		if ( $scheduled_from_datetime === '' && $scheduled_from_date !== '' && $scheduled_from_time !== '' ) {
+			$scheduled_from_datetime = $scheduled_from_date . 'T' . $scheduled_from_time;
+		}
+		if ( $scheduled_to_datetime === '' && $scheduled_to_date !== '' && $scheduled_to_time !== '' ) {
+			$scheduled_to_datetime = $scheduled_to_date . 'T' . $scheduled_to_time;
+		}
+
 		// Hide on scroll behavior: controlled by `hide_on_scroll` (bool).
 		$hide_on_scroll = false;
 		if ( array_key_exists( 'hide_on_scroll', $bar ) ) {
@@ -150,6 +241,9 @@ final class Options {
 			'enabled'        => true,
 			'visible'        => $visible,
 			'admin_visibile' => $admin_visibile,
+			'scheduled_enabled'   => $scheduled_enabled,
+			'scheduled_from_datetime' => $scheduled_from_datetime,
+			'scheduled_to_datetime'   => $scheduled_to_datetime,
 			'position'       => $pos,
 			'message'        => wp_kses_post( $msg ),
 			'bg_color'       => $bg ?: '#1d2327',
@@ -275,6 +369,66 @@ final class Options {
 		$color = ltrim( $color, '#' );
 		if ( preg_match( '/^([A-Fa-f0-9]{3}){1,2}$/', $color ) ) {
 			return '#' . $color;
+		}
+		return '';
+	}
+
+	/**
+	 * @return string ISO date `YYYY-MM-DD` or empty string.
+	 */
+	private static function sanitize_iso_date( string $value ): string {
+		$value = trim( $value );
+		if ( preg_match( '/^\d{4}-\d{2}-\d{2}$/', $value ) === 1 ) {
+			return $value;
+		}
+
+		// Back-compat with datepicker defaults like `MM/DD/YYYY`.
+		if ( preg_match( '/^(\d{2})\/(\d{2})\/(\d{4})$/', $value, $m ) === 1 ) {
+			return $m[3] . '-' . $m[1] . '-' . $m[2];
+		}
+		// Back-compat with `DD/MM/YYYY`.
+		if ( preg_match( '/^(\d{2})\/(\d{2})\/(\d{4})$/', $value, $m ) === 1 ) {
+			$left = (int) $m[1];
+			$right = (int) $m[2];
+			if ( $left > 12 ) {
+				return $m[3] . '-' . sprintf( '%02d', $right ) . '-' . sprintf( '%02d', $left );
+			}
+		}
+		// Back-compat with dotted format `DD.MM.YYYY`.
+		if ( preg_match( '/^(\d{2})\.(\d{2})\.(\d{4})$/', $value, $m ) === 1 ) {
+			return $m[3] . '-' . $m[2] . '-' . $m[1];
+		}
+
+		return '';
+	}
+
+	/**
+	 * @return string ISO time `HH:MM` or empty string.
+	 */
+	private static function sanitize_iso_time( string $value ): string {
+		$value = trim( $value );
+		// Basic `HH:MM` validation.
+		if ( preg_match( '/^(?:[01]\d|2[0-3]):[0-5]\d$/', $value ) !== 1 ) {
+			// Accept `HH:MM:SS` and normalize to `HH:MM`.
+			if ( preg_match( '/^((?:[01]\d|2[0-3]):[0-5]\d):[0-5]\d$/', $value, $m ) === 1 ) {
+				return $m[1];
+			}
+			return '';
+		}
+		return $value;
+	}
+
+	/**
+	 * @return string ISO datetime `YYYY-MM-DDTHH:MM` or empty string.
+	 */
+	private static function sanitize_iso_datetime( string $value ): string {
+		$value = trim( $value );
+		if ( preg_match( '/^(\d{4}-\d{2}-\d{2})T((?:[01]\d|2[0-3]):[0-5]\d)$/', $value, $m ) === 1 ) {
+			return $m[1] . 'T' . $m[2];
+		}
+		// Accept seconds and normalize to minute precision.
+		if ( preg_match( '/^(\d{4}-\d{2}-\d{2})T((?:[01]\d|2[0-3]):[0-5]\d):[0-5]\d$/', $value, $m ) === 1 ) {
+			return $m[1] . 'T' . $m[2];
 		}
 		return '';
 	}

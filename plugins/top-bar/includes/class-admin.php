@@ -173,6 +173,61 @@ final class Admin {
 				$visible = ! empty( $bar['visible'] );
 				// Whether the bar's settings details are expanded in the admin UI.
 				$admin_visibile = ! empty( $bar['admin_visibile'] );
+				// scheduling.
+				$scheduled_enabled     = ! empty( $bar['scheduled_enabled'] );
+				$scheduled_from_datetime = isset( $bar['scheduled_from_datetime'] ) ? (string) $bar['scheduled_from_datetime'] : '';
+				$scheduled_to_datetime   = isset( $bar['scheduled_to_datetime'] ) ? (string) $bar['scheduled_to_datetime'] : '';
+
+				// Split datetime back into date + time for the admin UI inputs.
+				$scheduled_from_date = '';
+				$scheduled_from_time = '';
+				$scheduled_to_date = '';
+				$scheduled_to_time = '';
+
+				if ( preg_match( '/^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})$/', $scheduled_from_datetime, $m ) === 1 ) {
+					$scheduled_from_date = (string) $m[1];
+					$scheduled_from_time = (string) $m[2];
+				}
+				if ( preg_match( '/^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})$/', $scheduled_to_datetime, $m ) === 1 ) {
+					$scheduled_to_date = (string) $m[1];
+					$scheduled_to_time = (string) $m[2];
+				}
+
+				// Back-compat: earlier stored separate date/time keys.
+				if ( $scheduled_from_date === '' && isset( $bar['scheduled_from_date'] ) ) {
+					$scheduled_from_date = (string) $bar['scheduled_from_date'];
+				}
+				if ( $scheduled_from_time === '' && isset( $bar['scheduled_from_time'] ) ) {
+					$scheduled_from_time = (string) $bar['scheduled_from_time'];
+				}
+				if ( $scheduled_to_date === '' && isset( $bar['scheduled_to_date'] ) ) {
+					$scheduled_to_date = (string) $bar['scheduled_to_date'];
+				}
+				if ( $scheduled_to_time === '' && isset( $bar['scheduled_to_time'] ) ) {
+					$scheduled_to_time = (string) $bar['scheduled_to_time'];
+				}
+				// Back-compat: earlier stored keys.
+				if ( ! isset( $bar['scheduled_enabled'] ) && isset( $bar['life_time_enabled'] ) ) {
+					$scheduled_enabled = ! empty( $bar['life_time_enabled'] );
+				}
+				if ( $scheduled_from_date === '' && isset( $bar['life_time_from_date'] ) ) {
+					$scheduled_from_date = (string) $bar['life_time_from_date'];
+				}
+				if ( $scheduled_from_time === '' && isset( $bar['life_time_from_time'] ) ) {
+					$scheduled_from_time = (string) $bar['life_time_from_time'];
+				}
+				if ( $scheduled_to_date === '' && isset( $bar['life_time_to_date'] ) ) {
+					$scheduled_to_date = (string) $bar['life_time_to_date'];
+				}
+				if ( $scheduled_to_time === '' && isset( $bar['life_time_to_time'] ) ) {
+					$scheduled_to_time = (string) $bar['life_time_to_time'];
+				}
+				if ( $scheduled_from_datetime === '' && $scheduled_from_date !== '' && $scheduled_from_time !== '' ) {
+					$scheduled_from_datetime = $scheduled_from_date . 'T' . $scheduled_from_time;
+				}
+				if ( $scheduled_to_datetime === '' && $scheduled_to_date !== '' && $scheduled_to_time !== '' ) {
+					$scheduled_to_datetime = $scheduled_to_date . 'T' . $scheduled_to_time;
+				}
 				$pf             = Options::OPTION_BARS . '[' . (int) $i . ']';
 				$remove_url     = wp_nonce_url(
 					add_query_arg(
@@ -304,12 +359,14 @@ final class Admin {
 					<div class="top-bar-grid title">
 						<div class="item">
 							<label class="check top-bar-life-time-checkbox">
+								<input type="hidden" name="<?php echo esc_attr( $pf ); ?>[scheduled_enabled]" value="0" />
 								<input
 									type="checkbox"
 									class="top-bar-toggle-life-time"
-									name="top_bar_hide_on_scroll__ui_mock"
+									name="<?php echo esc_attr( $pf ); ?>[scheduled_enabled]"
 									data-lifetime-panel-id="<?php echo esc_attr( 'top-bar-lifetime-panel-' . (int) $i ); ?>"
 									value="1"
+									<?php checked( $scheduled_enabled ); ?>
 								>
 								<span class="lifetime-label">
 									<p class="bold lg"><?php esc_html_e( 'Scheduled', 'top-bar' ); ?></p>
@@ -324,24 +381,19 @@ final class Admin {
 					<div
 						id="<?php echo esc_attr( 'top-bar-lifetime-panel-' . (int) $i ); ?>"
 						class="top-bar-grid bg bg-amber top-bar-lifetime-panel"
-						hidden
+						<?php echo $scheduled_enabled ? '' : 'hidden'; ?>
 					>
 						<div class="item">
 							<fieldset class="clear">
 								<legend class="bold"><?php esc_html_e( 'From', 'top-bar' ); ?></legend>
 								<label>
 								<input
-									type="text"
-									id="<?php echo esc_attr( 'top-bar-datepicker1-' . (int) $i ); ?>"
-									size="30"
-									class="datepicker top-bar-life-time-date"
-									disabled
-								>
-								<input
-									type="time"
-									id="<?php echo esc_attr( 'top-bar-time-from-' . (int) $i ); ?>"
-									class="top-bar-life-time-input"
-									disabled
+									type="datetime-local"
+									id="<?php echo esc_attr( 'top-bar-datetime-from-' . (int) $i ); ?>"
+									name="<?php echo esc_attr( $pf ); ?>[scheduled_from_datetime]"
+									class="top-bar-life-time-datetime"
+									value="<?php echo esc_attr( $scheduled_from_datetime ); ?>"
+									<?php echo $scheduled_enabled ? '' : 'disabled'; ?>
 								>
 				
 							</label>
@@ -352,17 +404,12 @@ final class Admin {
 								<legend class="bold"><?php esc_html_e( 'To', 'top-bar' ); ?></legend>
 								<label>
 								<input
-									type="text"
-									id="<?php echo esc_attr( 'top-bar-datepicker2-' . (int) $i ); ?>"
-									size="30"
-									class="datepicker top-bar-life-time-date"
-									disabled
-								>
-								<input
-									type="time"
-									id="<?php echo esc_attr( 'top-bar-time-to-' . (int) $i ); ?>"
-									class="top-bar-life-time-input"
-									disabled
+									type="datetime-local"
+									id="<?php echo esc_attr( 'top-bar-datetime-to-' . (int) $i ); ?>"
+									name="<?php echo esc_attr( $pf ); ?>[scheduled_to_datetime]"
+									class="top-bar-life-time-datetime"
+									value="<?php echo esc_attr( $scheduled_to_datetime ); ?>"
+									<?php echo $scheduled_enabled ? '' : 'disabled'; ?>
 								>
 								</label>
 						</fieldset>
@@ -803,13 +850,11 @@ final class Admin {
 				function sync(){
 					var enabled = cb.checked;
 					panel.hidden = !enabled;
-					panel.querySelectorAll('input.datepicker, input[type="time"]').forEach(function(input){
+					panel.querySelectorAll('input[type="datetime-local"]').forEach(function(input){
 						input.disabled = !enabled;
 					});
 				}
 
-				// Ensure "hidden until click" behavior on first render.
-				cb.checked = false;
 				sync();
 				cb.addEventListener('change', sync);
 			});
