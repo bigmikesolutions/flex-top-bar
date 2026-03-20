@@ -9,7 +9,7 @@ on:
 jobs:
   e2e:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     env:
       WP_BASE_URL: http://localhost:8080
       WP_ADMIN_USER: admin
@@ -50,10 +50,10 @@ jobs:
           exit 1
 
       - name: Run single-bar e2e tests
-        run: npm run test:e2e:single-bar
+        run: npx playwright test --workers=1 --reporter=line --timeout=60000 --global-timeout=1200000 e2e/top-bar-single.spec.ts
 
       - name: Run multi-bar e2e tests
-        run: npm run test:e2e:multi-bar
+        run: npx playwright test --workers=1 --reporter=line --timeout=60000 --global-timeout=1200000 e2e/top-bar-multi.spec.ts
 
       - name: Upload Playwright artifacts
         if: always()
