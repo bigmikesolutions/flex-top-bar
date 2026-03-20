@@ -1,26 +1,66 @@
 import { expect, test } from '@playwright/test';
+import {
+  ensureAtLeastBars,
+  loginAndOpenTopBarSettings,
+  openPanel,
+  toDatetimeLocalValue,
+} from './helpers/topBarHelpers';
 
-const ADMIN_USER = process.env.WP_ADMIN_USER ?? 'admin';
-const ADMIN_PASS = process.env.WP_ADMIN_PASSWORD ?? 'admin';
+declare const process: { env: Record<string, string | undefined> };
 
-function toDatetimeLocalValue(date: Date): string {
-  const pad = (n: number) => String(n).padStart(2, '0');
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
-}
+test.describe('basic settings', () => {
+  test('should save bar as top and render it at top', async ({ page }) => {
+    await loginAndOpenTopBarSettings(page);
+    await ensureAtLeastBars(page, 1);
+    await openPanel(page, 0);
+
+    const id0 = await page.locator('input[name="top_bars[0][id]"]').inputValue();
+    const position0 = page.locator('select[name="top_bars[0][position]"]');
+
+    await position0.evaluate((el: HTMLSelectElement) => {
+      el.value = 'top';
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+    await page.getByRole('button', { name: 'Save Changes' }).click();
+    await expect(page.locator('#setting-error-settings_updated, .notice-success')).toBeVisible();
+
+    await page.goto('/');
+
+    const topBar = page.locator(`[data-top-bar-id="${id0}"]`);
+    await expect(topBar).toHaveCount(1);
+    await expect(topBar).toHaveAttribute('data-top-bar-position', 'top');
+    await expect(topBar).toHaveClass(/top-bar--top/);
+  });
+
+  test('should save bar as bottom and render it at bottom', async ({ page }) => {
+    await loginAndOpenTopBarSettings(page);
+    await ensureAtLeastBars(page, 1);
+    await openPanel(page, 0);
+
+    const id0 = await page.locator('input[name="top_bars[0][id]"]').inputValue();
+    const position0 = page.locator('select[name="top_bars[0][position]"]');
+
+    await position0.evaluate((el: HTMLSelectElement) => {
+      el.value = 'bottom';
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+    await page.getByRole('button', { name: 'Save Changes' }).click();
+    await expect(page.locator('#setting-error-settings_updated, .notice-success')).toBeVisible();
+
+    await page.goto('/');
+
+    const bottomBar = page.locator(`[data-top-bar-id="${id0}"]`);
+    await expect(bottomBar).toHaveCount(1);
+    await expect(bottomBar).toHaveAttribute('data-top-bar-position', 'bottom');
+    await expect(bottomBar).toHaveClass(/top-bar--bottom/);
+  });
+});
 
 test.describe('scheduled', () => {
   test('should set future schedule and make top-bar hidden on frontend', async ({ page }) => {
-    await page.goto('/wp-login.php');
-    await page.getByLabel('Username or Email Address').fill(ADMIN_USER);
-    await page.getByLabel('Password', { exact: true }).fill(ADMIN_PASS);
-    await page.getByRole('button', { name: 'Log In' }).click();
-
-    await page.goto('/wp-admin/options-general.php?page=top-bar');
-
-    const firstPanel = page.locator('.top-bar-options').first();
-    if (!(await firstPanel.isVisible())) {
-      await page.locator('.top-bar-toggle-options').first().click();
-    }
+    await loginAndOpenTopBarSettings(page);
+    await ensureAtLeastBars(page, 2);
+    await openPanel(page, 0);
 
     const scheduled = page.locator('input[name="top_bars[0][scheduled_enabled]"][type="checkbox"]');
     const barIdInput = page.locator('input[name="top_bars[0][id]"]');
@@ -55,17 +95,9 @@ test.describe('scheduled', () => {
   });
 
   test('should set schedule covering now and make top-bar visible on frontend', async ({ page }) => {
-    await page.goto('/wp-login.php');
-    await page.getByLabel('Username or Email Address').fill(ADMIN_USER);
-    await page.getByLabel('Password', { exact: true }).fill(ADMIN_PASS);
-    await page.getByRole('button', { name: 'Log In' }).click();
-
-    await page.goto('/wp-admin/options-general.php?page=top-bar');
-
-    const firstPanel = page.locator('.top-bar-options').first();
-    if (!(await firstPanel.isVisible())) {
-      await page.locator('.top-bar-toggle-options').first().click();
-    }
+    await loginAndOpenTopBarSettings(page);
+    await ensureAtLeastBars(page, 2);
+    await openPanel(page, 0);
 
     const scheduled = page.locator('input[name="top_bars[0][scheduled_enabled]"][type="checkbox"]');
     const barIdInput = page.locator('input[name="top_bars[0][id]"]');
