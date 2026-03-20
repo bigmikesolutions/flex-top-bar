@@ -3,6 +3,7 @@ import {
   ensureAtLeastBars,
   loginAndOpenTopBarSettings,
   openPanel,
+  resetToSingleBar,
   toDatetimeLocalValue,
 } from './helpers/topBarHelpers';
 
@@ -13,6 +14,7 @@ test.describe('single-bar', () => {
   test.describe('basic settings - position', () => {
     test('should save bar as top and render it at top', async ({ page }) => {
       await loginAndOpenTopBarSettings(page);
+      await resetToSingleBar(page);
       await ensureAtLeastBars(page, 1);
       await openPanel(page, 0);
 
@@ -36,6 +38,7 @@ test.describe('single-bar', () => {
 
     test('should save bar as bottom and render it at bottom', async ({ page }) => {
       await loginAndOpenTopBarSettings(page);
+      await resetToSingleBar(page);
       await ensureAtLeastBars(page, 1);
       await openPanel(page, 0);
 
@@ -61,6 +64,7 @@ test.describe('single-bar', () => {
   test.describe('basic settings - hide on scroll', () => {
     test('should save top position with hide-on-scroll and hide after window scroll', async ({ page }) => {
       await loginAndOpenTopBarSettings(page);
+      await resetToSingleBar(page);
       await ensureAtLeastBars(page, 1);
       await openPanel(page, 0);
 
@@ -99,6 +103,7 @@ test.describe('single-bar', () => {
 
     test('should save top position with hide-on-scroll disabled and stay visible after window scroll', async ({ page }) => {
       await loginAndOpenTopBarSettings(page);
+      await resetToSingleBar(page);
       await ensureAtLeastBars(page, 1);
       await openPanel(page, 0);
 
@@ -137,6 +142,7 @@ test.describe('single-bar', () => {
 
     test('should save bottom position with hide-on-scroll and hide after window scroll', async ({ page }) => {
       await loginAndOpenTopBarSettings(page);
+      await resetToSingleBar(page);
       await ensureAtLeastBars(page, 1);
       await openPanel(page, 0);
 
@@ -173,6 +179,7 @@ test.describe('single-bar', () => {
 
     test('should save bottom position with hide-on-scroll disabled and stay visible after window scroll', async ({ page }) => {
       await loginAndOpenTopBarSettings(page);
+      await resetToSingleBar(page);
       await ensureAtLeastBars(page, 1);
       await openPanel(page, 0);
 
@@ -212,6 +219,7 @@ test.describe('single-bar', () => {
   test.describe('scheduled', () => {
     test('should set future schedule and make top-bar hidden on frontend', async ({ page }) => {
       await loginAndOpenTopBarSettings(page);
+      await resetToSingleBar(page);
       await ensureAtLeastBars(page, 2);
       await openPanel(page, 0);
 
@@ -249,6 +257,7 @@ test.describe('single-bar', () => {
 
     test('should set schedule covering now and make top-bar visible on frontend', async ({ page }) => {
       await loginAndOpenTopBarSettings(page);
+      await resetToSingleBar(page);
       await ensureAtLeastBars(page, 2);
       await openPanel(page, 0);
 
