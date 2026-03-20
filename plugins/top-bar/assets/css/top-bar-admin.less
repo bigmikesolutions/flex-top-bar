@@ -402,6 +402,21 @@
         padding-left: 30px;
       }
     }
+
+    // Only the "Life time" checkbox needs custom wrapping:
+    // keep the title on the first row, move the description to the next.
+    &.top-bar-life-time-checkbox {
+      flex-wrap: wrap !important;
+      align-items: flex-start;
+
+      .lifetime-description {
+        flex: 0 0 100% !important;
+        flex-basis: 100% !important;
+        width: 100% !important;
+        display: block !important;
+        padding-left: 0 !important;
+      }
+    }
   }
 
   input[type=text] {
