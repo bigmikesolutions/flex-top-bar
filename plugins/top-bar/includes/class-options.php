@@ -188,16 +188,6 @@ final class Options {
 			$scheduled_to_time = sanitize_text_field( (string) $bar['life_time_to_time'] );
 		}
 
-		// Avoid keeping stale values when scheduling is disabled.
-		if ( ! $scheduled_enabled ) {
-			$scheduled_from_datetime = '';
-			$scheduled_to_datetime   = '';
-			$scheduled_from_date     = '';
-			$scheduled_from_time     = '';
-			$scheduled_to_date       = '';
-			$scheduled_to_time       = '';
-		}
-
 		// Normalize into ISO datetime strings.
 		// If date+time were provided, combine them; otherwise use provided datetime.
 		$scheduled_from_datetime = $scheduled_from_datetime !== ''
@@ -217,6 +207,17 @@ final class Options {
 		}
 		if ( $scheduled_to_datetime === '' && $scheduled_to_date !== '' && $scheduled_to_time !== '' ) {
 			$scheduled_to_datetime = $scheduled_to_date . 'T' . $scheduled_to_time;
+		}
+
+		// If user provided schedule values, keep scheduling enabled.
+		if ( $scheduled_from_datetime !== '' || $scheduled_to_datetime !== '' ) {
+			$scheduled_enabled = true;
+		}
+
+		// Clear values only when schedule is explicitly disabled and empty.
+		if ( ! $scheduled_enabled ) {
+			$scheduled_from_datetime = '';
+			$scheduled_to_datetime   = '';
 		}
 
 		// Hide on scroll behavior: controlled by `hide_on_scroll` (bool).

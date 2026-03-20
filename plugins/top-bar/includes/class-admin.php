@@ -342,7 +342,6 @@ final class Admin {
 									name="<?php echo esc_attr( $pf ); ?>[scheduled_from_datetime]"
 									class="top-bar-life-time-datetime"
 									value="<?php echo esc_attr( $scheduled_from_datetime ); ?>"
-									<?php echo $scheduled_enabled ? '' : 'disabled'; ?>
 								>
 				
 							</label>
@@ -358,7 +357,6 @@ final class Admin {
 									name="<?php echo esc_attr( $pf ); ?>[scheduled_to_datetime]"
 									class="top-bar-life-time-datetime"
 									value="<?php echo esc_attr( $scheduled_to_datetime ); ?>"
-									<?php echo $scheduled_enabled ? '' : 'disabled'; ?>
 								>
 								</label>
 						</fieldset>
@@ -799,9 +797,6 @@ final class Admin {
 				function sync(){
 					var enabled = cb.checked;
 					panel.hidden = !enabled;
-					panel.querySelectorAll('input[type="datetime-local"]').forEach(function(input){
-						input.disabled = !enabled;
-					});
 				}
 
 				sync();
