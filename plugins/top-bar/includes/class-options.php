@@ -304,24 +304,65 @@ final class Options {
 						return false;
 					}
 					$v = $bar['visible'] ?? null;
+					$is_visible = true;
 					if ( is_bool( $v ) ) {
-						return $v;
-					}
-					if ( is_string( $v ) ) {
+						$is_visible = $v;
+					} elseif ( is_string( $v ) ) {
 						$raw = strtolower( trim( $v ) );
 						if ( in_array( $raw, [ 'true', 'false', '0', '1' ], true ) ) {
-							return $raw === 'true' || $raw === '1';
+							$is_visible = $raw === 'true' || $raw === '1';
 						}
+					} 
+					if ( ! $is_visible ) {
+						return false;
 					}
-					// Legacy fallback.
-					if ( isset( $bar['status'] ) ) {
-						$s = strtolower( trim( (string) $bar['status'] ) );
-						return $s === 'on';
-					}
-					return true;
+
+					return self::is_bar_in_schedule_window( $bar );
 				}
 			)
 		);
+	}
+
+	/**
+	 * A bar is in schedule window when scheduling is disabled, or now is within from..to.
+	 *
+	 * @param array<string, mixed> $bar
+	 */
+	private static function is_bar_in_schedule_window( array $bar ): bool {
+		$enabled_raw = $bar['scheduled_enabled'] ?? false;
+		$enabled = false;
+		if ( is_bool( $enabled_raw ) ) {
+			$enabled = $enabled_raw;
+		} elseif ( is_string( $enabled_raw ) ) {
+			$raw = strtolower( trim( $enabled_raw ) );
+			$enabled = $raw === 'true' || $raw === '1';
+		} elseif ( is_numeric( $enabled_raw ) ) {
+			$enabled = (int) $enabled_raw === 1;
+		}
+		if ( ! $enabled ) {
+			return true;
+		}
+
+		$from_raw = isset( $bar['scheduled_from_datetime'] ) ? (string) $bar['scheduled_from_datetime'] : '';
+		$to_raw   = isset( $bar['scheduled_to_datetime'] ) ? (string) $bar['scheduled_to_datetime'] : '';
+		$from = self::sanitize_iso_datetime( $from_raw );
+		$to   = self::sanitize_iso_datetime( $to_raw );
+		if ( $from === '' || $to === '' ) {
+			return false;
+		}
+
+		try {
+			$tz = wp_timezone();
+			$now = new \DateTimeImmutable( 'now', $tz );
+			$from_dt = \DateTimeImmutable::createFromFormat( 'Y-m-d\TH:i', $from, $tz );
+			$to_dt = \DateTimeImmutable::createFromFormat( 'Y-m-d\TH:i', $to, $tz );
+			if ( false === $from_dt || false === $to_dt ) {
+				return false;
+			}
+			return $now >= $from_dt && $now <= $to_dt;
+		} catch ( \Exception $e ) {
+			return false;
+		}
 	}
 
 	// --- Back-compat: first bar (admin/legacy UI) ---
