@@ -63,15 +63,6 @@ Optional env vars for login/base URL:
 - `WP_ADMIN_USER` (default `admin`)
 - `WP_ADMIN_PASSWORD` (default `admin`)
 
-
-#### Top-bar
-
-1) Check top plugins data:
-
-```sh
-docker compose exec wordpress php -r 'require "/var/www/html/wp-load.php"; $v=get_option("top_bars"); echo json_encode($v, JSON_PRETTY_PRINT), PHP_EOL;'
-```
-
 ### Seed two demo bars (top + bottom)
 
 Creates `top_bars` in DB with exactly two entries (one `top`, one `bottom`):

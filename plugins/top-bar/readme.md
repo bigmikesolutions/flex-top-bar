@@ -30,3 +30,11 @@ composer test
 # or
 ./vendor/bin/phpunit
 ```
+
+## Local development
+
+1) Check top plugins data:
+
+```sh
+docker compose exec wordpress php -r 'require "/var/www/html/wp-load.php"; $v=get_option("top_bars"); echo json_encode($v, JSON_PRETTY_PRINT), PHP_EOL;'
+```
