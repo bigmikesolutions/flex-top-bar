@@ -7,6 +7,7 @@ const { execSync } = require('node:child_process');
 
 const ADMIN_USER = process.env.WP_ADMIN_USER ?? 'admin';
 const ADMIN_PASS = process.env.WP_ADMIN_PASSWORD ?? 'admin';
+const TOP_BAR_SETTINGS_PATH = '/wp-admin/options-general.php?page=top-bar';
 
 export const MAX_BARS = 5;
 
@@ -16,11 +17,33 @@ export function toDatetimeLocalValue(date: Date): string {
 }
 
 export async function loginAndOpenTopBarSettings(page: Page): Promise<void> {
-  await page.goto('/wp-login.php');
-  await page.getByLabel('Username or Email Address').fill(ADMIN_USER);
-  await page.getByLabel('Password', { exact: true }).fill(ADMIN_PASS);
-  await page.getByRole('button', { name: 'Log In' }).click();
-  await page.goto('/wp-admin/options-general.php?page=top-bar');
+  // Go straight to the admin settings page; WP redirects to login if needed.
+  await page.goto(TOP_BAR_SETTINGS_PATH, { waitUntil: 'domcontentloaded', timeout: 20000 });
+
+  const loginInput = page.locator('input[name="log"]');
+  const topBarRoot = page.locator('#top-bar');
+  const hasLogin = (await loginInput.count()) > 0;
+  const hasTopBar = (await topBarRoot.count()) > 0;
+
+  if (!hasLogin && !hasTopBar) {
+    // One retry in case WordPress is still finishing startup.
+    await page.waitForTimeout(2000);
+    await page.goto(TOP_BAR_SETTINGS_PATH, { waitUntil: 'domcontentloaded', timeout: 20000 });
+  }
+
+  if (await loginInput.count()) {
+    await loginInput.first().fill(ADMIN_USER);
+    await page.locator('input[name="pwd"]').first().fill(ADMIN_PASS);
+    await page.locator('input[name="wp-submit"]').first().click();
+  }
+
+  await page.goto(TOP_BAR_SETTINGS_PATH, { waitUntil: 'domcontentloaded', timeout: 20000 });
+  const finalTopBar = page.locator('#top-bar').first();
+  await finalTopBar.waitFor({ state: 'visible', timeout: 15000 }).catch(async () => {
+    const url = page.url();
+    const title = await page.title();
+    throw new Error(`Failed to open Top Bar settings. URL: ${url}, title: ${title}`);
+  });
 }
 
 export async function ensureAtLeastBars(page: Page, expectedBars: number): Promise<void> {
@@ -73,7 +96,7 @@ export async function resetToSingleBar(page: Page): Promise<void> {
   const command = `docker compose -f "${composeFile}" exec -T wordpress php -r 'require_once "/var/www/html/wp-load.php"; $bars = [[ "id" => "bar_single", "name" => "Single bar", "enabled" => true, "visible" => true, "admin_visibile" => false, "scheduled_enabled" => false, "scheduled_from_datetime" => "", "scheduled_to_datetime" => "", "position" => "top", "message" => "Single bar for tests.", "bg_color" => "#389339", "frame_color" => "", "frame_width" => 0, "hide_on_scroll" => false ]]; update_option("top_bars", $bars);'`;
 
   execSync(command, { stdio: 'pipe' });
-  await page.goto('/wp-admin/options-general.php?page=top-bar');
+  await page.goto(TOP_BAR_SETTINGS_PATH);
   await page.waitForLoadState('domcontentloaded');
 }
 
