@@ -111,9 +111,9 @@ final class Admin {
 					</div>
 
 					<div class="item nav">
-						<button type="button" class="top-bar-icons status-on"><?php esc_html_e( 'Visible On/Off', 'top-bar' ); ?></button>		
-						<button type="button" class="top-bar-icons delete"><?php esc_html_e( 'Delete', 'top-bar' ); ?></button>				
-						<button type="button" class="top-bar-icons arrow-down"><?php esc_html_e( 'Open/Close', 'top-bar' ); ?></button>		
+						<button type="button" class="top-bar-icons mask black status-on"><?php esc_html_e( 'Visible On/Off', 'top-bar' ); ?></button>		
+						<button type="button" class="top-bar-icons mask black delete"><?php esc_html_e( 'Delete', 'top-bar' ); ?></button>				
+						<button type="button" class="top-bar-icons mask black arrow-down"><?php esc_html_e( 'Open/Close', 'top-bar' ); ?></button>		
 					</div>
 				</div>
 				<div id="top-bar-options" class="active">			<!-- The active class opens the options  -->
@@ -160,19 +160,19 @@ final class Admin {
 						<div class="item">
 							<fieldset class="clear">
 								<legend class="bold"><?php esc_html_e( 'Background', 'top-bar' ); ?></legend>
-								<input type="color" id="top_bar_bg_color" name="top_bar_bg_color" value="<?php echo esc_attr( $bg_color ?: '#1d2327' ); ?>" />
+								<input type="color" id="top_bar_bg_color" name="top_bar_bg_color" value="<?php echo esc_attr( $bg_color ?: '#1d2327' ); ?>">
 							</fieldset>
 						</div>
 						<div class="item column">
 							<div class="row">
 								<label class="clear">				
-									<input type="checkbox" id="top_bar_frame_disable" name="top_bar_frame_disable" value="1" <?php checked( empty( $frame_color ) ); ?> />
+									<input type="checkbox" id="top_bar_frame_disable" name="top_bar_frame_disable" value="1" <?php checked( empty( $frame_color ) ); ?>>
 									<p class="bold clear"><?php esc_html_e( 'Border frame', 'top-bar' ); ?></p>
 								</label>
 							</div>
 							<div class="row">
 								<label class="clear">				
-									<input type="color" id="top_bar_frame_color" name="top_bar_frame_color" value="<?php echo esc_attr( $frame_color ?: '#000000' ); ?>" />
+									<input type="color" id="top_bar_frame_color" name="top_bar_frame_color" value="<?php echo esc_attr( $frame_color ?: '#000000' ); ?>">
 									<select>
 										<?php
 											for ($i = 0; $i <= 10; $i += 1) {
@@ -185,10 +185,12 @@ final class Admin {
 						</div>
 						<div class="item column">
 							<div class="row">
-								<label>		
-									<input type="hidden" name="top_bar_hide_on_scroll" value="0" />
-									<input type="checkbox" name="top_bar_hide_on_scroll" value="1" <?php checked( $hide_on_scroll ); ?> />
-									<p class="bold clear"><?php esc_html_e('Scroll behaviour', 'top-bar' ); ?></p>
+								<label class="check">		
+									<input type="hidden" name="top_bar_hide_on_scroll" value="0">
+									<input type="checkbox" name="top_bar_hide_on_scroll" value="1" <?php checked( $hide_on_scroll ); ?>>
+									<span>
+										<p class="bold clear"><?php esc_html_e('Scroll behaviour', 'top-bar' ); ?></p>
+									</span>
 								</label>
 							</div>
 							<div class="row">
@@ -267,9 +269,9 @@ final class Admin {
 							<div class="item-creator">
 								<fieldset>
 									<legend class="bold"><?php esc_html_e( 'Type', 'top-bar' ); ?></legend>
-									<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?> /> <?php esc_html_e( 'Text Editor', 'top-bar' ); ?></label>
-									<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?> /> <?php esc_html_e( 'Social media', 'top-bar' ); ?></label>
-									<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?> /> <?php esc_html_e( 'Contact data', 'top-bar' ); ?></label>
+									<label class="radio"><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?>> <span><?php esc_html_e( 'Text Editor', 'top-bar' ); ?></span></label>
+									<label  class="radio"><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?>> <span><?php esc_html_e( 'Social media', 'top-bar' ); ?></span></label>
+									<label  class="radio"><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?>> <span><?php esc_html_e( 'Contact data', 'top-bar' ); ?></span></label>
 								</fieldset>
 							</div>
 						
@@ -375,32 +377,179 @@ final class Admin {
 							<div class="item-creator">
 								<fieldset>
 									<legend class="bold"><?php esc_html_e( 'Type', 'top-bar' ); ?></legend>
-									<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?> /> <?php esc_html_e( 'Text Editor', 'top-bar' ); ?></label><br />
-									<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?> /> <?php esc_html_e( 'Social media', 'top-bar' ); ?></label><br />
-									<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?> /> <?php esc_html_e( 'Contact data', 'top-bar' ); ?></label><br />
+									<label class="radio"><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?>> <span><?php esc_html_e( 'Text Editor', 'top-bar' ); ?></span></label>
+									<label  class="radio"><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?>> <span><?php esc_html_e( 'Social media', 'top-bar' ); ?></span></label>
+									<label  class="radio"><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?>> <span><?php esc_html_e( 'Contact data', 'top-bar' ); ?></span></label>
 								</fieldset>
 							</div>							
 							<div class="item-creator lg">
 								<fieldset class="line">
 									<legend class="bold"><?php esc_html_e( 'Choose the icon appearance', 'top-bar' ); ?></legend>
-									<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?> /> Zaokraglony (tutaj podgląd ikon)</label><br />
-									<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?> /> Kwadratowy</label><br />
-									<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?> /> Sama ikona</label><br />
-								</fieldset>
-								<div class="top-bar-grid">
-									<div class="item">
-										<fieldset class="line">
-											<legend class="bold"><?php esc_html_e( 'Background color', 'top-bar' ); ?></legend>
-											<label><input type="color" id="top_bar_frame_color" name="top_bar_frame_color" value="<?php echo esc_attr( $frame_color ?: '#000000' ); ?>" /></label>
-										</fieldset>
+									<p class="xs bold">Color black:</p>
+									<label class="radio">
+										<input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?>><span></span>
+										<div class="item icons">
+											<span class="top-bar-icons social-media mask black facebook"></span>
+											<span class="top-bar-icons social-media mask black twitterX"></span>
+											<span class="top-bar-icons social-media mask black instagram"></span>
+											<span class="top-bar-icons social-media mask black linkedin"></span>
+											<span class="top-bar-icons social-media mask black google"></span>
+											<span class="top-bar-icons social-media mask black youtube"></span>
+											<span class="top-bar-icons social-media mask black apple"></span>
+											<span class="top-bar-icons social-media mask black snapchat"></span>
+											<span class="top-bar-icons social-media mask black pinterest"></span>
+											<span class="top-bar-icons social-media mask black github"></span>
+											<span class="top-bar-icons social-media mask black threads"></span>
+											<span class="top-bar-icons social-media mask black whatsapp"></span>
+											<span class="top-bar-icons social-media mask black figma"></span>
+											<span class="top-bar-icons social-media mask black dribbble"></span>
+											<span class="top-bar-icons social-media mask black reddit"></span>
+											<span class="top-bar-icons social-media mask black discord"></span>
+											<span class="top-bar-icons social-media mask black tiktok"></span>
+											<span class="top-bar-icons social-media mask black tumblr"></span>
+											<span class="top-bar-icons social-media mask black telegram"></span>
+											<span class="top-bar-icons social-media mask black bluesky"></span>
+											<span class="top-bar-icons social-media mask black vk"></span>
+											<span class="top-bar-icons social-media mask black spotify"></span>
+											<span class="top-bar-icons social-media mask black twitch"></span>
+											<span class="top-bar-icons social-media mask black messenger"></span>
+										</div>
+									</label>
+									<p class="xs bold">Color white:</p>
+									<label class="bg radio">
+										<input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?>><span></span>
+										<div class="item icons">
+											<span class="top-bar-icons social-media mask white facebook"></span>
+											<span class="top-bar-icons social-media mask white twitterX"></span>
+											<span class="top-bar-icons social-media mask white instagram"></span>
+											<span class="top-bar-icons social-media mask white linkedin"></span>
+											<span class="top-bar-icons social-media mask white google"></span>
+											<span class="top-bar-icons social-media mask white youtube"></span>
+											<span class="top-bar-icons social-media mask white apple"></span>
+											<span class="top-bar-icons social-media mask white snapchat"></span>
+											<span class="top-bar-icons social-media mask white pinterest"></span>
+											<span class="top-bar-icons social-media mask white github"></span>
+											<span class="top-bar-icons social-media mask white threads"></span>
+											<span class="top-bar-icons social-media mask white whatsapp"></span>
+											<span class="top-bar-icons social-media mask white figma"></span>
+											<span class="top-bar-icons social-media mask white dribbble"></span>
+											<span class="top-bar-icons social-media mask white reddit"></span>
+											<span class="top-bar-icons social-media mask white discord"></span>
+											<span class="top-bar-icons social-media mask white tiktok"></span>
+											<span class="top-bar-icons social-media mask white tumblr"></span>
+											<span class="top-bar-icons social-media mask white telegram"></span>
+											<span class="top-bar-icons social-media mask white bluesky"></span>
+											<span class="top-bar-icons social-media mask white vk"></span>
+											<span class="top-bar-icons social-media mask white spotify"></span>
+											<span class="top-bar-icons social-media mask white twitch"></span>
+											<span class="top-bar-icons social-media mask white messenger"></span>
+										</div>
+									</label>
+									<p class="xs bold">Color oryginal:</p>
+									<label class="radio">
+										<input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?>><span></span>
+										<div class="item icons">
+											<span class="top-bar-icons social-media no-mask facebook"></span>
+											<span class="top-bar-icons social-media no-mask twitterX"></span>
+											<span class="top-bar-icons social-media no-mask instagram"></span>
+											<span class="top-bar-icons social-media no-mask linkedin"></span>
+											<span class="top-bar-icons social-media no-mask google"></span>
+											<span class="top-bar-icons social-media no-mask youtube"></span>
+											<span class="top-bar-icons social-media no-mask apple"></span>
+											<span class="top-bar-icons social-media no-mask snapchat"></span>
+											<span class="top-bar-icons social-media no-mask pinterest"></span>
+											<span class="top-bar-icons social-media no-mask github"></span>
+											<span class="top-bar-icons social-media no-mask threads"></span>
+											<span class="top-bar-icons social-media no-mask whatsapp"></span>
+											<span class="top-bar-icons social-media no-mask figma"></span>
+											<span class="top-bar-icons social-media no-mask dribbble"></span>
+											<span class="top-bar-icons social-media no-mask reddit"></span>
+											<span class="top-bar-icons social-media no-mask discord"></span>
+											<span class="top-bar-icons social-media no-mask tiktok"></span>
+											<span class="top-bar-icons social-media no-mask tumblr"></span>
+											<span class="top-bar-icons social-media no-mask telegram"></span>
+											<span class="top-bar-icons social-media no-mask bluesky"></span>
+											<span class="top-bar-icons social-media no-mask vk"></span>
+											<span class="top-bar-icons social-media no-mask spotify"></span>
+											<span class="top-bar-icons social-media no-mask twitch"></span>
+											<span class="top-bar-icons social-media no-mask messenger"></span>
+										</div>
+									</label>
+									<p class="xs bold">Square style (set background and icon colors):</p>
+									<label class="radio">
+										<input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?>><span></span>
+										<div class="item icons">
+											<span class="top-bar-icons social-media square facebook"></span>
+											<span class="top-bar-icons social-media square twitterX"></span>
+											<span class="top-bar-icons social-media square instagram"></span>
+											<span class="top-bar-icons social-media square linkedin"></span>
+											<span class="top-bar-icons social-media square google"></span>
+											<span class="top-bar-icons social-media square youtube"></span>
+											<span class="top-bar-icons social-media square apple"></span>
+											<span class="top-bar-icons social-media square snapchat"></span>
+											<span class="top-bar-icons social-media square pinterest"></span>
+											<span class="top-bar-icons social-media square github"></span>
+											<span class="top-bar-icons social-media square threads"></span>
+											<span class="top-bar-icons social-media square whatsapp"></span>
+											<span class="top-bar-icons social-media square figma"></span>
+											<span class="top-bar-icons social-media square dribbble"></span>
+											<span class="top-bar-icons social-media square reddit"></span>
+											<span class="top-bar-icons social-media square discord"></span>
+											<span class="top-bar-icons social-media square tiktok"></span>
+											<span class="top-bar-icons social-media square tumblr"></span>
+											<span class="top-bar-icons social-media square telegram"></span>
+											<span class="top-bar-icons social-media square bluesky"></span>
+											<span class="top-bar-icons social-media square vk"></span>
+											<span class="top-bar-icons social-media square spotify"></span>
+											<span class="top-bar-icons social-media square twitch"></span>
+											<span class="top-bar-icons social-media square messenger"></span>
+										</div>
+									</label>
+									<p class="xs bold">Circle style (set background and icon colors):</p>
+									<label class="radio">
+										<input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?>><span></span>
+										<div class="item icons">
+											<span class="top-bar-icons social-media circle facebook"></span>
+											<span class="top-bar-icons social-media circle twitterX"></span>
+											<span class="top-bar-icons social-media circle instagram"></span>
+											<span class="top-bar-icons social-media circle linkedin"></span>
+											<span class="top-bar-icons social-media circle google"></span>
+											<span class="top-bar-icons social-media circle youtube"></span>
+											<span class="top-bar-icons social-media circle apple"></span>
+											<span class="top-bar-icons social-media circle snapchat"></span>
+											<span class="top-bar-icons social-media circle pinterest"></span>
+											<span class="top-bar-icons social-media circle github"></span>
+											<span class="top-bar-icons social-media circle threads"></span>
+											<span class="top-bar-icons social-media circle whatsapp"></span>
+											<span class="top-bar-icons social-media circle figma"></span>
+											<span class="top-bar-icons social-media circle dribbble"></span>
+											<span class="top-bar-icons social-media circle reddit"></span>
+											<span class="top-bar-icons social-media circle discord"></span>
+											<span class="top-bar-icons social-media circle tiktok"></span>
+											<span class="top-bar-icons social-media circle tumblr"></span>
+											<span class="top-bar-icons social-media circle telegram"></span>
+											<span class="top-bar-icons social-media circle bluesky"></span>
+											<span class="top-bar-icons social-media circle vk"></span>
+											<span class="top-bar-icons social-media circle spotify"></span>
+											<span class="top-bar-icons social-media circle twitch"></span>
+											<span class="top-bar-icons social-media circle messenger"></span>
+										</div>
+									</label>
+									</fieldset>
+									<div class="top-bar-grid">
+										<div class="item">
+											<fieldset class="line">
+												<legend class="bold"><?php esc_html_e( 'Background color', 'top-bar' ); ?></legend>
+												<label><input type="color" id="top_bar_frame_color" name="top_bar_frame_color" value="<?php echo esc_attr( $frame_color ?: '#000000' ); ?>"></label>
+											</fieldset>
+										</div>
+										<div class="item">
+											<fieldset class="line">
+												<legend class="bold"><?php esc_html_e( 'Color icon', 'top-bar' ); ?></legend>
+												<label><input type="color" id="top_bar_frame_color" name="top_bar_frame_color" value="<?php echo esc_attr( $frame_color ?: '#000000' ); ?>"></label>
+											</fieldset>
+										</div>
 									</div>
-									<div class="item">
-										<fieldset class="line">
-											<legend class="bold"><?php esc_html_e( 'Color icon', 'top-bar' ); ?></legend>
-											<label><input type="color" id="top_bar_frame_color" name="top_bar_frame_color" value="<?php echo esc_attr( $frame_color ?: '#000000' ); ?>" /></label>
-										</fieldset>
-									</div>
-								</div>
 								<fieldset class="line">
 									<legend class="bold"><?php esc_html_e( 'Add contact', 'top-bar' ); ?></legend>
 									<div class="top-bar-column-creator-grid">
@@ -410,29 +559,32 @@ final class Admin {
 										<div class="item-creator vertical">	
 
 											<select name="social_media">
-												<option value="">Select social media</option>
 												<option value="facebook">Facebook</option>
+												<option value="twitter-x">X (Twitter)</option>
 												<option value="instagram">Instagram</option>
-												<option value="x">X (Twitter)</option>
 												<option value="linkedin">LinkedIn</option>
+												<option value="google">Google</option>
 												<option value="youtube">YouTube</option>
-												<option value="tiktok">TikTok</option>
-												<option value="pinterest">Pinterest</option>
+												<option value="apple">Apple</option>
 												<option value="snapchat">Snapchat</option>
-												<option value="reddit">Reddit</option>
-												<option value="tumblr">Tumblr</option>
-												<option value="whatsapp">WhatsApp</option>
-												<option value="telegram">Telegram</option>
-												<option value="discord">Discord</option>
-												<option value="threads">Threads</option>
-												<option value="mastodon">Mastodon</option>
-												<option value="medium">Medium</option>
+												<option value="pinterest">Pinterest</option>
 												<option value="github">GitHub</option>
+												<option value="threads">Threads</option>
+												<option value="whatsapp">WhatsApp</option>
+												<option value="figma">Figma</option>
 												<option value="dribbble">Dribbble</option>
-												<option value="behance">Behance</option>
-												<option value="flickr">Flickr</option>
+												<option value="reddit">Reddit</option>
+												<option value="discord">Discord</option>
+												<option value="tiktok">TikTok</option>
+												<option value="tumblr">Tumblr</option>
+												<option value="telegram">Telegram</option>
+												<option value="bluesky">Bluesky</option>
+												<option value="vk">VK</option>
+												<option value="spotify">Spotify</option>
+												<option value="twitch">Twitch</option>
+												<option value="messenger">Messenger</option>
 											</select>
-											<input type="text" name="top_bar_position" value="Your proflie link" <?php checked( $position, 'top' ); ?> />
+											<input type="text" name="top_bar_position" value="Your proflie link" <?php checked( $position, 'top' ); ?>>
 				
 									</div>
 								</div>
@@ -466,7 +618,7 @@ final class Admin {
 												<option value="behance">Behance</option>
 												<option value="flickr">Flickr</option>
 											</select>
-											<input type="text" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?> />
+											<input type="text" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?>>
 										</fieldset>
 									</div>
 								</div>
@@ -507,29 +659,29 @@ final class Admin {
 							<div class="item-creator">
 								<fieldset>
 									<legend class="bold"><?php esc_html_e( 'Type', 'top-bar' ); ?></legend>
-									<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?> /> <?php esc_html_e( 'Text Editor', 'top-bar' ); ?></label><br />
-									<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?> /> <?php esc_html_e( 'Social media', 'top-bar' ); ?></label><br />
-									<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?> /> <?php esc_html_e( 'Contact data', 'top-bar' ); ?></label><br />
+									<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?>> <?php esc_html_e( 'Text Editor', 'top-bar' ); ?></label><br>
+									<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?>> <?php esc_html_e( 'Social media', 'top-bar' ); ?></label><br>
+									<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?>> <?php esc_html_e( 'Contact data', 'top-bar' ); ?></label><br>
 								</fieldset>
 							</div>							
 							<div class="item-creator lg">
 								<fieldset class="line">
 									<legend class="bold"><?php esc_html_e( 'Choose the icon appearance', 'top-bar' ); ?></legend>
-									<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?> /> Zaokraglony (tutaj podgląd ikon)</label><br />
-									<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?> /> Kwadratowy</label><br />
-									<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?> /> Sama ikona</label><br />
+									<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?>> Zaokraglony (tutaj podgląd ikon)</label><br>
+									<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?>> Kwadratowy</label><br>
+									<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?>> Sama ikona</label><br>
 								</fieldset>
 								<div class="top-bar-grid">
 									<div class="item">
 										<fieldset class="line">
 											<legend class="bold"><?php esc_html_e( 'Background color', 'top-bar' ); ?></legend>
-											<label><input type="color" id="top_bar_frame_color" name="top_bar_frame_color" value="<?php echo esc_attr( $frame_color ?: '#000000' ); ?>" /></label>
+											<label><input type="color" id="top_bar_frame_color" name="top_bar_frame_color" value="<?php echo esc_attr( $frame_color ?: '#000000' ); ?>"></label>
 										</fieldset>
 									</div>
 									<div class="item">
 										<fieldset class="line">
 											<legend class="bold"><?php esc_html_e( 'Color icon', 'top-bar' ); ?></legend>
-											<label><input type="color" id="top_bar_frame_color" name="top_bar_frame_color" value="<?php echo esc_attr( $frame_color ?: '#000000' ); ?>" /></label>
+											<label><input type="color" id="top_bar_frame_color" name="top_bar_frame_color" value="<?php echo esc_attr( $frame_color ?: '#000000' ); ?>"></label>
 										</fieldset>
 									</div>
 								</div>
@@ -553,7 +705,7 @@ final class Admin {
 												<option value="support">Customer support</option>
 												<option value="calendar">Appointment / Booking</option>
 										</select>
-												<input type="text" name="top_bar_position" value="Your profile link" <?php checked( $position, 'top' ); ?> />
+												<input type="text" name="top_bar_position" value="Your profile link" <?php checked( $position, 'top' ); ?>>
 				
 									</div>
 								</div>
@@ -577,7 +729,7 @@ final class Admin {
 												<option value="support">Customer support</option>
 												<option value="calendar">Appointment / Booking</option>
 										</select>
-												<input type="text" name="top_bar_position" value="Your profile link" <?php checked( $position, 'top' ); ?> />
+												<input type="text" name="top_bar_position" value="Your profile link" <?php checked( $position, 'top' ); ?>>
 										</fieldset>
 									</div>
 								</div>
@@ -634,8 +786,8 @@ final class Admin {
 						<th scope="row"><?php esc_html_e( 'Position', 'top-bar' ); ?></th>
 						<td>
 							<fieldset>
-								<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?> /> <?php esc_html_e( 'Top', 'top-bar' ); ?></label><br />
-								<label><input type="radio" name="top_bar_position" value="bottom" <?php checked( $position, 'bottom' ); ?> /> <?php esc_html_e( 'Bottom', 'top-bar' ); ?></label>
+								<label><input type="radio" name="top_bar_position" value="top" <?php checked( $position, 'top' ); ?>> <?php esc_html_e( 'Top', 'top-bar' ); ?></label><br>
+								<label><input type="radio" name="top_bar_position" value="bottom" <?php checked( $position, 'bottom' ); ?>> <?php esc_html_e( 'Bottom', 'top-bar' ); ?></label>
 							</fieldset>
 						</td>
 					</tr>
@@ -661,22 +813,22 @@ final class Admin {
 					</tr>
 					<tr>
 						<th scope="row"><label for="top_bar_bg_color"><?php esc_html_e( 'Background colour', 'top-bar' ); ?></label></th>
-						<td><input type="color" id="top_bar_bg_color" name="top_bar_bg_color" value="<?php echo esc_attr( $bg_color ?: '#1d2327' ); ?>" /></td>
+						<td><input type="color" id="top_bar_bg_color" name="top_bar_bg_color" value="<?php echo esc_attr( $bg_color ?: '#1d2327' ); ?>"></td>
 					</tr>
 					<tr>
 						<th scope="row"><label for="top_bar_frame_color"><?php esc_html_e( 'Frame (border) colour', 'top-bar' ); ?></label></th>
 						<td>
-							<input type="color" id="top_bar_frame_color" name="top_bar_frame_color" value="<?php echo esc_attr( $frame_color ?: '#000000' ); ?>" />
-							<input type="checkbox" id="top_bar_frame_disable" name="top_bar_frame_disable" value="1" <?php checked( empty( $frame_color ) ); ?> />
+							<input type="color" id="top_bar_frame_color" name="top_bar_frame_color" value="<?php echo esc_attr( $frame_color ?: '#000000' ); ?>">
+							<input type="checkbox" id="top_bar_frame_disable" name="top_bar_frame_disable" value="1" <?php checked( empty( $frame_color ) ); ?>>
 							<label for="top_bar_frame_disable"><?php esc_html_e( 'No border', 'top-bar' ); ?></label>
 						</td>
 					</tr>
 					<tr>
 						<th scope="row"><?php esc_html_e( 'Scroll behaviour', 'top-bar' ); ?></th>
 						<td>
-							<input type="hidden" name="top_bar_hide_on_scroll" value="0" />
+							<input type="hidden" name="top_bar_hide_on_scroll" value="0">
 							<label>
-								<input type="checkbox" name="top_bar_hide_on_scroll" value="1" <?php checked( $hide_on_scroll ); ?> />
+								<input type="checkbox" name="top_bar_hide_on_scroll" value="1" <?php checked( $hide_on_scroll ); ?>>
 								<?php esc_html_e( 'Hide bar when user scrolls down; show again when scrolling up', 'top-bar' ); ?>
 							</label>
 						</td>
