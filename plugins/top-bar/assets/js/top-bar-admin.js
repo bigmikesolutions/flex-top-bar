@@ -1375,5 +1375,4 @@ jQuery( document ).ready(function( $ ) {
 		}
 	});
 
-
 });

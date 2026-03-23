@@ -41,7 +41,8 @@ final class Options {
 			'scheduled_from_datetime' => '',
 			'scheduled_to_datetime'   => '',
 			'position'       => 'top',
-			'message'        => __( 'Welcome!', 'top-bar' ),
+			'effect'         => 'none',
+			'messages'       => [ __( 'Welcome!', 'top-bar' ), '' ],
 			'bg_color'       => '#1d2327',
 			'frame_color'    => '',
 			'frame_width'    => 0,
@@ -80,21 +81,7 @@ final class Options {
 		if ( get_option( self::OPTION_BARS ) !== false ) {
 			return;
 		}
-		$bar                    = self::default_bar();
-		$legacy_pos             = get_option( 'top_bar_position', 'top' );
-		$bar['position']        = in_array( $legacy_pos, [ 'top', 'bottom' ], true ) ? $legacy_pos : 'top';
-		$bar['message']         = (string) get_option( 'top_bar_message', $bar['message'] );
-		$bar['bg_color']        = self::sanitize_hex_color( (string) get_option( 'top_bar_bg_color', '#1d2327' ) ) ?: '#1d2327';
-		$bar['frame_color']     = self::sanitize_hex_color( (string) get_option( 'top_bar_frame_color', '' ) ) ?: '';
-		$bar['frame_width']     = 1;
-		$bar['hide_on_scroll']  = get_option( 'top_bar_hide_on_scroll', '0' ) === '1';
-		$legacy_status          = get_option( 'top_bar_status', 'on' );
-		$legacy_status          = in_array( $legacy_status, [ 'on', 'off' ], true ) ? $legacy_status : 'on';
-		// Legacy mapping: `top_bar_status` used to mean "visible on the site".
-		$bar['visible']         = $legacy_status === 'on';
-		$legacy_name            = get_option( 'top_bar_name', '' );
-		$bar['name']            = is_string( $legacy_name ) && $legacy_name !== '' ? $legacy_name : $bar['name'];
-		update_option( self::OPTION_BARS, [ $bar ] );
+		update_option( self::OPTION_BARS, [ self::default_bar() ] );
 	}
 
 	/**
@@ -225,7 +212,26 @@ final class Options {
 		if ( array_key_exists( 'hide_on_scroll', $bar ) ) {
 			$hide_on_scroll = ! empty( $bar['hide_on_scroll'] );
 		}
-		$msg      = isset( $bar['message'] ) && is_string( $bar['message'] ) ? $bar['message'] : $defaults['message'];
+		$effect = isset( $bar['effect'] ) ? sanitize_key( (string) $bar['effect'] ) : 'none';
+		if ( ! in_array( $effect, [ 'none', 'slider', 'fadein', 'blink' ], true ) ) {
+			$effect = 'none';
+		}
+		$default_message = isset( $defaults['messages'][0] ) && is_string( $defaults['messages'][0] ) ? $defaults['messages'][0] : __( 'Welcome!', 'top-bar' );
+		$messages = [];
+		if ( isset( $bar['messages'] ) && is_array( $bar['messages'] ) ) {
+			foreach ( $bar['messages'] as $item ) {
+				if ( is_string( $item ) ) {
+					$messages[] = wp_kses_post( $item );
+				}
+			}
+		}
+		if ( $messages === [] ) {
+			$messages = [ wp_kses_post( $default_message ), '' ];
+		}
+		if ( ! isset( $messages[0] ) || $messages[0] === '' ) {
+			$messages[0] = wp_kses_post( $default_message );
+		}
+		$messages = array_values( array_slice( $messages, 0, 10 ) );
 		$bg       = isset( $bar['bg_color'] ) ? self::sanitize_hex_color( (string) $bar['bg_color'] ) : '';
 		$frame    = isset( $bar['frame_color'] ) ? self::sanitize_hex_color( (string) $bar['frame_color'] ) : '';
 		$width    = isset( $bar['frame_width'] ) ? (int) $bar['frame_width'] : 1;
@@ -246,7 +252,8 @@ final class Options {
 			'scheduled_from_datetime' => $scheduled_from_datetime,
 			'scheduled_to_datetime'   => $scheduled_to_datetime,
 			'position'       => $pos,
-			'message'        => wp_kses_post( $msg ),
+			'effect'         => $effect,
+			'messages'       => $messages,
 			'bg_color'       => $bg ?: '#1d2327',
 			'frame_color'    => $frame,
 			'frame_width'    => $width,
@@ -375,7 +382,7 @@ final class Options {
 
 	public static function get_message(): string {
 		$bars = self::get_bars();
-		return isset( $bars[0]['message'] ) ? (string) $bars[0]['message'] : '';
+		return isset( $bars[0]['messages'][0] ) ? (string) $bars[0]['messages'][0] : '';
 	}
 
 	public static function get_bg_color(): string {

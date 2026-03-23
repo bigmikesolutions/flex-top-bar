@@ -51,7 +51,7 @@ final class Frontend {
 		$raw_id         = isset( $bar['id'] ) ? (string) $bar['id'] : 'default';
 		$html_id        = 'top-bar-' . preg_replace( '/[^a-zA-Z0-9_-]/', '', $raw_id );
 		$position       = isset( $bar['position'] ) && $bar['position'] === 'bottom' ? 'bottom' : 'top';
-		$message        = isset( $bar['message'] ) ? (string) $bar['message'] : '';
+		$message        = $this->message_for_render( $bar );
 		$classes        = [ 'top-bar', 'top-bar--' . sanitize_html_class( $position ) ];
 		$hide_on_scroll = $this->bar_hides_on_scroll( $bar );
 		?>
@@ -77,7 +77,7 @@ final class Frontend {
 			$raw_id         = isset( $bar['id'] ) ? (string) $bar['id'] : 'default';
 			$html_id        = 'top-bar-' . preg_replace( '/[^a-zA-Z0-9_-]/', '', $raw_id );
 			$position       = isset( $bar['position'] ) && $bar['position'] === 'bottom' ? 'bottom' : 'top';
-			$message        = isset( $bar['message'] ) ? (string) $bar['message'] : '';
+			$message        = $this->message_for_render( $bar );
 			$classes        = [ 'top-bar', 'top-bar--' . sanitize_html_class( $position ) ];
 			$hide_on_scroll = $this->bar_hides_on_scroll( $bar );
 			$chunks[]       = '<div id="' . esc_attr( $html_id ) . '" class="' . esc_attr( implode( ' ', $classes ) ) . '" role="banner" data-top-bar-id="' . esc_attr( $raw_id ) . '" data-top-bar-position="' . esc_attr( $position ) . '"' . ( $hide_on_scroll ? ' data-top-bar-scroll-hide="1" data-top-bar-hide-threshold="30"' : '' ) . '><div class="top-bar__inner">' . wp_kses_post( $message ) . '</div></div>';
@@ -177,5 +177,39 @@ final class Frontend {
 	 */
 	private function bar_hides_on_scroll( array $bar ): bool {
 		return ! empty( $bar['hide_on_scroll'] );
+	}
+
+	/**
+	 * @param array<string, mixed> $bar
+	 */
+	private function message_for_render( array $bar ): string {
+		$effect = isset( $bar['effect'] ) ? sanitize_key( (string) $bar['effect'] ) : 'none';
+		$messages = [];
+		if ( isset( $bar['messages'] ) && is_array( $bar['messages'] ) ) {
+			foreach ( $bar['messages'] as $item ) {
+				if ( is_string( $item ) ) {
+					$item = trim( $item );
+					if ( $item !== '' ) {
+						$messages[] = $item;
+					}
+				}
+			}
+		}
+		if ( $messages === [] ) {
+			return '';
+		}
+		if ( $effect === 'none' ) {
+			$single_line_messages = [];
+			foreach ( $messages as $item ) {
+				$plain = wp_strip_all_tags( $item );
+				$plain = preg_replace( '/\s+/', ' ', (string) $plain );
+				$plain = trim( (string) $plain );
+				if ( $plain !== '' ) {
+					$single_line_messages[] = $plain;
+				}
+			}
+			return implode( ' ', $single_line_messages );
+		}
+		return $messages[0];
 	}
 }

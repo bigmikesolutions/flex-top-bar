@@ -93,7 +93,7 @@ export async function addBars(page: Page, count: number): Promise<void> {
 export async function resetToSingleBar(page: Page): Promise<void> {
   const root = process.cwd();
   const composeFile = `${root}/docker-compose.yml`;
-  const command = `docker compose -f "${composeFile}" exec -T wordpress php -r 'require_once "/var/www/html/wp-load.php"; $bars = [[ "id" => "bar_single", "name" => "Single bar", "enabled" => true, "visible" => true, "admin_visibile" => false, "scheduled_enabled" => false, "scheduled_from_datetime" => "", "scheduled_to_datetime" => "", "position" => "top", "message" => "Single bar for tests.", "bg_color" => "#389339", "frame_color" => "", "frame_width" => 0, "hide_on_scroll" => false ]]; update_option("top_bars", $bars);'`;
+  const command = `docker compose -f "${composeFile}" exec -T wordpress php -r 'require_once "/var/www/html/wp-load.php"; $bars = [[ "id" => "bar_single", "name" => "Single bar", "enabled" => true, "visible" => true, "admin_visibile" => false, "scheduled_enabled" => false, "scheduled_from_datetime" => "", "scheduled_to_datetime" => "", "position" => "top", "effect" => "none", "messages" => ["Single bar for tests.", ""], "bg_color" => "#389339", "frame_color" => "", "frame_width" => 0, "hide_on_scroll" => false ]]; update_option("top_bars", $bars);'`;
 
   execSync(command, { stdio: 'pipe' });
   await page.goto(TOP_BAR_SETTINGS_PATH);

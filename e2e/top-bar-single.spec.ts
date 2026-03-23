@@ -299,4 +299,68 @@ test.describe('single-bar', () => {
     });
   });
 
+  test.describe('multi-message effect', () => {
+    test('should add a new message field', async ({ page }) => {
+      await loginAndOpenTopBarSettings(page);
+      await resetToSingleBar(page);
+      await ensureAtLeastBars(page, 1);
+      await openPanel(page, 0);
+
+      const messageList = page.locator('.top-bar-message-list').first();
+      const addTextButton = page.getByRole('link', { name: 'Add new text' }).first();
+      const beforeCount = await messageList.locator('.top-bar-column-creator-grid').count();
+
+      await addTextButton.click();
+      await page.waitForLoadState('domcontentloaded');
+
+      const afterCount = await messageList.locator('.top-bar-column-creator-grid').count();
+      expect(afterCount).toBe(beforeCount + 1);
+    });
+
+    test('should add a new message field and then remove it', async ({ page }) => {
+      await loginAndOpenTopBarSettings(page);
+      await resetToSingleBar(page);
+      await ensureAtLeastBars(page, 1);
+      await openPanel(page, 0);
+
+      const messageList = page.locator('.top-bar-message-list').first();
+      const addTextButton = page.getByRole('link', { name: 'Add new text' }).first();
+
+      await addTextButton.click();
+      await page.waitForLoadState('domcontentloaded');
+      await openPanel(page, 0);
+
+      const afterAddCount = await messageList.locator('.top-bar-column-creator-grid').count();
+      const removeButtons = messageList.locator('.item-creator.no a.top-bar-btn', { hasText: 'X' });
+      const removeHref = await removeButtons.last().getAttribute('href');
+      expect(removeHref).toBeTruthy();
+      await page.goto(String(removeHref));
+      await openPanel(page, 0);
+
+      const afterRemoveCount = await messageList.locator('.top-bar-column-creator-grid').count();
+      expect(afterRemoveCount).toBe(afterAddCount - 1);
+    });
+
+    test('should not allow removing first message field', async ({ page }) => {
+      await loginAndOpenTopBarSettings(page);
+      await resetToSingleBar(page);
+      await ensureAtLeastBars(page, 1);
+      await openPanel(page, 0);
+
+      const messageList = page.locator('.top-bar-message-list').first();
+
+      // Reduce to a single message field.
+      while ((await messageList.locator('.top-bar-column-creator-grid').count()) > 1) {
+        const removeButtons = messageList.locator('.item-creator.no a.top-bar-btn', { hasText: 'X' });
+        const removeHref = await removeButtons.last().getAttribute('href');
+        expect(removeHref).toBeTruthy();
+        await page.goto(String(removeHref));
+        await openPanel(page, 0);
+      }
+
+      await expect(messageList.locator('.top-bar-column-creator-grid')).toHaveCount(1);
+      await expect(messageList.locator('.item-creator.no a.top-bar-btn', { hasText: 'X' })).toHaveCount(0);
+    });
+  });
+
 });
