@@ -77,6 +77,43 @@ final class Admin {
 			exit;
 		}
 
+		if ( isset( $_GET['top_bar_remove_message'], $_GET['top_bar_message_index'] ) ) {
+			$raw_id = (string) wp_unslash( $_GET['top_bar_remove_message'] );
+			$id     = sanitize_text_field( $raw_id );
+			$index  = max( 0, (int) $_GET['top_bar_message_index'] );
+			check_admin_referer( 'top_bar_remove_message_' . $id . '_' . $index );
+
+			$bars = get_option( Options::OPTION_BARS, [] );
+			if ( ! is_array( $bars ) ) {
+				$bars = [];
+			}
+
+			foreach ( $bars as $bar_idx => $row ) {
+				if ( ! is_array( $row ) ) {
+					continue;
+				}
+				$bid = isset( $row['id'] ) ? (string) $row['id'] : '';
+				if ( $bid !== $id ) {
+					continue;
+				}
+
+				$messages = isset( $row['messages'] ) && is_array( $row['messages'] ) ? array_values( $row['messages'] ) : [];
+				if ( count( $messages ) <= 1 ) {
+					break;
+				}
+				if ( array_key_exists( $index, $messages ) ) {
+					unset( $messages[ $index ] );
+					$row['messages'] = array_values( $messages );
+					$bars[ $bar_idx ] = $row;
+				}
+				break;
+			}
+
+			update_option( Options::OPTION_BARS, array_values( $bars ) );
+			wp_safe_redirect( admin_url( 'options-general.php?page=top-bar' ) );
+			exit;
+		}
+
 		if ( isset( $_GET['top_bar_add_message'] ) ) {
 			$raw_id = isset( $_GET['top_bar_add_message'] ) ? (string) wp_unslash( $_GET['top_bar_add_message'] ) : '';
 			$id     = sanitize_text_field( $raw_id );
@@ -447,15 +484,29 @@ final class Admin {
 								
 									<div class="top-bar-message-list" data-pf="<?php echo esc_attr( $pf ); ?>" data-bar-index="<?php echo esc_attr( (string) (int) $i ); ?>">
 										<?php
-										$message_count = max( 2, count( $messages ) );
+										$message_count = max( 1, count( $messages ) );
 										for ( $mi = 0; $mi < $message_count; $mi++ ) :
 											$editor_value = isset( $messages[ $mi ] ) && is_string( $messages[ $mi ] )
 												? $messages[ $mi ]
 												: ( $mi === 0 ? __( 'Welcome!', 'top-bar' ) : '' );
+											$remove_message_url = wp_nonce_url(
+												add_query_arg(
+													[
+														'page'                   => 'top-bar',
+														'top_bar_remove_message' => $bar_id,
+														'top_bar_message_index'  => (int) $mi,
+													],
+													admin_url( 'options-general.php' )
+												),
+												'top_bar_remove_message_' . $bar_id . '_' . (int) $mi
+											);
 											?>
 											<div class="top-bar-column-creator-grid">
 												<div class="item-creator no">								
 													<p class="bold md"><?php echo esc_html( (string) ( $mi + 1 ) ); ?></p>								
+													<?php if ( $message_count > 1 ) : ?>
+														<a href="<?php echo esc_url( $remove_message_url ); ?>" class="top-bar-btn amber sm"><?php esc_html_e( 'X', 'top-bar' ); ?></a>
+													<?php endif; ?>
 												</div>
 												<div class="item-creator">						
 													<?php
