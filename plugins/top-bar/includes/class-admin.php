@@ -76,6 +76,37 @@ final class Admin {
 			wp_safe_redirect( admin_url( 'options-general.php?page=top-bar' ) );
 			exit;
 		}
+
+		if ( isset( $_GET['top_bar_add_message'] ) ) {
+			$raw_id = isset( $_GET['top_bar_add_message'] ) ? (string) wp_unslash( $_GET['top_bar_add_message'] ) : '';
+			$id     = sanitize_text_field( $raw_id );
+			check_admin_referer( 'top_bar_add_message_' . $id );
+
+			$bars = get_option( Options::OPTION_BARS, [] );
+			if ( ! is_array( $bars ) ) {
+				$bars = [];
+			}
+
+			foreach ( $bars as $idx => $row ) {
+				if ( ! is_array( $row ) ) {
+					continue;
+				}
+				$bid = isset( $row['id'] ) ? (string) $row['id'] : '';
+				if ( $bid !== $id ) {
+					continue;
+				}
+
+				$messages = isset( $row['messages'] ) && is_array( $row['messages'] ) ? array_values( $row['messages'] ) : [];
+				$messages[] = '';
+				$row['messages'] = $messages;
+				$bars[ $idx ] = $row;
+				break;
+			}
+
+			update_option( Options::OPTION_BARS, array_values( $bars ) );
+			wp_safe_redirect( admin_url( 'options-general.php?page=top-bar' ) );
+			exit;
+		}
 	}
 
 	public function add_settings_page(): void {
@@ -188,6 +219,16 @@ final class Admin {
 						admin_url( 'options-general.php' )
 					),
 					'top_bar_remove_' . $bar_id
+				);
+				$add_message_url = wp_nonce_url(
+					add_query_arg(
+						[
+							'page'                => 'top-bar',
+							'top_bar_add_message' => $bar_id,
+						],
+						admin_url( 'options-general.php' )
+					),
+					'top_bar_add_message_' . $bar_id
 				);
 				$can_remove     = count( $bars ) > Options::MIN_BARS;
 				?>
@@ -404,40 +445,42 @@ final class Admin {
 								<fieldset class="line">
 									<legend class="bold"><?php esc_html_e( 'Add multi fields', 'top-bar' ); ?></legend>
 								
-									<?php
-									$message_count = max( 2, count( $messages ) );
-									for ( $mi = 0; $mi < $message_count; $mi++ ) :
-										$editor_value = isset( $messages[ $mi ] ) && is_string( $messages[ $mi ] )
-											? $messages[ $mi ]
-											: ( $mi === 0 ? __( 'Welcome!', 'top-bar' ) : '' );
-										?>
-										<div class="top-bar-column-creator-grid">
-											<div class="item-creator no">								
-												<p class="bold md"><?php echo esc_html( (string) ( $mi + 1 ) ); ?></p>								
+									<div class="top-bar-message-list" data-pf="<?php echo esc_attr( $pf ); ?>" data-bar-index="<?php echo esc_attr( (string) (int) $i ); ?>">
+										<?php
+										$message_count = max( 2, count( $messages ) );
+										for ( $mi = 0; $mi < $message_count; $mi++ ) :
+											$editor_value = isset( $messages[ $mi ] ) && is_string( $messages[ $mi ] )
+												? $messages[ $mi ]
+												: ( $mi === 0 ? __( 'Welcome!', 'top-bar' ) : '' );
+											?>
+											<div class="top-bar-column-creator-grid">
+												<div class="item-creator no">								
+													<p class="bold md"><?php echo esc_html( (string) ( $mi + 1 ) ); ?></p>								
+												</div>
+												<div class="item-creator">						
+													<?php
+													wp_editor( $editor_value, 'top_bar_message_' . (int) $i . '_' . (int) $mi, [
+														'textarea_name' => $pf . '[messages][' . (int) $mi . ']',
+														'textarea_rows' => 2,
+														'media_buttons' => false,
+														'teeny'         => true,
+														'quicktags'     => false,
+														'tinymce'       => [
+															'resize'   => false,
+															'plugins'  => 'textcolor',
+															'toolbar1' => 'formatselect,bold,italic,forecolor,backcolor,link,unlink,bullist,numlist,blockquote,undo,redo',
+														],
+														'editor_css'    => '',
+														'dfw'           => false,
+													] );
+													?>									
+												</div>
 											</div>
-											<div class="item-creator">						
-												<?php
-												wp_editor( $editor_value, 'top_bar_message_' . (int) $i . '_' . (int) $mi, [
-													'textarea_name' => $pf . '[messages][' . (int) $mi . ']',
-													'textarea_rows' => 2,
-													'media_buttons' => false,
-													'teeny'         => true,
-													'quicktags'     => false,
-													'tinymce'       => [
-														'resize'   => false,
-														'plugins'  => 'textcolor',
-														'toolbar1' => 'formatselect,bold,italic,forecolor,backcolor,link,unlink,bullist,numlist,blockquote,undo,redo',
-													],
-													'editor_css'    => '',
-													'dfw'           => false,
-												] );
-												?>									
-											</div>
-										</div>
-									<?php endfor; ?>
+										<?php endfor; ?>
+									</div>
 								</fieldset>								
 								<div class="top-bar-row rt">
-									<a href="#" class="top-bar-btn amber sm right"><?php esc_html_e( 'Add new text', 'top-bar' ); ?></a>	
+									<a href="<?php echo esc_url( $add_message_url ); ?>" class="top-bar-btn amber sm right"><?php esc_html_e( 'Add new text', 'top-bar' ); ?></a>	
 								</div>
 							</div>
 
@@ -786,6 +829,7 @@ final class Admin {
 				sync();
 				cb.addEventListener('change', sync);
 			});
+
 		})();
 		</script>
 		</form>
