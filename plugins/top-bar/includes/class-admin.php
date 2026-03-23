@@ -158,7 +158,8 @@ final class Admin {
 				$bar_id         = isset( $bar['id'] ) ? (string) $bar['id'] : '';
 				$bar_name       = isset( $bar['name'] ) ? (string) $bar['name'] : '';
 				$position       = isset( $bar['position'] ) ? (string) $bar['position'] : 'top';
-				$message        = isset( $bar['message'] ) ? (string) $bar['message'] : __( 'Welcome!', 'top-bar' );
+				$effect         = isset( $bar['effect'] ) ? (string) $bar['effect'] : 'none';
+				$messages       = isset( $bar['messages'] ) && is_array( $bar['messages'] ) ? array_values( $bar['messages'] ) : [];
 				$bg_color       = isset( $bar['bg_color'] ) ? Options::sanitize_hex_color( (string) $bar['bg_color'] ) : '#1d2327';
 				$frame_color    = isset( $bar['frame_color'] ) ? Options::sanitize_hex_color( (string) $bar['frame_color'] ) : '';
 				$frame_width    = isset( $bar['frame_width'] ) ? (int) $bar['frame_width'] : 0;
@@ -392,65 +393,48 @@ final class Admin {
 								<fieldset class="line">
 									<legend class="bold"><?php esc_html_e( 'Effect', 'top-bar' ); ?></legend>
 									<label>
-											<select>
-												<option value="Roboto">None</option>
-												<option value="Roboto">Slider</option>
-												<option value="Open Sans">Fade In</option>
-												<option value="Lato">Blink</option>
+											<select name="<?php echo esc_attr( $pf ); ?>[effect]" aria-label="<?php esc_attr_e( 'Effect', 'top-bar' ); ?>">
+												<option value="none" <?php selected( $effect, 'none' ); ?>><?php esc_html_e( 'None', 'top-bar' ); ?></option>
+												<option value="slider" <?php selected( $effect, 'slider' ); ?>><?php esc_html_e( 'Slider', 'top-bar' ); ?></option>
+												<option value="fadein" <?php selected( $effect, 'fadein' ); ?>><?php esc_html_e( 'Fade In', 'top-bar' ); ?></option>
+												<option value="blink" <?php selected( $effect, 'blink' ); ?>><?php esc_html_e( 'Blink', 'top-bar' ); ?></option>
 											</select>
 									</label>
 								</fieldset>
 								<fieldset class="line">
 									<legend class="bold"><?php esc_html_e( 'Add multi fields', 'top-bar' ); ?></legend>
 								
-									<div class="top-bar-column-creator-grid">
-										<div class="item-creator no">								
-											<p class="bold md">1</p>								
+									<?php
+									$message_count = max( 2, count( $messages ) );
+									for ( $mi = 0; $mi < $message_count; $mi++ ) :
+										$editor_value = isset( $messages[ $mi ] ) && is_string( $messages[ $mi ] )
+											? $messages[ $mi ]
+											: ( $mi === 0 ? __( 'Welcome!', 'top-bar' ) : '' );
+										?>
+										<div class="top-bar-column-creator-grid">
+											<div class="item-creator no">								
+												<p class="bold md"><?php echo esc_html( (string) ( $mi + 1 ) ); ?></p>								
+											</div>
+											<div class="item-creator">						
+												<?php
+												wp_editor( $editor_value, 'top_bar_message_' . (int) $i . '_' . (int) $mi, [
+													'textarea_name' => $pf . '[messages][' . (int) $mi . ']',
+													'textarea_rows' => 2,
+													'media_buttons' => false,
+													'teeny'         => true,
+													'quicktags'     => false,
+													'tinymce'       => [
+														'resize'   => false,
+														'plugins'  => 'textcolor',
+														'toolbar1' => 'formatselect,bold,italic,forecolor,backcolor,link,unlink,bullist,numlist,blockquote,undo,redo',
+													],
+													'editor_css'    => '',
+													'dfw'           => false,
+												] );
+												?>									
+											</div>
 										</div>
-										<div class="item-creator">						
-											<?php
-
-												wp_editor( $message, 'top_bar_message_' . (int) $i, [
-															'textarea_name' => $pf . '[message]',
-															'textarea_rows' => 2,
-															'media_buttons' => false,
-															'teeny'         => true,
-															'quicktags'     => false,
-															'tinymce'       => [
-																'resize' => false,
-																'plugins'  => 'textcolor',
-																'toolbar1' => 'formatselect,bold,italic,forecolor,backcolor,link,unlink,bullist,numlist,blockquote,undo,redo',
-															],
-															'editor_css'    => '',
-															'dfw'           => false,
-														] );
-											?>									
-										</div>
-									</div>
-									<div class="top-bar-column-creator-grid">
-										<div class="item-creator no">								
-											<p class="bold md">2</p>								
-										</div>
-										<div class="item-creator">						
-											<?php
-
-												wp_editor( $message, 'top_bar_message12', [
-															'textarea_name' => 'top_bar_message12',
-															'textarea_rows' => 2,
-															'media_buttons' => false,
-															'teeny'         => true,
-															'quicktags'     => false,
-															'tinymce'       => [
-																'resize' => false,
-																'plugins'  => 'textcolor',
-																'toolbar1' => 'formatselect,bold,italic,forecolor,backcolor,link,unlink,bullist,numlist,blockquote,undo,redo',
-															],
-															'editor_css'    => '',
-															'dfw'           => false,
-														] );
-											?>										
-										</div>
-									</div>
+									<?php endfor; ?>
 								</fieldset>								
 								<div class="top-bar-row rt">
 									<a href="#" class="top-bar-btn amber sm right"><?php esc_html_e( 'Add new text', 'top-bar' ); ?></a>	
