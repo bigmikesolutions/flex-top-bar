@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import {
   ensureAtLeastBars,
   loginAndOpenTopBarSettings,
@@ -299,7 +299,7 @@ test.describe('single-bar', () => {
     });
   });
 
-  test.describe('multi-message effect', () => {
+  test.describe('multi-message - admin panel', () => {
     test('should add a new message field', async ({ page }) => {
       await loginAndOpenTopBarSettings(page);
       await resetToSingleBar(page);
@@ -360,6 +360,130 @@ test.describe('single-bar', () => {
 
       await expect(messageList.locator('.top-bar-column-creator-grid')).toHaveCount(1);
       await expect(messageList.locator('.item-creator.no a.top-bar-btn', { hasText: 'X' })).toHaveCount(0);
+    });
+  });
+
+  test.describe('multi-message - effects', () => {
+    async function configureEffectAndMessages(
+      page: Page,
+      effect: 'none' | 'slider' | 'fadein' | 'blink',
+      firstMessage: string,
+      secondMessage: string
+    ): Promise<string> {
+      await loginAndOpenTopBarSettings(page);
+      await resetToSingleBar(page);
+      await ensureAtLeastBars(page, 1);
+      await openPanel(page, 0);
+
+      const id0 = (await page.locator('input[name="top_bars[0][id]"]').inputValue()).trim();
+      const effect0 = page.locator('select[name="top_bars[0][effect]"]');
+      const messageList = page.locator('.top-bar-message-list').first();
+      const addTextButton = page.getByRole('link', { name: 'Add new text' }).first();
+
+      // Ensure there are two message fields.
+      while ((await messageList.locator('.top-bar-column-creator-grid').count()) < 2) {
+        await addTextButton.click();
+        await page.waitForLoadState('domcontentloaded');
+        await openPanel(page, 0);
+      }
+
+      await effect0.evaluate(
+        (el: HTMLSelectElement, value: string) => {
+          el.value = value;
+          el.dispatchEvent(new Event('change', { bubbles: true }));
+        },
+        effect
+      );
+
+      await page.evaluate(
+        ({ first, second }) => {
+          const setMessage = (index: number, value: string): void => {
+            const editorId = `top_bar_message_0_${index}`;
+            const maybeTinyMce = (window as Window & { tinymce?: any }).tinymce;
+            const editor = maybeTinyMce?.get?.(editorId);
+            if (editor) {
+              editor.setContent(value);
+            }
+
+            const textarea = document.querySelector(
+              `textarea[name="top_bars[0][messages][${index}]"]`
+            ) as HTMLTextAreaElement | null;
+            if (textarea) {
+              textarea.value = value;
+              textarea.dispatchEvent(new Event('input', { bubbles: true }));
+              textarea.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+          };
+
+          setMessage(0, first);
+          setMessage(1, second);
+
+          // Synchronize TinyMCE editors to hidden textareas before submit.
+          const maybeTinyMce = (window as Window & { tinymce?: any }).tinymce;
+          if (maybeTinyMce?.triggerSave) {
+            maybeTinyMce.triggerSave();
+          }
+        },
+        { first: firstMessage, second: secondMessage }
+      );
+
+      await page.getByRole('button', { name: 'Save Changes' }).click();
+      await expect(page.locator('#setting-error-settings_updated, .notice-success')).toBeVisible();
+
+      return id0;
+    }
+
+    test('should rotate message text on frontend when effect is slider', async ({ page }) => {
+      const messageOne = 'Slider first message';
+      const messageTwo = 'Slider second message';
+      const id0 = await configureEffectAndMessages(page, 'slider', messageOne, messageTwo);
+
+      await page.goto('/');
+      const topBarInner = page.locator(`[data-top-bar-id="${id0}"] .top-bar__inner`);
+
+      await expect(topBarInner).toContainText(messageOne);
+      await expect
+        .poll(async () => (await topBarInner.textContent())?.trim() ?? '', { timeout: 7000 })
+        .toBe(messageTwo);
+    });
+
+    test('should rotate message text on frontend when effect is fade-in', async ({ page }) => {
+      const messageOne = 'Fade first message';
+      const messageTwo = 'Fade second message';
+      const id0 = await configureEffectAndMessages(page, 'fadein', messageOne, messageTwo);
+
+      await page.goto('/');
+      const topBarInner = page.locator(`[data-top-bar-id="${id0}"] .top-bar__inner`);
+
+      await expect(topBarInner).toContainText(messageOne);
+      await expect
+        .poll(async () => (await topBarInner.textContent())?.trim() ?? '', { timeout: 7000 })
+        .toBe(messageTwo);
+    });
+
+    test('should rotate message text on frontend when effect is blink', async ({ page }) => {
+      const messageOne = 'Blink first message';
+      const messageTwo = 'Blink second message';
+      const id0 = await configureEffectAndMessages(page, 'blink', messageOne, messageTwo);
+
+      await page.goto('/');
+      const topBarInner = page.locator(`[data-top-bar-id="${id0}"] .top-bar__inner`);
+
+      await expect(topBarInner).toContainText(messageOne);
+      await expect
+        .poll(async () => (await topBarInner.textContent())?.trim() ?? '', { timeout: 7000 })
+        .toBe(messageTwo);
+    });
+
+    test('should show concatenated messages on frontend when effect is none', async ({ page }) => {
+      const messageOne = 'No effect first';
+      const messageTwo = 'No effect second';
+      const id0 = await configureEffectAndMessages(page, 'none', messageOne, messageTwo);
+
+      await page.goto('/');
+      const topBarInner = page.locator(`[data-top-bar-id="${id0}"] .top-bar__inner`);
+
+      await expect(topBarInner).toContainText(`${messageOne} ${messageTwo}`);
     });
   });
 

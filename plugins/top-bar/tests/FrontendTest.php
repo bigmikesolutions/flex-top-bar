@@ -78,6 +78,20 @@ final class FrontendTest extends TestCase {
 		$this->assertSame( '', $result );
 	}
 
+	public function test_messages_for_effect_returns_trimmed_non_empty_strings_only(): void {
+		$frontend = new Frontend();
+		$method   = new \ReflectionMethod( Frontend::class, 'messages_for_effect' );
+
+		$result = $method->invoke(
+			$frontend,
+			[
+				'messages' => [ '  First  ', '', " \n ", 'Second', 5, null, ' Third ' ],
+			]
+		);
+
+		$this->assertSame( [ 'First', 'Second', 'Third' ], $result );
+	}
+
 	public function test_bar_hides_on_scroll_respects_flag(): void {
 		$frontend = new Frontend();
 		$method   = new \ReflectionMethod( Frontend::class, 'bar_hides_on_scroll' );

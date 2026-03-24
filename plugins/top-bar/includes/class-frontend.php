@@ -52,10 +52,12 @@ final class Frontend {
 		$html_id        = 'top-bar-' . preg_replace( '/[^a-zA-Z0-9_-]/', '', $raw_id );
 		$position       = isset( $bar['position'] ) && $bar['position'] === 'bottom' ? 'bottom' : 'top';
 		$message        = $this->message_for_render( $bar );
+		$effect         = isset( $bar['effect'] ) ? sanitize_key( (string) $bar['effect'] ) : 'none';
+		$effect_messages = $this->messages_for_effect( $bar );
 		$classes        = [ 'top-bar', 'top-bar--' . sanitize_html_class( $position ) ];
 		$hide_on_scroll = $this->bar_hides_on_scroll( $bar );
 		?>
-		<div id="<?php echo esc_attr( $html_id ); ?>" class="<?php echo esc_attr( implode( ' ', $classes ) ); ?>" role="banner" data-top-bar-id="<?php echo esc_attr( $raw_id ); ?>" data-top-bar-position="<?php echo esc_attr( $position ); ?>"<?php echo $hide_on_scroll ? ' data-top-bar-scroll-hide="1" data-top-bar-hide-threshold="30"' : ''; ?>>
+		<div id="<?php echo esc_attr( $html_id ); ?>" class="<?php echo esc_attr( implode( ' ', $classes ) ); ?>" role="banner" data-top-bar-id="<?php echo esc_attr( $raw_id ); ?>" data-top-bar-position="<?php echo esc_attr( $position ); ?>" data-top-bar-effect="<?php echo esc_attr( $effect ); ?>" data-top-bar-effect-messages="<?php echo esc_attr( wp_json_encode( $effect_messages ) ); ?>"<?php echo $hide_on_scroll ? ' data-top-bar-scroll-hide="1" data-top-bar-hide-threshold="30"' : ''; ?>>
 			<div class="top-bar__inner">
 				<?php echo wp_kses_post( $message ); ?>
 			</div>
@@ -78,9 +80,11 @@ final class Frontend {
 			$html_id        = 'top-bar-' . preg_replace( '/[^a-zA-Z0-9_-]/', '', $raw_id );
 			$position       = isset( $bar['position'] ) && $bar['position'] === 'bottom' ? 'bottom' : 'top';
 			$message        = $this->message_for_render( $bar );
+			$effect         = isset( $bar['effect'] ) ? sanitize_key( (string) $bar['effect'] ) : 'none';
+			$effect_messages = $this->messages_for_effect( $bar );
 			$classes        = [ 'top-bar', 'top-bar--' . sanitize_html_class( $position ) ];
 			$hide_on_scroll = $this->bar_hides_on_scroll( $bar );
-			$chunks[]       = '<div id="' . esc_attr( $html_id ) . '" class="' . esc_attr( implode( ' ', $classes ) ) . '" role="banner" data-top-bar-id="' . esc_attr( $raw_id ) . '" data-top-bar-position="' . esc_attr( $position ) . '"' . ( $hide_on_scroll ? ' data-top-bar-scroll-hide="1" data-top-bar-hide-threshold="30"' : '' ) . '><div class="top-bar__inner">' . wp_kses_post( $message ) . '</div></div>';
+			$chunks[]       = '<div id="' . esc_attr( $html_id ) . '" class="' . esc_attr( implode( ' ', $classes ) ) . '" role="banner" data-top-bar-id="' . esc_attr( $raw_id ) . '" data-top-bar-position="' . esc_attr( $position ) . '" data-top-bar-effect="' . esc_attr( $effect ) . '" data-top-bar-effect-messages="' . esc_attr( wp_json_encode( $effect_messages ) ) . '"' . ( $hide_on_scroll ? ' data-top-bar-scroll-hide="1" data-top-bar-hide-threshold="30"' : '' ) . '><div class="top-bar__inner">' . wp_kses_post( $message ) . '</div></div>';
 		}
 		$bar_html = implode( '', $chunks );
 		?>
@@ -119,6 +123,24 @@ final class Frontend {
 			wp_enqueue_script(
 				'top-bar-scroll-hide',
 				plugin_dir_url( TOP_BAR_PLUGIN_FILE ) . 'assets/js/top-bar.js',
+				[],
+				TOP_BAR_VERSION,
+				true
+			);
+		}
+		$needs_effect_rotation = false;
+		foreach ( $bars as $bar ) {
+			$effect = isset( $bar['effect'] ) ? sanitize_key( (string) $bar['effect'] ) : 'none';
+			$messages = $this->messages_for_effect( $bar );
+			if ( in_array( $effect, [ 'slider', 'fadein', 'blink' ], true ) && count( $messages ) > 1 ) {
+				$needs_effect_rotation = true;
+				break;
+			}
+		}
+		if ( $needs_effect_rotation ) {
+			wp_enqueue_script(
+				'top-bar-effects',
+				plugin_dir_url( TOP_BAR_PLUGIN_FILE ) . 'assets/js/top-bar-effects.js',
 				[],
 				TOP_BAR_VERSION,
 				true
@@ -211,5 +233,24 @@ final class Frontend {
 			return implode( ' ', $single_line_messages );
 		}
 		return $messages[0];
+	}
+
+	/**
+	 * @param array<string, mixed> $bar
+	 * @return list<string>
+	 */
+	private function messages_for_effect( array $bar ): array {
+		$messages = [];
+		if ( isset( $bar['messages'] ) && is_array( $bar['messages'] ) ) {
+			foreach ( $bar['messages'] as $item ) {
+				if ( is_string( $item ) ) {
+					$item = trim( $item );
+					if ( $item !== '' ) {
+						$messages[] = $item;
+					}
+				}
+			}
+		}
+		return array_values( $messages );
 	}
 }
