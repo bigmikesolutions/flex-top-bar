@@ -228,6 +228,7 @@ final class Admin {
 				$position       = isset( $bar['position'] ) ? (string) $bar['position'] : 'top';
 				$effect         = isset( $bar['effect'] ) ? (string) $bar['effect'] : 'none';
 				$messages       = isset( $bar['messages'] ) && is_array( $bar['messages'] ) ? array_values( $bar['messages'] ) : [];
+				$messages_mobile_visible = ! array_key_exists( 'messages_mobile_visible', $bar ) || ! empty( $bar['messages_mobile_visible'] );
 				$bg_color       = isset( $bar['bg_color'] ) ? Options::sanitize_hex_color( (string) $bar['bg_color'] ) : '#1d2327';
 				$frame_color    = isset( $bar['frame_color'] ) ? Options::sanitize_hex_color( (string) $bar['frame_color'] ) : '';
 				$frame_width    = isset( $bar['frame_width'] ) ? (int) $bar['frame_width'] : 0;
@@ -551,9 +552,9 @@ final class Admin {
 								</fieldset>
 								<fieldset>
 									<legend class="bold"><?php esc_html_e( 'Visible on the mobile', 'top-bar' ); ?></legend>
-									<select name="top_bar_visible_mobile_ui" aria-label="<?php esc_attr_e( 'Visible on the mobile', 'top-bar' ); ?>">
-										<option value="on"><?php esc_html_e( 'On', 'top-bar' ); ?></option>
-										<option value="off"><?php esc_html_e( 'Off', 'top-bar' ); ?></option>
+									<select name="<?php echo esc_attr( $pf ); ?>[messages_mobile_visible]" aria-label="<?php esc_attr_e( 'Visible on the mobile', 'top-bar' ); ?>">
+										<option value="1" <?php selected( $messages_mobile_visible, true ); ?>><?php esc_html_e( 'On', 'top-bar' ); ?></option>
+										<option value="0" <?php selected( $messages_mobile_visible, false ); ?>><?php esc_html_e( 'Off', 'top-bar' ); ?></option>
 									</select>			
 								</fieldset>							
 							</div>

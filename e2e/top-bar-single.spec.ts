@@ -487,4 +487,52 @@ test.describe('single-bar', () => {
     });
   });
 
+  test.describe('multi-message - mobile support', () => {
+    async function configureMessagesMobileVisibility(page: Page, mobileVisible: boolean): Promise<string> {
+      await loginAndOpenTopBarSettings(page);
+      await resetToSingleBar(page);
+      await ensureAtLeastBars(page, 1);
+      await openPanel(page, 0);
+
+      const id0 = (await page.locator('input[name="top_bars[0][id]"]').inputValue()).trim();
+      const mobileVisibility = page.locator('select[name="top_bars[0][messages_mobile_visible]"]');
+
+      await mobileVisibility.evaluate(
+        (el: HTMLSelectElement, value: string) => {
+          el.value = value;
+          el.dispatchEvent(new Event('change', { bubbles: true }));
+        },
+        mobileVisible ? '1' : '0'
+      );
+
+      await page.getByRole('button', { name: 'Save Changes' }).click();
+      await expect(page.locator('#setting-error-settings_updated, .notice-success')).toBeVisible();
+
+      return id0;
+    }
+
+    test('should show top bar on mobile when mobile visibility is enabled', async ({ page }) => {
+      const id0 = await configureMessagesMobileVisibility(page, true);
+
+      await page.setViewportSize({ width: 375, height: 812 });
+      await page.goto('/');
+
+      const topBar = page.locator(`[data-top-bar-id="${id0}"]`);
+      await expect(topBar).toHaveCount(1);
+      await expect(topBar).toBeVisible();
+    });
+
+    test('should hide top bar on mobile when mobile visibility is disabled', async ({ page }) => {
+      const id0 = await configureMessagesMobileVisibility(page, false);
+
+      await page.setViewportSize({ width: 375, height: 812 });
+      await page.goto('/');
+
+      const topBar = page.locator(`[data-top-bar-id="${id0}"]`);
+      await expect(topBar).toHaveCount(1);
+      await expect(topBar).toHaveAttribute('data-top-bar-mobile-visible', '0');
+      await expect(topBar).toBeHidden();
+    });
+  });
+
 });

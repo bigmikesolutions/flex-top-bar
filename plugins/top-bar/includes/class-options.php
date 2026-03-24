@@ -32,7 +32,6 @@ final class Options {
 		return [
 			'id'             => self::new_bar_id(),
 			'name'           => __( 'Top Bar', 'top-bar' ),
-			'enabled'        => true,
 			'visible'        => true,
 			// Whether the bar's options details are expanded in the admin panel.
 			'admin_visibile' => true,
@@ -43,6 +42,7 @@ final class Options {
 			'position'       => 'top',
 			'effect'         => 'none',
 			'messages'       => [ __( 'Welcome!', 'top-bar' ), '' ],
+			'messages_mobile_visible' => true,
 			'bg_color'       => '#1d2327',
 			'frame_color'    => '',
 			'frame_width'    => 0,
@@ -232,6 +232,16 @@ final class Options {
 			$messages[0] = wp_kses_post( $default_message );
 		}
 		$messages = array_values( array_slice( $messages, 0, 10 ) );
+		$messages_mobile_visible = true;
+		if ( array_key_exists( 'messages_mobile_visible', $bar ) ) {
+			$mmv = $bar['messages_mobile_visible'];
+			if ( is_bool( $mmv ) ) {
+				$messages_mobile_visible = $mmv;
+			} else {
+				$raw = is_string( $mmv ) ? strtolower( trim( $mmv ) ) : '';
+				$messages_mobile_visible = $raw === 'true' || $raw === '1' || $raw === 'on' || $mmv === 1;
+			}
+		}
 		$bg       = isset( $bar['bg_color'] ) ? self::sanitize_hex_color( (string) $bar['bg_color'] ) : '';
 		$frame    = isset( $bar['frame_color'] ) ? self::sanitize_hex_color( (string) $bar['frame_color'] ) : '';
 		$width    = isset( $bar['frame_width'] ) ? (int) $bar['frame_width'] : 1;
@@ -245,7 +255,6 @@ final class Options {
 		return [
 			'id'             => sanitize_key( (string) $id ) ?: (string) $id,
 			'name'           => isset( $bar['name'] ) ? sanitize_text_field( (string) $bar['name'] ) : $defaults['name'],
-			'enabled'        => true,
 			'visible'        => $visible,
 			'admin_visibile' => $admin_visibile,
 			'scheduled_enabled'   => $scheduled_enabled,
@@ -254,6 +263,7 @@ final class Options {
 			'position'       => $pos,
 			'effect'         => $effect,
 			'messages'       => $messages,
+			'messages_mobile_visible' => $messages_mobile_visible,
 			'bg_color'       => $bg ?: '#1d2327',
 			'frame_color'    => $frame,
 			'frame_width'    => $width,

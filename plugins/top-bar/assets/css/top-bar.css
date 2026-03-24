@@ -39,6 +39,10 @@ body.admin-bar .top-bar--top {
 	body.admin-bar .top-bar--top {
 		top: 46px;
 	}
+
+	.top-bar--messages-mobile-hidden {
+		display: none !important;
+	}
 }
 
 /* Optional transitions when using .is-hidden (JS uses display:none by default) */

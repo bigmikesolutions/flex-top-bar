@@ -57,6 +57,22 @@ final class OptionsScheduleTest extends TestCase {
 		$this->assertTrue( (bool) $bar['scheduled_enabled'] );
 	}
 
+	public function test_normalize_bar_saves_messages_mobile_visible_as_boolean(): void {
+		$off_bar = Options::normalize_bar(
+			[
+				'messages_mobile_visible' => '0',
+			]
+		);
+		$on_bar = Options::normalize_bar(
+			[
+				'messages_mobile_visible' => '1',
+			]
+		);
+
+		$this->assertFalse( $off_bar['messages_mobile_visible'] );
+		$this->assertTrue( $on_bar['messages_mobile_visible'] );
+	}
+
 	public function test_schedule_window_disabled_returns_true(): void {
 		$method = new \ReflectionMethod( Options::class, 'is_bar_in_schedule_window' );
 

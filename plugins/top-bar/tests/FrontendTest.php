@@ -115,6 +115,7 @@ final class FrontendTest extends TestCase {
 					'position'              => 'top',
 					'effect'                => 'none',
 					'messages'              => [ 'Hello from test', '' ],
+					'messages_mobile_visible' => true,
 					'bg_color'              => '#123456',
 					'frame_color'           => '',
 					'frame_width'           => 0,
@@ -130,6 +131,40 @@ final class FrontendTest extends TestCase {
 
 		$this->assertStringContainsString( 'data-top-bar-id="bar_one"', $html );
 		$this->assertStringContainsString( 'Hello from test', $html );
+		$this->assertStringContainsString( 'data-top-bar-mobile-visible="1"', $html );
+	}
+
+	public function test_maybe_render_bar_outputs_mobile_hidden_class_when_messages_mobile_visibility_disabled(): void {
+		update_option(
+			Options::OPTION_BARS,
+			[
+				[
+					'id'                    => 'bar_mobile_hidden',
+					'name'                  => 'Bar mobile hidden',
+					'visible'               => true,
+					'admin_visibile'        => true,
+					'scheduled_enabled'     => false,
+					'scheduled_from_datetime' => '',
+					'scheduled_to_datetime' => '',
+					'position'              => 'top',
+					'effect'                => 'none',
+					'messages'              => [ 'Hidden on mobile', '' ],
+					'messages_mobile_visible' => false,
+					'bg_color'              => '#123456',
+					'frame_color'           => '',
+					'frame_width'           => 0,
+					'hide_on_scroll'        => false,
+				],
+			]
+		);
+
+		$frontend = new Frontend();
+		ob_start();
+		$frontend->maybe_render_bar();
+		$html = (string) ob_get_clean();
+
+		$this->assertStringContainsString( 'data-top-bar-mobile-visible="0"', $html );
+		$this->assertStringContainsString( 'top-bar--messages-mobile-hidden', $html );
 	}
 
 	public function test_maybe_output_bar_fallback_outputs_script_when_active_bar_exists(): void {
@@ -147,6 +182,7 @@ final class FrontendTest extends TestCase {
 					'position'              => 'bottom',
 					'effect'                => 'none',
 					'messages'              => [ 'Fallback text', '' ],
+					'messages_mobile_visible' => false,
 					'bg_color'              => '#123456',
 					'frame_color'           => '',
 					'frame_width'           => 0,
@@ -162,6 +198,8 @@ final class FrontendTest extends TestCase {
 
 		$this->assertStringContainsString( 'id="top-bar-fallback"', $html );
 		$this->assertStringContainsString( 'bar_fallback', $html );
+		$this->assertStringContainsString( 'data-top-bar-mobile-visible=\"0\"', $html );
+		$this->assertStringContainsString( 'top-bar--messages-mobile-hidden', $html );
 	}
 
 	public function test_enqueue_assets_enqueues_style_script_and_inline_rules(): void {
@@ -197,6 +235,7 @@ final class FrontendTest extends TestCase {
 		$this->assertContains( 'top-bar-scroll-hide', $script_handles );
 		$this->assertNotEmpty( $GLOBALS['wp_test_inline_styles'] );
 		$this->assertStringContainsString( '#top-bar-bar_assets', $GLOBALS['wp_test_inline_styles'][0]['data'] );
+		$this->assertStringContainsString( '.top-bar--messages-mobile-hidden', $GLOBALS['wp_test_inline_styles'][0]['data'] );
 	}
 
 	public function test_enqueue_admin_assets_enqueues_admin_resources(): void {

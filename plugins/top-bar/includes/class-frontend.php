@@ -55,9 +55,13 @@ final class Frontend {
 		$effect         = isset( $bar['effect'] ) ? sanitize_key( (string) $bar['effect'] ) : 'none';
 		$effect_messages = $this->messages_for_effect( $bar );
 		$classes        = [ 'top-bar', 'top-bar--' . sanitize_html_class( $position ) ];
+		$mobile_visible = $this->messages_visible_on_mobile( $bar );
+		if ( ! $mobile_visible ) {
+			$classes[] = 'top-bar--messages-mobile-hidden';
+		}
 		$hide_on_scroll = $this->bar_hides_on_scroll( $bar );
 		?>
-		<div id="<?php echo esc_attr( $html_id ); ?>" class="<?php echo esc_attr( implode( ' ', $classes ) ); ?>" role="banner" data-top-bar-id="<?php echo esc_attr( $raw_id ); ?>" data-top-bar-position="<?php echo esc_attr( $position ); ?>" data-top-bar-effect="<?php echo esc_attr( $effect ); ?>" data-top-bar-effect-messages="<?php echo esc_attr( wp_json_encode( $effect_messages ) ); ?>"<?php echo $hide_on_scroll ? ' data-top-bar-scroll-hide="1" data-top-bar-hide-threshold="30"' : ''; ?>>
+		<div id="<?php echo esc_attr( $html_id ); ?>" class="<?php echo esc_attr( implode( ' ', $classes ) ); ?>" role="banner" data-top-bar-id="<?php echo esc_attr( $raw_id ); ?>" data-top-bar-position="<?php echo esc_attr( $position ); ?>" data-top-bar-effect="<?php echo esc_attr( $effect ); ?>" data-top-bar-effect-messages="<?php echo esc_attr( wp_json_encode( $effect_messages ) ); ?>" data-top-bar-mobile-visible="<?php echo $mobile_visible ? '1' : '0'; ?>"<?php echo $hide_on_scroll ? ' data-top-bar-scroll-hide="1" data-top-bar-hide-threshold="30"' : ''; ?>>
 			<div class="top-bar__inner">
 				<?php echo wp_kses_post( $message ); ?>
 			</div>
@@ -83,8 +87,12 @@ final class Frontend {
 			$effect         = isset( $bar['effect'] ) ? sanitize_key( (string) $bar['effect'] ) : 'none';
 			$effect_messages = $this->messages_for_effect( $bar );
 			$classes        = [ 'top-bar', 'top-bar--' . sanitize_html_class( $position ) ];
+			$mobile_visible = $this->messages_visible_on_mobile( $bar );
+			if ( ! $mobile_visible ) {
+				$classes[] = 'top-bar--messages-mobile-hidden';
+			}
 			$hide_on_scroll = $this->bar_hides_on_scroll( $bar );
-			$chunks[]       = '<div id="' . esc_attr( $html_id ) . '" class="' . esc_attr( implode( ' ', $classes ) ) . '" role="banner" data-top-bar-id="' . esc_attr( $raw_id ) . '" data-top-bar-position="' . esc_attr( $position ) . '" data-top-bar-effect="' . esc_attr( $effect ) . '" data-top-bar-effect-messages="' . esc_attr( wp_json_encode( $effect_messages ) ) . '"' . ( $hide_on_scroll ? ' data-top-bar-scroll-hide="1" data-top-bar-hide-threshold="30"' : '' ) . '><div class="top-bar__inner">' . wp_kses_post( $message ) . '</div></div>';
+			$chunks[]       = '<div id="' . esc_attr( $html_id ) . '" class="' . esc_attr( implode( ' ', $classes ) ) . '" role="banner" data-top-bar-id="' . esc_attr( $raw_id ) . '" data-top-bar-position="' . esc_attr( $position ) . '" data-top-bar-effect="' . esc_attr( $effect ) . '" data-top-bar-effect-messages="' . esc_attr( wp_json_encode( $effect_messages ) ) . '" data-top-bar-mobile-visible="' . ( $mobile_visible ? '1' : '0' ) . '"' . ( $hide_on_scroll ? ' data-top-bar-scroll-hide="1" data-top-bar-hide-threshold="30"' : '' ) . '><div class="top-bar__inner">' . wp_kses_post( $message ) . '</div></div>';
 		}
 		$bar_html = implode( '', $chunks );
 		?>
@@ -168,6 +176,7 @@ final class Frontend {
 				$rules[] = $sel . ' { border: ' . $width . 'px solid ' . esc_attr( $frame ) . '; }';
 			}
 		}
+		$rules[] = '@media screen and (max-width: 782px) { .top-bar--messages-mobile-hidden { display: none !important; } }';
 		wp_add_inline_style( 'top-bar', implode( ' ', $rules ) );
 	}
 
@@ -199,6 +208,13 @@ final class Frontend {
 	 */
 	private function bar_hides_on_scroll( array $bar ): bool {
 		return ! empty( $bar['hide_on_scroll'] );
+	}
+
+	/**
+	 * @param array<string, mixed> $bar
+	 */
+	private function messages_visible_on_mobile( array $bar ): bool {
+		return ! array_key_exists( 'messages_mobile_visible', $bar ) || ! empty( $bar['messages_mobile_visible'] );
 	}
 
 	/**
