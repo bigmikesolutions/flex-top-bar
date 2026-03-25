@@ -10,6 +10,7 @@ vi.mock('@wordpress/i18n', () => ({
 describe('TextColumnEditor', () => {
   const defaultProps = {
     barId: 'bar_1',
+    columnId: 'col_1',
     effect: 'none' as Bar['effect'],
     messages: ['Hello', 'World'],
     maxMessages: 4,
@@ -19,10 +20,10 @@ describe('TextColumnEditor', () => {
     vi.clearAllMocks()
   })
 
-  it('renders effect select with bar id', () => {
+  it('renders effect select with bar and column id', () => {
     const wrapper = mount(TextColumnEditor, { props: defaultProps })
 
-    const select = wrapper.find('#effect_bar_1')
+    const select = wrapper.find('#effect_bar_1_col_1')
     expect(select.exists()).toBe(true)
     expect((select.element as HTMLSelectElement).value).toBe('none')
   })
@@ -39,7 +40,7 @@ describe('TextColumnEditor', () => {
   it('emits update with effect when effect changes', async () => {
     const wrapper = mount(TextColumnEditor, { props: defaultProps })
 
-    await wrapper.find('#effect_bar_1').setValue('slider')
+    await wrapper.find('#effect_bar_1_col_1').setValue('slider')
 
     expect(wrapper.emitted('update')).toBeTruthy()
     expect(wrapper.emitted('update')?.[0]).toEqual([{ effect: 'slider' }])

@@ -200,39 +200,58 @@
       <!-- Column creator -->
       <div class="top-bar-grid">
         <div id="top-bar-column-creator">
-          <div class="top-bar-column-creator-grid">
-            <!-- Column number -->
+          <div
+            v-for="(column, columnIndex) in localBar.columns"
+            :key="column.id"
+            class="top-bar-column-creator-grid"
+          >
             <div class="item-creator no">
-              <p class="bold lg">1</p>
+              <p class="bold lg">{{ columnIndex + 1 }}</p>
+              <button
+                v-if="localBar.columns.length > 1"
+                type="button"
+                class="top-bar-btn amber sm"
+                :title="__('Remove column', 'top-bar')"
+                @click="removeColumn(columnIndex)"
+              >
+                X
+              </button>
             </div>
 
             <ColumnTypeSelector />
 
             <TextColumnEditor
               :bar-id="bar.id"
-              :effect="localBar.effect"
-              :messages="localBar.messages"
+              :column-id="column.id"
+              :effect="column.effect"
+              :messages="column.messages"
               :max-messages="maxMessages"
-              @patch="onMessagesPatch"
+              @patch="onColumnMessagesPatch(columnIndex, $event)"
               @commit="saveChanges"
-              @update="onTextColumnPersist"
+              @update="onTextColumnPersist(columnIndex, $event)"
             />
 
-            <!-- Size + Mobile visibility -->
             <div class="item item-creator">
               <fieldset>
                 <legend class="bold">{{ __('Size column', 'top-bar') }}</legend>
                 <label>
-                  <select disabled>
-                    <option>100%</option>
+                  <select
+                    :value="column.size_percent"
+                    @change="onColumnSizeChange(columnIndex, $event)"
+                  >
+                    <option :value="25">25%</option>
+                    <option :value="33">33%</option>
+                    <option :value="50">50%</option>
+                    <option :value="75">75%</option>
+                    <option :value="100">100%</option>
                   </select>
                 </label>
               </fieldset>
               <fieldset>
                 <legend class="bold">{{ __('Visible on the mobile', 'top-bar') }}</legend>
                 <select
-                  v-model="localBar.messages_mobile_visible"
-                  @change="saveChanges"
+                  :value="column.messages_mobile_visible"
+                  @change="onColumnMobileVisibleChange(columnIndex, $event)"
                 >
                   <option :value="true">{{ __('On', 'top-bar') }}</option>
                   <option :value="false">{{ __('Off', 'top-bar') }}</option>
@@ -242,16 +261,82 @@
           </div>
         </div>
       </div>
+
+      <div class="top-bar-grid">
+        <div class="item">
+          <button
+            type="button"
+            class="top-bar-btn mint sm"
+            :disabled="localBar.columns.length >= maxColumns"
+            @click="addColumn"
+          >
+            {{ __('Add column', 'top-bar') }}
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import type { Bar } from '@/types'
+import type { Bar, BarColumn } from '@/types'
 import { __ } from '@wordpress/i18n'
 import ColumnTypeSelector from './ColumnTypeSelector.vue'
 import TextColumnEditor from './TextColumnEditor.vue'
+
+const maxColumns = 4
+
+function newColumnId(): string {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return `col_${crypto.randomUUID().replace(/-/g, '')}`
+  }
+  return `col_${String(Date.now())}_${Math.random().toString(36).slice(2, 10)}`
+}
+
+function legacyFromColumns(cols: BarColumn[]) {
+  const first = cols[0]
+  if (!first) {
+    return {}
+  }
+  return {
+    effect: first.effect,
+    messages: first.messages,
+    messages_mobile_visible: first.messages_mobile_visible,
+  }
+}
+
+function defaultSizePercentForColumnCount(count: number): BarColumn['size_percent'] {
+  if (count <= 1) {
+    return 100
+  }
+  if (count === 2) {
+    return 50
+  }
+  if (count === 3) {
+    return 33
+  }
+  return 25
+}
+
+function withColumns(bar: Bar): Bar {
+  if (bar.columns?.length) {
+    return bar
+  }
+  return {
+    ...bar,
+    columns: [
+      {
+        id: newColumnId(),
+        type: 'text',
+        effect: bar.effect,
+        messages: bar.messages,
+        size_percent: 100,
+        messages_mobile_visible: bar.messages_mobile_visible,
+      },
+    ],
+  }
+}
 
 const props = defineProps<{
   bar: Bar
@@ -265,22 +350,81 @@ const emit = defineEmits<{
   delete: [id: string]
 }>()
 
-const localBar = ref<Bar>({ ...props.bar })
+const localBar = ref<Bar>(withColumns({ ...props.bar }))
 const isExpanded = ref(props.bar.admin_visibile !== false)
 
 // Only sync from props on initial load, not on every update
 // This prevents the form from resetting while user is typing
 watch(() => props.bar.id, () => {
-  localBar.value = { ...props.bar }
+  localBar.value = withColumns({ ...props.bar })
   isExpanded.value = props.bar.admin_visibile !== false
 })
 
-function onMessagesPatch(updates: Partial<Pick<Bar, 'messages'>>) {
-  localBar.value = { ...localBar.value, ...updates }
+function onColumnMessagesPatch(
+  columnIndex: number,
+  updates: Partial<Pick<BarColumn, 'messages'>>,
+) {
+  const cols = [...localBar.value.columns]
+  cols[columnIndex] = { ...cols[columnIndex], ...updates }
+  localBar.value = { ...localBar.value, columns: cols, ...legacyFromColumns(cols) }
 }
 
-function onTextColumnPersist(updates: Partial<Pick<Bar, 'effect' | 'messages'>>) {
-  localBar.value = { ...localBar.value, ...updates }
+function onTextColumnPersist(
+  columnIndex: number,
+  updates: Partial<Pick<BarColumn, 'effect' | 'messages'>>,
+) {
+  const cols = [...localBar.value.columns]
+  cols[columnIndex] = { ...cols[columnIndex], ...updates }
+  localBar.value = { ...localBar.value, columns: cols, ...legacyFromColumns(cols) }
+  saveChanges()
+}
+
+function onColumnSizeChange(columnIndex: number, e: Event) {
+  const value = Number((e.target as HTMLSelectElement).value) as BarColumn['size_percent']
+  const cols = [...localBar.value.columns]
+  cols[columnIndex] = { ...cols[columnIndex], size_percent: value }
+  localBar.value = { ...localBar.value, columns: cols, ...legacyFromColumns(cols) }
+  saveChanges()
+}
+
+function onColumnMobileVisibleChange(columnIndex: number, e: Event) {
+  const raw = (e.target as HTMLSelectElement).value
+  const visible = raw === 'true'
+  const cols = [...localBar.value.columns]
+  cols[columnIndex] = { ...cols[columnIndex], messages_mobile_visible: visible }
+  localBar.value = { ...localBar.value, columns: cols, ...legacyFromColumns(cols) }
+  saveChanges()
+}
+
+function addColumn() {
+  if (localBar.value.columns.length >= maxColumns) {
+    return
+  }
+  const cols = [...localBar.value.columns]
+  const nextCount = cols.length + 1
+  const share = defaultSizePercentForColumnCount(nextCount)
+  const resized = cols.map(c => ({ ...c, size_percent: share }))
+  resized.push({
+    id: newColumnId(),
+    type: 'text',
+    effect: 'none',
+    messages: ['', ''],
+    size_percent: share,
+    messages_mobile_visible: true,
+  })
+  localBar.value = { ...localBar.value, columns: resized, ...legacyFromColumns(resized) }
+  saveChanges()
+}
+
+function removeColumn(columnIndex: number) {
+  if (localBar.value.columns.length <= 1) {
+    return
+  }
+  const cols = localBar.value.columns.filter((_, i) => i !== columnIndex)
+  if (cols.length === 1) {
+    cols[0] = { ...cols[0], size_percent: 100 }
+  }
+  localBar.value = { ...localBar.value, columns: cols, ...legacyFromColumns(cols) }
   saveChanges()
 }
 

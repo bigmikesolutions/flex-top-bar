@@ -4,7 +4,7 @@
       <legend class="bold">{{ __('Effect', 'top-bar') }}</legend>
       <label>
         <select
-          :id="`effect_${barId}`"
+          :id="`effect_${barId}_${columnId}`"
           :value="effect"
           @change="onEffectChange"
         >
@@ -63,19 +63,20 @@
 
 <script setup lang="ts">
 import { __ } from '@wordpress/i18n'
-import type { Bar } from '@/types'
+import type { Bar, BarColumn } from '@/types'
 
 const props = defineProps<{
   barId: string
+  columnId: string
   effect: Bar['effect']
   messages: string[]
   maxMessages: number
 }>()
 
 const emit = defineEmits<{
-  patch: [updates: Partial<Pick<Bar, 'messages'>>]
+  patch: [updates: Partial<Pick<BarColumn, 'messages'>>]
   commit: []
-  update: [updates: Partial<Pick<Bar, 'effect' | 'messages'>>]
+  update: [updates: Partial<Pick<BarColumn, 'effect' | 'messages'>>]
 }>()
 
 function onEffectChange(e: Event) {

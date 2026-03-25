@@ -445,9 +445,9 @@ test.describe('single-bar', () => {
 
       const topBar = page.locator(`[data-top-bar-id="${id0}"]`);
       await expect(topBar).toHaveCount(1);
-      // Frontend uses class top-bar--messages-mobile-hidden (no data-top-bar-mobile-visible attr).
-      await expect(topBar).toHaveClass(/top-bar--messages-mobile-hidden/);
-      await expect(topBar).toBeHidden();
+      const column = topBar.locator('.top-bar__column').first();
+      await expect(column).toHaveClass(/top-bar__column--mobile-hidden/);
+      await expect(column).toBeHidden();
     });
   });
 

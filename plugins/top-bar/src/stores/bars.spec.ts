@@ -26,6 +26,16 @@ describe('useBarsStore', () => {
     effect: 'none',
     messages: ['Hello'],
     messages_mobile_visible: true,
+    columns: [
+      {
+        id: 'col_1',
+        type: 'text',
+        effect: 'none',
+        messages: ['Hello'],
+        size_percent: 100,
+        messages_mobile_visible: true,
+      },
+    ],
     bg_color: '#123456',
     frame_color: '',
     frame_width: 0,

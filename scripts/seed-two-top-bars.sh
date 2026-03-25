@@ -19,6 +19,16 @@ $bars = [
 		"effect" => "fadein",
 		"messages" => ["Top bar.", "Top position.", "Scroll is off."],
 		"messages_mobile_visible" => true,
+		"columns" => [
+			[
+				"id" => "col_bar_top",
+				"type" => "text",
+				"effect" => "fadein",
+				"messages" => ["Top bar.", "Top position.", "Scroll is off."],
+				"size_percent" => 100,
+				"messages_mobile_visible" => true,
+			],
+		],
 		"bg_color" => "#389339",
 		"frame_color" => "",
 		"frame_width" => 0,
@@ -36,6 +46,16 @@ $bars = [
 		"effect" => "blink",
 		"messages" => ["Bottom bar.", "Hidden on scroll."],
 		"messages_mobile_visible" => false,
+		"columns" => [
+			[
+				"id" => "col_bar_bottom",
+				"type" => "text",
+				"effect" => "blink",
+				"messages" => ["Bottom bar.", "Hidden on scroll."],
+				"size_percent" => 100,
+				"messages_mobile_visible" => false,
+			],
+		],
 		"bg_color" => "#3b3893",
 		"frame_color" => "#FFFF00",
 		"frame_width" => 4,
@@ -53,6 +73,16 @@ $bars = [
 		"effect" => "none",
 		"messages" => ["Bottom bar. scheduled"],
 		"messages_mobile_visible" => false,
+		"columns" => [
+			[
+				"id" => "col_bar_scheduled",
+				"type" => "text",
+				"effect" => "none",
+				"messages" => ["Bottom bar. scheduled"],
+				"size_percent" => 100,
+				"messages_mobile_visible" => false,
+			],
+		],
 		"bg_color" => "#ff4500",
 		"frame_color" => "#FFFF00",
 		"frame_width" => 0,
@@ -61,6 +91,6 @@ $bars = [
 ];
 
 update_option("top_bars", $bars);
-echo "Seeded option top_bars with 2 bars (top + bottom)." . PHP_EOL;
+echo "Seeded option top_bars with 3 bars (top, bottom, scheduled)." . PHP_EOL;
 '
 

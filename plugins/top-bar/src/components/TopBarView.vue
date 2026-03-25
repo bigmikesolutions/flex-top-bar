@@ -4,25 +4,35 @@
       v-for="bar in visibleBars"
       :key="bar.id"
       :id="`top-bar-${bar.id}`"
-      :class="['top-bar', `top-bar--${bar.position}`, { 'top-bar--messages-mobile-hidden': !bar.messages_mobile_visible }]"
+      :class="['top-bar', `top-bar--${bar.position}`]"
       :style="getBarStyles(bar)"
       role="banner"
       :data-top-bar-id="bar.id"
       :data-top-bar-position="bar.position"
-      :data-top-bar-effect="bar.effect"
+      :data-top-bar-effect="getColumns(bar)[0]?.effect ?? bar.effect"
       :data-top-bar-hide-on-scroll="bar.hide_on_scroll ? '1' : '0'"
     >
       <div class="top-bar__inner">
-        <template v-if="bar.effect === 'none'">
-          {{ getConcatenatedMessage(bar) }}
-        </template>
-        <template v-else>
-          <transition :name="getTransitionName(bar.effect)" mode="out-in">
-            <div :key="currentMessageIndex[bar.id] || 0">
-              {{ getCurrentMessage(bar) }}
-            </div>
-          </transition>
-        </template>
+        <div class="top-bar__columns">
+          <div
+            v-for="column in getColumns(bar)"
+            :key="column.id"
+            class="top-bar__column"
+            :class="{ 'top-bar__column--mobile-hidden': !column.messages_mobile_visible }"
+            :style="getColumnStyle(column)"
+          >
+            <template v-if="column.effect === 'none'">
+              {{ getConcatenatedMessage(column) }}
+            </template>
+            <template v-else>
+              <transition :name="getTransitionName(column.effect)" mode="out-in">
+                <div :key="currentMessageIndex[columnKey(bar.id, column.id)] ?? 0">
+                  {{ getCurrentMessage(bar, column) }}
+                </div>
+              </transition>
+            </template>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -30,13 +40,40 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import type { Bar } from '@/types'
+import type { Bar, BarColumn } from '@/types'
 
 const bars = ref<Bar[]>([])
 const currentMessageIndex = ref<Record<string, number>>({})
 const intervals = ref<Record<string, number>>({})
 const lastScrollY = ref(0)
 const hideScrollBars = ref<Set<string>>(new Set())
+
+function getColumns(bar: Bar): BarColumn[] {
+  if (bar.columns?.length) {
+    return bar.columns
+  }
+  return [
+    {
+      id: `${bar.id}-legacy`,
+      type: 'text',
+      effect: bar.effect,
+      messages: bar.messages,
+      size_percent: 100,
+      messages_mobile_visible: bar.messages_mobile_visible,
+    },
+  ]
+}
+
+function columnKey(barId: string, columnId: string): string {
+  return `${barId}:${columnId}`
+}
+
+function getColumnStyle(column: BarColumn) {
+  return {
+    flex: `0 0 ${column.size_percent}%`,
+    maxWidth: `${column.size_percent}%`,
+  }
+}
 
 // Fetch bars from public API endpoint
 async function fetchBars() {
@@ -49,12 +86,15 @@ async function fetchBars() {
     }
     bars.value = await response.json()
 
-    // Initialize message rotation for bars with effects
+    // Initialize message rotation for columns with effects
     bars.value.forEach(bar => {
-      if (bar.effect !== 'none' && bar.messages.length > 1) {
-        currentMessageIndex.value[bar.id] = 0
-        startMessageRotation(bar)
-      }
+      getColumns(bar).forEach(column => {
+        if (column.effect !== 'none' && column.messages.length > 1) {
+          const key = columnKey(bar.id, column.id)
+          currentMessageIndex.value[key] = 0
+          startMessageRotation(bar, column)
+        }
+      })
     })
   } catch (error) {
     console.error('Failed to load top bars:', error)
@@ -99,13 +139,14 @@ function getBarStyles(bar: Bar) {
   return styles
 }
 
-function getConcatenatedMessage(bar: Bar): string {
-  return bar.messages.filter(m => m.trim()).join(' ')
+function getConcatenatedMessage(column: BarColumn): string {
+  return column.messages.filter(m => m.trim()).join(' ')
 }
 
-function getCurrentMessage(bar: Bar): string {
-  const index = currentMessageIndex.value[bar.id] || 0
-  return bar.messages[index] || ''
+function getCurrentMessage(bar: Bar, column: BarColumn): string {
+  const key = columnKey(bar.id, column.id)
+  const index = currentMessageIndex.value[key] || 0
+  return column.messages[index] || ''
 }
 
 function getTransitionName(effect: string): string {
@@ -115,19 +156,20 @@ function getTransitionName(effect: string): string {
   return 'fade'
 }
 
-function startMessageRotation(bar: Bar) {
+function startMessageRotation(bar: Bar, column: BarColumn) {
   const duration = 5000 // 5 seconds per message
+  const key = columnKey(bar.id, column.id)
 
-  intervals.value[bar.id] = window.setInterval(() => {
-    const current = currentMessageIndex.value[bar.id] || 0
-    currentMessageIndex.value[bar.id] = (current + 1) % bar.messages.length
+  intervals.value[key] = window.setInterval(() => {
+    const current = currentMessageIndex.value[key] || 0
+    currentMessageIndex.value[key] = (current + 1) % column.messages.length
   }, duration)
 }
 
-function stopMessageRotation(barId: string) {
-  if (intervals.value[barId]) {
-    clearInterval(intervals.value[barId])
-    delete intervals.value[barId]
+function stopMessageRotation(key: string) {
+  if (intervals.value[key]) {
+    clearInterval(intervals.value[key])
+    delete intervals.value[key]
   }
 }
 
@@ -155,7 +197,6 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  // Clean up intervals
   Object.keys(intervals.value).forEach(stopMessageRotation)
   window.removeEventListener('scroll', handleScroll)
 })
@@ -203,10 +244,25 @@ body.admin-bar .top-bar--top {
 .top-bar__inner {
   max-width: 1200px;
   margin: 0 auto;
-  text-align: center;
   color: #fff;
   font-size: 16px;
   line-height: 1.5;
+}
+
+.top-bar__columns {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+  gap: 0;
+  text-align: center;
+}
+
+.top-bar__column {
+  box-sizing: border-box;
+  padding: 0 8px;
+  min-width: 0;
 }
 
 /* Transitions for effects */
@@ -243,9 +299,9 @@ body.admin-bar .top-bar--top {
   opacity: 0;
 }
 
-/* Mobile visibility */
+/* Mobile visibility per column */
 @media screen and (max-width: 782px) {
-  .top-bar--messages-mobile-hidden {
+  .top-bar__column--mobile-hidden {
     display: none !important;
   }
 }

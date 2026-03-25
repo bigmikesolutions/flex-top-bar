@@ -20,12 +20,29 @@ final class Options {
 	/** At least one bar configuration must exist. */
 	public const MIN_BARS = 1;
 
+	/** Maximum layout columns per bar (admin + frontend). */
+	public const MAX_COLUMNS = 4;
+
 	public static function new_bar_id(): string {
 		return 'bar_' . wp_generate_password( 8, false, false );
 	}
 
+	public static function new_column_id(): string {
+		return 'col_' . wp_generate_password( 8, false, false );
+	}
+
 	/** @return array<string, mixed> */
 	public static function default_bar(): array {
+		$welcome = __( 'Welcome!', 'top-bar' );
+		$column  = [
+			'id'                      => self::new_column_id(),
+			'type'                    => 'text',
+			'effect'                  => 'none',
+			'messages'                => [ $welcome, '' ],
+			'size_percent'            => 100,
+			'messages_mobile_visible' => true,
+		];
+
 		return [
 			'id'             => self::new_bar_id(),
 			'name'           => __( 'Top Bar', 'top-bar' ),
@@ -33,17 +50,18 @@ final class Options {
 			// Whether the bar's options details are expanded in the admin panel.
 			'admin_visibile' => true,
 			// Scheduling in admin panel.
-			'scheduled_enabled'   => false,
+			'scheduled_enabled'       => false,
 			'scheduled_from_datetime' => '',
 			'scheduled_to_datetime'   => '',
-			'position'       => 'top',
-			'effect'         => 'none',
-			'messages'       => [ __( 'Welcome!', 'top-bar' ), '' ],
-			'messages_mobile_visible' => true,
-			'bg_color'       => '#1d2327',
-			'frame_color'    => '',
-			'frame_width'    => 0,
-			'hide_on_scroll' => false,
+			'position'                => 'top',
+			'effect'                  => $column['effect'],
+			'messages'                => $column['messages'],
+			'messages_mobile_visible' => $column['messages_mobile_visible'],
+			'columns'                 => [ $column ],
+			'bg_color'                => '#1d2327',
+			'frame_color'             => '',
+			'frame_width'             => 0,
+			'hide_on_scroll'          => false,
 		];
 	}
 
@@ -133,22 +151,99 @@ final class Options {
 			$frame = '';
 		}
 
+		$max_messages = FeatureFlags::instance()->max_messages();
+
+		$columns = [];
+		if ( isset( $bar['columns'] ) && is_array( $bar['columns'] ) && $bar['columns'] !== [] ) {
+			foreach ( $bar['columns'] as $col ) {
+				if ( is_array( $col ) ) {
+					$columns[] = self::normalize_column_row( $col, $default_message, $max_messages );
+				}
+			}
+			$columns = array_values( array_slice( $columns, 0, self::MAX_COLUMNS ) );
+		}
+
+		if ( $columns === [] ) {
+			$columns = [
+				self::normalize_column_row(
+					[
+						'effect'                  => $effect,
+						'messages'                => $messages,
+						'messages_mobile_visible' => $messages_mobile_visible,
+						'size_percent'            => 100,
+					],
+					$default_message,
+					$max_messages
+				),
+			];
+		}
+
+		$first = $columns[0];
+
 		return [
-			'id'             => sanitize_key( (string) $id ) ?: (string) $id,
-			'name'           => isset( $bar['name'] ) ? sanitize_text_field( (string) $bar['name'] ) : $defaults['name'],
-			'visible'        => $visible,
-			'admin_visibile' => $admin_visibile,
-			'scheduled_enabled'   => $scheduled_enabled,
+			'id'                      => sanitize_key( (string) $id ) ?: (string) $id,
+			'name'                    => isset( $bar['name'] ) ? sanitize_text_field( (string) $bar['name'] ) : $defaults['name'],
+			'visible'                 => $visible,
+			'admin_visibile'          => $admin_visibile,
+			'scheduled_enabled'       => $scheduled_enabled,
 			'scheduled_from_datetime' => $scheduled_from_datetime,
 			'scheduled_to_datetime'   => $scheduled_to_datetime,
-			'position'       => $pos,
-			'effect'         => $effect,
-			'messages'       => $messages,
-			'messages_mobile_visible' => $messages_mobile_visible,
-			'bg_color'       => $bg ?: '#1d2327',
-			'frame_color'    => $frame,
-			'frame_width'    => $width,
-			'hide_on_scroll' => $hide_on_scroll,
+			'position'                => $pos,
+			'effect'                  => $first['effect'],
+			'messages'                => $first['messages'],
+			'messages_mobile_visible' => $first['messages_mobile_visible'],
+			'columns'                 => $columns,
+			'bg_color'                => $bg ?: '#1d2327',
+			'frame_color'             => $frame,
+			'frame_width'             => $width,
+			'hide_on_scroll'          => $hide_on_scroll,
+		];
+	}
+
+	/**
+	 * @param array<string, mixed> $col
+	 * @return array<string, mixed>
+	 */
+	private static function normalize_column_row( array $col, string $default_message, int $max_messages ): array {
+		$id = isset( $col['id'] ) && is_string( $col['id'] ) && $col['id'] !== ''
+			? sanitize_key( (string) $col['id'] )
+			: self::new_column_id();
+
+		$effect = isset( $col['effect'] ) ? sanitize_key( (string) $col['effect'] ) : 'none';
+		if ( ! in_array( $effect, [ 'none', 'slider', 'fadein', 'blink' ], true ) ) {
+			$effect = 'none';
+		}
+
+		$messages = [];
+		if ( isset( $col['messages'] ) && is_array( $col['messages'] ) ) {
+			foreach ( $col['messages'] as $item ) {
+				if ( is_string( $item ) ) {
+					$messages[] = wp_kses_post( $item );
+				}
+			}
+		}
+		if ( $messages === [] ) {
+			$messages = [ wp_kses_post( $default_message ), '' ];
+		}
+		if ( ! isset( $messages[0] ) || $messages[0] === '' ) {
+			$messages[0] = wp_kses_post( $default_message );
+		}
+		$messages = array_values( array_slice( $messages, 0, $max_messages ) );
+
+		$size_percent = isset( $col['size_percent'] ) ? (int) $col['size_percent'] : 100;
+		if ( ! in_array( $size_percent, [ 25, 33, 50, 75, 100 ], true ) ) {
+			$size_percent = 100;
+		}
+
+		$mmv = self::parse_bool( $col['messages_mobile_visible'] ?? true, true );
+
+		return [
+			'id'                      => $id,
+			'type'                    => 'text',
+			'effect'                  => $effect,
+			'messages'                => $messages,
+			'size_percent'            => $size_percent,
+			'messages_mobile_visible' => $mmv,
 		];
 	}
 
