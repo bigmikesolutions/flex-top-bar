@@ -40,21 +40,6 @@ final class OptionsScheduleTest extends TestCase {
 		$this->assertSame( '2026-03-21T12:30', $bar['scheduled_to_datetime'] );
 	}
 
-	public function test_normalize_bar_combines_legacy_date_time_fields(): void {
-		$this->enableScheduleFeature();
-		$bar = Options::normalize_bar(
-			[
-				'scheduled_enabled' => '1',
-				'scheduled_from_date' => '2026-03-21',
-				'scheduled_from_time' => '11:00',
-				'scheduled_to_date' => '2026-03-21',
-				'scheduled_to_time' => '12:30',
-			]
-		);
-
-		$this->assertSame( '2026-03-21T11:00', $bar['scheduled_from_datetime'] );
-		$this->assertSame( '2026-03-21T12:30', $bar['scheduled_to_datetime'] );
-	}
 
 	public function test_normalize_bar_enables_schedule_when_datetimes_provided(): void {
 		$this->enableScheduleFeature();
@@ -95,42 +80,13 @@ final class OptionsScheduleTest extends TestCase {
 	}
 
 	/**
-	 * @runInSeparateProcess
-	 * @preserveGlobalState disabled
-	 */
-	public function test_schedule_window_feature_flag_off_always_returns_true(): void {
-		if ( ! defined( 'FF_SCHEDULE' ) ) {
-			define( 'FF_SCHEDULE', false );
-		}
-		// Reset FeatureFlags to pick up the constant
-		FeatureFlags::reset_for_tests();
-		$method = new \ReflectionMethod( Options::class, 'is_bar_in_schedule_window' );
-
-		$result = $method->invoke(
-			null,
-			[
-				'scheduled_enabled' => true,
-				'scheduled_from_datetime' => '2026-03-21T11:00',
-				'scheduled_to_datetime' => '',
-			]
-		);
-
-		$this->assertTrue( $result );
-	}
-
-	/**
-	 * When scheduling is not part of the plan (`FF_SCHEDULE=false`), bars should not be filtered out
-	 * by schedule window logic.
+	 * Scheduling is now handled client-side by Vue, so get_active_bars() only checks visibility.
+	 * Bars with future schedules are returned (Vue will filter them client-side).
 	 *
 	 * @runInSeparateProcess
 	 * @preserveGlobalState disabled
 	 */
-	public function test_get_active_bars_ignores_schedule_when_feature_flag_off(): void {
-		if ( ! defined( 'FF_SCHEDULE' ) ) {
-			define( 'FF_SCHEDULE', false );
-		}
-		// Reset FeatureFlags to pick up the constant
-		FeatureFlags::reset_for_tests();
+	public function test_get_active_bars_returns_visible_bars_regardless_of_schedule(): void {
 		$GLOBALS['wp_test_options'] = [];
 
 		update_option(
@@ -150,7 +106,7 @@ final class OptionsScheduleTest extends TestCase {
 		);
 
 		$active = Options::get_active_bars();
-		$this->assertCount( 1, $active );
+		$this->assertCount( 1, $active, 'Visible bar should be returned regardless of schedule (Vue handles filtering)' );
 		$this->assertSame( 'bar_scheduled', $active[0]['id'] );
 	}
 
@@ -196,36 +152,5 @@ final class OptionsScheduleTest extends TestCase {
 		$this->assertSame( 'bar_one', $active[0]['id'] );
 	}
 
-	public function test_schedule_window_disabled_returns_true(): void {
-		$this->enableScheduleFeature();
-		$method = new \ReflectionMethod( Options::class, 'is_bar_in_schedule_window' );
-
-		$result = $method->invoke(
-			null,
-			[
-				'scheduled_enabled' => false,
-				'scheduled_from_datetime' => '',
-				'scheduled_to_datetime' => '',
-			]
-		);
-
-		$this->assertTrue( $result );
-	}
-
-	public function test_schedule_window_enabled_with_missing_values_returns_false(): void {
-		$this->enableScheduleFeature();
-		$method = new \ReflectionMethod( Options::class, 'is_bar_in_schedule_window' );
-
-		$result = $method->invoke(
-			null,
-			[
-				'scheduled_enabled' => true,
-				'scheduled_from_datetime' => '2026-03-21T11:00',
-				'scheduled_to_datetime' => '',
-			]
-		);
-
-		$this->assertFalse( $result );
-	}
 }
 

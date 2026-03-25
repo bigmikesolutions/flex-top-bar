@@ -75,6 +75,12 @@ if ( ! function_exists( 'add_action' ) ) {
 	}
 }
 
+if ( ! function_exists( 'add_filter' ) ) {
+	function add_filter( string $hook, $callback, int $priority = 10, int $accepted_args = 1 ): void {
+		$GLOBALS['wp_test_filters'][] = [ 'hook' => $hook, 'callback' => $callback, 'priority' => $priority ];
+	}
+}
+
 if ( ! function_exists( 'apply_filters' ) ) {
 	function apply_filters( string $hook, $value ) {
 		if ( isset( $GLOBALS['wp_test_filters'][ $hook ] ) && is_callable( $GLOBALS['wp_test_filters'][ $hook ] ) ) {
@@ -138,8 +144,18 @@ if ( ! function_exists( 'wp_strip_all_tags' ) ) {
 	}
 }
 
+if ( ! function_exists( 'is_admin' ) ) {
+	function is_admin(): bool {
+		return false;
+	}
+}
+
 if ( ! defined( 'TOP_BAR_PLUGIN_FILE' ) ) {
 	define( 'TOP_BAR_PLUGIN_FILE', dirname( __DIR__ ) . '/top-bar.php' );
+}
+
+if ( ! defined( 'TOP_BAR_PLUGIN_DIR' ) ) {
+	define( 'TOP_BAR_PLUGIN_DIR', dirname( __DIR__ ) . '/' );
 }
 
 if ( ! defined( 'TOP_BAR_VERSION' ) ) {

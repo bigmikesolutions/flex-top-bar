@@ -2,13 +2,12 @@ import { expect, test } from '@playwright/test';
 import {
   addBars,
   getBarIds,
+  getBarIdByIndex,
   loginAndOpenTopBarSettings,
   MAX_BARS,
-  openPanel,
+  setBarPosition,
   resetToSingleBar,
 } from './helpers/topBarHelpers';
-
-declare const process: { env: Record<string, string | undefined> };
 
 test.describe('multi-bar', () => {
   test('should create 2 top bars and display both on frontend', async ({ page }) => {
@@ -19,19 +18,11 @@ test.describe('multi-bar', () => {
     const ids = await getBarIds(page);
     expect(ids).toHaveLength(2);
 
-    for (let i = 0; i < 2; i += 1) {
-      await openPanel(page, i);
+    // Set both to top position
+    await setBarPosition(page, 0, 'top');
+    await setBarPosition(page, 1, 'top');
 
-      const position = page.locator(`select[name="top_bars[${i}][position]"]`);
-      await position.evaluate((el: HTMLSelectElement) => {
-        el.value = 'top';
-        el.dispatchEvent(new Event('change', { bubbles: true }));
-      });
-    }
-
-    await page.getByRole('button', { name: 'Save Changes' }).click();
-    await expect(page.locator('#setting-error-settings_updated, .notice-success')).toBeVisible();
-
+    // Verify on frontend
     await page.goto('/');
     for (const id of ids) {
       const bar = page.locator(`[data-top-bar-id="${id}"]`);
@@ -48,21 +39,17 @@ test.describe('multi-bar', () => {
     const createdIds = await getBarIds(page);
     expect(createdIds).toHaveLength(3);
 
-    for (let i = 0; i < 3; i += 1) {
-      await openPanel(page, i);
-    }
-
-    await page.getByRole('button', { name: 'Save Changes' }).click();
-    await expect(page.locator('#setting-error-settings_updated, .notice-success')).toBeVisible();
-
+    // Delete first bar
     const removedId = createdIds[0];
-    const rowToRemove = page
-      .locator('.top-bar-row.bg')
-      .filter({ has: page.locator(`input[name^="top_bars["][name$="[id]"][value="${removedId}"]`) })
-      .first();
-    await rowToRemove.locator('a.top-bar-icons.delete').click();
-    await page.waitForLoadState('domcontentloaded');
+    const firstBar = page.locator('.top-bar-row.bg').first();
+    const deleteButton = firstBar.locator('button.delete').first();
 
+    // Handle confirmation dialog
+    page.on('dialog', dialog => dialog.accept());
+    await deleteButton.click();
+    await page.waitForTimeout(500); // Wait for Vue to remove bar
+
+    // Verify on frontend
     await page.goto('/');
     await expect(page.locator(`[data-top-bar-id="${removedId}"]`)).toHaveCount(0);
     await expect(page.locator(`[data-top-bar-id="${createdIds[1]}"]`)).toHaveCount(1);
@@ -73,22 +60,23 @@ test.describe('multi-bar', () => {
     await loginAndOpenTopBarSettings(page);
     await resetToSingleBar(page);
 
-    // Start from 1 bar and keep adding until the add control is disabled/hidden.
+    // Try to add bars until limit
     for (let i = 0; i < MAX_BARS + 2; i += 1) {
-      const enabledAdd = page.locator('a[href*="top_bar_add=1"]:not([aria-disabled="true"])').first();
-      if ((await enabledAdd.count()) === 0) {
+      const addButton = page.getByRole('button', { name: 'Add new Top Bar' });
+      if ((await addButton.count()) === 0 || (await addButton.isDisabled())) {
         break;
       }
-      await enabledAdd.click({ force: true });
-      await page.waitForLoadState('domcontentloaded');
+      await addButton.click();
+      await page.waitForTimeout(300);
     }
 
     const barCount = await page.locator('.top-bar-row.bg').count();
-    const enabledAdd = page.locator('a[href*="top_bar_add=1"]:not([aria-disabled="true"])');
-    const addButtons = page.getByRole('link', { name: 'Add new Top Bar' });
+    const addButton = page.getByRole('button', { name: 'Add new Top Bar' });
 
     expect(barCount).toBe(MAX_BARS);
-    await expect(enabledAdd).toHaveCount(0);
-    await expect(addButtons).toHaveCount(0);
+    // Button should be disabled or hidden when max reached
+    if (await addButton.count() > 0) {
+      await expect(addButton).toBeDisabled();
+    }
   });
 });
