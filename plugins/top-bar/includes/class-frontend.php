@@ -15,41 +15,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 final class Frontend {
 
-	/** @var list<array<string, mixed>>|null Cached active and scheduled bars for this request */
-	private ?array $cached_bars = null;
-
 	public function __construct() {
 		add_action( 'wp_body_open', [ $this, 'maybe_render_bar' ], 5 );
 		add_action( 'wp_footer', [ $this, 'maybe_output_bar_fallback' ], 1 );
 		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_assets' ] );
-		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
-	}
-
-	/**
-	 * Get active bars that are also scheduled to show now (cached for request).
-	 *
-	 * @return list<array<string, mixed>>
-	 */
-	private function get_scheduled_bars(): array {
-		if ( null !== $this->cached_bars ) {
-			return $this->cached_bars;
-		}
-
-		$bars = Options::get_active_bars();
-		$scheduled_bars = [];
-
-		foreach ( $bars as $bar ) {
-			if ( $this->is_bar_scheduled_now( $bar ) ) {
-				$scheduled_bars[] = $bar;
-			}
-		}
-
-		$this->cached_bars = $scheduled_bars;
-		return $scheduled_bars;
 	}
 
 	private function should_show_bar(): bool {
-		$has_active = $this->get_scheduled_bars() !== [];
+		$has_active = Options::get_active_bars() !== [];
 		return (bool) apply_filters( 'top_bar_show', $has_active );
 	}
 
@@ -116,16 +89,6 @@ final class Frontend {
 			);
 		}
 
-		// Fallback to old CSS if Vue not built
-		if ( ! file_exists( $frontend_js ) ) {
-			wp_enqueue_style(
-				'top-bar',
-				plugin_dir_url( TOP_BAR_PLUGIN_FILE ) . 'assets/css/top-bar.css',
-				[],
-				TOP_BAR_VERSION
-			);
-		}
-
 	}
 
 	/**
@@ -141,63 +104,4 @@ final class Frontend {
 		}
 		return $tag;
 	}
-
-	public function enqueue_admin_assets(): void {
-		wp_enqueue_style(
-			'jquery-ui-style',
-			'https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css',
-			[],
-			'1.13.2'
-		);
-		wp_enqueue_style(
-			'top-bar-admin',
-			plugins_url( 'assets/css/top-bar-admin.css', TOP_BAR_PLUGIN_FILE ),
-			[],
-			TOP_BAR_VERSION
-		);
-		wp_enqueue_script( 'jquery-ui-datepicker' );
-		wp_enqueue_script(
-			'top-bar-admin',
-			plugins_url( 'assets/js/top-bar-admin.js', TOP_BAR_PLUGIN_FILE ),
-			[],
-			TOP_BAR_VERSION,
-			true
-		);
-	}
-
-	/**
-	 * Check if bar is scheduled and currently within the scheduled time range.
-	 *
-	 * @param array<string, mixed> $bar
-	 */
-	private function is_bar_scheduled_now( array $bar ): bool {
-		// If scheduling is not enabled, bar is always visible
-		if ( empty( $bar['scheduled_enabled'] ) ) {
-			return true;
-		}
-
-		$from = isset( $bar['scheduled_from_datetime'] ) ? trim( (string) $bar['scheduled_from_datetime'] ) : '';
-		$to   = isset( $bar['scheduled_to_datetime'] ) ? trim( (string) $bar['scheduled_to_datetime'] ) : '';
-
-		// If dates are not set, treat as always visible
-		if ( $from === '' || $to === '' ) {
-			return true;
-		}
-
-		// Get current time in site timezone
-		$now = current_time( 'timestamp' );
-
-		// Parse datetime strings (ISO 8601 format: YYYY-MM-DDTHH:mm)
-		$from_timestamp = strtotime( $from );
-		$to_timestamp   = strtotime( $to );
-
-		// If parsing failed, treat as always visible
-		if ( false === $from_timestamp || false === $to_timestamp ) {
-			return true;
-		}
-
-		// Check if current time is within range
-		return $now >= $from_timestamp && $now <= $to_timestamp;
-	}
-
 }

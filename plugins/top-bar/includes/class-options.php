@@ -307,6 +307,8 @@ final class Options {
 	}
 
 	/**
+	 * Get visible bars (scheduling is handled client-side by Vue).
+	 *
 	 * @return list<array<string, mixed>>
 	 */
 	public static function get_active_bars(): array {
@@ -327,64 +329,13 @@ final class Options {
 							$is_visible = $raw === 'true' || $raw === '1';
 						}
 					}
-					if ( ! $is_visible ) {
-						return false;
-					}
-
-					return self::is_bar_in_schedule_window( $bar );
+					return $is_visible;
 				}
 			)
 		);
 
 		// Enforce plan limit on active bars as well.
 		return array_slice( $active, 0, FeatureFlags::instance()->max_bars() );
-	}
-
-	/**
-	 * A bar is in schedule window when scheduling is disabled, or now is within from..to.
-	 *
-	 * @param array<string, mixed> $bar
-	 */
-	private static function is_bar_in_schedule_window( array $bar ): bool {
-		// If scheduling feature is not available (Freemius flag off), treat scheduling as disabled.
-		if ( ! FeatureFlags::instance()->is_schedule_enabled() ) {
-			return true;
-		}
-
-		$enabled_raw = $bar['scheduled_enabled'] ?? false;
-		$enabled = false;
-		if ( is_bool( $enabled_raw ) ) {
-			$enabled = $enabled_raw;
-		} elseif ( is_string( $enabled_raw ) ) {
-			$raw = strtolower( trim( $enabled_raw ) );
-			$enabled = $raw === 'true' || $raw === '1';
-		} elseif ( is_numeric( $enabled_raw ) ) {
-			$enabled = (int) $enabled_raw === 1;
-		}
-		if ( ! $enabled ) {
-			return true;
-		}
-
-		$from_raw = isset( $bar['scheduled_from_datetime'] ) ? (string) $bar['scheduled_from_datetime'] : '';
-		$to_raw   = isset( $bar['scheduled_to_datetime'] ) ? (string) $bar['scheduled_to_datetime'] : '';
-		$from = self::sanitize_iso_datetime( $from_raw );
-		$to   = self::sanitize_iso_datetime( $to_raw );
-		if ( $from === '' || $to === '' ) {
-			return false;
-		}
-
-		try {
-			$tz = wp_timezone();
-			$now = new \DateTimeImmutable( 'now', $tz );
-			$from_dt = \DateTimeImmutable::createFromFormat( 'Y-m-d\TH:i', $from, $tz );
-			$to_dt = \DateTimeImmutable::createFromFormat( 'Y-m-d\TH:i', $to, $tz );
-			if ( false === $from_dt || false === $to_dt ) {
-				return false;
-			}
-			return $now >= $from_dt && $now <= $to_dt;
-		} catch ( \Exception $e ) {
-			return false;
-		}
 	}
 
 	public static function sanitize_hex_color( string $color ): string {
