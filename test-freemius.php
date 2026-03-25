@@ -12,11 +12,11 @@ header('Content-Type: text/plain');
 echo "=== Freemius Integration Test ===\n\n";
 
 // Check if function exists
-if ( function_exists( 'top_bar_fs' ) ) {
-    echo "✓ top_bar_fs() function exists\n";
+if ( function_exists( 'ftb_fs' ) ) {
+    echo "✓ ftb_fs() function exists\n";
 
     try {
-        $fs = top_bar_fs();
+        $fs = ftb_fs();
         echo "✓ Freemius instance created\n";
 
         // Check basic properties
@@ -43,7 +43,7 @@ if ( function_exists( 'top_bar_fs' ) ) {
         echo "✗ Error: " . $e->getMessage() . "\n";
     }
 } else {
-    echo "✗ top_bar_fs() function not found\n";
+    echo "✗ ftb_fs() function not found\n";
     echo "  Make sure the Top Bar plugin is active\n";
 }
 

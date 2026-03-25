@@ -20,7 +20,6 @@ final class Options {
 	/** At least one bar configuration must exist. */
 	public const MIN_BARS = 1;
 
-
 	public static function new_bar_id(): string {
 		return 'bar_' . wp_generate_password( 8, false, false );
 	}
@@ -386,48 +385,6 @@ final class Options {
 		} catch ( \Exception $e ) {
 			return false;
 		}
-	}
-
-	// --- Back-compat: first bar (admin/legacy UI) ---
-
-	public static function get_position(): string {
-		$bars = self::get_bars();
-		$pos  = isset( $bars[0]['position'] ) ? (string) $bars[0]['position'] : 'top';
-		return in_array( $pos, [ 'top', 'bottom' ], true ) ? $pos : 'top';
-	}
-
-	public static function get_message(): string {
-		$bars = self::get_bars();
-		return isset( $bars[0]['messages'][0] ) ? (string) $bars[0]['messages'][0] : '';
-	}
-
-	public static function get_bg_color(): string {
-		$bars = self::get_bars();
-		$bg   = isset( $bars[0]['bg_color'] ) ? (string) $bars[0]['bg_color'] : '#1d2327';
-		return self::sanitize_hex_color( $bg ) ?: '#1d2327';
-	}
-
-	public static function get_frame_color(): string {
-		$bars = self::get_bars();
-		$c    = isset( $bars[0]['frame_color'] ) ? (string) $bars[0]['frame_color'] : '';
-		return self::sanitize_hex_color( $c ) ?: 'transparent';
-	}
-
-	public static function get_hide_on_scroll(): bool {
-		$bars = self::get_bars();
-		return ! empty( $bars[0]['hide_on_scroll'] );
-	}
-
-	public static function get_status(): string {
-		$bars   = self::get_bars();
-		$v = $bars[0]['visible'] ?? true;
-		if ( is_string( $v ) ) {
-			$raw = strtolower( trim( $v ) );
-			if ( in_array( $raw, [ 'true', 'false', '0', '1' ], true ) ) {
-				$v = $raw === 'true' || $raw === '1';
-			}
-		}
-		return ! empty( $v ) ? 'on' : 'off';
 	}
 
 	public static function sanitize_hex_color( string $color ): string {
