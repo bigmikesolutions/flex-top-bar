@@ -9,12 +9,17 @@
     "vitest": "^4.1.1"
   },
   "scripts": {
+    "test": "npm test -w plugins/top-bar",
+    "test:ui": "npm run test:ui -w plugins/top-bar",
     "test:e2e": "playwright test --workers=1",
     "test:e2e:single-bar": "playwright test --workers=1 e2e/top-bar-single.spec.ts",
     "test:e2e:multi-bar": "playwright test --workers=1 e2e/top-bar-multi.spec.ts",
     "test:e2e:headed": "playwright test --workers=1 --headed",
     "test:e2e:ui": "playwright test --workers=1 --ui"
   },
+  "workspaces": [
+    "plugins/top-bar"
+  ],
   "dependencies": {
     "vue": "^3.5.31"
   }

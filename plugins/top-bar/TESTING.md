@@ -67,17 +67,18 @@ Located in: `src/**/*.spec.ts`
 
 **Run tests:**
 ```bash
-# From plugin directory
-npm test
+# From WordPress root (recommended)
+npm test              # Run once and exit
+npm run test:ui       # Run with Vitest UI
 
-# Or with watch mode
-npm test -- --watch
-
-# With UI
-npm run test:ui
+# Or from plugin directory
+cd plugins/top-bar
+npm test              # Run once and exit
+npm run test:watch    # Run in watch mode (auto-rerun on file changes)
+npm run test:ui       # Run with Vitest UI
 ```
 
-**Note:** Tests run from plugin directory but use node_modules from WordPress root (monorepo setup). Vue was installed at root level to resolve dependencies.
+**Note:** Monorepo setup with workspaces. Tests can run from WordPress root or plugin directory. Vue and test dependencies are installed at root level.
 
 ## Test Philosophy
 
