@@ -85,10 +85,10 @@ test.describe('multi-bar', () => {
 
     const barCount = await page.locator('.top-bar-row.bg').count();
     const enabledAdd = page.locator('a[href*="top_bar_add=1"]:not([aria-disabled="true"])');
-    const disabledAdd = page.locator('a.top-bar-btn[aria-disabled="true"]');
+    const addButtons = page.getByRole('link', { name: 'Add new Top Bar' });
 
     expect(barCount).toBe(MAX_BARS);
     await expect(enabledAdd).toHaveCount(0);
-    await expect(disabledAdd.first()).toBeVisible();
+    await expect(addButtons).toHaveCount(0);
   });
 });
