@@ -27,7 +27,7 @@ cd /Users/m-wrona/github/bigmikesolutions/wordpress
 php vendor/bin/phpunit --testdox plugins/top-bar/tests/
 ```
 
-### JavaScript Unit Tests (Vitest) ✅ **45 tests passing**
+### JavaScript Unit Tests (Vitest) ✅ **79 tests passing**
 
 Located in: `src/**/*.spec.ts`
 
@@ -35,6 +35,15 @@ Located in: `src/**/*.spec.ts`
 
 **Components:**
 - ✅ TopBarFrontend - Rendering, visibility, scheduling, styles, API errors (12 tests)
+- ✅ BarItem - Admin component for editing bars (34 tests)
+  - Rendering (name, expanded/collapsed states)
+  - Visibility toggle functionality
+  - Delete button (enabled/disabled states, confirmation)
+  - Expand/collapse with aria-expanded
+  - Form fields (name, position, colors, effects, hide on scroll, mobile visibility)
+  - Messages CRUD (add, remove, update, max limit)
+  - Scheduling (enable/disable, datetime inputs)
+  - Reactivity on prop changes
 
 **API Client:**
 - ✅ GET /bars - Fetch bars
@@ -51,6 +60,7 @@ Located in: `src/**/*.spec.ts`
 
 **Test files:**
 - `src/components/TopBarFrontend.spec.ts` - Frontend component
+- `src/components/BarItem.spec.ts` - Admin bar item component
 - `src/api/client.spec.ts` - API client layer
 - `src/stores/bars.spec.ts` - Bars state management
 - `src/stores/featureFlags.spec.ts` - Feature flags state
@@ -99,26 +109,21 @@ npm run test:ui
 - Updated to reflect Vue-based architecture
 - Tests only check mount point output and asset enqueuing
 
-**JS Tests:** ✅ Fully working (45/45 passing)
+**JS Tests:** ✅ Fully working (79/79 passing)
 - Complete test suites for components, API, and stores
-- 45 test cases covering all Vue/JS logic
+- 79 test cases covering all Vue/JS logic
 - Tests run successfully from plugin directory
 
 **E2E Tests:** ✅ Separate Playwright setup (in `/e2e`)
 
 ## Recommended Next Steps
 
-1. Fix JavaScript test setup:
-   - Configure vitest to work in monorepo
-   - Or extract plugin to standalone repo
-   - Run and verify all JS tests pass
-
-2. Add more JS test coverage:
-   - Admin panel components
-   - Pinia stores (bars, feature flags)
-   - API service layer
-
-3. Maintain separation:
+1. Maintain separation:
    - PHP tests never test Vue rendering
    - JS tests never test PHP logic
    - E2E tests verify integration
+
+2. Consider additional test coverage:
+   - Admin panel container component (if/when created)
+   - Additional edge cases for scheduling
+   - Integration tests for complete user workflows
