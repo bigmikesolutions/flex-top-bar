@@ -48,16 +48,12 @@ final class Options {
 	}
 
 	/**
-	 * Bars from DB (migrates legacy flat options once).
+	 * Bars from DB.
 	 *
 	 * @return list<array<string, mixed>>
 	 */
 	public static function get_bars(): array {
 		$stored = get_option( self::OPTION_BARS );
-		if ( false === $stored ) {
-			self::maybe_migrate_legacy();
-			$stored = get_option( self::OPTION_BARS );
-		}
 		if ( ! is_array( $stored ) || $stored === [] ) {
 			return [ self::default_bar() ];
 		}
@@ -74,13 +70,6 @@ final class Options {
 		return $out;
 	}
 
-	private static function maybe_migrate_legacy(): void {
-		if ( get_option( self::OPTION_BARS ) !== false ) {
-			return;
-		}
-		update_option( self::OPTION_BARS, [ self::default_bar() ] );
-	}
-
 	/**
 	 * @param array<string, mixed> $bar
 	 * @return array<string, mixed>
@@ -89,130 +78,34 @@ final class Options {
 		$defaults = self::default_bar();
 		$id       = isset( $bar['id'] ) && is_string( $bar['id'] ) && $bar['id'] !== '' ? $bar['id'] : self::new_bar_id();
 		$pos      = isset( $bar['position'] ) && in_array( $bar['position'], [ 'top', 'bottom' ], true ) ? $bar['position'] : 'top';
-		// Visibility on the site: controlled by `visible` (true/false).
-		$visible = true;
-		if ( array_key_exists( 'visible', $bar ) ) {
-			$v = $bar['visible'];
-			if ( is_bool( $v ) ) {
-				$visible = $v;
-			} else {
-				$raw = is_string( $v ) ? strtolower( trim( (string) $v ) ) : '';
-				$visible = $raw === 'true' || $raw === '1' || $v === 1;
-			}
-		} elseif ( array_key_exists( 'status', $bar ) ) {
-			// Legacy: `status` used `on/off` strings.
-			$raw_status = is_string( $bar['status'] ) ? strtolower( trim( (string) $bar['status'] ) ) : '';
-			$visible    = $raw_status === 'on';
-		}
 
-		$admin_visibile = $defaults['admin_visibile'];
-		if ( array_key_exists( 'admin_visibile', $bar ) ) {
-			$av = $bar['admin_visibile'];
-			if ( is_bool( $av ) ) {
-				$admin_visibile = $av;
-			} else {
-				$raw = is_string( $av ) ? strtolower( trim( (string) $av ) ) : '';
-				$admin_visibile = $raw === 'true' || $raw === '1' || $av === 1;
-			}
-		}
-
-		// Scheduling: read admin inputs (may be date+time or already combined datetime).
-		$scheduled_enabled = $defaults['scheduled_enabled'];
-		if ( array_key_exists( 'scheduled_enabled', $bar ) ) {
-			$se = $bar['scheduled_enabled'];
-			if ( is_bool( $se ) ) {
-				$scheduled_enabled = $se;
-			} else {
-				$raw = is_string( $se ) ? strtolower( trim( (string) $se ) ) : '';
-				$scheduled_enabled = $raw === 'true' || $raw === '1' || $se === 1;
-			}
-		} elseif ( array_key_exists( 'life_time_enabled', $bar ) ) {
-			// Back-compat for the earlier key name.
-			$se = $bar['life_time_enabled'];
-			if ( is_bool( $se ) ) {
-				$scheduled_enabled = $se;
-			} else {
-				$raw = is_string( $se ) ? strtolower( trim( (string) $se ) ) : '';
-				$scheduled_enabled = $raw === 'true' || $raw === '1' || $se === 1;
-			}
-		}
+		$visible            = self::parse_bool( $bar['visible'] ?? true, true );
+		$admin_visibile     = self::parse_bool( $bar['admin_visibile'] ?? $defaults['admin_visibile'], $defaults['admin_visibile'] );
+		$scheduled_enabled  = self::parse_bool( $bar['scheduled_enabled'] ?? $defaults['scheduled_enabled'], $defaults['scheduled_enabled'] );
+		$hide_on_scroll     = self::parse_bool( $bar['hide_on_scroll'] ?? false, false );
+		$messages_mobile_visible = self::parse_bool( $bar['messages_mobile_visible'] ?? true, true );
 
 		$scheduled_from_datetime = isset( $bar['scheduled_from_datetime'] )
-			? sanitize_text_field( (string) $bar['scheduled_from_datetime'] )
+			? self::sanitize_iso_datetime( sanitize_text_field( (string) $bar['scheduled_from_datetime'] ) )
 			: '';
 		$scheduled_to_datetime = isset( $bar['scheduled_to_datetime'] )
-			? sanitize_text_field( (string) $bar['scheduled_to_datetime'] )
+			? self::sanitize_iso_datetime( sanitize_text_field( (string) $bar['scheduled_to_datetime'] ) )
 			: '';
 
-		// Back-compat: earlier saved keys.
-		$scheduled_from_date = isset( $bar['scheduled_from_date'] )
-			? sanitize_text_field( (string) $bar['scheduled_from_date'] )
-			: '';
-		$scheduled_from_time = isset( $bar['scheduled_from_time'] )
-			? sanitize_text_field( (string) $bar['scheduled_from_time'] )
-			: '';
-		$scheduled_to_date = isset( $bar['scheduled_to_date'] )
-			? sanitize_text_field( (string) $bar['scheduled_to_date'] )
-			: '';
-		$scheduled_to_time = isset( $bar['scheduled_to_time'] )
-			? sanitize_text_field( (string) $bar['scheduled_to_time'] )
-			: '';
-
-		// Back-compat: map earlier keys if new ones are missing.
-		if ( $scheduled_from_datetime === '' && $scheduled_from_date === '' && isset( $bar['life_time_from_date'] ) ) {
-			$scheduled_from_date = sanitize_text_field( (string) $bar['life_time_from_date'] );
-		}
-		if ( $scheduled_from_datetime === '' && $scheduled_from_time === '' && isset( $bar['life_time_from_time'] ) ) {
-			$scheduled_from_time = sanitize_text_field( (string) $bar['life_time_from_time'] );
-		}
-		if ( $scheduled_to_datetime === '' && $scheduled_to_date === '' && isset( $bar['life_time_to_date'] ) ) {
-			$scheduled_to_date = sanitize_text_field( (string) $bar['life_time_to_date'] );
-		}
-		if ( $scheduled_to_datetime === '' && $scheduled_to_time === '' && isset( $bar['life_time_to_time'] ) ) {
-			$scheduled_to_time = sanitize_text_field( (string) $bar['life_time_to_time'] );
-		}
-
-		// Normalize into ISO datetime strings.
-		// If date+time were provided, combine them; otherwise use provided datetime.
-		$scheduled_from_datetime = $scheduled_from_datetime !== ''
-			? self::sanitize_iso_datetime( $scheduled_from_datetime )
-			: '';
-		$scheduled_to_datetime = $scheduled_to_datetime !== ''
-			? self::sanitize_iso_datetime( $scheduled_to_datetime )
-			: '';
-
-		$scheduled_from_date = self::sanitize_iso_date( $scheduled_from_date );
-		$scheduled_to_date   = self::sanitize_iso_date( $scheduled_to_date );
-		$scheduled_from_time = self::sanitize_iso_time( $scheduled_from_time );
-		$scheduled_to_time   = self::sanitize_iso_time( $scheduled_to_time );
-
-		if ( $scheduled_from_datetime === '' && $scheduled_from_date !== '' && $scheduled_from_time !== '' ) {
-			$scheduled_from_datetime = $scheduled_from_date . 'T' . $scheduled_from_time;
-		}
-		if ( $scheduled_to_datetime === '' && $scheduled_to_date !== '' && $scheduled_to_time !== '' ) {
-			$scheduled_to_datetime = $scheduled_to_date . 'T' . $scheduled_to_time;
-		}
-
-		// If user provided schedule values, keep scheduling enabled.
 		if ( $scheduled_from_datetime !== '' || $scheduled_to_datetime !== '' ) {
 			$scheduled_enabled = true;
 		}
 
-		// Clear values only when schedule is explicitly disabled and empty.
 		if ( ! $scheduled_enabled ) {
 			$scheduled_from_datetime = '';
 			$scheduled_to_datetime   = '';
 		}
 
-		// Hide on scroll behavior: controlled by `hide_on_scroll` (bool).
-		$hide_on_scroll = false;
-		if ( array_key_exists( 'hide_on_scroll', $bar ) ) {
-			$hide_on_scroll = ! empty( $bar['hide_on_scroll'] );
-		}
 		$effect = isset( $bar['effect'] ) ? sanitize_key( (string) $bar['effect'] ) : 'none';
 		if ( ! in_array( $effect, [ 'none', 'slider', 'fadein', 'blink' ], true ) ) {
 			$effect = 'none';
 		}
+
 		$default_message = isset( $defaults['messages'][0] ) && is_string( $defaults['messages'][0] ) ? $defaults['messages'][0] : __( 'Welcome!', 'top-bar' );
 		$messages = [];
 		if ( isset( $bar['messages'] ) && is_array( $bar['messages'] ) ) {
@@ -229,24 +122,15 @@ final class Options {
 			$messages[0] = wp_kses_post( $default_message );
 		}
 		$messages = array_values( array_slice( $messages, 0, FeatureFlags::instance()->max_messages() ) );
-		$messages_mobile_visible = true;
-		if ( array_key_exists( 'messages_mobile_visible', $bar ) ) {
-			$mmv = $bar['messages_mobile_visible'];
-			if ( is_bool( $mmv ) ) {
-				$messages_mobile_visible = $mmv;
-			} else {
-				$raw = is_string( $mmv ) ? strtolower( trim( $mmv ) ) : '';
-				$messages_mobile_visible = $raw === 'true' || $raw === '1' || $raw === 'on' || $mmv === 1;
-			}
-		}
-		$bg       = isset( $bar['bg_color'] ) ? self::sanitize_hex_color( (string) $bar['bg_color'] ) : '';
-		$frame    = isset( $bar['frame_color'] ) ? self::sanitize_hex_color( (string) $bar['frame_color'] ) : '';
-		$width    = isset( $bar['frame_width'] ) ? (int) $bar['frame_width'] : 1;
-		if ( $width < 0 ) {
-			$width = 0;
-		}
-		if ( $width > 10 ) {
-			$width = 10;
+
+		$bg    = isset( $bar['bg_color'] ) ? self::sanitize_hex_color( (string) $bar['bg_color'] ) : '';
+		$width = isset( $bar['frame_width'] ) ? (int) $bar['frame_width'] : 0;
+		$width = max( 0, min( 10, $width ) );
+		$frame = $width > 0 && isset( $bar['frame_color'] ) ? self::sanitize_hex_color( (string) $bar['frame_color'] ) : '';
+
+		// Clear frame if width is 0
+		if ( $width === 0 ) {
+			$frame = '';
 		}
 
 		return [
@@ -269,41 +153,22 @@ final class Options {
 	}
 
 	/**
-	 * @param mixed $bars
-	 * @return list<array<string, mixed>>
+	 * @param mixed $value
+	 * @param bool  $default
+	 * @return bool
 	 */
-	public static function sanitize_bars_input( $bars ): array {
-		if ( ! is_array( $bars ) ) {
-			return [ self::default_bar() ];
+	private static function parse_bool( $value, bool $default ): bool {
+		if ( is_bool( $value ) ) {
+			return $value;
 		}
-		$out = [];
-		foreach ( $bars as $row ) {
-			if ( ! is_array( $row ) ) {
-				continue;
-			}
-			$width = isset( $row['frame_width'] ) ? (int) $row['frame_width'] : 0;
-			if ( $width <= 0 ) {
-				$row['frame_color'] = '';
-				$row['frame_width'] = 0;
-			}
-			$hos = $row['hide_on_scroll'] ?? '0';
-			if ( is_bool( $hos ) ) {
-				$row['hide_on_scroll'] = $hos;
-			} else {
-				$row['hide_on_scroll'] = (string) $hos === '1' || $hos === 1;
-			}
-			$out[] = self::normalize_bar( $row );
+		if ( is_string( $value ) ) {
+			$raw = strtolower( trim( $value ) );
+			return $raw === 'true' || $raw === '1';
 		}
-		if ( $out === [] ) {
-			return [ self::default_bar() ];
+		if ( is_int( $value ) ) {
+			return $value === 1;
 		}
-		$out = array_slice( $out, 0, FeatureFlags::instance()->max_bars() );
-		if ( count( $out ) < self::MIN_BARS ) {
-			while ( count( $out ) < self::MIN_BARS ) {
-				$out[] = self::default_bar();
-			}
-		}
-		return array_values( $out );
+		return $default;
 	}
 
 	/**
@@ -312,30 +177,12 @@ final class Options {
 	 * @return list<array<string, mixed>>
 	 */
 	public static function get_active_bars(): array {
-		$active = array_values(
+		return array_values(
 			array_filter(
 				self::get_bars(),
-				static function ( $bar ) {
-					if ( ! is_array( $bar ) ) {
-						return false;
-					}
-					$v = $bar['visible'] ?? null;
-					$is_visible = true;
-					if ( is_bool( $v ) ) {
-						$is_visible = $v;
-					} elseif ( is_string( $v ) ) {
-						$raw = strtolower( trim( $v ) );
-						if ( in_array( $raw, [ 'true', 'false', '0', '1' ], true ) ) {
-							$is_visible = $raw === 'true' || $raw === '1';
-						}
-					}
-					return $is_visible;
-				}
+				static fn( $bar ) => is_array( $bar ) && ( $bar['visible'] ?? false )
 			)
 		);
-
-		// Enforce plan limit on active bars as well.
-		return array_slice( $active, 0, FeatureFlags::instance()->max_bars() );
 	}
 
 	public static function sanitize_hex_color( string $color ): string {
@@ -344,51 +191,6 @@ final class Options {
 			return '#' . $color;
 		}
 		return '';
-	}
-
-	/**
-	 * @return string ISO date `YYYY-MM-DD` or empty string.
-	 */
-	private static function sanitize_iso_date( string $value ): string {
-		$value = trim( $value );
-		if ( preg_match( '/^\d{4}-\d{2}-\d{2}$/', $value ) === 1 ) {
-			return $value;
-		}
-
-		// Back-compat with datepicker defaults like `MM/DD/YYYY`.
-		if ( preg_match( '/^(\d{2})\/(\d{2})\/(\d{4})$/', $value, $m ) === 1 ) {
-			return $m[3] . '-' . $m[1] . '-' . $m[2];
-		}
-		// Back-compat with `DD/MM/YYYY`.
-		if ( preg_match( '/^(\d{2})\/(\d{2})\/(\d{4})$/', $value, $m ) === 1 ) {
-			$left = (int) $m[1];
-			$right = (int) $m[2];
-			if ( $left > 12 ) {
-				return $m[3] . '-' . sprintf( '%02d', $right ) . '-' . sprintf( '%02d', $left );
-			}
-		}
-		// Back-compat with dotted format `DD.MM.YYYY`.
-		if ( preg_match( '/^(\d{2})\.(\d{2})\.(\d{4})$/', $value, $m ) === 1 ) {
-			return $m[3] . '-' . $m[2] . '-' . $m[1];
-		}
-
-		return '';
-	}
-
-	/**
-	 * @return string ISO time `HH:MM` or empty string.
-	 */
-	private static function sanitize_iso_time( string $value ): string {
-		$value = trim( $value );
-		// Basic `HH:MM` validation.
-		if ( preg_match( '/^(?:[01]\d|2[0-3]):[0-5]\d$/', $value ) !== 1 ) {
-			// Accept `HH:MM:SS` and normalize to `HH:MM`.
-			if ( preg_match( '/^((?:[01]\d|2[0-3]):[0-5]\d):[0-5]\d$/', $value, $m ) === 1 ) {
-				return $m[1];
-			}
-			return '';
-		}
-		return $value;
 	}
 
 	/**

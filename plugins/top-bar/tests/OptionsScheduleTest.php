@@ -40,21 +40,6 @@ final class OptionsScheduleTest extends TestCase {
 		$this->assertSame( '2026-03-21T12:30', $bar['scheduled_to_datetime'] );
 	}
 
-	public function test_normalize_bar_combines_legacy_date_time_fields(): void {
-		$this->enableScheduleFeature();
-		$bar = Options::normalize_bar(
-			[
-				'scheduled_enabled' => '1',
-				'scheduled_from_date' => '2026-03-21',
-				'scheduled_from_time' => '11:00',
-				'scheduled_to_date' => '2026-03-21',
-				'scheduled_to_time' => '12:30',
-			]
-		);
-
-		$this->assertSame( '2026-03-21T11:00', $bar['scheduled_from_datetime'] );
-		$this->assertSame( '2026-03-21T12:30', $bar['scheduled_to_datetime'] );
-	}
 
 	public function test_normalize_bar_enables_schedule_when_datetimes_provided(): void {
 		$this->enableScheduleFeature();

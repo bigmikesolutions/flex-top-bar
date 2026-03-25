@@ -148,13 +148,6 @@ final class OptionsEdgeCasesTest extends TestCase {
 		$this->assertFalse( $bar4['visible'] );
 	}
 
-	public function test_normalize_bar_handles_legacy_status_field(): void {
-		$bar1 = Options::normalize_bar( [ 'status' => 'on' ] );
-		$bar2 = Options::normalize_bar( [ 'status' => 'off' ] );
-
-		$this->assertTrue( $bar1['visible'] );
-		$this->assertFalse( $bar2['visible'] );
-	}
 
 	public function test_normalize_bar_handles_effect_types(): void {
 		$bar1 = Options::normalize_bar( [ 'effect' => 'none' ] );
@@ -242,44 +235,25 @@ final class OptionsEdgeCasesTest extends TestCase {
 		$this->assertSame( '', Options::sanitize_hex_color( 'rgb(255,0,0)' ) );
 	}
 
-	public function test_sanitize_bars_input_handles_non_array(): void {
-		$result = Options::sanitize_bars_input( 'not an array' );
-
-		$this->assertCount( 1, $result );
-		$this->assertArrayHasKey( 'id', $result[0] );
-	}
-
-	public function test_sanitize_bars_input_removes_frame_when_width_zero(): void {
-		$result = Options::sanitize_bars_input(
+	public function test_normalize_bar_removes_frame_when_width_zero(): void {
+		$result = Options::normalize_bar(
 			[
-				[
-					'id'          => 'test',
-					'frame_width' => 0,
-					'frame_color' => '#ff0000',
-				],
+				'id'          => 'test',
+				'frame_width' => 0,
+				'frame_color' => '#ff0000',
 			]
 		);
 
-		$this->assertSame( '', $result[0]['frame_color'] );
-		$this->assertSame( 0, $result[0]['frame_width'] );
+		$this->assertSame( '', $result['frame_color'] );
+		$this->assertSame( 0, $result['frame_width'] );
 	}
 
-	public function test_sanitize_bars_input_handles_hide_on_scroll_as_string(): void {
-		$result1 = Options::sanitize_bars_input( [ [ 'hide_on_scroll' => '1' ] ] );
-		$result2 = Options::sanitize_bars_input( [ [ 'hide_on_scroll' => '0' ] ] );
+	public function test_normalize_bar_handles_hide_on_scroll_as_string(): void {
+		$result1 = Options::normalize_bar( [ 'hide_on_scroll' => '1' ] );
+		$result2 = Options::normalize_bar( [ 'hide_on_scroll' => '0' ] );
 
-		$this->assertTrue( $result1[0]['hide_on_scroll'] );
-		$this->assertFalse( $result2[0]['hide_on_scroll'] );
-	}
-
-	/**
-	 * @runInSeparateProcess
-	 * @preserveGlobalState disabled
-	 */
-	public function test_sanitize_bars_input_enforces_min_bars(): void {
-		$result = Options::sanitize_bars_input( [] );
-
-		$this->assertGreaterThanOrEqual( Options::MIN_BARS, count( $result ) );
+		$this->assertTrue( $result1['hide_on_scroll'] );
+		$this->assertFalse( $result2['hide_on_scroll'] );
 	}
 
 	/**
@@ -330,13 +304,11 @@ final class OptionsEdgeCasesTest extends TestCase {
 		$bar2 = Options::normalize_bar( [ 'messages_mobile_visible' => false ] );
 		$bar3 = Options::normalize_bar( [ 'messages_mobile_visible' => '1' ] );
 		$bar4 = Options::normalize_bar( [ 'messages_mobile_visible' => '0' ] );
-		$bar5 = Options::normalize_bar( [ 'messages_mobile_visible' => 'on' ] );
 
 		$this->assertTrue( $bar1['messages_mobile_visible'] );
 		$this->assertFalse( $bar2['messages_mobile_visible'] );
 		$this->assertTrue( $bar3['messages_mobile_visible'] );
 		$this->assertFalse( $bar4['messages_mobile_visible'] );
-		$this->assertTrue( $bar5['messages_mobile_visible'] );
 	}
 
 	public function test_normalize_bar_handles_admin_visibile_variations(): void {
@@ -351,21 +323,6 @@ final class OptionsEdgeCasesTest extends TestCase {
 		$this->assertFalse( $bar4['admin_visibile'] );
 	}
 
-	public function test_normalize_bar_combines_legacy_life_time_fields(): void {
-		$bar = Options::normalize_bar(
-			[
-				'life_time_enabled'   => '1',
-				'life_time_from_date' => '2026-03-25',
-				'life_time_from_time' => '10:00',
-				'life_time_to_date'   => '2026-03-26',
-				'life_time_to_time'   => '18:00',
-			]
-		);
-
-		$this->assertTrue( $bar['scheduled_enabled'] );
-		$this->assertSame( '2026-03-25T10:00', $bar['scheduled_from_datetime'] );
-		$this->assertSame( '2026-03-26T18:00', $bar['scheduled_to_datetime'] );
-	}
 
 	public function test_normalize_bar_sanitizes_iso_datetime_with_seconds(): void {
 		$bar = Options::normalize_bar(
