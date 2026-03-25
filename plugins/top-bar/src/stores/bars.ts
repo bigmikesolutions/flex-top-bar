@@ -44,7 +44,8 @@ export const useBarsStore = defineStore('bars', () => {
   }
 
   async function updateBar(id: string, updates: Partial<Bar>) {
-    loading.value = true
+    // Don't set loading for updates - keeps UI responsive
+    // loading.value = true
     error.value = null
     try {
       const updated = await api.updateBar(id, updates)
@@ -58,7 +59,7 @@ export const useBarsStore = defineStore('bars', () => {
       console.error('Failed to update bar:', e)
       throw e
     } finally {
-      loading.value = false
+      // loading.value = false
     }
   }
 

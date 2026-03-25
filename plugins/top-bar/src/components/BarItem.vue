@@ -322,9 +322,12 @@ const emit = defineEmits<{
 const localBar = ref<Bar>({ ...props.bar })
 const isExpanded = ref(props.bar.admin_visibile !== false)
 
-watch(() => props.bar, (newBar) => {
-  localBar.value = { ...newBar }
-}, { deep: true })
+// Only sync from props on initial load, not on every update
+// This prevents the form from resetting while user is typing
+watch(() => props.bar.id, () => {
+  localBar.value = { ...props.bar }
+  isExpanded.value = props.bar.admin_visibile !== false
+})
 
 function addMessage() {
   if (localBar.value.messages.length < props.maxMessages) {
