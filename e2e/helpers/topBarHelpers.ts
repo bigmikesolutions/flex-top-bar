@@ -126,6 +126,22 @@ export async function resetToSingleBar(page: Page): Promise<void> {
   await waitForTopBarAdminReady(page);
 }
 
+/**
+ * One bar with two layout columns (50% / 50%) for multi-column E2E tests.
+ * Requires Docker Compose `wordpress` service (same as resetToSingleBar).
+ */
+export async function resetToTwoColumnBar(page: Page): Promise<void> {
+  const root = process.cwd();
+  const composeFile = `${root}/docker-compose.yml`;
+  const command = `docker compose -f "${composeFile}" exec -T wordpress php -r 'require_once "/var/www/html/wp-load.php"; $bars = [[ "id" => "bar_mcol", "name" => "Multi column", "visible" => true, "admin_visibile" => true, "scheduled_enabled" => false, "scheduled_from_datetime" => "", "scheduled_to_datetime" => "", "position" => "top", "effect" => "none", "messages" => ["Col A", ""], "messages_mobile_visible" => true, "columns" => [ [ "id" => "col_e2e_a", "type" => "text", "effect" => "none", "messages" => ["Col A", ""], "size_percent" => 50, "messages_mobile_visible" => true ], [ "id" => "col_e2e_b", "type" => "text", "effect" => "none", "messages" => ["Col B", ""], "size_percent" => 50, "messages_mobile_visible" => true ] ], "bg_color" => "#389339", "frame_color" => "", "frame_width" => 0, "hide_on_scroll" => false ]]; update_option("top_bars", $bars);'`;
+
+  execSync(command, { stdio: 'pipe' });
+  await page.goto(TOP_BAR_SETTINGS_PATH);
+  await page.waitForLoadState('domcontentloaded');
+
+  await waitForTopBarAdminReady(page);
+}
+
 export async function getBarIds(page: Page): Promise<string[]> {
   const count = await page.locator('.top-bar-row.bg').count();
   const ids: string[] = [];
