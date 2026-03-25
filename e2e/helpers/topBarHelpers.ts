@@ -16,6 +16,17 @@ export function toDatetimeLocalValue(date: Date): string {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
+/** Wait for the Vue admin to persist a bar via REST (PUT /wp-json/top-bar/v1/bars/:id). */
+export async function waitForTopBarPut(page: Page): Promise<void> {
+  await page.waitForResponse(
+    (r) =>
+      r.url().includes('/wp-json/top-bar/v1/bars/') &&
+      r.request().method() === 'PUT' &&
+      r.ok(),
+    { timeout: 15000 }
+  );
+}
+
 export async function loginAndOpenTopBarSettings(page: Page): Promise<void> {
   // Go straight to the admin settings page; WP redirects to login if needed.
   await page.goto(TOP_BAR_SETTINGS_PATH, { waitUntil: 'domcontentloaded', timeout: 20000 });
@@ -45,9 +56,9 @@ export async function loginAndOpenTopBarSettings(page: Page): Promise<void> {
     throw new Error(`Failed to open Top Bar settings. URL: ${url}, title: ${title}`);
   });
 
-  // Wait for Vue app to mount and load data
+  // Wait for Vue app to mount and load data (button appears when app is interactive)
   await page.waitForSelector('#top-bar-app', { state: 'visible', timeout: 10000 });
-  await page.waitForTimeout(1000); // Wait for API data to load
+  await page.getByRole('button', { name: 'Add new Top Bar' }).waitFor({ state: 'visible', timeout: 15000 });
 }
 
 export async function ensureAtLeastBars(page: Page, expectedBars: number): Promise<void> {
@@ -99,7 +110,7 @@ export async function resetToSingleBar(page: Page): Promise<void> {
 
   // Wait for Vue app to load and render
   await page.waitForSelector('#top-bar-app', { state: 'visible', timeout: 10000 });
-  await page.waitForTimeout(1000); // Wait for Vue to fetch and render bars
+  await page.getByRole('button', { name: 'Add new Top Bar' }).waitFor({ state: 'visible', timeout: 15000 });
 }
 
 export async function getBarIds(page: Page): Promise<string[]> {

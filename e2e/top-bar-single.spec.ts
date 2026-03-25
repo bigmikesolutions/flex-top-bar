@@ -8,7 +8,7 @@ import {
   getBarIdByIndex,
   setBarPosition,
   setBarHideOnScroll,
-  setSchedule,
+  waitForTopBarPut,
 } from './helpers/topBarHelpers';
 
 declare const process: { env: Record<string, string | undefined> };
@@ -51,24 +51,11 @@ test.describe('single-bar', () => {
     test('should save top position with hide-on-scroll and hide after window scroll', async ({ page }) => {
       await loginAndOpenTopBarSettings(page);
       await resetToSingleBar(page);
-      await ensureAtLeastBars(page, 1);
       await openPanel(page, 0);
 
-      const id0 = await page.locator('input[name="top_bars[0][id]"]').inputValue();
-      const position0 = page.locator('select[name="top_bars[0][position]"]');
-      const hideOnScroll0 = page.locator('select[name="top_bars[0][hide_on_scroll]"]');
-
-      await position0.evaluate((el: HTMLSelectElement) => {
-        el.value = 'top';
-        el.dispatchEvent(new Event('change', { bubbles: true }));
-      });
-      await hideOnScroll0.evaluate((el: HTMLSelectElement) => {
-        el.value = '1';
-        el.dispatchEvent(new Event('change', { bubbles: true }));
-      });
-
-      await page.getByRole('button', { name: 'Save Changes' }).click();
-      await expect(page.locator('#setting-error-settings_updated, .notice-success')).toBeVisible();
+      const id0 = await getBarIdByIndex(page, 0);
+      await setBarPosition(page, 0, 'top');
+      await setBarHideOnScroll(page, 0, true);
 
       await page.goto('/');
 
@@ -76,7 +63,7 @@ test.describe('single-bar', () => {
       await expect(topBar).toHaveCount(1);
       await expect(topBar).toHaveAttribute('data-top-bar-position', 'top');
       await expect(topBar).toHaveClass(/top-bar--top/);
-      await expect(topBar).toHaveAttribute('data-top-bar-scroll-hide', '1');
+      await expect(topBar).toHaveAttribute('data-top-bar-hide-on-scroll', '1');
 
       // Initial state at top of page: visible.
       await expect(topBar).toBeVisible();
@@ -84,30 +71,18 @@ test.describe('single-bar', () => {
 
       // Scroll past threshold (30px) and verify the bar is hidden by script.
       await page.evaluate(() => window.scrollTo(0, 200));
-      await expect(topBar).toHaveCSS('display', 'none');
+      await page.waitForTimeout(500); // Wait for scroll handler to execute
+      await expect(topBar).toBeHidden();
     });
 
     test('should save top position with hide-on-scroll disabled and stay visible after window scroll', async ({ page }) => {
       await loginAndOpenTopBarSettings(page);
       await resetToSingleBar(page);
-      await ensureAtLeastBars(page, 1);
       await openPanel(page, 0);
 
-      const id0 = await page.locator('input[name="top_bars[0][id]"]').inputValue();
-      const position0 = page.locator('select[name="top_bars[0][position]"]');
-      const hideOnScroll0 = page.locator('select[name="top_bars[0][hide_on_scroll]"]');
-
-      await position0.evaluate((el: HTMLSelectElement) => {
-        el.value = 'top';
-        el.dispatchEvent(new Event('change', { bubbles: true }));
-      });
-      await hideOnScroll0.evaluate((el: HTMLSelectElement) => {
-        el.value = '0';
-        el.dispatchEvent(new Event('change', { bubbles: true }));
-      });
-
-      await page.getByRole('button', { name: 'Save Changes' }).click();
-      await expect(page.locator('#setting-error-settings_updated, .notice-success')).toBeVisible();
+      const id0 = await getBarIdByIndex(page, 0);
+      await setBarPosition(page, 0, 'top');
+      await setBarHideOnScroll(page, 0, false);
 
       await page.goto('/');
 
@@ -116,7 +91,7 @@ test.describe('single-bar', () => {
       await expect(topBar).toHaveAttribute('data-top-bar-position', 'top');
       await expect(topBar).toHaveClass(/top-bar--top/);
       // Disabled mode omits the attribute entirely in frontend markup.
-      await expect(topBar).not.toHaveAttribute('data-top-bar-scroll-hide', '1');
+      await expect(topBar).not.toHaveAttribute('data-top-bar-hide-on-scroll', '1');
 
       await expect(topBar).toBeVisible();
       await expect(topBar).not.toHaveCSS('display', 'none');
@@ -129,24 +104,11 @@ test.describe('single-bar', () => {
     test('should save bottom position with hide-on-scroll and hide after window scroll', async ({ page }) => {
       await loginAndOpenTopBarSettings(page);
       await resetToSingleBar(page);
-      await ensureAtLeastBars(page, 1);
       await openPanel(page, 0);
 
-      const id0 = await page.locator('input[name="top_bars[0][id]"]').inputValue();
-      const position0 = page.locator('select[name="top_bars[0][position]"]');
-      const hideOnScroll0 = page.locator('select[name="top_bars[0][hide_on_scroll]"]');
-
-      await position0.evaluate((el: HTMLSelectElement) => {
-        el.value = 'bottom';
-        el.dispatchEvent(new Event('change', { bubbles: true }));
-      });
-      await hideOnScroll0.evaluate((el: HTMLSelectElement) => {
-        el.value = '1';
-        el.dispatchEvent(new Event('change', { bubbles: true }));
-      });
-
-      await page.getByRole('button', { name: 'Save Changes' }).click();
-      await expect(page.locator('#setting-error-settings_updated, .notice-success')).toBeVisible();
+      const id0 = await getBarIdByIndex(page, 0);
+      await setBarPosition(page, 0, 'bottom');
+      await setBarHideOnScroll(page, 0, true);
 
       await page.goto('/');
 
@@ -154,36 +116,24 @@ test.describe('single-bar', () => {
       await expect(bottomBar).toHaveCount(1);
       await expect(bottomBar).toHaveAttribute('data-top-bar-position', 'bottom');
       await expect(bottomBar).toHaveClass(/top-bar--bottom/);
-      await expect(bottomBar).toHaveAttribute('data-top-bar-scroll-hide', '1');
+      await expect(bottomBar).toHaveAttribute('data-top-bar-hide-on-scroll', '1');
 
       await expect(bottomBar).toBeVisible();
       await expect(bottomBar).not.toHaveCSS('display', 'none');
 
       await page.evaluate(() => window.scrollTo(0, 200));
-      await expect(bottomBar).toHaveCSS('display', 'none');
+      await page.waitForTimeout(500); // Wait for scroll handler to execute
+      await expect(bottomBar).toBeHidden();
     });
 
     test('should save bottom position with hide-on-scroll disabled and stay visible after window scroll', async ({ page }) => {
       await loginAndOpenTopBarSettings(page);
       await resetToSingleBar(page);
-      await ensureAtLeastBars(page, 1);
       await openPanel(page, 0);
 
-      const id0 = await page.locator('input[name="top_bars[0][id]"]').inputValue();
-      const position0 = page.locator('select[name="top_bars[0][position]"]');
-      const hideOnScroll0 = page.locator('select[name="top_bars[0][hide_on_scroll]"]');
-
-      await position0.evaluate((el: HTMLSelectElement) => {
-        el.value = 'bottom';
-        el.dispatchEvent(new Event('change', { bubbles: true }));
-      });
-      await hideOnScroll0.evaluate((el: HTMLSelectElement) => {
-        el.value = '0';
-        el.dispatchEvent(new Event('change', { bubbles: true }));
-      });
-
-      await page.getByRole('button', { name: 'Save Changes' }).click();
-      await expect(page.locator('#setting-error-settings_updated, .notice-success')).toBeVisible();
+      const id0 = await getBarIdByIndex(page, 0);
+      await setBarPosition(page, 0, 'bottom');
+      await setBarHideOnScroll(page, 0, false);
 
       await page.goto('/');
 
@@ -191,7 +141,7 @@ test.describe('single-bar', () => {
       await expect(bottomBar).toHaveCount(1);
       await expect(bottomBar).toHaveAttribute('data-top-bar-position', 'bottom');
       await expect(bottomBar).toHaveClass(/top-bar--bottom/);
-      await expect(bottomBar).not.toHaveAttribute('data-top-bar-scroll-hide', '1');
+      await expect(bottomBar).not.toHaveAttribute('data-top-bar-hide-on-scroll', '1');
 
       await expect(bottomBar).toBeVisible();
       await expect(bottomBar).not.toHaveCSS('display', 'none');
@@ -209,30 +159,30 @@ test.describe('single-bar', () => {
       await ensureAtLeastBars(page, 2);
       await openPanel(page, 0);
 
-      const scheduled = page.locator('input[name="top_bars[0][scheduled_enabled]"][type="checkbox"]');
-      const barIdInput = page.locator('input[name="top_bars[0][id]"]');
-      const fromInput = page.locator('input[name="top_bars[0][scheduled_from_datetime]"]');
-      const toInput = page.locator('input[name="top_bars[0][scheduled_to_datetime]"]');
-      const barId = (await barIdInput.inputValue()).trim();
+      const barId = await getBarIdByIndex(page, 0);
 
-      // Hidden checkbox: toggle via label first, then force JS state as fallback.
+      // Enable scheduling (Vue auto-saves on change)
+      const scheduleSave = waitForTopBarPut(page);
       await page.locator('label.top-bar-life-time-checkbox').first().click();
-      await scheduled.evaluate((el: HTMLInputElement) => {
-        if (!el.checked) {
-          el.checked = true;
-          el.dispatchEvent(new Event('change', { bubbles: true }));
-        }
-      });
+      await scheduleSave;
 
-      await expect(scheduled).toBeChecked();
-      // Use a far-future window so this bar should be hidden on frontend now.
+      const fromInput = page.locator(`#scheduled_from_${barId}`);
+      const toInput = page.locator(`#scheduled_to_${barId}`);
       await fromInput.fill('2099-03-21T11:00');
-      await toInput.fill('2099-03-21T12:30');
+      const fromSave = waitForTopBarPut(page);
+      await fromInput.blur();
+      await fromSave;
 
-      await page.getByRole('button', { name: 'Save Changes' }).click();
-      await expect(page.locator('#setting-error-settings_updated, .notice-success')).toBeVisible();
+      await toInput.fill('2099-03-21T12:30');
+      const toSave = waitForTopBarPut(page);
+      await toInput.blur();
+      await toSave;
 
       await page.reload();
+      await openPanel(page, 0);
+
+      // Verify schedule is set
+      const scheduled = page.locator('.top-bar-toggle-life-time').nth(0);
       await expect(scheduled).toBeChecked();
       await expect(fromInput).toHaveValue('2099-03-21T11:00');
       await expect(toInput).toHaveValue('2099-03-21T12:30');
@@ -247,20 +197,7 @@ test.describe('single-bar', () => {
       await ensureAtLeastBars(page, 2);
       await openPanel(page, 0);
 
-      const scheduled = page.locator('input[name="top_bars[0][scheduled_enabled]"][type="checkbox"]');
-      const barIdInput = page.locator('input[name="top_bars[0][id]"]');
-      const fromInput = page.locator('input[name="top_bars[0][scheduled_from_datetime]"]');
-      const toInput = page.locator('input[name="top_bars[0][scheduled_to_datetime]"]');
-      const barId = (await barIdInput.inputValue()).trim();
-
-      await page.locator('label.top-bar-life-time-checkbox').first().click();
-      await scheduled.evaluate((el: HTMLInputElement) => {
-        if (!el.checked) {
-          el.checked = true;
-          el.dispatchEvent(new Event('change', { bubbles: true }));
-        }
-      });
-      await expect(scheduled).toBeChecked();
+      const barId = await getBarIdByIndex(page, 0);
 
       // Wide range around now to avoid timezone edge cases.
       const now = new Date();
@@ -269,13 +206,27 @@ test.describe('single-bar', () => {
       const fromValue = toDatetimeLocalValue(from);
       const toValue = toDatetimeLocalValue(to);
 
-      await fromInput.fill(fromValue);
-      await toInput.fill(toValue);
+      const scheduleSave2 = waitForTopBarPut(page);
+      await page.locator('label.top-bar-life-time-checkbox').first().click();
+      await scheduleSave2;
 
-      await page.getByRole('button', { name: 'Save Changes' }).click();
-      await expect(page.locator('#setting-error-settings_updated, .notice-success')).toBeVisible();
+      const fromInput = page.locator(`#scheduled_from_${barId}`);
+      const toInput = page.locator(`#scheduled_to_${barId}`);
+      await fromInput.fill(fromValue);
+      const fromSave2 = waitForTopBarPut(page);
+      await fromInput.blur();
+      await fromSave2;
+
+      await toInput.fill(toValue);
+      const toSave2 = waitForTopBarPut(page);
+      await toInput.blur();
+      await toSave2;
 
       await page.reload();
+      await openPanel(page, 0);
+
+      // Verify schedule is set
+      const scheduled = page.locator('.top-bar-toggle-life-time').nth(0);
       await expect(scheduled).toBeChecked();
       await expect(fromInput).toHaveValue(fromValue);
       await expect(toInput).toHaveValue(toValue);
@@ -293,10 +244,12 @@ test.describe('single-bar', () => {
       await openPanel(page, 0);
 
       const messageList = page.locator('.top-bar-message-list').first();
-      const addTextButton = page.getByRole('link', { name: 'Add new text' }).first();
+      const addTextButton = page.getByRole('button', { name: 'Add new text' }).first();
       const beforeCount = await messageList.locator('.top-bar-column-creator-grid').count();
 
+      const addSave = waitForTopBarPut(page);
       await addTextButton.click();
+      await addSave;
       await page.waitForLoadState('domcontentloaded');
 
       const afterCount = await messageList.locator('.top-bar-column-creator-grid').count();
@@ -310,17 +263,18 @@ test.describe('single-bar', () => {
       await openPanel(page, 0);
 
       const messageList = page.locator('.top-bar-message-list').first();
-      const addTextButton = page.getByRole('link', { name: 'Add new text' }).first();
+      const addTextButton = page.getByRole('button', { name: 'Add new text' }).first();
 
+      const addSave2 = waitForTopBarPut(page);
       await addTextButton.click();
-      await page.waitForLoadState('domcontentloaded');
+      await addSave2;
       await openPanel(page, 0);
 
       const afterAddCount = await messageList.locator('.top-bar-column-creator-grid').count();
-      const removeButtons = messageList.locator('.item-creator.no a.top-bar-btn', { hasText: 'X' });
-      const removeHref = await removeButtons.last().getAttribute('href');
-      expect(removeHref).toBeTruthy();
-      await page.goto(String(removeHref));
+      const removeButtons = messageList.locator('.item-creator.no').getByRole('button', { name: 'X' });
+      const removeSave = waitForTopBarPut(page);
+      await removeButtons.last().click();
+      await removeSave;
       await openPanel(page, 0);
 
       const afterRemoveCount = await messageList.locator('.top-bar-column-creator-grid').count();
@@ -337,15 +291,15 @@ test.describe('single-bar', () => {
 
       // Reduce to a single message field.
       while ((await messageList.locator('.top-bar-column-creator-grid').count()) > 1) {
-        const removeButtons = messageList.locator('.item-creator.no a.top-bar-btn', { hasText: 'X' });
-        const removeHref = await removeButtons.last().getAttribute('href');
-        expect(removeHref).toBeTruthy();
-        await page.goto(String(removeHref));
+        const removeLoop = messageList.locator('.item-creator.no').getByRole('button', { name: 'X' });
+        const removeLoopSave = waitForTopBarPut(page);
+        await removeLoop.last().click();
+        await removeLoopSave;
         await openPanel(page, 0);
       }
 
       await expect(messageList.locator('.top-bar-column-creator-grid')).toHaveCount(1);
-      await expect(messageList.locator('.item-creator.no a.top-bar-btn', { hasText: 'X' })).toHaveCount(0);
+      await expect(messageList.locator('.item-creator.no').getByRole('button', { name: 'X' })).toHaveCount(0);
     });
   });
 
@@ -361,60 +315,37 @@ test.describe('single-bar', () => {
       await ensureAtLeastBars(page, 1);
       await openPanel(page, 0);
 
-      const id0 = (await page.locator('input[name="top_bars[0][id]"]').inputValue()).trim();
-      const effect0 = page.locator('select[name="top_bars[0][effect]"]');
-      const messageList = page.locator('.top-bar-message-list').first();
-      const addTextButton = page.getByRole('link', { name: 'Add new text' }).first();
+      const id0 = await getBarIdByIndex(page, 0);
+      const barRow = page.locator('.top-bar-row.bg').first();
+      const effectSelect = barRow
+        .locator('fieldset')
+        .filter({ has: page.locator('legend', { hasText: 'Effect' }) })
+        .locator('select')
+        .first();
+      const messageList = barRow.locator('.top-bar-message-list').first();
+      const addTextButton = page.getByRole('button', { name: 'Add new text' }).first();
 
-      // Ensure there are two message fields.
       while ((await messageList.locator('.top-bar-column-creator-grid').count()) < 2) {
+        const addLoopSave = waitForTopBarPut(page);
         await addTextButton.click();
-        await page.waitForLoadState('domcontentloaded');
+        await addLoopSave;
         await openPanel(page, 0);
       }
 
-      await effect0.evaluate(
-        (el: HTMLSelectElement, value: string) => {
-          el.value = value;
-          el.dispatchEvent(new Event('change', { bubbles: true }));
-        },
-        effect
-      );
+      const effectSave = waitForTopBarPut(page);
+      await effectSelect.selectOption(effect);
+      await effectSave;
 
-      await page.evaluate(
-        ({ first, second }) => {
-          const setMessage = (index: number, value: string): void => {
-            const editorId = `top_bar_message_0_${index}`;
-            const maybeTinyMce = (window as Window & { tinymce?: any }).tinymce;
-            const editor = maybeTinyMce?.get?.(editorId);
-            if (editor) {
-              editor.setContent(value);
-            }
+      const textareas = barRow.locator('.top-bar-message-list textarea');
+      await textareas.nth(0).fill(firstMessage);
+      const msg0Save = waitForTopBarPut(page);
+      await textareas.nth(0).blur();
+      await msg0Save;
 
-            const textarea = document.querySelector(
-              `textarea[name="top_bars[0][messages][${index}]"]`
-            ) as HTMLTextAreaElement | null;
-            if (textarea) {
-              textarea.value = value;
-              textarea.dispatchEvent(new Event('input', { bubbles: true }));
-              textarea.dispatchEvent(new Event('change', { bubbles: true }));
-            }
-          };
-
-          setMessage(0, first);
-          setMessage(1, second);
-
-          // Synchronize TinyMCE editors to hidden textareas before submit.
-          const maybeTinyMce = (window as Window & { tinymce?: any }).tinymce;
-          if (maybeTinyMce?.triggerSave) {
-            maybeTinyMce.triggerSave();
-          }
-        },
-        { first: firstMessage, second: secondMessage }
-      );
-
-      await page.getByRole('button', { name: 'Save Changes' }).click();
-      await expect(page.locator('#setting-error-settings_updated, .notice-success')).toBeVisible();
+      await textareas.nth(1).fill(secondMessage);
+      const msg1Save = waitForTopBarPut(page);
+      await textareas.nth(1).blur();
+      await msg1Save;
 
       return id0;
     }
@@ -480,19 +411,17 @@ test.describe('single-bar', () => {
       await ensureAtLeastBars(page, 1);
       await openPanel(page, 0);
 
-      const id0 = (await page.locator('input[name="top_bars[0][id]"]').inputValue()).trim();
-      const mobileVisibility = page.locator('select[name="top_bars[0][messages_mobile_visible]"]');
+      const id0 = await getBarIdByIndex(page, 0);
+      const barRow = page.locator('.top-bar-row.bg').first();
+      const mobileVisibility = barRow
+        .locator('fieldset')
+        .filter({ has: page.locator('legend', { hasText: 'Visible on the mobile' }) })
+        .locator('select')
+        .first();
 
-      await mobileVisibility.evaluate(
-        (el: HTMLSelectElement, value: string) => {
-          el.value = value;
-          el.dispatchEvent(new Event('change', { bubbles: true }));
-        },
-        mobileVisible ? '1' : '0'
-      );
-
-      await page.getByRole('button', { name: 'Save Changes' }).click();
-      await expect(page.locator('#setting-error-settings_updated, .notice-success')).toBeVisible();
+      const mobileSave = waitForTopBarPut(page);
+      await mobileVisibility.selectOption({ label: mobileVisible ? 'On' : 'Off' });
+      await mobileSave;
 
       return id0;
     }

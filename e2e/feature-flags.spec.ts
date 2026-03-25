@@ -11,229 +11,224 @@ declare const require: (name: string) => any;
 
 const { execSync } = require('node:child_process');
 
-/**
- * Helper to set feature flag constants via WordPress CLI
- */
-async function setFeatureFlags(flags: { maxBars?: number; maxMessages?: number; schedule?: boolean }) {
-  const root = process.cwd();
-  const composeFile = `${root}/docker-compose.yml`;
+test.describe('Feature Flag', () => {
 
-  const phpCode = `
-    require_once "/var/www/html/wp-load.php";
-    ${flags.maxBars !== undefined ? `define('FF_MAX_BARS', ${flags.maxBars});` : ''}
-    ${flags.maxMessages !== undefined ? `define('FF_MAX_MESSAGES', ${flags.maxMessages});` : ''}
-    ${flags.schedule !== undefined ? `define('FF_SCHEDULE', ${flags.schedule ? 'true' : 'false'});` : ''}
-    echo "Feature flags set";
-  `;
+  test.describe('max bars', () => {
 
-  const command = `docker compose -f "${composeFile}" exec -T wordpress php -r '${phpCode.replace(/'/g, "'\\''")}' || true`;
 
-  try {
-    execSync(command, { stdio: 'pipe' });
-  } catch (error) {
-    console.warn('Could not set feature flags via CLI, may need alternative approach');
-  }
-}
 
-test.describe('Feature Flag Limits', () => {
+    test('should enforce max_bars limit when adding bars', async ({ page }) => {
+      await loginAndOpenTopBarSettings(page);
+      await resetToSingleBar(page);
 
-  test('should enforce max_bars limit when adding bars', async ({ page }) => {
-    await loginAndOpenTopBarSettings(page);
-    await resetToSingleBar(page);
+      const initialIds = await getBarIds(page);
+      expect(initialIds.length).toBeGreaterThanOrEqual(1);
 
-    const initialIds = await getBarIds(page);
-    expect(initialIds.length).toBeGreaterThanOrEqual(1);
+      // Try to add a bar
+      const addButton = page.getByRole('button', { name: 'Add new Top Bar' });
+      const canAdd = await addButton.isVisible().catch(() => false);
 
-    // Try to add a bar
-    const addButton = page.getByRole('button', { name: 'Add new Top Bar' });
-    const canAdd = await addButton.isVisible().catch(() => false);
+      if (canAdd && !(await addButton.isDisabled())) {
+        await addButton.click();
+        await page.waitForTimeout(500);
 
-    if (canAdd && !(await addButton.isDisabled())) {
-      await addButton.click();
+        const newIds = await getBarIds(page);
+        // Verify we added successfully or hit limit
+        expect(newIds.length).toBeGreaterThanOrEqual(initialIds.length);
+      } else {
+        // Already at limit - add button is disabled or hidden
+        expect(initialIds.length).toBeGreaterThanOrEqual(1);
+      }
+    });
+
+    test('should show correct max bars limit in admin UI', async ({ page }) => {
+      await loginAndOpenTopBarSettings(page);
+      await resetToSingleBar(page);
+
+      const currentBars = await page.locator('.top-bar-row.bg').count();
+      expect(currentBars).toBeGreaterThanOrEqual(1);
+
+      const addButton = page.getByRole('button', { name: 'Add new Top Bar' });
+      const canAddMore = (await addButton.isVisible()) && !(await addButton.isDisabled());
+
+      // Verify button state is consistent with bar count
+      expect(typeof canAddMore).toBe('boolean');
+    });
+
+    test('should respect max_bars when displaying on frontend', async ({ page }) => {
+      await loginAndOpenTopBarSettings(page);
+      await resetToSingleBar(page);
+
+      const adminBarCount = await page.locator('.top-bar-row.bg').count();
+
+      // resetToSingleBar already sets visibility to true, so just verify
+      // Go to frontend
+      await page.goto('/');
       await page.waitForTimeout(500);
 
-      const newIds = await getBarIds(page);
-      // Verify we added successfully or hit limit
-      expect(newIds.length).toBeGreaterThanOrEqual(initialIds.length);
-    } else {
-      // Already at limit - add button is disabled or hidden
-      expect(initialIds.length).toBeGreaterThanOrEqual(1);
-    }
+      // Count rendered bars
+      const frontendBarCount = await page.locator('[data-top-bar-id]').count();
+
+      // Frontend should show bars
+      expect(frontendBarCount).toBeGreaterThanOrEqual(1);
+      expect(frontendBarCount).toBeLessThanOrEqual(adminBarCount);
+    });
+
   });
 
-  test('should show correct max bars limit in admin UI', async ({ page }) => {
-    await loginAndOpenTopBarSettings(page);
-    await resetToSingleBar(page);
+  test.describe('max messages', () => {
 
-    const currentBars = await page.locator('.top-bar-row.bg').count();
-    expect(currentBars).toBeGreaterThanOrEqual(1);
+    test('should enforce max_messages limit in admin panel', async ({ page }) => {
+      await loginAndOpenTopBarSettings(page);
+      await resetToSingleBar(page);
+      await openPanel(page, 0);
 
-    const addButton = page.getByRole('button', { name: 'Add new Top Bar' });
-    const canAddMore = (await addButton.isVisible()) && !(await addButton.isDisabled());
+      // Count initial messages (textareas in Vue)
+      const initialMessages = await page.locator('.top-bar-message-list textarea').count();
+      expect(initialMessages).toBeGreaterThanOrEqual(1);
 
-    // Verify button state is consistent with bar count
-    expect(typeof canAddMore).toBe('boolean');
-  });
+      // Try to add messages
+      for (let i = 0; i < 10; i++) {
+        const addMessageBtn = page.getByRole('button', { name: 'Add new text' });
+        const isVisible = await addMessageBtn.isVisible().catch(() => false);
 
-  test('should enforce max_messages limit in admin panel', async ({ page }) => {
-    await loginAndOpenTopBarSettings(page);
-    await resetToSingleBar(page);
-    await openPanel(page, 0);
+        if (!isVisible) {
+          break; // Can't add more
+        }
 
-    // Count initial messages (textareas in Vue)
-    const initialMessages = await page.locator('.top-bar-message-list textarea').count();
-    expect(initialMessages).toBeGreaterThanOrEqual(1);
-
-    // Try to add messages
-    for (let i = 0; i < 10; i++) {
-      const addMessageBtn = page.getByRole('button', { name: 'Add new text' });
-      const isVisible = await addMessageBtn.isVisible().catch(() => false);
-
-      if (!isVisible) {
-        break; // Can't add more
-      }
-
-      await addMessageBtn.click();
-      await page.waitForTimeout(300);
-    }
-
-    // Count final messages
-    const finalMessages = await page.locator('.top-bar-message-list textarea').count();
-
-    expect(finalMessages).toBeLessThanOrEqual(50); // Max possible
-    expect(finalMessages).toBeGreaterThanOrEqual(initialMessages);
-  });
-
-  test('should respect max_bars when displaying on frontend', async ({ page }) => {
-    await loginAndOpenTopBarSettings(page);
-    await resetToSingleBar(page);
-
-    const adminBarCount = await page.locator('.top-bar-row.bg').count();
-
-    // resetToSingleBar already sets visibility to true, so just verify
-    // Go to frontend
-    await page.goto('/');
-    await page.waitForTimeout(500);
-
-    // Count rendered bars
-    const frontendBarCount = await page.locator('[data-top-bar-id]').count();
-
-    // Frontend should show bars
-    expect(frontendBarCount).toBeGreaterThanOrEqual(1);
-    expect(frontendBarCount).toBeLessThanOrEqual(adminBarCount);
-  });
-
-  test('should hide scheduling UI when scheduling feature is disabled', async ({ page }) => {
-    await loginAndOpenTopBarSettings(page);
-    await resetToSingleBar(page);
-    await openPanel(page, 0);
-
-    // Check if scheduling checkbox exists (Vue component)
-    const scheduleCheckbox = page.locator('.top-bar-toggle-life-time');
-    const scheduleLabel = page.locator('.top-bar-life-time-checkbox');
-
-    const hasScheduleUI = await scheduleCheckbox.isVisible().catch(() => false);
-
-    // Verify scheduling UI exists and is functional
-    expect(typeof hasScheduleUI).toBe('boolean');
-
-    if (hasScheduleUI) {
-      // Enable scheduling
-      const isChecked = await scheduleCheckbox.isChecked();
-      if (!isChecked) {
-        await scheduleLabel.click(); // Click label to toggle
+        await addMessageBtn.click();
         await page.waitForTimeout(300);
       }
 
-      // Verify datetime inputs appear
-      const barId = await page.locator('.top-bar-row.bg').first().locator('input[type="text"]').first().getAttribute('id');
-      if (barId) {
-        const id = barId.replace('name_', '');
-        const fromInput = page.locator(`#scheduled_from_${id}`);
-        const hasDatetimeInputs = await fromInput.isVisible().catch(() => false);
-        expect(typeof hasDatetimeInputs).toBe('boolean');
-      }
-    }
-  });
+      // Count final messages
+      const finalMessages = await page.locator('.top-bar-message-list textarea').count();
 
-  test('should save and respect multiple feature flag limits together', async ({ page }) => {
-    await loginAndOpenTopBarSettings(page);
-    await resetToSingleBar(page);
+      expect(finalMessages).toBeLessThanOrEqual(50); // Max possible
+      expect(finalMessages).toBeGreaterThanOrEqual(initialMessages);
+    });
 
-    const currentBarCount = await page.locator('.top-bar-row.bg').count();
-    await openPanel(page, 0);
-    await page.waitForTimeout(300);
+    test('should handle boundary case of exactly max_bars', async ({ page }) => {
+      await loginAndOpenTopBarSettings(page);
+      await resetToSingleBar(page);
 
-    // Count message textareas in Vue
-    const currentMessageCount = await page.locator('.top-bar-message-list textarea').count();
+      const initialBarCount = await page.locator('.top-bar-row.bg').count();
 
-    // Verify bars within limits
-    expect(currentBarCount).toBeGreaterThanOrEqual(1);
-    expect(currentBarCount).toBeLessThanOrEqual(20);
+      // Try adding one more bar
+      const addButton = page.getByRole('button', { name: 'Add new Top Bar' });
+      const canAdd = await addButton.isVisible().catch(() => false);
 
-    // Verify messages within limits
-    expect(currentMessageCount).toBeGreaterThanOrEqual(1);
-    expect(currentMessageCount).toBeLessThanOrEqual(50);
+      if (canAdd && !(await addButton.isDisabled())) {
+        await addButton.click();
+        await page.waitForTimeout(500);
 
-    // Go to frontend and verify bars render (resetToSingleBar sets visible=true)
-    await page.goto('/');
-    await page.waitForTimeout(500);
-    const renderedBars = await page.locator('[data-top-bar-id]').count();
+        const newBarCount = await page.locator('.top-bar-row.bg').count();
 
-    expect(renderedBars).toBeGreaterThanOrEqual(1);
-    expect(renderedBars).toBeLessThanOrEqual(currentBarCount);
-  });
-
-  test('should handle boundary case of exactly max_bars', async ({ page }) => {
-    await loginAndOpenTopBarSettings(page);
-    await resetToSingleBar(page);
-
-    const initialBarCount = await page.locator('.top-bar-row.bg').count();
-
-    // Try adding one more bar
-    const addButton = page.getByRole('button', { name: 'Add new Top Bar' });
-    const canAdd = await addButton.isVisible().catch(() => false);
-
-    if (canAdd && !(await addButton.isDisabled())) {
-      await addButton.click();
-      await page.waitForTimeout(500);
-
-      const newBarCount = await page.locator('.top-bar-row.bg').count();
-
-      if (newBarCount > initialBarCount) {
-        // Successfully added, check if we can add more
-        const canAddMore = (await addButton.isVisible()) && !(await addButton.isDisabled());
-        expect(typeof canAddMore).toBe('boolean');
+        if (newBarCount > initialBarCount) {
+          // Successfully added, check if we can add more
+          const canAddMore = (await addButton.isVisible()) && !(await addButton.isDisabled());
+          expect(typeof canAddMore).toBe('boolean');
+        } else {
+          // Hit the limit
+          expect(newBarCount).toBe(initialBarCount);
+        }
       } else {
-        // Hit the limit
-        expect(newBarCount).toBe(initialBarCount);
+        // Already at max
+        expect(initialBarCount).toBeGreaterThanOrEqual(1);
       }
-    } else {
-      // Already at max
-      expect(initialBarCount).toBeGreaterThanOrEqual(1);
-    }
+    });
+
   });
 
-  test('should display feature limits consistently across page reloads', async ({ page }) => {
-    await loginAndOpenTopBarSettings(page);
-    await resetToSingleBar(page);
 
-    const barCount1 = await page.locator('.top-bar-row.bg').count();
-    await openPanel(page, 0);
-    const messageCount1 = await page.locator('.top-bar-message-list textarea').count();
+  test.describe('max messages', () => {
 
-    // Reload page and wait for Vue
-    await page.reload();
-    await page.waitForLoadState('domcontentloaded');
-    await page.waitForSelector('#top-bar-app', { state: 'visible' });
-    await page.waitForTimeout(1000);
+    test('should hide scheduling UI when scheduling feature is disabled', async ({ page }) => {
+      await loginAndOpenTopBarSettings(page);
+      await resetToSingleBar(page);
+      await openPanel(page, 0);
 
-    const barCount2 = await page.locator('.top-bar-row.bg').count();
-    await openPanel(page, 0);
-    const messageCount2 = await page.locator('.top-bar-message-list textarea').count();
+      // Check if scheduling checkbox exists (Vue component)
+      const scheduleCheckbox = page.locator('.top-bar-toggle-life-time');
+      const scheduleLabel = page.locator('.top-bar-life-time-checkbox');
 
-    // Counts should be consistent
-    expect(barCount2).toBe(barCount1);
-    expect(messageCount2).toBe(messageCount1);
+      const hasScheduleUI = await scheduleCheckbox.isVisible().catch(() => false);
+
+      // Verify scheduling UI exists and is functional
+      expect(typeof hasScheduleUI).toBe('boolean');
+
+      if (hasScheduleUI) {
+        // Enable scheduling
+        const isChecked = await scheduleCheckbox.isChecked();
+        if (!isChecked) {
+          await scheduleLabel.click(); // Click label to toggle
+          await page.waitForTimeout(300);
+        }
+
+        // Verify datetime inputs appear
+        const barId = await page.locator('.top-bar-row.bg').first().locator('input[type="text"]').first().getAttribute('id');
+        if (barId) {
+          const id = barId.replace('name_', '');
+          const fromInput = page.locator(`#scheduled_from_${id}`);
+          const hasDatetimeInputs = await fromInput.isVisible().catch(() => false);
+          expect(typeof hasDatetimeInputs).toBe('boolean');
+        }
+      }
+    });
+
+  });
+
+  test.describe('mix flags', () => {
+
+    test('should save and respect multiple feature flag limits together', async ({ page }) => {
+      await loginAndOpenTopBarSettings(page);
+      await resetToSingleBar(page);
+
+      const currentBarCount = await page.locator('.top-bar-row.bg').count();
+      await openPanel(page, 0);
+      await page.waitForTimeout(300);
+
+      // Count message textareas in Vue
+      const currentMessageCount = await page.locator('.top-bar-message-list textarea').count();
+
+      // Verify bars within limits
+      expect(currentBarCount).toBeGreaterThanOrEqual(1);
+      expect(currentBarCount).toBeLessThanOrEqual(20);
+
+      // Verify messages within limits
+      expect(currentMessageCount).toBeGreaterThanOrEqual(1);
+      expect(currentMessageCount).toBeLessThanOrEqual(50);
+
+      // Go to frontend and verify bars render (resetToSingleBar sets visible=true)
+      await page.goto('/');
+      await page.waitForTimeout(500);
+      const renderedBars = await page.locator('[data-top-bar-id]').count();
+
+      expect(renderedBars).toBeGreaterThanOrEqual(1);
+      expect(renderedBars).toBeLessThanOrEqual(currentBarCount);
+    });
+
+    test('should display feature limits consistently across page reloads', async ({ page }) => {
+      await loginAndOpenTopBarSettings(page);
+      await resetToSingleBar(page);
+
+      const barCount1 = await page.locator('.top-bar-row.bg').count();
+      await openPanel(page, 0);
+      const messageCount1 = await page.locator('.top-bar-message-list textarea').count();
+
+      // Reload page and wait for Vue
+      await page.reload();
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForSelector('#top-bar-app', { state: 'visible' });
+      await page.waitForTimeout(1000);
+
+      const barCount2 = await page.locator('.top-bar-row.bg').count();
+      await openPanel(page, 0);
+      const messageCount2 = await page.locator('.top-bar-message-list textarea').count();
+
+      // Counts should be consistent
+      expect(barCount2).toBe(barCount1);
+      expect(messageCount2).toBe(messageCount1);
+    });
+
   });
 });

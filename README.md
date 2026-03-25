@@ -49,6 +49,13 @@ composer test
 # or only Top Bar:  composer test:top-bar
 ```
 
+**Unit tests** (JS Unit) run from the project root:
+
+```bash
+npm install
+npm run test:e2e
+```
+
 **E2E tests** (Playwright):
 
 ```bash
