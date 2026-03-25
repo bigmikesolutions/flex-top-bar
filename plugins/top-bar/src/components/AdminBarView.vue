@@ -206,73 +206,17 @@
               <p class="bold lg">1</p>
             </div>
 
-            <!-- Type selector (UI mock for now) -->
-            <div class="item-creator">
-              <fieldset>
-                <legend class="bold">{{ __('Type', 'top-bar') }}</legend>
-                <label><input type="radio" checked disabled /> {{ __('Text Editor', 'top-bar') }}</label>
-              </fieldset>
-            </div>
+            <ColumnTypeSelector />
 
-            <!-- Messages section (large column) -->
-            <div class="item-creator lg">
-              <fieldset class="line">
-                <legend class="bold">{{ __('Effect', 'top-bar') }}</legend>
-                <label>
-                  <select
-                    v-model="localBar.effect"
-                    @change="saveChanges"
-                  >
-                    <option value="none">{{ __('None', 'top-bar') }}</option>
-                    <option value="slider">{{ __('Slider', 'top-bar') }}</option>
-                    <option value="fadein">{{ __('Fade In', 'top-bar') }}</option>
-                    <option value="blink">{{ __('Blink', 'top-bar') }}</option>
-                  </select>
-                </label>
-              </fieldset>
-              <fieldset class="line">
-                <legend class="bold">{{ __('Add multi fields', 'top-bar') }}</legend>
-
-                <div class="top-bar-message-list">
-                  <div
-                    v-for="(message, index) in localBar.messages"
-                    :key="index"
-                    class="top-bar-column-creator-grid"
-                  >
-                    <div class="item-creator no">
-                      <p class="bold md">{{ index + 1 }}</p>
-                      <button
-                        v-if="localBar.messages.length > 1"
-                        type="button"
-                        class="top-bar-btn amber sm"
-                        @click="removeMessage(index)"
-                      >
-                        X
-                      </button>
-                    </div>
-                    <div class="item-creator">
-                      <textarea
-                        v-model="localBar.messages[index]"
-                        :placeholder="index === 0 ? __('Welcome!', 'top-bar') : ''"
-                        rows="2"
-                        @blur="saveChanges"
-                      ></textarea>
-                    </div>
-                  </div>
-                </div>
-              </fieldset>
-
-              <div class="top-bar-row rt">
-                <button
-                  v-if="localBar.messages.length < maxMessages"
-                  type="button"
-                  class="top-bar-btn amber sm right"
-                  @click="addMessage"
-                >
-                  {{ __('Add new text', 'top-bar') }}
-                </button>
-              </div>
-            </div>
+            <TextColumnEditor
+              :bar-id="bar.id"
+              :effect="localBar.effect"
+              :messages="localBar.messages"
+              :max-messages="maxMessages"
+              @patch="onMessagesPatch"
+              @commit="saveChanges"
+              @update="onTextColumnPersist"
+            />
 
             <!-- Size + Mobile visibility -->
             <div class="item item-creator">
@@ -306,6 +250,8 @@
 import { ref, watch } from 'vue'
 import type { Bar } from '@/types'
 import { __ } from '@wordpress/i18n'
+import ColumnTypeSelector from './ColumnTypeSelector.vue'
+import TextColumnEditor from './TextColumnEditor.vue'
 
 const props = defineProps<{
   bar: Bar
@@ -329,18 +275,13 @@ watch(() => props.bar.id, () => {
   isExpanded.value = props.bar.admin_visibile !== false
 })
 
-function addMessage() {
-  if (localBar.value.messages.length < props.maxMessages) {
-    localBar.value.messages.push('')
-    saveChanges()
-  }
+function onMessagesPatch(updates: Partial<Pick<Bar, 'messages'>>) {
+  localBar.value = { ...localBar.value, ...updates }
 }
 
-function removeMessage(index: number) {
-  if (localBar.value.messages.length > 1 && index > 0) {
-    localBar.value.messages.splice(index, 1)
-    saveChanges()
-  }
+function onTextColumnPersist(updates: Partial<Pick<Bar, 'effect' | 'messages'>>) {
+  localBar.value = { ...localBar.value, ...updates }
+  saveChanges()
 }
 
 function toggleVisibility() {

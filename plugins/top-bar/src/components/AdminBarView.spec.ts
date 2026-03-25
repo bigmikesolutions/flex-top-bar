@@ -1,6 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import AdminBarView from './AdminBarView.vue'
+import ColumnTypeSelector from './ColumnTypeSelector.vue'
+import TextColumnEditor from './TextColumnEditor.vue'
 import type { Bar } from '@/types'
 
 // Mock @wordpress/i18n
@@ -166,6 +168,20 @@ describe('AdminBarView', () => {
       await wrapper.vm.$nextTick()
 
       expect(arrowButton.attributes('aria-expanded')).toBe('false')
+    })
+  })
+
+  describe('column design (type + text editor)', () => {
+    it('mounts ColumnTypeSelector and TextColumnEditor with bar data', () => {
+      const wrapper = mount(AdminBarView, { props: defaultProps })
+
+      expect(wrapper.findComponent(ColumnTypeSelector).exists()).toBe(true)
+      const editor = wrapper.findComponent(TextColumnEditor)
+      expect(editor.exists()).toBe(true)
+      expect(editor.props('barId')).toBe('bar_1')
+      expect(editor.props('effect')).toBe('none')
+      expect(editor.props('messages')).toEqual(['Hello', 'World'])
+      expect(editor.props('maxMessages')).toBe(4)
     })
   })
 
