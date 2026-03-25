@@ -41,16 +41,13 @@ const hideScrollBars = ref<Set<string>>(new Set())
 // Fetch bars from public API endpoint
 async function fetchBars() {
   try {
-    console.log('[Top Bar] Fetching bars from API...')
     // Use public endpoint (no auth required for frontend)
     // Using query string format for compatibility with sites without pretty permalinks
     const response = await fetch('/?rest_route=/top-bar/v1/public-bars')
-    console.log('[Top Bar] API response status:', response.status)
     if (!response.ok) {
       throw new Error('Failed to fetch bars')
     }
     bars.value = await response.json()
-    console.log('[Top Bar] Bars loaded:', bars.value.length, bars.value)
 
     // Initialize message rotation for bars with effects
     bars.value.forEach(bar => {
@@ -66,7 +63,7 @@ async function fetchBars() {
 
 // Filter bars by visibility and scheduling
 const visibleBars = computed(() => {
-  const filtered = bars.value.filter(bar => {
+  return bars.value.filter(bar => {
     // Check if visible
     if (!bar.visible) return false
 
@@ -88,8 +85,6 @@ const visibleBars = computed(() => {
 
     return true
   })
-  console.log('[Top Bar] Visible bars:', filtered.length, filtered)
-  return filtered
 })
 
 function getBarStyles(bar: Bar) {
