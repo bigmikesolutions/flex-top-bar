@@ -18,6 +18,7 @@ final class Admin {
 	public function __construct() {
 		add_action( 'admin_menu', [ $this, 'add_settings_page' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_vue_app' ] );
+		add_filter( 'script_loader_tag', [ $this, 'add_module_type_to_script' ], 10, 3 );
 	}
 
 	public function enqueue_vue_app( string $hook ): void {
@@ -72,6 +73,20 @@ final class Admin {
 		);
 	}
 
+
+	/**
+	 * Add type="module" attribute to admin script tag for ES modules.
+	 *
+	 * @param string $tag    Script tag HTML.
+	 * @param string $handle Script handle.
+	 * @param string $src    Script source URL.
+	 */
+	public function add_module_type_to_script( string $tag, string $handle, string $src ): string {
+		if ( 'top-bar-admin-vue' === $handle ) {
+			$tag = str_replace( '<script ', '<script type="module" ', $tag );
+		}
+		return $tag;
+	}
 
 	public function render_settings_page(): void {
 		if ( ! current_user_can( 'manage_options' ) ) {

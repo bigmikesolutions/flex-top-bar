@@ -100,7 +100,10 @@ final class Frontend {
 				TOP_BAR_VERSION,
 				true
 			);
-			// Add type="module" attribute for ES modules
+		}
+
+		// Add type="module" attribute for ES modules (only on frontend)
+		if ( ! is_admin() ) {
 			add_filter( 'script_loader_tag', [ $this, 'add_module_type_to_script' ], 10, 3 );
 		}
 
