@@ -39,7 +39,7 @@ final class Admin {
 				$bars = [];
 			}
 			$bars = array_values( array_filter( $bars, 'is_array' ) );
-			if ( count( $bars ) >= Options::max_bars() ) {
+			if ( count( $bars ) >= \TopBar\FeatureFlags::instance()->max_bars() ) {
 				wp_safe_redirect( admin_url( 'options-general.php?page=top-bar&top_bar_max=1' ) );
 				exit;
 			}
@@ -134,7 +134,7 @@ final class Admin {
 				}
 
 				$messages = isset( $row['messages'] ) && is_array( $row['messages'] ) ? array_values( $row['messages'] ) : [];
-				$max_messages = Options::max_messages();
+				$max_messages = \TopBar\FeatureFlags::instance()->max_messages();
 				if ( $max_messages > 1 && count( $messages ) < $max_messages ) {
 					$messages[] = '';
 				}
@@ -186,7 +186,7 @@ final class Admin {
 			),
 			'top_bar_add'
 		);
-		$can_add_bar = count( $bars ) < Options::max_bars();
+		$can_add_bar = count( $bars ) < \TopBar\FeatureFlags::instance()->max_bars();
 		?>
 
 		<form action="options.php" method="post">
@@ -196,7 +196,7 @@ final class Admin {
 			<h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
 
 			<?php if ( isset( $_GET['top_bar_max'] ) ) : ?>
-				<div class="notice notice-warning"><p><?php echo esc_html( sprintf( /* translators: %d: max bars */ __( 'You can add at most %d top bars.', 'top-bar' ), Options::max_bars() ) ); ?></p></div>
+				<div class="notice notice-warning"><p><?php echo esc_html( sprintf( /* translators: %d: max bars */ __( 'You can add at most %d top bars.', 'top-bar' ), \TopBar\FeatureFlags::instance()->max_bars() ) ); ?></p></div>
 			<?php endif; ?>
 			<?php if ( isset( $_GET['top_bar_min'] ) ) : ?>
 				<div class="notice notice-warning"><p><?php esc_html_e( 'At least one top bar must remain.', 'top-bar' ); ?></p></div>
@@ -392,7 +392,7 @@ final class Admin {
 						</div>
 					</div>
 
-					<?php if ( defined( 'FF_SCHEDULE' ) && FF_SCHEDULE ) : ?>
+					<?php if ( \TopBar\FeatureFlags::instance()->is_schedule_enabled() ) : ?>
 						<div class="top-bar-grid title">
 							<div class="item">
 								<label class="check top-bar-life-time-checkbox">
@@ -494,7 +494,7 @@ final class Admin {
 								
 									<div class="top-bar-message-list" data-pf="<?php echo esc_attr( $pf ); ?>" data-bar-index="<?php echo esc_attr( (string) (int) $i ); ?>">
 										<?php
-										$message_count = max( 1, min( count( $messages ), Options::max_messages() ) );
+										$message_count = max( 1, min( count( $messages ), \TopBar\FeatureFlags::instance()->max_messages() ) );
 										for ( $mi = 0; $mi < $message_count; $mi++ ) :
 											$editor_value = isset( $messages[ $mi ] ) && is_string( $messages[ $mi ] )
 												? $messages[ $mi ]
@@ -542,7 +542,7 @@ final class Admin {
 								</fieldset>								
 								<div class="top-bar-row rt">
 									<?php
-									$max_messages = Options::max_messages();
+									$max_messages = \TopBar\FeatureFlags::instance()->max_messages();
 									$can_add_message = $max_messages > 1 && count( $messages ) < $max_messages;
 									?>
 									<?php if ( $can_add_message ) : ?>

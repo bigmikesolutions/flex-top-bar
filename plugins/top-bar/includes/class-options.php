@@ -20,52 +20,6 @@ final class Options {
 	/** At least one bar configuration must exist. */
 	public const MIN_BARS = 1;
 
-	/** Maximum number of bars (order preserved in array). */
-	public const MAX_BARS = 1;
-
-	public const MAX_MESSAGES = 1;
-
-	/**
-	 * Maximum number of bars allowed.
-	 *
-	 * If Freemius plan exposes the `FF_MAX_BARS` constant, use it. Otherwise fall back to MAX_BARS.
-	 */
-	public static function max_bars(): int {
-		$max = self::MAX_BARS;
-		if ( defined( 'FF_MAX_BARS' ) ) {
-			$raw = constant( 'FF_MAX_BARS' );
-			if ( is_numeric( $raw ) ) {
-				$max = (int) $raw;
-			}
-		}
-		if ( $max < self::MIN_BARS ) {
-			$max = self::MIN_BARS;
-		}
-		return $max;
-	}
-
-	/**
-	 * Maximum number of messages allowed per bar.
-	 *
-	 * Driven by Freemius feature flag `FF_MAX_MESSAGES` when defined; otherwise defaults to 10.
-	 */
-	public static function max_messages(): int {
-		$max = self::MAX_MESSAGES;
-		if ( defined( 'FF_MAX_MESSAGES' ) ) {
-			$raw = constant( 'FF_MAX_MESSAGES' );
-			if ( is_numeric( $raw ) ) {
-				$max = (int) $raw;
-			}
-		}
-		if ( $max < 1 ) {
-			$max = 1;
-		}
-		if ( $max > 50 ) {
-			$max = 50;
-		}
-		return $max;
-	}
-
 	public static function new_bar_id(): string {
 		return 'bar_' . wp_generate_password( 8, false, false );
 	}
@@ -94,7 +48,7 @@ final class Options {
 	}
 
 	/**
-	 * Bars from DB (migrates legacy flat options once). Count between MIN_BARS and MAX_BARS.
+	 * Bars from DB (migrates legacy flat options once).
 	 *
 	 * @return list<array<string, mixed>>
 	 */
@@ -116,7 +70,7 @@ final class Options {
 		if ( $out === [] ) {
 			return [ self::default_bar() ];
 		}
-		$out = array_slice( $out, 0, self::max_bars() );
+		$out = array_slice( $out, 0, FeatureFlags::instance()->max_bars() );
 		return $out;
 	}
 
@@ -274,7 +228,7 @@ final class Options {
 		if ( ! isset( $messages[0] ) || $messages[0] === '' ) {
 			$messages[0] = wp_kses_post( $default_message );
 		}
-		$messages = array_values( array_slice( $messages, 0, self::max_messages() ) );
+		$messages = array_values( array_slice( $messages, 0, FeatureFlags::instance()->max_messages() ) );
 		$messages_mobile_visible = true;
 		if ( array_key_exists( 'messages_mobile_visible', $bar ) ) {
 			$mmv = $bar['messages_mobile_visible'];
@@ -343,7 +297,7 @@ final class Options {
 		if ( $out === [] ) {
 			return [ self::default_bar() ];
 		}
-		$out = array_slice( $out, 0, self::max_bars() );
+		$out = array_slice( $out, 0, FeatureFlags::instance()->max_bars() );
 		if ( count( $out ) < self::MIN_BARS ) {
 			while ( count( $out ) < self::MIN_BARS ) {
 				$out[] = self::default_bar();
@@ -383,7 +337,7 @@ final class Options {
 		);
 
 		// Enforce plan limit on active bars as well.
-		return array_slice( $active, 0, self::max_bars() );
+		return array_slice( $active, 0, FeatureFlags::instance()->max_bars() );
 	}
 
 	/**
@@ -393,7 +347,7 @@ final class Options {
 	 */
 	private static function is_bar_in_schedule_window( array $bar ): bool {
 		// If scheduling feature is not available (Freemius flag off), treat scheduling as disabled.
-		if ( ! defined( 'FF_SCHEDULE' ) || ! FF_SCHEDULE ) {
+		if ( ! FeatureFlags::instance()->is_schedule_enabled() ) {
 			return true;
 		}
 
@@ -431,48 +385,6 @@ final class Options {
 		} catch ( \Exception $e ) {
 			return false;
 		}
-	}
-
-	// --- Back-compat: first bar (admin/legacy UI) ---
-
-	public static function get_position(): string {
-		$bars = self::get_bars();
-		$pos  = isset( $bars[0]['position'] ) ? (string) $bars[0]['position'] : 'top';
-		return in_array( $pos, [ 'top', 'bottom' ], true ) ? $pos : 'top';
-	}
-
-	public static function get_message(): string {
-		$bars = self::get_bars();
-		return isset( $bars[0]['messages'][0] ) ? (string) $bars[0]['messages'][0] : '';
-	}
-
-	public static function get_bg_color(): string {
-		$bars = self::get_bars();
-		$bg   = isset( $bars[0]['bg_color'] ) ? (string) $bars[0]['bg_color'] : '#1d2327';
-		return self::sanitize_hex_color( $bg ) ?: '#1d2327';
-	}
-
-	public static function get_frame_color(): string {
-		$bars = self::get_bars();
-		$c    = isset( $bars[0]['frame_color'] ) ? (string) $bars[0]['frame_color'] : '';
-		return self::sanitize_hex_color( $c ) ?: 'transparent';
-	}
-
-	public static function get_hide_on_scroll(): bool {
-		$bars = self::get_bars();
-		return ! empty( $bars[0]['hide_on_scroll'] );
-	}
-
-	public static function get_status(): string {
-		$bars   = self::get_bars();
-		$v = $bars[0]['visible'] ?? true;
-		if ( is_string( $v ) ) {
-			$raw = strtolower( trim( $v ) );
-			if ( in_array( $raw, [ 'true', 'false', '0', '1' ], true ) ) {
-				$v = $raw === 'true' || $raw === '1';
-			}
-		}
-		return ! empty( $v ) ? 'on' : 'off';
 	}
 
 	public static function sanitize_hex_color( string $color ): string {
