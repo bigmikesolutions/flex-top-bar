@@ -38,3 +38,8 @@ composer test
 ```sh
 docker compose exec wordpress php -r 'require "/var/www/html/wp-load.php"; $v=get_option("top_bars"); echo json_encode($v, JSON_PRETTY_PRINT), PHP_EOL;'
 ```
+
+## Buying on sandbox via Freemius
+
+- [Testing credit cards & PayPal accounts](https://freemius.com/help/documentation/checkout/integration/testing/#testing-credit-cards)
+

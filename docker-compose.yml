@@ -11,10 +11,21 @@ services:
       WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD:-wordpress}
       WORDPRESS_DB_NAME: ${MYSQL_DATABASE:-wordpress}
       WORDPRESS_DEBUG: ${WORDPRESS_DEBUG:-1}
+      # Freemius dev-only integration (Docker Compose only).
+      # Set FREEMIUS_PRODUCT_SLUG and FREEMIUS_SECRET_KEY in your local `.env`.
+      FREEMIUS_PRODUCT_SLUG: ${FREEMIUS_PRODUCT_SLUG:-}
+      FREEMIUS_SECRET_KEY: ${FREEMIUS_SECRET_KEY:-}
       WORDPRESS_CONFIG_EXTRA: |
         define('WP_DEBUG_LOG', true);
         define('WP_DEBUG_DISPLAY', true);
         ini_set('opcache.enable', '0');
+        define('WP_FS__DEV_MODE', true);
+        define('WP_FS__SKIP_EMAIL_ACTIVATION', true);
+        $$fs_slug = getenv('FREEMIUS_PRODUCT_SLUG');
+        $$fs_secret = getenv('FREEMIUS_SECRET_KEY');
+        if (is_string($$fs_slug) && $$fs_slug !== '' && is_string($$fs_secret) && $$fs_secret !== '') {
+          define('WP_FS__' . $$fs_slug . '_SECRET_KEY', $$fs_secret);
+        }
     volumes:
       - wordpress_data:/var/www/html
       # Custom plugins (develop locally; container plugins dir is replaced)

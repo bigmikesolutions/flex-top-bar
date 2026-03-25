@@ -39,7 +39,7 @@ final class Admin {
 				$bars = [];
 			}
 			$bars = array_values( array_filter( $bars, 'is_array' ) );
-			if ( count( $bars ) >= Options::MAX_BARS ) {
+			if ( count( $bars ) >= Options::max_bars() ) {
 				wp_safe_redirect( admin_url( 'options-general.php?page=top-bar&top_bar_max=1' ) );
 				exit;
 			}
@@ -183,7 +183,7 @@ final class Admin {
 			),
 			'top_bar_add'
 		);
-		$can_add = count( $bars ) < Options::MAX_BARS;
+		$can_add = count( $bars ) < Options::max_bars();
 		?>
 
 		<form action="options.php" method="post">
@@ -193,7 +193,7 @@ final class Admin {
 			<h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
 
 			<?php if ( isset( $_GET['top_bar_max'] ) ) : ?>
-				<div class="notice notice-warning"><p><?php echo esc_html( sprintf( /* translators: %d: max bars */ __( 'You can add at most %d top bars.', 'top-bar' ), Options::MAX_BARS ) ); ?></p></div>
+				<div class="notice notice-warning"><p><?php echo esc_html( sprintf( /* translators: %d: max bars */ __( 'You can add at most %d top bars.', 'top-bar' ), Options::max_bars() ) ); ?></p></div>
 			<?php endif; ?>
 			<?php if ( isset( $_GET['top_bar_min'] ) ) : ?>
 				<div class="notice notice-warning"><p><?php esc_html_e( 'At least one top bar must remain.', 'top-bar' ); ?></p></div>

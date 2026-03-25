@@ -23,6 +23,29 @@ final class Options {
 	/** Maximum number of bars (order preserved in array). */
 	public const MAX_BARS = 5;
 
+	/**
+	 * Maximum number of bars allowed.
+	 *
+	 * If Freemius plan exposes the `FF_MAX_BARS` constant, use it. Otherwise fall back to MAX_BARS.
+	 */
+	public static function max_bars(): int {
+		$max = self::MAX_BARS;
+		if ( defined( 'FF_MAX_BARS' ) ) {
+			$raw = constant( 'FF_MAX_BARS' );
+			if ( is_numeric( $raw ) ) {
+				$max = (int) $raw;
+			}
+		}
+		if ( $max < self::MIN_BARS ) {
+			$max = self::MIN_BARS;
+		}
+		// Safety cap.
+		if ( $max > 50 ) {
+			$max = 50;
+		}
+		return $max;
+	}
+
 	public static function new_bar_id(): string {
 		return 'bar_' . wp_generate_password( 8, false, false );
 	}
@@ -73,7 +96,7 @@ final class Options {
 		if ( $out === [] ) {
 			return [ self::default_bar() ];
 		}
-		$out = array_slice( $out, 0, self::MAX_BARS );
+		$out = array_slice( $out, 0, self::max_bars() );
 		return $out;
 	}
 
@@ -300,7 +323,7 @@ final class Options {
 		if ( $out === [] ) {
 			return [ self::default_bar() ];
 		}
-		$out = array_slice( $out, 0, self::MAX_BARS );
+		$out = array_slice( $out, 0, self::max_bars() );
 		if ( count( $out ) < self::MIN_BARS ) {
 			while ( count( $out ) < self::MIN_BARS ) {
 				$out[] = self::default_bar();
