@@ -186,7 +186,7 @@ final class Admin {
 			),
 			'top_bar_add'
 		);
-		$can_add = count( $bars ) < Options::max_bars();
+		$can_add_bar = count( $bars ) < Options::max_bars();
 		?>
 
 		<form action="options.php" method="post">
@@ -207,13 +207,17 @@ final class Admin {
 			<div class="top-bar-row center empty">
 				<p class="xlg bold"><?php esc_html_e( 'Welcome to Top Bar plugin', 'top-bar' ); ?></p>
 				<p class="xs"><?php esc_html_e( 'Click the button to add your first Top Bar', 'top-bar' ); ?></p>	
-				<a href="<?php echo $can_add ? esc_url( $add_url ) : '#'; ?>" class="top-bar-btn mint md"<?php echo $can_add ? '' : ' aria-disabled="true" onclick="return false;"'; ?>><?php esc_html_e( 'Add new Top Bar', 'top-bar' ); ?></a>	
+				<?php if ( $can_add_bar ) : ?>
+					<a href="<?php echo esc_url( $add_url ); ?>" class="top-bar-btn mint md"><?php esc_html_e( 'Add new Top Bar', 'top-bar' ); ?></a>
+				<?php endif; ?>
 			</div>
 
 			<!-- List of buttons  -->
 
 			<div class="top-bar-row rt">
-				<a href="<?php echo $can_add ? esc_url( $add_url ) : '#'; ?>" class="top-bar-btn mint sm"<?php echo $can_add ? '' : ' aria-disabled="true" onclick="return false;"'; ?>><?php esc_html_e( 'Add new Top Bar', 'top-bar' ); ?></a>	
+				<?php if ( $can_add_bar ) : ?>
+					<a href="<?php echo esc_url( $add_url ); ?>" class="top-bar-btn mint sm"><?php esc_html_e( 'Add new Top Bar', 'top-bar' ); ?></a>
+				<?php endif; ?>
 			</div>
 
 
