@@ -27,23 +27,33 @@ cd /Users/m-wrona/github/bigmikesolutions/wordpress
 php vendor/bin/phpunit --testdox plugins/top-bar/tests/
 ```
 
-### JavaScript Unit Tests (Vitest) ✅ **12 tests passing**
+### JavaScript Unit Tests (Vitest) ✅ **45 tests passing**
 
-Located in: `src/components/*.spec.ts`
+Located in: `src/**/*.spec.ts`
 
 **What's tested:**
-- ✅ TopBarFrontend component rendering
-- ✅ Bar visibility filtering (visible flag)
-- ✅ Schedule window filtering (datetime logic)
-- ✅ Message concatenation for "none" effect
-- ✅ CSS class application (position, mobile-hidden)
-- ✅ Style attributes (background, border)
-- ✅ API error handling
-- ✅ Data attributes
-- ✅ Mobile visibility classes
 
-**Test file:**
-- `src/components/TopBarFrontend.spec.ts` - Complete component test suite
+**Components:**
+- ✅ TopBarFrontend - Rendering, visibility, scheduling, styles, API errors (12 tests)
+
+**API Client:**
+- ✅ GET /bars - Fetch bars
+- ✅ POST /bars - Create bar
+- ✅ PUT /bars/:id - Update bar
+- ✅ DELETE /bars/:id - Delete bar
+- ✅ GET /feature-flags - Fetch flags
+- ✅ Error handling (network errors, HTTP errors)
+- ✅ 204 No Content handling (8 tests)
+
+**Pinia Stores:**
+- ✅ useBarsStore - State management, CRUD operations, error handling (17 tests)
+- ✅ useFeatureFlagsStore - Feature flag loading, error handling (8 tests)
+
+**Test files:**
+- `src/components/TopBarFrontend.spec.ts` - Frontend component
+- `src/api/client.spec.ts` - API client layer
+- `src/stores/bars.spec.ts` - Bars state management
+- `src/stores/featureFlags.spec.ts` - Feature flags state
 
 **Run tests:**
 ```bash
@@ -89,9 +99,9 @@ npm run test:ui
 - Updated to reflect Vue-based architecture
 - Tests only check mount point output and asset enqueuing
 
-**JS Tests:** ✅ Fully working (12/12 passing)
-- Complete test suite created (`TopBarFrontend.spec.ts`)
-- 12 test cases covering all Vue logic
+**JS Tests:** ✅ Fully working (45/45 passing)
+- Complete test suites for components, API, and stores
+- 45 test cases covering all Vue/JS logic
 - Tests run successfully from plugin directory
 
 **E2E Tests:** ✅ Separate Playwright setup (in `/e2e`)
