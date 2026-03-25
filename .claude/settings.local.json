@@ -11,7 +11,11 @@
       "Bash(docker compose:*)",
       "Bash(curl -s http://localhost:8080/wp-json/top-bar/v1/public-bars)",
       "Bash(curl -s http://localhost:8080/)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(find /Users/m-wrona/github/bigmikesolutions/wordpress/plugins/top-bar -name *test*.php -o -name phpunit.xml -o -name phpunit.xml.dist)",
+      "Bash(php:*)",
+      "Bash(npm test:*)",
+      "Bash(npx vitest:*)"
     ]
   }
 }
