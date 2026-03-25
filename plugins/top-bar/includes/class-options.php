@@ -21,7 +21,7 @@ final class Options {
 	public const MIN_BARS = 1;
 
 	/** Maximum number of bars (order preserved in array). */
-	public const MAX_BARS = 5;
+	public const MAX_BARS = 1;
 
 	/**
 	 * Maximum number of bars allowed.
@@ -38,10 +38,6 @@ final class Options {
 		}
 		if ( $max < self::MIN_BARS ) {
 			$max = self::MIN_BARS;
-		}
-		// Safety cap.
-		if ( $max > 50 ) {
-			$max = 50;
 		}
 		return $max;
 	}
@@ -336,7 +332,7 @@ final class Options {
 	 * @return list<array<string, mixed>>
 	 */
 	public static function get_active_bars(): array {
-		return array_values(
+		$active = array_values(
 			array_filter(
 				self::get_bars(),
 				static function ( $bar ) {
@@ -352,7 +348,7 @@ final class Options {
 						if ( in_array( $raw, [ 'true', 'false', '0', '1' ], true ) ) {
 							$is_visible = $raw === 'true' || $raw === '1';
 						}
-					} 
+					}
 					if ( ! $is_visible ) {
 						return false;
 					}
@@ -361,6 +357,9 @@ final class Options {
 				}
 			)
 		);
+
+		// Enforce plan limit on active bars as well.
+		return array_slice( $active, 0, self::max_bars() );
 	}
 
 	/**
