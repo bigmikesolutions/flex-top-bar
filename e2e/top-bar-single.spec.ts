@@ -5,6 +5,10 @@ import {
   openPanel,
   resetToSingleBar,
   toDatetimeLocalValue,
+  getBarIdByIndex,
+  setBarPosition,
+  setBarHideOnScroll,
+  setSchedule,
 } from './helpers/topBarHelpers';
 
 declare const process: { env: Record<string, string | undefined> };
@@ -15,18 +19,9 @@ test.describe('single-bar', () => {
     test('should save bar as top and render it at top', async ({ page }) => {
       await loginAndOpenTopBarSettings(page);
       await resetToSingleBar(page);
-      await ensureAtLeastBars(page, 1);
-      await openPanel(page, 0);
 
-      const id0 = await page.locator('input[name="top_bars[0][id]"]').inputValue();
-      const position0 = page.locator('select[name="top_bars[0][position]"]');
-
-      await position0.evaluate((el: HTMLSelectElement) => {
-        el.value = 'top';
-        el.dispatchEvent(new Event('change', { bubbles: true }));
-      });
-      await page.getByRole('button', { name: 'Save Changes' }).click();
-      await expect(page.locator('#setting-error-settings_updated, .notice-success')).toBeVisible();
+      const id0 = await getBarIdByIndex(page, 0);
+      await setBarPosition(page, 0, 'top');
 
       await page.goto('/');
 
@@ -39,18 +34,9 @@ test.describe('single-bar', () => {
     test('should save bar as bottom and render it at bottom', async ({ page }) => {
       await loginAndOpenTopBarSettings(page);
       await resetToSingleBar(page);
-      await ensureAtLeastBars(page, 1);
-      await openPanel(page, 0);
 
-      const id0 = await page.locator('input[name="top_bars[0][id]"]').inputValue();
-      const position0 = page.locator('select[name="top_bars[0][position]"]');
-
-      await position0.evaluate((el: HTMLSelectElement) => {
-        el.value = 'bottom';
-        el.dispatchEvent(new Event('change', { bubbles: true }));
-      });
-      await page.getByRole('button', { name: 'Save Changes' }).click();
-      await expect(page.locator('#setting-error-settings_updated, .notice-success')).toBeVisible();
+      const id0 = await getBarIdByIndex(page, 0);
+      await setBarPosition(page, 0, 'bottom');
 
       await page.goto('/');
 

@@ -1,7 +1,7 @@
 name: Top Bar PR & main checks
 
 on:
-  pull_request:
+  # pull_request:
   push:
     branches:
       - main

@@ -19,6 +19,7 @@
 composer.lock
 node_modules/
 test-results/
+.idea
 
 # Configuration
 wp-config.php
