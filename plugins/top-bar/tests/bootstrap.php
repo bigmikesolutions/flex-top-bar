@@ -32,6 +32,28 @@ if ( ! function_exists( 'sanitize_text_field' ) ) {
 	}
 }
 
+if ( ! function_exists( 'sanitize_textarea_field' ) ) {
+	function sanitize_textarea_field( string $text ): string {
+		return trim( strip_tags( $text ) );
+	}
+}
+
+if ( ! function_exists( 'esc_url_raw' ) ) {
+	function esc_url_raw( string $url ): string {
+		$url = trim( $url );
+		if ( $url === '' ) {
+			return '';
+		}
+		if ( preg_match( '#^https?://#i', $url ) ) {
+			return $url;
+		}
+		if ( str_starts_with( $url, 'mailto:' ) || str_starts_with( $url, 'tel:' ) ) {
+			return $url;
+		}
+		return '';
+	}
+}
+
 if ( ! function_exists( 'wp_kses_post' ) ) {
 	function wp_kses_post( string $text ): string {
 		return $text;

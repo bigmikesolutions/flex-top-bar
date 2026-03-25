@@ -9,7 +9,7 @@
       role="banner"
       :data-top-bar-id="bar.id"
       :data-top-bar-position="bar.position"
-      :data-top-bar-effect="getColumns(bar)[0]?.effect ?? bar.effect"
+      :data-top-bar-effect="getBarEffect(bar)"
       :data-top-bar-hide-on-scroll="bar.hide_on_scroll ? '1' : '0'"
     >
       <div class="top-bar__inner">
@@ -21,15 +21,75 @@
             :class="{ 'top-bar__column--mobile-hidden': !column.messages_mobile_visible }"
             :style="getColumnStyle(column)"
           >
-            <template v-if="column.effect === 'none'">
-              {{ getConcatenatedMessage(column) }}
+            <template v-if="column.type === 'text'">
+              <template v-if="column.effect === 'none'">
+                {{ getConcatenatedMessage(column) }}
+              </template>
+              <template v-else>
+                <transition :name="getTransitionName(column.effect)" mode="out-in">
+                  <div :key="currentMessageIndex[columnKey(bar.id, column.id)] ?? 0">
+                    {{ getCurrentMessage(bar, column) }}
+                  </div>
+                </transition>
+              </template>
             </template>
-            <template v-else>
-              <transition :name="getTransitionName(column.effect)" mode="out-in">
-                <div :key="currentMessageIndex[columnKey(bar.id, column.id)] ?? 0">
-                  {{ getCurrentMessage(bar, column) }}
-                </div>
-              </transition>
+            <template v-else-if="column.type === 'social'">
+              <div
+                class="top-bar-social-column"
+                :class="socialColumnClass(column)"
+                :style="socialColumnStyle(column)"
+              >
+                <a
+                  v-for="(link, i) in column.links.filter(l => l.url.trim() !== '')"
+                  :key="`${column.id}-link-${i}`"
+                  class="top-bar-social-column__link"
+                  :href="safeHref(link.url)"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <span
+                    class="top-bar-icon top-bar-icon--social"
+                    :style="iconStyleFromClass(socialIconClass(link.platform), column.icon_color)"
+                    aria-hidden="true"
+                  ></span>
+                  {{ socialPlatformLabel(link.platform) }}
+                </a>
+              </div>
+            </template>
+            <template v-else-if="column.type === 'contact'">
+              <div
+                class="top-bar-contact-column"
+                :class="contactColumnClass(column)"
+                :style="contactColumnStyle(column)"
+              >
+                <template v-for="(entry, i) in column.contacts.filter(e => e.value.trim() !== '')" :key="`${column.id}-c-${i}`">
+                  <a
+                    v-if="contactHref(entry.kind, entry.value) !== '#'"
+                    class="top-bar-contact-column__link"
+                    :href="contactHref(entry.kind, entry.value)"
+                    :target="entry.kind === 'website' || entry.kind === 'location' ? '_blank' : undefined"
+                    :rel="entry.kind === 'website' || entry.kind === 'location' ? 'noopener noreferrer' : undefined"
+                  >
+                    <span
+                      class="top-bar-icon top-bar-icon--contact"
+                      :style="iconStyleFromClass(contactIconClass(entry.kind), column.icon_color)"
+                      aria-hidden="true"
+                    ></span>
+                    {{ contactDisplayLabel(entry.kind, entry.value) }}
+                  </a>
+                  <span
+                    v-else
+                    class="top-bar-contact-column__text"
+                  >
+                    <span
+                      class="top-bar-icon top-bar-icon--contact"
+                      :style="iconStyleFromClass(contactIconClass(entry.kind), column.icon_color)"
+                      aria-hidden="true"
+                    ></span>
+                    {{ contactDisplayLabel(entry.kind, entry.value) }}
+                  </span>
+                </template>
+              </div>
             </template>
           </div>
         </div>
@@ -40,7 +100,20 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import type { Bar, BarColumn } from '@/types'
+import type {
+  Bar,
+  BarColumn,
+  ContactBarColumn,
+  ContactKind,
+  SocialBarColumn,
+  SocialPlatform,
+  TextBarColumn,
+} from '@/types'
+import {
+  CONTACT_ICONS_BY_KIND,
+  ICONS,
+  SOCIAL_ICONS_BY_PLATFORM,
+} from '@/constants/icons'
 
 const bars = ref<Bar[]>([])
 const currentMessageIndex = ref<Record<string, number>>({})
@@ -62,6 +135,11 @@ function getColumns(bar: Bar): BarColumn[] {
       messages_mobile_visible: bar.messages_mobile_visible,
     },
   ]
+}
+
+function getBarEffect(bar: Bar): string {
+  const textCol = getColumns(bar).find((c): c is TextBarColumn => c.type === 'text')
+  return textCol?.effect ?? bar.effect
 }
 
 function columnKey(barId: string, columnId: string): string {
@@ -89,7 +167,11 @@ async function fetchBars() {
     // Initialize message rotation for columns with effects
     bars.value.forEach(bar => {
       getColumns(bar).forEach(column => {
-        if (column.effect !== 'none' && column.messages.length > 1) {
+        if (
+          column.type === 'text' &&
+          column.effect !== 'none' &&
+          column.messages.length > 1
+        ) {
           const key = columnKey(bar.id, column.id)
           currentMessageIndex.value[key] = 0
           startMessageRotation(bar, column)
@@ -139,14 +221,133 @@ function getBarStyles(bar: Bar) {
   return styles
 }
 
-function getConcatenatedMessage(column: BarColumn): string {
+function getConcatenatedMessage(column: TextBarColumn): string {
   return column.messages.filter(m => m.trim()).join(' ')
 }
 
-function getCurrentMessage(bar: Bar, column: BarColumn): string {
+function getCurrentMessage(bar: Bar, column: TextBarColumn): string {
   const key = columnKey(bar.id, column.id)
   const index = currentMessageIndex.value[key] || 0
   return column.messages[index] || ''
+}
+
+function socialColumnClass(column: SocialBarColumn): string {
+  return `top-bar-social-column--${column.icon_style}`
+}
+
+function socialColumnStyle(column: SocialBarColumn): Record<string, string> {
+  return {
+    backgroundColor: column.background_color,
+    color: column.icon_color,
+  }
+}
+
+function socialPlatformLabel(platform: SocialPlatform | ''): string {
+  if (!platform) {
+    return 'Link'
+  }
+  const map: Record<SocialPlatform, string> = {
+    facebook: 'Facebook',
+    instagram: 'Instagram',
+    x: 'X',
+    linkedin: 'LinkedIn',
+    youtube: 'YouTube',
+    tiktok: 'TikTok',
+    pinterest: 'Pinterest',
+    snapchat: 'Snapchat',
+    reddit: 'Reddit',
+    tumblr: 'Tumblr',
+    whatsapp: 'WhatsApp',
+    telegram: 'Telegram',
+    discord: 'Discord',
+    threads: 'Threads',
+    mastodon: 'Mastodon',
+    medium: 'Medium',
+    github: 'GitHub',
+    dribbble: 'Dribbble',
+    behance: 'Behance',
+    flickr: 'Flickr',
+  }
+  return map[platform] ?? platform
+}
+
+function socialIconClass(platform: SocialPlatform | ''): string {
+  if (!platform) {
+    return ''
+  }
+  return SOCIAL_ICONS_BY_PLATFORM[platform] ?? ''
+}
+
+function safeHref(url: string): string {
+  const t = url.trim()
+  if (!t) {
+    return '#'
+  }
+  if (/^https?:\/\//i.test(t)) {
+    return t
+  }
+  if (t.startsWith('mailto:') || t.startsWith('tel:')) {
+    return t
+  }
+  return `https://${t}`
+}
+
+function contactColumnClass(column: ContactBarColumn): string {
+  return `top-bar-contact-column--${column.icon_style}`
+}
+
+function contactColumnStyle(column: ContactBarColumn): Record<string, string> {
+  return {
+    backgroundColor: column.background_color,
+    color: column.icon_color,
+  }
+}
+
+function contactHref(kind: ContactKind | '', value: string): string {
+  const v = value.trim()
+  if (!v || !kind) {
+    return '#'
+  }
+  if (kind === 'email') {
+    return `mailto:${encodeURIComponent(v)}`
+  }
+  if (kind === 'phone' || kind === 'mobile' || kind === 'fax') {
+    return `tel:${v.replace(/\s/g, '')}`
+  }
+  if (kind === 'website') {
+    return safeHref(v)
+  }
+  if (kind === 'location') {
+    const q = encodeURIComponent(v)
+    return `https://www.google.com/maps/search/?api=1&query=${q}`
+  }
+  return '#'
+}
+
+function contactDisplayLabel(_kind: ContactKind | '', value: string): string {
+  return value.trim()
+}
+
+function contactIconClass(kind: ContactKind | ''): string {
+  if (!kind) {
+    return ''
+  }
+  return CONTACT_ICONS_BY_KIND[kind] ?? ''
+}
+
+function iconStyleFromClass(iconClass: string, color: string): Record<string, string> {
+  if (!iconClass) {
+    return {}
+  }
+  const svg = ICONS[iconClass]
+  if (!svg) {
+    return {}
+  }
+  return {
+    backgroundColor: color || 'currentColor',
+    WebkitMaskImage: `url("${svg}")`,
+    maskImage: `url("${svg}")`,
+  }
 }
 
 function getTransitionName(effect: string): string {
@@ -156,7 +357,7 @@ function getTransitionName(effect: string): string {
   return 'fade'
 }
 
-function startMessageRotation(bar: Bar, column: BarColumn) {
+function startMessageRotation(bar: Bar, column: TextBarColumn) {
   const duration = 5000 // 5 seconds per message
   const key = columnKey(bar.id, column.id)
 
@@ -304,5 +505,96 @@ body.admin-bar .top-bar--top {
   .top-bar__column--mobile-hidden {
     display: none !important;
   }
+}
+
+.top-bar-social-column {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+.top-bar-social-column__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+.top-bar-social-column--rounded .top-bar-social-column__link {
+  border-radius: 999px;
+}
+
+.top-bar-social-column--square .top-bar-social-column__link {
+  border-radius: 4px;
+}
+
+.top-bar-social-column--icon_only .top-bar-social-column__link {
+  padding: 0 8px;
+  font-size: 0.85rem;
+}
+
+.top-bar-contact-column {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px;
+  border-radius: 6px;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.top-bar-contact-column__link,
+.top-bar-contact-column__text {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 16px;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.top-bar-contact-column__link {
+  text-decoration: underline;
+}
+
+.top-bar-contact-column--rounded .top-bar-contact-column__link,
+.top-bar-contact-column--rounded .top-bar-contact-column__text {
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+
+.top-bar-icon {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+.top-bar-social-column--icon_only .top-bar-social-column__link {
+  font-size: 0;
+  line-height: 0;
+}
+
+.top-bar-social-column--icon_only .top-bar-icon {
+  width: 18px;
+  height: 18px;
+  flex-basis: 18px;
 }
 </style>
