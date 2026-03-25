@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
-import BasicSettingsSection from './BasicSettingsSection.vue'
+import BasicSettingsSection from '@/components/BasicSettingsSection.vue'
 import type { Bar, BarColumn } from '@/types'
 
 vi.mock('@wordpress/i18n', () => ({

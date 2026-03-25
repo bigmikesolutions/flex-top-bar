@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
-import { useBarsStore } from './bars'
+import { useBarsStore } from '@/stores/bars'
 import { api } from '@/api/client'
 import type { Bar } from '@/types'
 

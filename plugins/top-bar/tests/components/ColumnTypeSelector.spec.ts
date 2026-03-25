@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
-import ColumnTypeSelector from './ColumnTypeSelector.vue'
+import ColumnTypeSelector from '@/components/ColumnTypeSelector.vue'
 
 vi.mock('@wordpress/i18n', () => ({
   __: (text: string) => text,

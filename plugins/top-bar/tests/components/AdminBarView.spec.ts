@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
-import AdminBarView from './AdminBarView.vue'
-import ColumnTypeSelector from './ColumnTypeSelector.vue'
-import TextColumnEditor from './TextColumnEditor.vue'
+import AdminBarView from '@/components/AdminBarView.vue'
+import ColumnTypeSelector from '@/components/ColumnTypeSelector.vue'
+import TextColumnEditor from '@/components/TextColumnEditor.vue'
 import type { Bar, BarColumn } from '@/types'
 
 // Mock @wordpress/i18n

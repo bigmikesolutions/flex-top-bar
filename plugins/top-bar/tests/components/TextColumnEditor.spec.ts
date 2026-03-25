@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
-import TextColumnEditor from './TextColumnEditor.vue'
+import TextColumnEditor from '@/components/TextColumnEditor.vue'
 import type { Bar } from '@/types'
 
 vi.mock('@wordpress/i18n', () => ({

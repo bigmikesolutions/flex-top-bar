@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
-import ScheduleSection from './ScheduleSection.vue'
+import ScheduleSection from '@/components/ScheduleSection.vue'
 import type { Bar, BarColumn } from '@/types'
 
 vi.mock('@wordpress/i18n', () => ({

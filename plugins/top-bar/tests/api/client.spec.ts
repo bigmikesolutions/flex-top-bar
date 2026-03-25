@@ -13,7 +13,7 @@ beforeAll(() => {
 })
 
 // Import after setting up window
-const { api } = await import('./client')
+const { api } = await import('@/api/client')
 
 beforeEach(() => {
   vi.clearAllMocks()
@@ -265,7 +265,7 @@ describe('ApiClient', () => {
       } as Response)
 
       // Create new instance to test constructor
-      const { api: newApi } = await import('./client')
+      const { api: newApi } = await import('@/api/client')
       await newApi.getBars()
 
       expect(fetch).toHaveBeenCalledWith('/wp-json/top-bar/v1/bars', {

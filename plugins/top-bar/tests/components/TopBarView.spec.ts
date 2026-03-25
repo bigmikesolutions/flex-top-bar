@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
-import TopBarView from './TopBarView.vue'
+import TopBarView from '@/components/TopBarView.vue'
 import type { Bar } from '@/types'
 
 // Mock fetch
