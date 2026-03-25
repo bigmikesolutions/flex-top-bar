@@ -5,7 +5,10 @@
       "Bash(vendor/bin/phpunit plugins/top-bar/tests/)",
       "Bash(npm run:*)",
       "Bash(npx playwright:*)",
-      "Bash(tee /tmp/e2e-test-fix.txt)"
+      "Bash(tee /tmp/e2e-test-fix.txt)",
+      "Bash(npm init:*)",
+      "Bash(npm install:*)",
+      "Bash(docker compose:*)"
     ]
   }
 }

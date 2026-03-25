@@ -74,6 +74,7 @@ if ( ! function_exists( 'ftb_fs' ) ) {
 
 require_once TOP_BAR_PLUGIN_DIR . 'includes/class-feature-flags.php';
 require_once TOP_BAR_PLUGIN_DIR . 'includes/class-options.php';
+require_once TOP_BAR_PLUGIN_DIR . 'includes/class-api.php';
 require_once TOP_BAR_PLUGIN_DIR . 'includes/class-admin.php';
 require_once TOP_BAR_PLUGIN_DIR . 'includes/class-frontend.php';
 
@@ -89,6 +90,7 @@ final class Plugin {
 	}
 
 	private function __construct() {
+		new API();
 		new Admin();
 		new Frontend();
 	}
