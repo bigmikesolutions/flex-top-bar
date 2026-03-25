@@ -41,6 +41,23 @@ $bars = [
 		"frame_width" => 4,
 		"hide_on_scroll" => true,
 	],
+	[
+		"id" => "bar_bottom - scheduled",
+		"name" => "3rd - bottom scheduled",
+		"visible" => true,
+		"admin_visibile" => false,
+		"scheduled_enabled" => false,
+		"scheduled_from_datetime" => "",
+		"scheduled_to_datetime" => "",
+		"position" => "bottom",
+		"effect" => "none",
+		"messages" => ["Bottom bar. scheduled"],
+		"messages_mobile_visible" => false,
+		"bg_color" => "#ff4500",
+		"frame_color" => "#FFFF00",
+		"frame_width" => 0,
+		"hide_on_scroll" => false,
+	],
 ];
 
 update_option("top_bars", $bars);

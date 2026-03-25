@@ -31,6 +31,19 @@ export async function waitForTopBarPut(page: Page): Promise<void> {
   await page.waitForResponse(isTopBarBarPut, { timeout: 30000 });
 }
 
+/**
+ * Wait until the Top Bar admin UI finished loading (not the Loading… notice).
+ * Do not require "Add new Top Bar" — that control is omitted when already at max_bars.
+ */
+export async function waitForTopBarAdminReady(page: Page): Promise<void> {
+  await page.waitForSelector('#top-bar-app', { state: 'visible', timeout: 10000 });
+  await page
+    .locator('#top-bar')
+    .locator('.top-bar-row.center.empty, .top-bar-row.bg, .notice-error')
+    .first()
+    .waitFor({ state: 'visible', timeout: 15000 });
+}
+
 export async function loginAndOpenTopBarSettings(page: Page): Promise<void> {
   // Go straight to the admin settings page; WP redirects to login if needed.
   await page.goto(TOP_BAR_SETTINGS_PATH, { waitUntil: 'domcontentloaded', timeout: 20000 });
@@ -60,9 +73,7 @@ export async function loginAndOpenTopBarSettings(page: Page): Promise<void> {
     throw new Error(`Failed to open Top Bar settings. URL: ${url}, title: ${title}`);
   });
 
-  // Wait for Vue app to mount and load data (button appears when app is interactive)
-  await page.waitForSelector('#top-bar-app', { state: 'visible', timeout: 10000 });
-  await page.getByRole('button', { name: 'Add new Top Bar' }).waitFor({ state: 'visible', timeout: 15000 });
+  await waitForTopBarAdminReady(page);
 }
 
 export async function ensureAtLeastBars(page: Page, expectedBars: number): Promise<void> {
@@ -112,9 +123,7 @@ export async function resetToSingleBar(page: Page): Promise<void> {
   await page.goto(TOP_BAR_SETTINGS_PATH);
   await page.waitForLoadState('domcontentloaded');
 
-  // Wait for Vue app to load and render
-  await page.waitForSelector('#top-bar-app', { state: 'visible', timeout: 10000 });
-  await page.getByRole('button', { name: 'Add new Top Bar' }).waitFor({ state: 'visible', timeout: 15000 });
+  await waitForTopBarAdminReady(page);
 }
 
 export async function getBarIds(page: Page): Promise<string[]> {
