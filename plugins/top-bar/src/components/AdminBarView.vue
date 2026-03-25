@@ -57,137 +57,9 @@
         </div>
       </div>
 
-      <!-- Basic settings title -->
-      <div class="top-bar-grid title">
-        <div class="item">
-          <p class="bold lg">{{ __('Basic settings', 'top-bar') }}</p>
-        </div>
-      </div>
+      <BasicSettingsSection v-model="localBar" @save="saveChanges" />
 
-      <!-- Basic settings grid (4 columns - no Effect here) -->
-      <div class="top-bar-grid bg bg-blue">
-        <div class="item">
-          <fieldset class="clear">
-            <legend class="bold">{{ __('Position', 'top-bar') }}</legend>
-            <select
-              :id="`position_${bar.id}`"
-              v-model="localBar.position"
-              @change="saveChanges"
-            >
-              <option value="top">{{ __('Top', 'top-bar') }}</option>
-              <option value="bottom">{{ __('Bottom', 'top-bar') }}</option>
-            </select>
-          </fieldset>
-        </div>
-        <div class="item">
-          <fieldset class="clear">
-            <legend class="bold">Fonts</legend>
-            <select disabled>
-              <option>Roboto</option>
-            </select>
-          </fieldset>
-        </div>
-        <div class="item">
-          <fieldset class="clear">
-            <legend class="bold">{{ __('Background', 'top-bar') }}</legend>
-            <input
-              :id="`bg_color_${bar.id}`"
-              v-model="localBar.bg_color"
-              type="color"
-              @change="saveChanges"
-            />
-          </fieldset>
-        </div>
-        <div class="item">
-          <fieldset class="clear">
-            <legend class="bold">{{ __('Border frame', 'top-bar') }}</legend>
-            <div class="top-bar-border-frame-controls">
-              <input
-                :id="`frame_color_${bar.id}`"
-                v-model="localBar.frame_color"
-                type="color"
-                @change="saveChanges"
-              />
-              <select
-                v-model.number="localBar.frame_width"
-                @change="saveChanges"
-              >
-                <option v-for="px in 11" :key="px - 1" :value="px - 1">{{ px - 1 }}px</option>
-              </select>
-            </div>
-          </fieldset>
-        </div>
-        <div class="item">
-          <fieldset class="clear">
-            <legend class="bold">{{ __('On scroll', 'top-bar') }}</legend>
-            <select
-              :id="`hide_on_scroll_${bar.id}`"
-              v-model="localBar.hide_on_scroll"
-              @change="saveChanges"
-            >
-              <option :value="false">{{ __('Keep showing', 'top-bar') }}</option>
-              <option :value="true">{{ __('Hide on scroll', 'top-bar') }}</option>
-            </select>
-            <p class="xs">{{ __('Whether the bar stays visible or hides when the user scrolls the page.', 'top-bar') }}</p>
-          </fieldset>
-        </div>
-      </div>
-
-      <!-- Scheduling (if enabled) -->
-      <template v-if="scheduleEnabled">
-        <div class="top-bar-grid title">
-          <div class="item">
-            <label class="check top-bar-life-time-checkbox">
-              <input
-                v-model="localBar.scheduled_enabled"
-                type="checkbox"
-                class="top-bar-toggle-life-time"
-                @change="saveChanges"
-              />
-              <span class="lifetime-label">
-                <p class="bold lg">{{ __('Scheduled', 'top-bar') }}</p>
-              </span>
-              <span class="lifetime-description">
-                <p class="xs">{{ __('Schedule when the bar should be visible.', 'top-bar') }}</p>
-              </span>
-            </label>
-          </div>
-        </div>
-
-        <div
-          v-if="localBar.scheduled_enabled"
-          class="top-bar-grid bg bg-amber top-bar-lifetime-panel"
-        >
-          <div class="item">
-            <fieldset class="clear">
-              <legend class="bold">{{ __('From', 'top-bar') }}</legend>
-              <label>
-                <input
-                  :id="`scheduled_from_${bar.id}`"
-                  v-model="localBar.scheduled_from_datetime"
-                  type="datetime-local"
-                  class="top-bar-life-time-datetime"
-                  @blur="saveChanges"
-                />
-              </label>
-            </fieldset>
-          </div>
-          <div class="item">
-            <fieldset class="clear">
-              <legend class="bold">{{ __('To', 'top-bar') }}</legend>
-              <label>
-                <input
-                  :id="`scheduled_to_${bar.id}`"
-                  v-model="localBar.scheduled_to_datetime"
-                  type="datetime-local"
-                  class="top-bar-life-time-datetime"
-                  @blur="saveChanges"
-                />
-              </label>
-            </fieldset>
-          </div>
-        </div>
-      </template>
+      <ScheduleSection v-model="localBar" :schedule-enabled="scheduleEnabled" @save="saveChanges" />
 
       <!-- Messages section title + add column. Inline flex avoids #top-bar .top-bar-grid { grid } collapsing the 2nd column to 0 width. -->
       <div
@@ -285,7 +157,9 @@
 import { ref, watch } from 'vue'
 import type { Bar, BarColumn } from '@/types'
 import { __ } from '@wordpress/i18n'
+import BasicSettingsSection from './BasicSettingsSection.vue'
 import ColumnTypeSelector from './ColumnTypeSelector.vue'
+import ScheduleSection from './ScheduleSection.vue'
 import TextColumnEditor from './TextColumnEditor.vue'
 
 const maxColumns = 4
