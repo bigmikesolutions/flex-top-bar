@@ -189,20 +189,36 @@
         </div>
       </template>
 
-      <!-- Messages section title -->
-      <div class="top-bar-grid title">
-        <div class="item">
+      <!-- Messages section title + add column. Inline flex avoids #top-bar .top-bar-grid { grid } collapsing the 2nd column to 0 width. -->
+      <div
+        class="top-bar-grid title title-with-action"
+        style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 16px; width: 100%; box-sizing: border-box;"
+      >
+        <div class="item" style="flex: 1 1 220px; min-width: 0;">
           <p class="bold lg">{{ __('Create a design', 'top-bar') }}</p>
           <p class="xs">{{ __('Create your own top bar. You can add a maximum of 4 columns, choosing different types of content.', 'top-bar') }}</p>
+        </div>
+        <div
+          class="item title-with-action__btn"
+          style="flex: 0 0 auto; min-width: min(100%, 11rem); border-left: none !important; padding-left: 0 !important;"
+        >
+          <button
+            type="button"
+            class="top-bar-btn mint sm"
+            :disabled="localBar.columns.length >= maxColumns"
+            @click="addColumn"
+          >
+            {{ __('Add column', 'top-bar') }}
+          </button>
         </div>
       </div>
 
       <!-- Column creator -->
       <div class="top-bar-grid">
-        <div id="top-bar-column-creator">
+        <div class="top-bar-column-creator">
           <div
             v-for="(column, columnIndex) in localBar.columns"
-            :key="column.id"
+            :key="`${column.id}-${columnIndex}`"
             class="top-bar-column-creator-grid"
           >
             <div class="item-creator no">
@@ -261,19 +277,6 @@
           </div>
         </div>
       </div>
-
-      <div class="top-bar-grid">
-        <div class="item">
-          <button
-            type="button"
-            class="top-bar-btn mint sm"
-            :disabled="localBar.columns.length >= maxColumns"
-            @click="addColumn"
-          >
-            {{ __('Add column', 'top-bar') }}
-          </button>
-        </div>
-      </div>
     </div>
   </div>
 </template>
@@ -319,20 +322,32 @@ function defaultSizePercentForColumnCount(count: number): BarColumn['size_percen
   return 25
 }
 
+/** Detach from Pinia / props so local edits never mutate the store by reference. */
+function cloneBar(bar: Bar): Bar {
+  // Deep clone via JSON — must NOT use toRaw() here: it only unwraps one level, so nested
+  // `columns` could stay as proxies or be missing and collapse to a single synthetic column.
+  return JSON.parse(JSON.stringify(bar)) as Bar
+}
+
+/**
+ * Ensure `columns` exists. Always returns a clone — never return `bar` by reference, or localBar
+ * shares the store object and multi-column UI can collapse to one column.
+ */
 function withColumns(bar: Bar): Bar {
   if (bar.columns?.length) {
-    return bar
+    return cloneBar(bar)
   }
+  const b = cloneBar(bar)
   return {
-    ...bar,
+    ...b,
     columns: [
       {
         id: newColumnId(),
         type: 'text',
-        effect: bar.effect,
-        messages: bar.messages,
+        effect: b.effect,
+        messages: [...(b.messages ?? [])],
         size_percent: 100,
-        messages_mobile_visible: bar.messages_mobile_visible,
+        messages_mobile_visible: b.messages_mobile_visible,
       },
     ],
   }
@@ -350,15 +365,18 @@ const emit = defineEmits<{
   delete: [id: string]
 }>()
 
-const localBar = ref<Bar>(withColumns({ ...props.bar }))
+const localBar = ref<Bar>(withColumns(cloneBar(props.bar)))
 const isExpanded = ref(props.bar.admin_visibile !== false)
 
-// Only sync from props on initial load, not on every update
-// This prevents the form from resetting while user is typing
-watch(() => props.bar.id, () => {
-  localBar.value = withColumns({ ...props.bar })
-  isExpanded.value = props.bar.admin_visibile !== false
-})
+// Re-sync when the bar id or server column set changes (fetch, PUT response).
+watch(
+  () => [props.bar.id, JSON.stringify(props.bar.columns ?? null)] as const,
+  () => {
+    localBar.value = withColumns(cloneBar(props.bar))
+    isExpanded.value = props.bar.admin_visibile !== false
+  },
+  { immediate: true },
+)
 
 function onColumnMessagesPatch(
   columnIndex: number,

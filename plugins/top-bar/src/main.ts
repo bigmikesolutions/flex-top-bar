@@ -2,8 +2,8 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import App from './App.vue'
 
-// Import existing styles
-import '../assets/css/top-bar-admin.css'
+// Bundled into assets/dist/css/admin.css (see vite.config.ts)
+import '../assets/css/top-bar-admin.less'
 
 // Create and mount the app
 const pinia = createPinia()

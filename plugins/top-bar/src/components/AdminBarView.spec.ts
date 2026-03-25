@@ -58,10 +58,33 @@ describe('AdminBarView', () => {
     vi.clearAllMocks()
   })
 
-  describe('rendering', () => {
+  describe('AdminBarView', () => {
     it('renders bar name', () => {
       const wrapper = mount(AdminBarView, { props: defaultProps })
       expect(wrapper.text()).toContain('Test Bar')
+    })
+
+    it('renders one layout column row per bar column', () => {
+      const col2: BarColumn = {
+        id: 'col_test_2',
+        type: 'text',
+        effect: 'blink',
+        messages: ['Second', ''],
+        size_percent: 50,
+        messages_mobile_visible: true,
+      }
+      const barTwoCols: Bar = {
+        ...mockBar,
+        messages: ['Hello', 'World'],
+        columns: [mockColumn, col2],
+      }
+      const wrapper = mount(AdminBarView, {
+        props: { ...defaultProps, bar: barTwoCols },
+      })
+      const creator = wrapper.find('.top-bar-column-creator')
+      expect(creator.exists()).toBe(true)
+      const directLayoutRows = creator.element.querySelectorAll(':scope > .top-bar-column-creator-grid')
+      expect(directLayoutRows.length).toBe(2)
     })
 
     it('renders default name when bar name is empty', () => {

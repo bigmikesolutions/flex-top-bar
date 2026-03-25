@@ -191,6 +191,32 @@
       }
     }
 
+    /* "Create a design" row: title + Add column — grid auto-fit can collapse the 2nd column to 0 width */
+    &.title.title-with-action {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px 16px;
+
+      > .item:first-child {
+        flex: 1 1 220px;
+        min-width: 0;
+      }
+
+      > .item.title-with-action__btn {
+        flex: 0 0 auto;
+        min-width: min-content;
+        border-left: none;
+        padding-left: 0;
+
+        .top-bar-btn {
+          white-space: nowrap;
+        }
+      }
+    }
+
     .item, .item-creator {
       border-left:1px solid fade(@black,10);
       padding: 0 8px;
@@ -230,7 +256,7 @@
 
   // Column generator
 
-  #top-bar-column-creator {
+  .top-bar-column-creator {
     box-sizing: border-box;
     border:1px solid fade(@black,20);
     border-bottom: 0;
