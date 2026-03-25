@@ -464,4 +464,65 @@ final class OptionsEdgeCasesTest extends TestCase {
 		$this->assertArrayHasKey( 'columns', $bars[0] );
 		$this->assertCount( 2, $bars[0]['columns'] );
 	}
+
+	/**
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
+	 */
+	public function test_normalize_bar_preserves_social_and_contact_column_payloads(): void {
+		if ( ! defined( 'FF_MAX_BARS' ) ) {
+			define( 'FF_MAX_BARS', 10 );
+		}
+		if ( ! defined( 'FF_MAX_MESSAGES' ) ) {
+			define( 'FF_MAX_MESSAGES', 10 );
+		}
+		FeatureFlags::reset_for_tests();
+
+		$bar = Options::normalize_bar(
+			[
+				'columns' => [
+					[
+						'id'                      => 'soc_1',
+						'type'                    => 'social',
+						'icon_style'              => 'rounded',
+						'background_color'        => '#ffffff',
+						'icon_color'              => '#000000',
+						'links'                   => [
+							[
+								'platform' => 'facebook',
+								'url'      => 'https://example.com/profile',
+							],
+						],
+						'size_percent'            => 50,
+						'messages_mobile_visible' => true,
+					],
+					[
+						'id'                      => 'con_1',
+						'type'                    => 'contact',
+						'icon_style'              => 'square',
+						'background_color'        => '#eeeeee',
+						'icon_color'              => '#333333',
+						'contacts'                => [
+							[
+								'kind'  => 'email',
+								'value' => 'hello@example.com',
+							],
+						],
+						'size_percent'            => 50,
+						'messages_mobile_visible' => true,
+					],
+				],
+			]
+		);
+
+		$this->assertSame( 'social', $bar['columns'][0]['type'] );
+		$this->assertSame( 'facebook', $bar['columns'][0]['links'][0]['platform'] );
+		$this->assertStringContainsString( 'example.com', $bar['columns'][0]['links'][0]['url'] );
+
+		$this->assertSame( 'contact', $bar['columns'][1]['type'] );
+		$this->assertSame( 'email', $bar['columns'][1]['contacts'][0]['kind'] );
+		$this->assertSame( 'hello@example.com', $bar['columns'][1]['contacts'][0]['value'] );
+
+		$this->assertSame( 'none', $bar['effect'] );
+	}
 }

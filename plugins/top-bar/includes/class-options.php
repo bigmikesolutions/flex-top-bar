@@ -178,8 +178,6 @@ final class Options {
 			];
 		}
 
-		$first = $columns[0];
-
 		return [
 			'id'                      => sanitize_key( (string) $id ) ?: (string) $id,
 			'name'                    => isset( $bar['name'] ) ? sanitize_text_field( (string) $bar['name'] ) : $defaults['name'],
@@ -189,9 +187,9 @@ final class Options {
 			'scheduled_from_datetime' => $scheduled_from_datetime,
 			'scheduled_to_datetime'   => $scheduled_to_datetime,
 			'position'                => $pos,
-			'effect'                  => $first['effect'],
-			'messages'                => $first['messages'],
-			'messages_mobile_visible' => $first['messages_mobile_visible'],
+			'effect'                  => $effect,
+			'messages'                => $messages,
+			'messages_mobile_visible' => $messages_mobile_visible,
 			'columns'                 => $columns,
 			'bg_color'                => $bg ?: '#1d2327',
 			'frame_color'             => $frame,
@@ -209,6 +207,84 @@ final class Options {
 			? sanitize_key( (string) $col['id'] )
 			: self::new_column_id();
 
+		$size_percent = isset( $col['size_percent'] ) ? (int) $col['size_percent'] : 100;
+		if ( ! in_array( $size_percent, [ 25, 33, 50, 75, 100 ], true ) ) {
+			$size_percent = 100;
+		}
+
+		$mmv = self::parse_bool( $col['messages_mobile_visible'] ?? true, true );
+
+		$type = isset( $col['type'] ) ? sanitize_key( (string) $col['type'] ) : 'text';
+		if ( ! in_array( $type, [ 'text', 'social', 'contact' ], true ) ) {
+			$type = 'text';
+		}
+
+		if ( $type === 'social' ) {
+			return self::normalize_social_column( $col, $id, $size_percent, $mmv, $max_messages );
+		}
+		if ( $type === 'contact' ) {
+			return self::normalize_contact_column( $col, $id, $size_percent, $mmv, $max_messages );
+		}
+
+		return self::normalize_text_column( $col, $id, $default_message, $max_messages, $size_percent, $mmv );
+	}
+
+	/**
+	 * @return list<string>
+	 */
+	private static function allowed_social_platforms(): array {
+		return [
+			'facebook',
+			'instagram',
+			'x',
+			'linkedin',
+			'youtube',
+			'tiktok',
+			'pinterest',
+			'snapchat',
+			'reddit',
+			'tumblr',
+			'whatsapp',
+			'telegram',
+			'discord',
+			'threads',
+			'mastodon',
+			'medium',
+			'github',
+			'dribbble',
+			'behance',
+			'flickr',
+		];
+	}
+
+	/**
+	 * @return list<string>
+	 */
+	private static function allowed_contact_kinds(): array {
+		return [
+			'email',
+			'phone',
+			'mobile',
+			'address',
+			'location',
+			'website',
+			'fax',
+			'support',
+			'calendar',
+		];
+	}
+
+	/**
+	 * @return array<string, mixed>
+	 */
+	private static function normalize_text_column(
+		array $col,
+		string $id,
+		string $default_message,
+		int $max_messages,
+		int $size_percent,
+		bool $mmv
+	): array {
 		$effect = isset( $col['effect'] ) ? sanitize_key( (string) $col['effect'] ) : 'none';
 		if ( ! in_array( $effect, [ 'none', 'slider', 'fadein', 'blink' ], true ) ) {
 			$effect = 'none';
@@ -230,18 +306,150 @@ final class Options {
 		}
 		$messages = array_values( array_slice( $messages, 0, $max_messages ) );
 
-		$size_percent = isset( $col['size_percent'] ) ? (int) $col['size_percent'] : 100;
-		if ( ! in_array( $size_percent, [ 25, 33, 50, 75, 100 ], true ) ) {
-			$size_percent = 100;
-		}
-
-		$mmv = self::parse_bool( $col['messages_mobile_visible'] ?? true, true );
-
 		return [
 			'id'                      => $id,
 			'type'                    => 'text',
 			'effect'                  => $effect,
 			'messages'                => $messages,
+			'size_percent'            => $size_percent,
+			'messages_mobile_visible' => $mmv,
+		];
+	}
+
+	/**
+	 * @return array<string, mixed>
+	 */
+	private static function normalize_social_column(
+		array $col,
+		string $id,
+		int $size_percent,
+		bool $mmv,
+		int $max_links
+	): array {
+		$icon_style = isset( $col['icon_style'] ) ? sanitize_key( (string) $col['icon_style'] ) : 'rounded';
+		if ( ! in_array( $icon_style, [ 'rounded', 'square', 'icon_only' ], true ) ) {
+			$icon_style = 'rounded';
+		}
+
+		$bg = isset( $col['background_color'] ) ? self::sanitize_hex_color( (string) $col['background_color'] ) : '';
+		if ( $bg === '' ) {
+			$bg = '#ffffff';
+		}
+
+		$icon_color = isset( $col['icon_color'] ) ? self::sanitize_hex_color( (string) $col['icon_color'] ) : '';
+		if ( $icon_color === '' ) {
+			$icon_color = '#1d2327';
+		}
+
+		$allowed = self::allowed_social_platforms();
+		$links   = [];
+		if ( isset( $col['links'] ) && is_array( $col['links'] ) ) {
+			foreach ( $col['links'] as $link ) {
+				if ( count( $links ) >= $max_links ) {
+					break;
+				}
+				if ( ! is_array( $link ) ) {
+					continue;
+				}
+				$platform = isset( $link['platform'] ) ? sanitize_key( (string) $link['platform'] ) : '';
+				if ( $platform !== '' && ! in_array( $platform, $allowed, true ) ) {
+					$platform = '';
+				}
+				$url = isset( $link['url'] ) ? esc_url_raw( (string) $link['url'] ) : '';
+				if ( $platform === '' && $url === '' ) {
+					continue;
+				}
+				$links[] = [
+					'platform' => $platform,
+					'url'      => $url,
+				];
+			}
+		}
+
+		if ( $links === [] ) {
+			$links[] = [
+				'platform' => '',
+				'url'      => '',
+			];
+		}
+
+		return [
+			'id'                      => $id,
+			'type'                    => 'social',
+			'icon_style'              => $icon_style,
+			'background_color'        => $bg,
+			'icon_color'              => $icon_color,
+			'links'                   => $links,
+			'size_percent'            => $size_percent,
+			'messages_mobile_visible' => $mmv,
+		];
+	}
+
+	/**
+	 * @return array<string, mixed>
+	 */
+	private static function normalize_contact_column(
+		array $col,
+		string $id,
+		int $size_percent,
+		bool $mmv,
+		int $max_entries
+	): array {
+		$icon_style = isset( $col['icon_style'] ) ? sanitize_key( (string) $col['icon_style'] ) : 'rounded';
+		if ( ! in_array( $icon_style, [ 'rounded', 'square', 'icon_only' ], true ) ) {
+			$icon_style = 'rounded';
+		}
+
+		$bg = isset( $col['background_color'] ) ? self::sanitize_hex_color( (string) $col['background_color'] ) : '';
+		if ( $bg === '' ) {
+			$bg = '#ffffff';
+		}
+
+		$icon_color = isset( $col['icon_color'] ) ? self::sanitize_hex_color( (string) $col['icon_color'] ) : '';
+		if ( $icon_color === '' ) {
+			$icon_color = '#1d2327';
+		}
+
+		$allowed  = self::allowed_contact_kinds();
+		$contacts = [];
+		if ( isset( $col['contacts'] ) && is_array( $col['contacts'] ) ) {
+			foreach ( $col['contacts'] as $entry ) {
+				if ( count( $contacts ) >= $max_entries ) {
+					break;
+				}
+				if ( ! is_array( $entry ) ) {
+					continue;
+				}
+				$kind = isset( $entry['kind'] ) ? sanitize_key( (string) $entry['kind'] ) : '';
+				if ( $kind !== '' && ! in_array( $kind, $allowed, true ) ) {
+					$kind = '';
+				}
+				$raw   = isset( $entry['value'] ) ? (string) $entry['value'] : '';
+				$value = $kind === 'address' ? sanitize_textarea_field( $raw ) : sanitize_text_field( $raw );
+				if ( $kind === '' && $value === '' ) {
+					continue;
+				}
+				$contacts[] = [
+					'kind'  => $kind,
+					'value' => $value,
+				];
+			}
+		}
+
+		if ( $contacts === [] ) {
+			$contacts[] = [
+				'kind'  => '',
+				'value' => '',
+			];
+		}
+
+		return [
+			'id'                      => $id,
+			'type'                    => 'contact',
+			'icon_style'              => $icon_style,
+			'background_color'        => $bg,
+			'icon_color'              => $icon_color,
+			'contacts'                => $contacts,
 			'size_percent'            => $size_percent,
 			'messages_mobile_visible' => $mmv,
 		];

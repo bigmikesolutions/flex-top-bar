@@ -106,9 +106,14 @@
               </button>
             </div>
 
-            <ColumnTypeSelector />
+            <ColumnTypeSelector
+              :group-name="`${bar.id}_${column.id}`"
+              :column-type="column.type"
+              @update:column-type="onColumnTypeChange(columnIndex, $event)"
+            />
 
             <TextColumnEditor
+              v-if="column.type === 'text'"
               :bar-id="bar.id"
               :column-id="column.id"
               :effect="column.effect"
@@ -117,6 +122,26 @@
               @patch="onColumnMessagesPatch(columnIndex, $event)"
               @commit="saveChanges"
               @update="onTextColumnPersist(columnIndex, $event)"
+            />
+
+            <SocialColumnEditor
+              v-else-if="column.type === 'social'"
+              :bar-id="bar.id"
+              :column-id="column.id"
+              :column="column"
+              :max-links="maxMessages"
+              @patch="onSocialColumnPatch(columnIndex, $event)"
+              @commit="saveChanges"
+            />
+
+            <ContactColumnEditor
+              v-else-if="column.type === 'contact'"
+              :bar-id="bar.id"
+              :column-id="column.id"
+              :column="column"
+              :max-entries="maxMessages"
+              @patch="onContactColumnPatch(columnIndex, $event)"
+              @commit="saveChanges"
             />
 
             <div class="item item-creator">
@@ -155,11 +180,19 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import type { Bar, BarColumn } from '@/types'
+import type {
+  Bar,
+  BarColumn,
+  ColumnType,
+  ContactBarColumn,
+  SocialBarColumn,
+} from '@/types'
 import { __ } from '@wordpress/i18n'
 import BasicSettingsSection from './BasicSettingsSection.vue'
 import ColumnTypeSelector from './ColumnTypeSelector.vue'
+import ContactColumnEditor from './ContactColumnEditor.vue'
 import ScheduleSection from './ScheduleSection.vue'
+import SocialColumnEditor from './SocialColumnEditor.vue'
 import TextColumnEditor from './TextColumnEditor.vue'
 
 const maxColumns = 4
@@ -171,15 +204,64 @@ function newColumnId(): string {
   return `col_${String(Date.now())}_${Math.random().toString(36).slice(2, 10)}`
 }
 
-function legacyFromColumns(cols: BarColumn[]) {
+/** Keeps bar-level effect/messages in sync with `columns` for API payloads (PHP does not derive these from columns). */
+function syncBarRootForPersist() {
+  const cols = localBar.value.columns
   const first = cols[0]
   if (!first) {
-    return {}
+    localBar.value.effect = 'none'
+    localBar.value.messages = ['', '']
+    localBar.value.messages_mobile_visible = true
+    return
+  }
+  if (first.type === 'text') {
+    localBar.value.effect = first.effect
+    localBar.value.messages = [...first.messages]
+    localBar.value.messages_mobile_visible = first.messages_mobile_visible
+    return
+  }
+  localBar.value.effect = 'none'
+  localBar.value.messages = ['', '']
+  localBar.value.messages_mobile_visible = first.messages_mobile_visible
+}
+
+function defaultColumnForType(
+  type: ColumnType,
+  id: string,
+  sizePercent: BarColumn['size_percent'],
+  messagesMobileVisible: boolean,
+): BarColumn {
+  if (type === 'text') {
+    return {
+      id,
+      type: 'text',
+      effect: 'none',
+      messages: ['', ''],
+      size_percent: sizePercent,
+      messages_mobile_visible: messagesMobileVisible,
+    }
+  }
+  if (type === 'social') {
+    return {
+      id,
+      type: 'social',
+      icon_style: 'rounded',
+      background_color: '#ffffff',
+      icon_color: '#1d2327',
+      links: [{ platform: '', url: '' }],
+      size_percent: sizePercent,
+      messages_mobile_visible: messagesMobileVisible,
+    }
   }
   return {
-    effect: first.effect,
-    messages: first.messages,
-    messages_mobile_visible: first.messages_mobile_visible,
+    id,
+    type: 'contact',
+    icon_style: 'rounded',
+    background_color: '#ffffff',
+    icon_color: '#1d2327',
+    contacts: [{ kind: '', value: '' }],
+    size_percent: sizePercent,
+    messages_mobile_visible: messagesMobileVisible,
   }
 }
 
@@ -254,28 +336,72 @@ watch(
 
 function onColumnMessagesPatch(
   columnIndex: number,
-  updates: Partial<Pick<BarColumn, 'messages'>>,
+  updates: Partial<Pick<Extract<BarColumn, { type: 'text' }>, 'messages'>>,
 ) {
   const cols = [...localBar.value.columns]
-  cols[columnIndex] = { ...cols[columnIndex], ...updates }
-  localBar.value = { ...localBar.value, columns: cols, ...legacyFromColumns(cols) }
+  const cur = cols[columnIndex]
+  if (cur.type !== 'text') {
+    return
+  }
+  cols[columnIndex] = { ...cur, ...updates }
+  localBar.value = { ...localBar.value, columns: cols }
 }
 
 function onTextColumnPersist(
   columnIndex: number,
-  updates: Partial<Pick<BarColumn, 'effect' | 'messages'>>,
+  updates: Partial<Pick<Extract<BarColumn, { type: 'text' }>, 'effect' | 'messages'>>,
 ) {
   const cols = [...localBar.value.columns]
-  cols[columnIndex] = { ...cols[columnIndex], ...updates }
-  localBar.value = { ...localBar.value, columns: cols, ...legacyFromColumns(cols) }
+  const cur = cols[columnIndex]
+  if (cur.type !== 'text') {
+    return
+  }
+  cols[columnIndex] = { ...cur, ...updates }
+  localBar.value = { ...localBar.value, columns: cols }
   saveChanges()
+}
+
+function onColumnTypeChange(columnIndex: number, newType: ColumnType) {
+  const cur = localBar.value.columns[columnIndex]
+  if (cur.type === newType) {
+    return
+  }
+  const cols = [...localBar.value.columns]
+  cols[columnIndex] = defaultColumnForType(
+    newType,
+    cur.id,
+    cur.size_percent,
+    cur.messages_mobile_visible,
+  )
+  localBar.value = { ...localBar.value, columns: cols }
+  saveChanges()
+}
+
+function onSocialColumnPatch(columnIndex: number, partial: Partial<SocialBarColumn>) {
+  const cols = [...localBar.value.columns]
+  const cur = cols[columnIndex]
+  if (cur.type !== 'social') {
+    return
+  }
+  cols[columnIndex] = { ...cur, ...partial }
+  localBar.value = { ...localBar.value, columns: cols }
+}
+
+function onContactColumnPatch(columnIndex: number, partial: Partial<ContactBarColumn>) {
+  const cols = [...localBar.value.columns]
+  const cur = cols[columnIndex]
+  if (cur.type !== 'contact') {
+    return
+  }
+  cols[columnIndex] = { ...cur, ...partial }
+  localBar.value = { ...localBar.value, columns: cols }
 }
 
 function onColumnSizeChange(columnIndex: number, e: Event) {
   const value = Number((e.target as HTMLSelectElement).value) as BarColumn['size_percent']
   const cols = [...localBar.value.columns]
   cols[columnIndex] = { ...cols[columnIndex], size_percent: value }
-  localBar.value = { ...localBar.value, columns: cols, ...legacyFromColumns(cols) }
+  localBar.value = { ...localBar.value, columns: cols }
   saveChanges()
 }
 
@@ -284,7 +410,7 @@ function onColumnMobileVisibleChange(columnIndex: number, e: Event) {
   const visible = raw === 'true'
   const cols = [...localBar.value.columns]
   cols[columnIndex] = { ...cols[columnIndex], messages_mobile_visible: visible }
-  localBar.value = { ...localBar.value, columns: cols, ...legacyFromColumns(cols) }
+  localBar.value = { ...localBar.value, columns: cols }
   saveChanges()
 }
 
@@ -304,7 +430,7 @@ function addColumn() {
     size_percent: share,
     messages_mobile_visible: true,
   })
-  localBar.value = { ...localBar.value, columns: resized, ...legacyFromColumns(resized) }
+  localBar.value = { ...localBar.value, columns: resized }
   saveChanges()
 }
 
@@ -316,7 +442,7 @@ function removeColumn(columnIndex: number) {
   if (cols.length === 1) {
     cols[0] = { ...cols[0], size_percent: 100 }
   }
-  localBar.value = { ...localBar.value, columns: cols, ...legacyFromColumns(cols) }
+  localBar.value = { ...localBar.value, columns: cols }
   saveChanges()
 }
 
@@ -331,6 +457,7 @@ function toggleExpanded() {
 }
 
 function saveChanges() {
+  syncBarRootForPersist()
   emit('update', props.bar.id, localBar.value)
 }
 

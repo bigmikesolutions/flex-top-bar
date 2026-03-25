@@ -63,7 +63,7 @@
 
 <script setup lang="ts">
 import { __ } from '@wordpress/i18n'
-import type { Bar, BarColumn } from '@/types'
+import type { Bar, TextBarColumn } from '@/types'
 
 const props = defineProps<{
   barId: string
@@ -74,9 +74,9 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  patch: [updates: Partial<Pick<BarColumn, 'messages'>>]
+  patch: [updates: Partial<Pick<TextBarColumn, 'messages'>>]
   commit: []
-  update: [updates: Partial<Pick<BarColumn, 'effect' | 'messages'>>]
+  update: [updates: Partial<Pick<TextBarColumn, 'effect' | 'messages'>>]
 }>()
 
 function onEffectChange(e: Event) {

@@ -1,12 +1,90 @@
-export interface BarColumn {
+export type ColumnType = 'text' | 'social' | 'contact'
+
+export type IconStyle = 'rounded' | 'square' | 'icon_only'
+
+/** Social platforms (aligned with legacy PHP admin mock). */
+export const SOCIAL_PLATFORMS = [
+  'facebook',
+  'instagram',
+  'x',
+  'linkedin',
+  'youtube',
+  'tiktok',
+  'pinterest',
+  'snapchat',
+  'reddit',
+  'tumblr',
+  'whatsapp',
+  'telegram',
+  'discord',
+  'threads',
+  'mastodon',
+  'medium',
+  'github',
+  'dribbble',
+  'behance',
+  'flickr',
+] as const
+
+export type SocialPlatform = (typeof SOCIAL_PLATFORMS)[number]
+
+export interface SocialLink {
+  platform: SocialPlatform | ''
+  url: string
+}
+
+/** Contact row kinds (aligned with legacy PHP admin mock). */
+export const CONTACT_KINDS = [
+  'email',
+  'phone',
+  'mobile',
+  'address',
+  'location',
+  'website',
+  'fax',
+  'support',
+  'calendar',
+] as const
+
+export type ContactKind = (typeof CONTACT_KINDS)[number]
+
+export interface ContactEntry {
+  kind: ContactKind | ''
+  value: string
+}
+
+export interface TextBarColumn {
   id: string
   type: 'text'
   effect: 'none' | 'slider' | 'fadein' | 'blink'
   messages: string[]
-  /** Column width as a percentage of the bar (25–100). */
   size_percent: number
   messages_mobile_visible: boolean
 }
+
+export interface SocialBarColumn {
+  id: string
+  type: 'social'
+  icon_style: IconStyle
+  background_color: string
+  icon_color: string
+  links: SocialLink[]
+  size_percent: number
+  messages_mobile_visible: boolean
+}
+
+export interface ContactBarColumn {
+  id: string
+  type: 'contact'
+  icon_style: IconStyle
+  background_color: string
+  icon_color: string
+  contacts: ContactEntry[]
+  size_percent: number
+  messages_mobile_visible: boolean
+}
+
+export type BarColumn = TextBarColumn | SocialBarColumn | ContactBarColumn
 
 export interface Bar {
   id: string
