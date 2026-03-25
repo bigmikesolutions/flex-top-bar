@@ -78,7 +78,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useBarsStore } from '@/stores/bars'
 import { useFeatureFlagsStore } from '@/stores/featureFlags'
 import { __ } from '@wordpress/i18n'
-import BarItem from '@/components/BarItem.vue'
+import BarItem from '@/components/AdminBarView.vue'
 import type { Bar } from '@/types'
 
 const barsStore = useBarsStore()

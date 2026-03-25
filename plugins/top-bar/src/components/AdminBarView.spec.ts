@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
-import BarItem from './BarItem.vue'
+import AdminBarView from './AdminBarView.vue'
 import type { Bar } from '@/types'
 
 // Mock @wordpress/i18n
@@ -8,7 +8,7 @@ vi.mock('@wordpress/i18n', () => ({
   __: (text: string) => text,
 }))
 
-describe('BarItem', () => {
+describe('AdminBarView', () => {
   const mockBar: Bar = {
     id: 'bar_1',
     name: 'Test Bar',
@@ -40,12 +40,12 @@ describe('BarItem', () => {
 
   describe('rendering', () => {
     it('renders bar name', () => {
-      const wrapper = mount(BarItem, { props: defaultProps })
+      const wrapper = mount(AdminBarView, { props: defaultProps })
       expect(wrapper.text()).toContain('Test Bar')
     })
 
     it('renders default name when bar name is empty', () => {
-      const wrapper = mount(BarItem, {
+      const wrapper = mount(AdminBarView, {
         props: {
           ...defaultProps,
           bar: { ...mockBar, name: '' },
@@ -55,12 +55,12 @@ describe('BarItem', () => {
     })
 
     it('renders expanded by default when admin_visibile is true', () => {
-      const wrapper = mount(BarItem, { props: defaultProps })
+      const wrapper = mount(AdminBarView, { props: defaultProps })
       expect(wrapper.find('.top-bar-options').classes()).toContain('active')
     })
 
     it('renders collapsed when admin_visibile is false', () => {
-      const wrapper = mount(BarItem, {
+      const wrapper = mount(AdminBarView, {
         props: {
           ...defaultProps,
           bar: { ...mockBar, admin_visibile: false },
@@ -72,13 +72,13 @@ describe('BarItem', () => {
 
   describe('visibility toggle', () => {
     it('shows status-on class when bar is visible', () => {
-      const wrapper = mount(BarItem, { props: defaultProps })
+      const wrapper = mount(AdminBarView, { props: defaultProps })
       const toggleButton = wrapper.find('.top-bar-visibility-toggle')
       expect(toggleButton.classes()).toContain('status-on')
     })
 
     it('shows status-off class when bar is not visible', () => {
-      const wrapper = mount(BarItem, {
+      const wrapper = mount(AdminBarView, {
         props: {
           ...defaultProps,
           bar: { ...mockBar, visible: false },
@@ -89,7 +89,7 @@ describe('BarItem', () => {
     })
 
     it('emits update event when visibility is toggled', async () => {
-      const wrapper = mount(BarItem, { props: defaultProps })
+      const wrapper = mount(AdminBarView, { props: defaultProps })
       const toggleButton = wrapper.find('.top-bar-visibility-toggle')
 
       await toggleButton.trigger('click')
@@ -103,13 +103,13 @@ describe('BarItem', () => {
 
   describe('delete button', () => {
     it('shows enabled delete button when canDelete is true', () => {
-      const wrapper = mount(BarItem, { props: defaultProps })
+      const wrapper = mount(AdminBarView, { props: defaultProps })
       const deleteButton = wrapper.findAll('.delete').find(btn => !btn.attributes('disabled'))
       expect(deleteButton?.exists()).toBe(true)
     })
 
     it('shows disabled delete button when canDelete is false', () => {
-      const wrapper = mount(BarItem, {
+      const wrapper = mount(AdminBarView, {
         props: { ...defaultProps, canDelete: false },
       })
       const deleteButton = wrapper.find('.delete[disabled]')
@@ -120,7 +120,7 @@ describe('BarItem', () => {
     it('emits delete event when delete is confirmed', async () => {
       global.confirm = vi.fn(() => true)
 
-      const wrapper = mount(BarItem, { props: defaultProps })
+      const wrapper = mount(AdminBarView, { props: defaultProps })
       const deleteButton = wrapper.findAll('.delete').find(btn => !btn.attributes('disabled'))
 
       await deleteButton?.trigger('click')
@@ -133,7 +133,7 @@ describe('BarItem', () => {
     it('does not emit delete event when delete is cancelled', async () => {
       global.confirm = vi.fn(() => false)
 
-      const wrapper = mount(BarItem, { props: defaultProps })
+      const wrapper = mount(AdminBarView, { props: defaultProps })
       const deleteButton = wrapper.findAll('.delete').find(btn => !btn.attributes('disabled'))
 
       await deleteButton?.trigger('click')
@@ -144,7 +144,7 @@ describe('BarItem', () => {
 
   describe('expand/collapse', () => {
     it('toggles expansion when arrow button is clicked', async () => {
-      const wrapper = mount(BarItem, { props: defaultProps })
+      const wrapper = mount(AdminBarView, { props: defaultProps })
       const arrowButton = wrapper.find('.top-bar-toggle-options')
 
       expect(wrapper.find('.top-bar-options').classes()).toContain('active')
@@ -157,7 +157,7 @@ describe('BarItem', () => {
     })
 
     it('sets aria-expanded correctly', async () => {
-      const wrapper = mount(BarItem, { props: defaultProps })
+      const wrapper = mount(AdminBarView, { props: defaultProps })
       const arrowButton = wrapper.find('.top-bar-toggle-options')
 
       expect(arrowButton.attributes('aria-expanded')).toBe('true')
@@ -171,7 +171,7 @@ describe('BarItem', () => {
 
   describe('form fields', () => {
     it('updates name field', async () => {
-      const wrapper = mount(BarItem, { props: defaultProps })
+      const wrapper = mount(AdminBarView, { props: defaultProps })
       const nameInput = wrapper.find('input[type="text"]')
 
       await nameInput.setValue('New Name')
@@ -183,7 +183,7 @@ describe('BarItem', () => {
     })
 
     it('updates position select', async () => {
-      const wrapper = mount(BarItem, { props: defaultProps })
+      const wrapper = mount(AdminBarView, { props: defaultProps })
       const positionSelect = wrapper.find('#position_bar_1')
 
       await positionSelect.setValue('bottom')
@@ -194,7 +194,7 @@ describe('BarItem', () => {
     })
 
     it('updates background color', async () => {
-      const wrapper = mount(BarItem, { props: defaultProps })
+      const wrapper = mount(AdminBarView, { props: defaultProps })
       const bgColorInput = wrapper.find('#bg_color_bar_1')
 
       await bgColorInput.setValue('#abcdef')
@@ -205,7 +205,7 @@ describe('BarItem', () => {
     })
 
     it('updates frame color', async () => {
-      const wrapper = mount(BarItem, { props: defaultProps })
+      const wrapper = mount(AdminBarView, { props: defaultProps })
       const frameColorInput = wrapper.find('#frame_color_bar_1')
 
       await frameColorInput.setValue('#00ff00')
@@ -216,7 +216,7 @@ describe('BarItem', () => {
     })
 
     it('updates hide on scroll', async () => {
-      const wrapper = mount(BarItem, { props: defaultProps })
+      const wrapper = mount(AdminBarView, { props: defaultProps })
       const hideOnScrollSelect = wrapper.find('#hide_on_scroll_bar_1')
 
       await hideOnScrollSelect.setValue('true')
@@ -227,7 +227,7 @@ describe('BarItem', () => {
     })
 
     it('updates effect select', async () => {
-      const wrapper = mount(BarItem, { props: defaultProps })
+      const wrapper = mount(AdminBarView, { props: defaultProps })
       const effectSelect = wrapper.findAll('select').find(s =>
         Array.from((s.element as HTMLSelectElement).options).some(o => o.value === 'slider')
       )
@@ -240,7 +240,7 @@ describe('BarItem', () => {
     })
 
     it('updates mobile visibility', async () => {
-      const wrapper = mount(BarItem, { props: defaultProps })
+      const wrapper = mount(AdminBarView, { props: defaultProps })
       const mobileVisibleSelects = wrapper.findAll('select')
       const mobileVisibleSelect = mobileVisibleSelects.find(s =>
         Array.from((s.element as HTMLSelectElement).options).some(o => o.textContent === 'On')
@@ -256,7 +256,7 @@ describe('BarItem', () => {
 
   describe('messages', () => {
     it('renders all messages', () => {
-      const wrapper = mount(BarItem, { props: defaultProps })
+      const wrapper = mount(AdminBarView, { props: defaultProps })
       const textareas = wrapper.findAll('textarea')
 
       expect(textareas).toHaveLength(2)
@@ -265,7 +265,7 @@ describe('BarItem', () => {
     })
 
     it('updates message content', async () => {
-      const wrapper = mount(BarItem, {
+      const wrapper = mount(AdminBarView, {
         props: {
           ...defaultProps,
           bar: { ...mockBar, messages: ['Hello', 'World'] },
@@ -284,7 +284,7 @@ describe('BarItem', () => {
     })
 
     it('adds new message when button is clicked', async () => {
-      const wrapper = mount(BarItem, {
+      const wrapper = mount(AdminBarView, {
         props: {
           ...defaultProps,
           bar: { ...mockBar, messages: ['Hello', 'World'] },
@@ -303,7 +303,7 @@ describe('BarItem', () => {
     })
 
     it('does not show add button when max messages reached', () => {
-      const wrapper = mount(BarItem, {
+      const wrapper = mount(AdminBarView, {
         props: {
           ...defaultProps,
           bar: { ...mockBar, messages: ['1', '2', '3', '4'] },
@@ -316,7 +316,7 @@ describe('BarItem', () => {
     })
 
     it('removes message when X button is clicked', async () => {
-      const wrapper = mount(BarItem, {
+      const wrapper = mount(AdminBarView, {
         props: {
           ...defaultProps,
           bar: { ...mockBar, messages: ['Hello', 'World'] },
@@ -341,7 +341,7 @@ describe('BarItem', () => {
     })
 
     it('does not show remove button on first message when only one exists', () => {
-      const wrapper = mount(BarItem, {
+      const wrapper = mount(AdminBarView, {
         props: {
           ...defaultProps,
           bar: { ...mockBar, messages: ['Only one'] },
@@ -357,19 +357,19 @@ describe('BarItem', () => {
 
   describe('scheduling', () => {
     it('shows scheduling section when scheduleEnabled is true', () => {
-      const wrapper = mount(BarItem, { props: defaultProps })
+      const wrapper = mount(AdminBarView, { props: defaultProps })
       expect(wrapper.text()).toContain('Scheduled')
     })
 
     it('hides scheduling section when scheduleEnabled is false', () => {
-      const wrapper = mount(BarItem, {
+      const wrapper = mount(AdminBarView, {
         props: { ...defaultProps, scheduleEnabled: false },
       })
       expect(wrapper.text()).not.toContain('Scheduled')
     })
 
     it('toggles scheduled_enabled', async () => {
-      const wrapper = mount(BarItem, { props: defaultProps })
+      const wrapper = mount(AdminBarView, { props: defaultProps })
       const checkbox = wrapper.find('.top-bar-toggle-life-time')
 
       await checkbox.setChecked(true)
@@ -380,7 +380,7 @@ describe('BarItem', () => {
     })
 
     it('shows datetime inputs when scheduled_enabled is true', async () => {
-      const wrapper = mount(BarItem, {
+      const wrapper = mount(AdminBarView, {
         props: {
           ...defaultProps,
           bar: { ...mockBar, scheduled_enabled: true },
@@ -392,14 +392,14 @@ describe('BarItem', () => {
     })
 
     it('hides datetime inputs when scheduled_enabled is false', () => {
-      const wrapper = mount(BarItem, { props: defaultProps })
+      const wrapper = mount(AdminBarView, { props: defaultProps })
 
       expect(wrapper.find('#scheduled_from_bar_1').exists()).toBe(false)
       expect(wrapper.find('#scheduled_to_bar_1').exists()).toBe(false)
     })
 
     it('updates scheduled_from_datetime', async () => {
-      const wrapper = mount(BarItem, {
+      const wrapper = mount(AdminBarView, {
         props: {
           ...defaultProps,
           bar: { ...mockBar, scheduled_enabled: true },
@@ -418,7 +418,7 @@ describe('BarItem', () => {
     })
 
     it('updates scheduled_to_datetime', async () => {
-      const wrapper = mount(BarItem, {
+      const wrapper = mount(AdminBarView, {
         props: {
           ...defaultProps,
           bar: { ...mockBar, scheduled_enabled: true },
@@ -439,7 +439,7 @@ describe('BarItem', () => {
 
   describe('reactivity', () => {
     it('updates localBar when bar id changes', async () => {
-      const wrapper = mount(BarItem, { props: defaultProps })
+      const wrapper = mount(AdminBarView, { props: defaultProps })
 
       const newBar = { ...mockBar, id: 'bar_2', name: 'New Bar' }
       await wrapper.setProps({ bar: newBar })

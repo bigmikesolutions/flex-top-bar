@@ -1,12 +1,12 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
-import TopBarFrontend from './TopBarFrontend.vue'
+import TopBarView from './TopBarView.vue'
 import type { Bar } from '@/types'
 
 // Mock fetch
 global.fetch = vi.fn()
 
-describe('TopBarFrontend', () => {
+describe('TopBarView', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
@@ -35,7 +35,7 @@ describe('TopBarFrontend', () => {
       json: async () => [],
     } as Response)
 
-    const wrapper = mount(TopBarFrontend)
+    const wrapper = mount(TopBarView)
     await wrapper.vm.$nextTick()
     await new Promise(resolve => setTimeout(resolve, 0))
 
@@ -48,7 +48,7 @@ describe('TopBarFrontend', () => {
       json: async () => mockBars,
     } as Response)
 
-    const wrapper = mount(TopBarFrontend)
+    const wrapper = mount(TopBarView)
     await wrapper.vm.$nextTick()
     await new Promise(resolve => setTimeout(resolve, 0))
 
@@ -63,7 +63,7 @@ describe('TopBarFrontend', () => {
       json: async () => mockBars,
     } as Response)
 
-    const wrapper = mount(TopBarFrontend)
+    const wrapper = mount(TopBarView)
     await wrapper.vm.$nextTick()
     await new Promise(resolve => setTimeout(resolve, 0))
 
@@ -76,7 +76,7 @@ describe('TopBarFrontend', () => {
       json: async () => mockBars,
     } as Response)
 
-    const wrapper = mount(TopBarFrontend)
+    const wrapper = mount(TopBarView)
     await wrapper.vm.$nextTick()
     await new Promise(resolve => setTimeout(resolve, 0))
 
@@ -96,7 +96,7 @@ describe('TopBarFrontend', () => {
       json: async () => [barWithFrame],
     } as Response)
 
-    const wrapper = mount(TopBarFrontend)
+    const wrapper = mount(TopBarView)
     await wrapper.vm.$nextTick()
     await new Promise(resolve => setTimeout(resolve, 0))
 
@@ -115,7 +115,7 @@ describe('TopBarFrontend', () => {
       json: async () => [mobileHiddenBar],
     } as Response)
 
-    const wrapper = mount(TopBarFrontend)
+    const wrapper = mount(TopBarView)
     await wrapper.vm.$nextTick()
     await new Promise(resolve => setTimeout(resolve, 0))
 
@@ -133,7 +133,7 @@ describe('TopBarFrontend', () => {
       json: async () => [invisibleBar],
     } as Response)
 
-    const wrapper = mount(TopBarFrontend)
+    const wrapper = mount(TopBarView)
     await wrapper.vm.$nextTick()
     await new Promise(resolve => setTimeout(resolve, 0))
 
@@ -153,7 +153,7 @@ describe('TopBarFrontend', () => {
       json: async () => [scheduledBar],
     } as Response)
 
-    const wrapper = mount(TopBarFrontend)
+    const wrapper = mount(TopBarView)
     await wrapper.vm.$nextTick()
     await new Promise(resolve => setTimeout(resolve, 0))
 
@@ -174,7 +174,7 @@ describe('TopBarFrontend', () => {
       json: async () => [scheduledBar],
     } as Response)
 
-    const wrapper = mount(TopBarFrontend)
+    const wrapper = mount(TopBarView)
 
     // Wait for fetch to complete and component to update
     await new Promise(resolve => setTimeout(resolve, 50))
@@ -196,7 +196,7 @@ describe('TopBarFrontend', () => {
       json: async () => [multiMessageBar],
     } as Response)
 
-    const wrapper = mount(TopBarFrontend)
+    const wrapper = mount(TopBarView)
     await wrapper.vm.$nextTick()
     await new Promise(resolve => setTimeout(resolve, 0))
 
@@ -211,7 +211,7 @@ describe('TopBarFrontend', () => {
       status: 500,
     } as Response)
 
-    const wrapper = mount(TopBarFrontend)
+    const wrapper = mount(TopBarView)
     await wrapper.vm.$nextTick()
     await new Promise(resolve => setTimeout(resolve, 0))
 
@@ -230,7 +230,7 @@ describe('TopBarFrontend', () => {
       json: async () => mockBars,
     } as Response)
 
-    const wrapper = mount(TopBarFrontend)
+    const wrapper = mount(TopBarView)
     await wrapper.vm.$nextTick()
     await new Promise(resolve => setTimeout(resolve, 0))
 
