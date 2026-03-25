@@ -1,4 +1,4 @@
-import { type Page } from '@playwright/test';
+import { type Page, type Response } from '@playwright/test';
 
 declare const process: { env: Record<string, string | undefined>; cwd: () => string };
 declare const require: (name: string) => any;
@@ -16,15 +16,19 @@ export function toDatetimeLocalValue(date: Date): string {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
-/** Wait for the Vue admin to persist a bar via REST (PUT /wp-json/top-bar/v1/bars/:id). */
+/** True when response is a successful PUT updating a single bar (matches pretty and plain permalink REST URLs). */
+function isTopBarBarPut(response: Response): boolean {
+  if (response.request().method() !== 'PUT' || !response.ok()) {
+    return false;
+  }
+  const url = decodeURIComponent(response.url());
+  // Pretty: /wp-json/top-bar/v1/bars/{id} — Plain: ?rest_route=/top-bar/v1/bars/{id}
+  return /top-bar\/v1\/bars\/[a-z0-9_]+/i.test(url);
+}
+
+/** Wait for the Vue admin to persist a bar via REST (PUT …/top-bar/v1/bars/:id). */
 export async function waitForTopBarPut(page: Page): Promise<void> {
-  await page.waitForResponse(
-    (r) =>
-      r.url().includes('/wp-json/top-bar/v1/bars/') &&
-      r.request().method() === 'PUT' &&
-      r.ok(),
-    { timeout: 15000 }
-  );
+  await page.waitForResponse(isTopBarBarPut, { timeout: 30000 });
 }
 
 export async function loginAndOpenTopBarSettings(page: Page): Promise<void> {

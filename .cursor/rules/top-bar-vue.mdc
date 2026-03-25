@@ -1,0 +1,15 @@
+---
+description: Vue 3 + Pinia Top Bar plugin (admin and frontend)
+globs: plugins/top-bar/src/**/*
+alwaysApply: false
+---
+
+# Top Bar Vue (admin & frontend)
+
+- **Admin** mounts on `#top-bar-app` (see `includes/class-admin.php`). **Frontend** mounts on `#top-bar-frontend-mount`; public data loads via REST (`fetch` / public-bars), not the authenticated admin API.
+- **State:** Pinia stores in `src/stores/`; API wrapper in `src/api/client.ts` uses `window.topBarConfig` (nonce, `apiRoot`).
+- **Saving:** The admin UI saves automatically on relevant `@change` / `@blur` handlers — there is **no** classic WordPress “Save Changes” submit for the Vue screen.
+- **i18n:** Use `@wordpress/i18n` `__()` in Vue consistent with existing components.
+- **Mobile visibility:** Frontend toggles visibility via class `top-bar--messages-mobile-hidden` on the bar root (`TopBarFrontend.vue`); do not assume a `data-top-bar-mobile-visible` attribute unless you add it explicitly.
+
+After changing Vue/TS, run `npm run build -w top-bar` (or workspace equivalent) so `assets/dist/` matches source.
