@@ -111,6 +111,7 @@ final class API {
 				'effect'                   => $bar['effect'] ?? 'none',
 				'messages'                 => $bar['messages'] ?? [],
 				'messages_mobile_visible'  => $bar['messages_mobile_visible'] ?? true,
+				'columns'                  => $bar['columns'] ?? [],
 				'bg_color'                 => $bar['bg_color'] ?? '#1d2327',
 				'frame_color'              => $bar['frame_color'] ?? '',
 				'frame_width'              => $bar['frame_width'] ?? 0,
@@ -252,6 +253,10 @@ final class API {
 			],
 			'messages_mobile_visible' => [
 				'type'     => 'boolean',
+				'required' => false,
+			],
+			'columns'                 => [
+				'type'     => 'array',
 				'required' => false,
 			],
 			'bg_color'                => [

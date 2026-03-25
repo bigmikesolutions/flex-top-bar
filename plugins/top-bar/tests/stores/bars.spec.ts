@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
-import { useBarsStore } from './bars'
+import { useBarsStore } from '@/stores/bars'
 import { api } from '@/api/client'
 import type { Bar } from '@/types'
 
@@ -26,6 +26,16 @@ describe('useBarsStore', () => {
     effect: 'none',
     messages: ['Hello'],
     messages_mobile_visible: true,
+    columns: [
+      {
+        id: 'col_1',
+        type: 'text',
+        effect: 'none',
+        messages: ['Hello'],
+        size_percent: 100,
+        messages_mobile_visible: true,
+      },
+    ],
     bg_color: '#123456',
     frame_color: '',
     frame_width: 0,

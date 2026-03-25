@@ -13,7 +13,7 @@ beforeAll(() => {
 })
 
 // Import after setting up window
-const { api } = await import('./client')
+const { api } = await import('@/api/client')
 
 beforeEach(() => {
   vi.clearAllMocks()
@@ -30,6 +30,16 @@ describe('ApiClient', () => {
           effect: 'none',
           messages: ['Hello'],
           messages_mobile_visible: true,
+          columns: [
+            {
+              id: 'col_1',
+              type: 'text',
+              effect: 'none',
+              messages: ['Hello'],
+              size_percent: 100,
+              messages_mobile_visible: true,
+            },
+          ],
           bg_color: '#123456',
           frame_color: '',
           frame_width: 0,
@@ -98,6 +108,16 @@ describe('ApiClient', () => {
         effect: 'none',
         messages: ['Welcome'],
         messages_mobile_visible: true,
+        columns: [
+          {
+            id: 'col_new',
+            type: 'text',
+            effect: 'none',
+            messages: ['Welcome'],
+            size_percent: 100,
+            messages_mobile_visible: true,
+          },
+        ],
         bg_color: '#1d2327',
         frame_color: '',
         frame_width: 0,
@@ -144,6 +164,16 @@ describe('ApiClient', () => {
         effect: 'none',
         messages: ['Hello'],
         messages_mobile_visible: true,
+        columns: [
+          {
+            id: 'col_1',
+            type: 'text',
+            effect: 'none',
+            messages: ['Hello'],
+            size_percent: 100,
+            messages_mobile_visible: true,
+          },
+        ],
         bg_color: '#123456',
         frame_color: '',
         frame_width: 0,
@@ -235,7 +265,7 @@ describe('ApiClient', () => {
       } as Response)
 
       // Create new instance to test constructor
-      const { api: newApi } = await import('./client')
+      const { api: newApi } = await import('@/api/client')
       await newApi.getBars()
 
       expect(fetch).toHaveBeenCalledWith('/wp-json/top-bar/v1/bars', {

@@ -1,7 +1,9 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
-import AdminBarView from './AdminBarView.vue'
-import type { Bar } from '@/types'
+import AdminBarView from '@/components/AdminBarView.vue'
+import ColumnTypeSelector from '@/components/ColumnTypeSelector.vue'
+import TextColumnEditor from '@/components/TextColumnEditor.vue'
+import type { Bar, BarColumn } from '@/types'
 
 // Mock @wordpress/i18n
 vi.mock('@wordpress/i18n', () => ({
@@ -9,6 +11,15 @@ vi.mock('@wordpress/i18n', () => ({
 }))
 
 describe('AdminBarView', () => {
+  const mockColumn: BarColumn = {
+    id: 'col_test',
+    type: 'text',
+    effect: 'none',
+    messages: ['Hello', 'World'],
+    size_percent: 100,
+    messages_mobile_visible: true,
+  }
+
   const mockBar: Bar = {
     id: 'bar_1',
     name: 'Test Bar',
@@ -16,6 +27,7 @@ describe('AdminBarView', () => {
     effect: 'none',
     messages: ['Hello', 'World'],
     messages_mobile_visible: true,
+    columns: [mockColumn],
     bg_color: '#123456',
     frame_color: '#ff0000',
     frame_width: 2,
@@ -34,14 +46,45 @@ describe('AdminBarView', () => {
     scheduleEnabled: true,
   }
 
+  function barWithColumnMessages(messages: string[]): Bar {
+    return {
+      ...mockBar,
+      messages,
+      columns: [{ ...mockColumn, messages }],
+    }
+  }
+
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
-  describe('rendering', () => {
+  describe('AdminBarView', () => {
     it('renders bar name', () => {
       const wrapper = mount(AdminBarView, { props: defaultProps })
       expect(wrapper.text()).toContain('Test Bar')
+    })
+
+    it('renders one layout column row per bar column', () => {
+      const col2: BarColumn = {
+        id: 'col_test_2',
+        type: 'text',
+        effect: 'blink',
+        messages: ['Second', ''],
+        size_percent: 50,
+        messages_mobile_visible: true,
+      }
+      const barTwoCols: Bar = {
+        ...mockBar,
+        messages: ['Hello', 'World'],
+        columns: [mockColumn, col2],
+      }
+      const wrapper = mount(AdminBarView, {
+        props: { ...defaultProps, bar: barTwoCols },
+      })
+      const creator = wrapper.find('.top-bar-column-creator')
+      expect(creator.exists()).toBe(true)
+      const directLayoutRows = creator.element.querySelectorAll(':scope > .top-bar-column-creator-grid')
+      expect(directLayoutRows.length).toBe(2)
     })
 
     it('renders default name when bar name is empty', () => {
@@ -169,6 +212,21 @@ describe('AdminBarView', () => {
     })
   })
 
+  describe('column design (type + text editor)', () => {
+    it('mounts ColumnTypeSelector and TextColumnEditor with bar data', () => {
+      const wrapper = mount(AdminBarView, { props: defaultProps })
+
+      expect(wrapper.findComponent(ColumnTypeSelector).exists()).toBe(true)
+      const editor = wrapper.findComponent(TextColumnEditor)
+      expect(editor.exists()).toBe(true)
+      expect(editor.props('barId')).toBe('bar_1')
+      expect(editor.props('columnId')).toBe('col_test')
+      expect(editor.props('effect')).toBe('none')
+      expect(editor.props('messages')).toEqual(['Hello', 'World'])
+      expect(editor.props('maxMessages')).toBe(4)
+    })
+  })
+
   describe('form fields', () => {
     it('updates name field', async () => {
       const wrapper = mount(AdminBarView, { props: defaultProps })
@@ -268,7 +326,7 @@ describe('AdminBarView', () => {
       const wrapper = mount(AdminBarView, {
         props: {
           ...defaultProps,
-          bar: { ...mockBar, messages: ['Hello', 'World'] },
+          bar: barWithColumnMessages(['Hello', 'World']),
         },
       })
       const firstTextarea = wrapper.findAll('textarea')[0]
@@ -287,7 +345,7 @@ describe('AdminBarView', () => {
       const wrapper = mount(AdminBarView, {
         props: {
           ...defaultProps,
-          bar: { ...mockBar, messages: ['Hello', 'World'] },
+          bar: barWithColumnMessages(['Hello', 'World']),
         },
       })
       const addButton = wrapper.find('.top-bar-btn.amber.sm.right')
@@ -306,7 +364,7 @@ describe('AdminBarView', () => {
       const wrapper = mount(AdminBarView, {
         props: {
           ...defaultProps,
-          bar: { ...mockBar, messages: ['1', '2', '3', '4'] },
+          bar: barWithColumnMessages(['1', '2', '3', '4']),
           maxMessages: 4,
         },
       })
@@ -319,7 +377,7 @@ describe('AdminBarView', () => {
       const wrapper = mount(AdminBarView, {
         props: {
           ...defaultProps,
-          bar: { ...mockBar, messages: ['Hello', 'World'] },
+          bar: barWithColumnMessages(['Hello', 'World']),
         },
       })
       // Find X buttons - when there are multiple messages, all show X buttons (v-if="localBar.messages.length > 1")
@@ -344,7 +402,7 @@ describe('AdminBarView', () => {
       const wrapper = mount(AdminBarView, {
         props: {
           ...defaultProps,
-          bar: { ...mockBar, messages: ['Only one'] },
+          bar: barWithColumnMessages(['Only one']),
         },
       })
 

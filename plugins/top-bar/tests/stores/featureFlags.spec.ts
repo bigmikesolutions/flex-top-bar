@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
-import { useFeatureFlagsStore } from './featureFlags'
+import { useFeatureFlagsStore } from '@/stores/featureFlags'
 import { api } from '@/api/client'
 import type { FeatureFlags } from '@/types'
 

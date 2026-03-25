@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
-import TopBarView from './TopBarView.vue'
+import TopBarView from '@/components/TopBarView.vue'
 import type { Bar } from '@/types'
 
 // Mock fetch
@@ -14,15 +14,27 @@ describe('TopBarView', () => {
   const mockBars: Bar[] = [
     {
       id: 'bar_top',
+      name: 'Test',
       position: 'top',
       effect: 'none',
       messages: ['Welcome to our site'],
       messages_mobile_visible: true,
+      columns: [
+        {
+          id: 'col_top',
+          type: 'text',
+          effect: 'none',
+          messages: ['Welcome to our site'],
+          size_percent: 100,
+          messages_mobile_visible: true,
+        },
+      ],
       bg_color: '#123456',
       frame_color: '',
       frame_width: 0,
       hide_on_scroll: false,
       visible: true,
+      admin_visibile: true,
       scheduled_enabled: false,
       scheduled_from_datetime: '',
       scheduled_to_datetime: '',
@@ -104,10 +116,16 @@ describe('TopBarView', () => {
     expect(bar.attributes('style')).toContain('border: 2px solid #ff0000')
   })
 
-  it('hides bar when mobile_visible is false and applies class', async () => {
-    const mobileHiddenBar = {
+  it('hides column on mobile when messages_mobile_visible is false', async () => {
+    const mobileHiddenBar: Bar = {
       ...mockBars[0],
       messages_mobile_visible: false,
+      columns: [
+        {
+          ...mockBars[0].columns[0],
+          messages_mobile_visible: false,
+        },
+      ],
     }
 
     vi.mocked(fetch).mockResolvedValueOnce({
@@ -119,7 +137,7 @@ describe('TopBarView', () => {
     await wrapper.vm.$nextTick()
     await new Promise(resolve => setTimeout(resolve, 0))
 
-    expect(wrapper.find('.top-bar--messages-mobile-hidden').exists()).toBe(true)
+    expect(wrapper.find('.top-bar__column--mobile-hidden').exists()).toBe(true)
   })
 
   it('filters out invisible bars', async () => {
@@ -185,10 +203,20 @@ describe('TopBarView', () => {
   })
 
   it('concatenates messages for "none" effect', async () => {
-    const multiMessageBar = {
+    const multiMessageBar: Bar = {
       ...mockBars[0],
       effect: 'none',
       messages: ['Hello', 'World', 'Test'],
+      columns: [
+        {
+          id: 'col_top',
+          type: 'text',
+          effect: 'none',
+          messages: ['Hello', 'World', 'Test'],
+          size_percent: 100,
+          messages_mobile_visible: true,
+        },
+      ],
     }
 
     vi.mocked(fetch).mockResolvedValueOnce({

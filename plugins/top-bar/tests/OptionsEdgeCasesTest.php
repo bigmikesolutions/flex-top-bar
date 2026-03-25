@@ -290,7 +290,7 @@ final class OptionsEdgeCasesTest extends TestCase {
 		$requiredFields = [
 			'id', 'name', 'visible', 'admin_visibile', 'scheduled_enabled',
 			'scheduled_from_datetime', 'scheduled_to_datetime', 'position',
-			'effect', 'messages', 'messages_mobile_visible', 'bg_color',
+			'effect', 'messages', 'messages_mobile_visible', 'columns', 'bg_color',
 			'frame_color', 'frame_width', 'hide_on_scroll'
 		];
 
@@ -365,5 +365,103 @@ final class OptionsEdgeCasesTest extends TestCase {
 		$this->assertFalse( $bar['scheduled_enabled'] );
 		$this->assertSame( '', $bar['scheduled_from_datetime'] );
 		$this->assertSame( '', $bar['scheduled_to_datetime'] );
+	}
+
+	/**
+	 * Mirrors scripts/seed-two-top-bars.sh bar_top: backend must keep multiple layout columns.
+	 *
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
+	 */
+	public function test_normalize_bar_preserves_two_text_columns(): void {
+		if ( ! defined( 'FF_MAX_BARS' ) ) {
+			define( 'FF_MAX_BARS', 10 );
+		}
+		if ( ! defined( 'FF_MAX_MESSAGES' ) ) {
+			define( 'FF_MAX_MESSAGES', 10 );
+		}
+		FeatureFlags::reset_for_tests();
+
+		$bar = Options::normalize_bar(
+			[
+				'id'      => 'bar_top',
+				'columns' => [
+					[
+						'id'                      => 'text_1',
+						'type'                    => 'text',
+						'effect'                  => 'fadein',
+						'messages'                => [ 'Top bar.', 'Top position.', 'Scroll is off.' ],
+						'size_percent'            => 50,
+						'messages_mobile_visible' => true,
+					],
+					[
+						'id'                      => 'text_2',
+						'type'                    => 'text',
+						'effect'                  => 'blink',
+						'messages'                => [ '2nd column.', '2nd column effect is working.' ],
+						'size_percent'            => 50,
+						'messages_mobile_visible' => true,
+					],
+				],
+			]
+		);
+
+		$this->assertCount( 2, $bar['columns'] );
+		$this->assertSame( 'text_1', $bar['columns'][0]['id'] );
+		$this->assertSame( 'text_2', $bar['columns'][1]['id'] );
+		$this->assertSame( 50, $bar['columns'][0]['size_percent'] );
+		$this->assertSame( 50, $bar['columns'][1]['size_percent'] );
+	}
+
+	/**
+	 * get_bars() must surface multiple columns after normalize (same path as GET /bars).
+	 *
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
+	 */
+	public function test_get_bars_returns_two_columns_for_seeded_style_bar(): void {
+		if ( ! defined( 'FF_MAX_BARS' ) ) {
+			define( 'FF_MAX_BARS', 10 );
+		}
+		if ( ! defined( 'FF_MAX_MESSAGES' ) ) {
+			define( 'FF_MAX_MESSAGES', 10 );
+		}
+		FeatureFlags::reset_for_tests();
+
+		update_option(
+			Options::OPTION_BARS,
+			[
+				[
+					'id'       => 'bar_top',
+					'name'     => '1st - top',
+					'visible'  => true,
+					'position' => 'top',
+					'columns'  => [
+						[
+							'id'                      => 'text_1',
+							'type'                    => 'text',
+							'effect'                  => 'fadein',
+							'messages'                => [ 'A', 'B' ],
+							'size_percent'            => 50,
+							'messages_mobile_visible' => true,
+						],
+						[
+							'id'                      => 'text_2',
+							'type'                    => 'text',
+							'effect'                  => 'blink',
+							'messages'                => [ 'C', 'D' ],
+							'size_percent'            => 50,
+							'messages_mobile_visible' => true,
+						],
+					],
+				],
+			]
+		);
+
+		$bars = Options::get_bars();
+
+		$this->assertCount( 1, $bars );
+		$this->assertArrayHasKey( 'columns', $bars[0] );
+		$this->assertCount( 2, $bars[0]['columns'] );
 	}
 }
