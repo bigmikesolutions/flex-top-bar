@@ -134,7 +134,10 @@ final class Admin {
 				}
 
 				$messages = isset( $row['messages'] ) && is_array( $row['messages'] ) ? array_values( $row['messages'] ) : [];
-				$messages[] = '';
+				$max_messages = Options::max_messages();
+				if ( $max_messages > 1 && count( $messages ) < $max_messages ) {
+					$messages[] = '';
+				}
 				$row['messages'] = $messages;
 				$bars[ $idx ] = $row;
 				break;
@@ -385,63 +388,65 @@ final class Admin {
 						</div>
 					</div>
 
-					<div class="top-bar-grid title">
-						<div class="item">
-							<label class="check top-bar-life-time-checkbox">
-								<input type="hidden" name="<?php echo esc_attr( $pf ); ?>[scheduled_enabled]" value="0" />
-								<input
-									type="checkbox"
-									class="top-bar-toggle-life-time"
-									name="<?php echo esc_attr( $pf ); ?>[scheduled_enabled]"
-									data-lifetime-panel-id="<?php echo esc_attr( 'top-bar-lifetime-panel-' . (int) $i ); ?>"
-									value="1"
-									<?php checked( $scheduled_enabled ); ?>
-								>
-								<span class="lifetime-label">
-									<p class="bold lg"><?php esc_html_e( 'Scheduled', 'top-bar' ); ?></p>
-								</span>
-								<span class="lifetime-description">
-									<p class="xs"><?php esc_html_e( 'Schedule when the bar should be visible.', 'top-bar' ); ?></p>
-								</span>
-							</label>
-						</div>
-					</div>
-					
-					<div
-						id="<?php echo esc_attr( 'top-bar-lifetime-panel-' . (int) $i ); ?>"
-						class="top-bar-grid bg bg-amber top-bar-lifetime-panel"
-						<?php echo $scheduled_enabled ? '' : 'hidden'; ?>
-					>
-						<div class="item">
-							<fieldset class="clear">
-								<legend class="bold"><?php esc_html_e( 'From', 'top-bar' ); ?></legend>
-								<label>
-								<input
-									type="datetime-local"
-									id="<?php echo esc_attr( 'top-bar-datetime-from-' . (int) $i ); ?>"
-									name="<?php echo esc_attr( $pf ); ?>[scheduled_from_datetime]"
-									class="top-bar-life-time-datetime"
-									value="<?php echo esc_attr( $scheduled_from_datetime ); ?>"
-								>
-				
-							</label>
-							</fieldset>
-						</div>
-						<div class="item">
-							<fieldset class="clear">
-								<legend class="bold"><?php esc_html_e( 'To', 'top-bar' ); ?></legend>
-								<label>
-								<input
-									type="datetime-local"
-									id="<?php echo esc_attr( 'top-bar-datetime-to-' . (int) $i ); ?>"
-									name="<?php echo esc_attr( $pf ); ?>[scheduled_to_datetime]"
-									class="top-bar-life-time-datetime"
-									value="<?php echo esc_attr( $scheduled_to_datetime ); ?>"
-								>
+					<?php if ( defined( 'FF_SCHEDULE' ) && FF_SCHEDULE ) : ?>
+						<div class="top-bar-grid title">
+							<div class="item">
+								<label class="check top-bar-life-time-checkbox">
+									<input type="hidden" name="<?php echo esc_attr( $pf ); ?>[scheduled_enabled]" value="0" />
+									<input
+										type="checkbox"
+										class="top-bar-toggle-life-time"
+										name="<?php echo esc_attr( $pf ); ?>[scheduled_enabled]"
+										data-lifetime-panel-id="<?php echo esc_attr( 'top-bar-lifetime-panel-' . (int) $i ); ?>"
+										value="1"
+										<?php checked( $scheduled_enabled ); ?>
+									>
+									<span class="lifetime-label">
+										<p class="bold lg"><?php esc_html_e( 'Scheduled', 'top-bar' ); ?></p>
+									</span>
+									<span class="lifetime-description">
+										<p class="xs"><?php esc_html_e( 'Schedule when the bar should be visible.', 'top-bar' ); ?></p>
+									</span>
 								</label>
-						</fieldset>
+							</div>
 						</div>
-					</div>
+						
+						<div
+							id="<?php echo esc_attr( 'top-bar-lifetime-panel-' . (int) $i ); ?>"
+							class="top-bar-grid bg bg-amber top-bar-lifetime-panel"
+							<?php echo $scheduled_enabled ? '' : 'hidden'; ?>
+						>
+							<div class="item">
+								<fieldset class="clear">
+									<legend class="bold"><?php esc_html_e( 'From', 'top-bar' ); ?></legend>
+									<label>
+									<input
+										type="datetime-local"
+										id="<?php echo esc_attr( 'top-bar-datetime-from-' . (int) $i ); ?>"
+										name="<?php echo esc_attr( $pf ); ?>[scheduled_from_datetime]"
+										class="top-bar-life-time-datetime"
+										value="<?php echo esc_attr( $scheduled_from_datetime ); ?>"
+									>
+					
+								</label>
+								</fieldset>
+							</div>
+							<div class="item">
+								<fieldset class="clear">
+									<legend class="bold"><?php esc_html_e( 'To', 'top-bar' ); ?></legend>
+									<label>
+									<input
+										type="datetime-local"
+										id="<?php echo esc_attr( 'top-bar-datetime-to-' . (int) $i ); ?>"
+										name="<?php echo esc_attr( $pf ); ?>[scheduled_to_datetime]"
+										class="top-bar-life-time-datetime"
+										value="<?php echo esc_attr( $scheduled_to_datetime ); ?>"
+									>
+									</label>
+							</fieldset>
+							</div>
+						</div>
+					<?php endif; ?>
 
 					<div class="top-bar-grid title">
 						<div class="item">
@@ -485,7 +490,7 @@ final class Admin {
 								
 									<div class="top-bar-message-list" data-pf="<?php echo esc_attr( $pf ); ?>" data-bar-index="<?php echo esc_attr( (string) (int) $i ); ?>">
 										<?php
-										$message_count = max( 1, count( $messages ) );
+										$message_count = max( 1, min( count( $messages ), Options::max_messages() ) );
 										for ( $mi = 0; $mi < $message_count; $mi++ ) :
 											$editor_value = isset( $messages[ $mi ] ) && is_string( $messages[ $mi ] )
 												? $messages[ $mi ]
@@ -532,7 +537,13 @@ final class Admin {
 									</div>
 								</fieldset>								
 								<div class="top-bar-row rt">
-									<a href="<?php echo esc_url( $add_message_url ); ?>" class="top-bar-btn amber sm right"><?php esc_html_e( 'Add new text', 'top-bar' ); ?></a>	
+									<?php
+									$max_messages = Options::max_messages();
+									$can_add_message = $max_messages > 1 && count( $messages ) < $max_messages;
+									?>
+									<?php if ( $can_add_message ) : ?>
+										<a href="<?php echo esc_url( $add_message_url ); ?>" class="top-bar-btn amber sm right"><?php esc_html_e( 'Add new text', 'top-bar' ); ?></a>
+									<?php endif; ?>
 								</div>
 							</div>
 

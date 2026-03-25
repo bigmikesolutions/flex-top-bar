@@ -23,6 +23,8 @@ final class Options {
 	/** Maximum number of bars (order preserved in array). */
 	public const MAX_BARS = 1;
 
+	public const MAX_MESSAGES = 1;
+
 	/**
 	 * Maximum number of bars allowed.
 	 *
@@ -38,6 +40,28 @@ final class Options {
 		}
 		if ( $max < self::MIN_BARS ) {
 			$max = self::MIN_BARS;
+		}
+		return $max;
+	}
+
+	/**
+	 * Maximum number of messages allowed per bar.
+	 *
+	 * Driven by Freemius feature flag `FF_MAX_MESSAGES` when defined; otherwise defaults to 10.
+	 */
+	public static function max_messages(): int {
+		$max = self::MAX_MESSAGES;
+		if ( defined( 'FF_MAX_MESSAGES' ) ) {
+			$raw = constant( 'FF_MAX_MESSAGES' );
+			if ( is_numeric( $raw ) ) {
+				$max = (int) $raw;
+			}
+		}
+		if ( $max < 1 ) {
+			$max = 1;
+		}
+		if ( $max > 50 ) {
+			$max = 50;
 		}
 		return $max;
 	}
@@ -250,7 +274,7 @@ final class Options {
 		if ( ! isset( $messages[0] ) || $messages[0] === '' ) {
 			$messages[0] = wp_kses_post( $default_message );
 		}
-		$messages = array_values( array_slice( $messages, 0, 10 ) );
+		$messages = array_values( array_slice( $messages, 0, self::max_messages() ) );
 		$messages_mobile_visible = true;
 		if ( array_key_exists( 'messages_mobile_visible', $bar ) ) {
 			$mmv = $bar['messages_mobile_visible'];
@@ -368,6 +392,11 @@ final class Options {
 	 * @param array<string, mixed> $bar
 	 */
 	private static function is_bar_in_schedule_window( array $bar ): bool {
+		// If scheduling feature is not available (Freemius flag off), treat scheduling as disabled.
+		if ( ! defined( 'FF_SCHEDULE' ) || ! FF_SCHEDULE ) {
+			return true;
+		}
+
 		$enabled_raw = $bar['scheduled_enabled'] ?? false;
 		$enabled = false;
 		if ( is_bool( $enabled_raw ) ) {
