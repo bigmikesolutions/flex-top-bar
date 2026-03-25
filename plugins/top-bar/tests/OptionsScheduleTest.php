@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace TopBar\Tests;
 
 use PHPUnit\Framework\TestCase;
+use TopBar\FeatureFlags;
 use TopBar\Options;
 
 final class OptionsScheduleTest extends TestCase {
@@ -18,6 +19,8 @@ final class OptionsScheduleTest extends TestCase {
 		if ( ! defined( 'FF_SCHEDULE' ) ) {
 			define( 'FF_SCHEDULE', true );
 		}
+		// Reset FeatureFlags to pick up the constant
+		FeatureFlags::reset_for_tests();
 	}
 
 	public function test_normalize_bar_keeps_valid_iso_datetime(): void {
@@ -86,7 +89,9 @@ final class OptionsScheduleTest extends TestCase {
 		if ( ! defined( 'FF_MAX_MESSAGES' ) ) {
 			define( 'FF_MAX_MESSAGES', 2 );
 		}
-		$this->assertSame( 2, Options::max_messages() );
+		// Reset FeatureFlags to pick up the constant
+		FeatureFlags::reset_for_tests();
+		$this->assertSame( 2, FeatureFlags::instance()->max_messages() );
 	}
 
 	/**
@@ -97,6 +102,8 @@ final class OptionsScheduleTest extends TestCase {
 		if ( ! defined( 'FF_SCHEDULE' ) ) {
 			define( 'FF_SCHEDULE', false );
 		}
+		// Reset FeatureFlags to pick up the constant
+		FeatureFlags::reset_for_tests();
 		$method = new \ReflectionMethod( Options::class, 'is_bar_in_schedule_window' );
 
 		$result = $method->invoke(
@@ -122,6 +129,8 @@ final class OptionsScheduleTest extends TestCase {
 		if ( ! defined( 'FF_SCHEDULE' ) ) {
 			define( 'FF_SCHEDULE', false );
 		}
+		// Reset FeatureFlags to pick up the constant
+		FeatureFlags::reset_for_tests();
 		$GLOBALS['wp_test_options'] = [];
 
 		update_option(
@@ -156,6 +165,8 @@ final class OptionsScheduleTest extends TestCase {
 		if ( ! defined( 'FF_SCHEDULE' ) ) {
 			define( 'FF_SCHEDULE', false );
 		}
+		// Reset FeatureFlags to pick up the constant
+		FeatureFlags::reset_for_tests();
 		$GLOBALS['wp_test_options'] = [];
 
 		update_option(

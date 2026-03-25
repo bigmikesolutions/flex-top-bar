@@ -72,6 +72,7 @@ if ( ! function_exists( 'ftb_fs' ) ) {
     do_action( 'ftb_fs_loaded' );
 }
 
+require_once TOP_BAR_PLUGIN_DIR . 'includes/class-feature-flags.php';
 require_once TOP_BAR_PLUGIN_DIR . 'includes/class-options.php';
 require_once TOP_BAR_PLUGIN_DIR . 'includes/class-admin.php';
 require_once TOP_BAR_PLUGIN_DIR . 'includes/class-frontend.php';
