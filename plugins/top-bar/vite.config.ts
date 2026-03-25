@@ -10,6 +10,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         admin: path.resolve(__dirname, 'src/main.ts'),
+        frontend: path.resolve(__dirname, 'src/frontend.ts'),
       },
       output: {
         entryFileNames: 'js/[name].js',

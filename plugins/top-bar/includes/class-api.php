@@ -22,6 +22,17 @@ final class API {
 	}
 
 	public function register_routes(): void {
+		// Public endpoint for frontend (no auth required)
+		register_rest_route(
+			self::NAMESPACE,
+			'/public-bars',
+			[
+				'methods'             => 'GET',
+				'callback'            => [ $this, 'get_public_bars' ],
+				'permission_callback' => '__return_true', // Public access
+			]
+		);
+
 		// Get all bars
 		register_rest_route(
 			self::NAMESPACE,
@@ -82,6 +93,36 @@ final class API {
 
 	public function check_permissions(): bool {
 		return current_user_can( 'manage_options' );
+	}
+
+	/**
+	 * Get public bars for frontend display (no auth required).
+	 * Only returns visible bars without sensitive admin fields.
+	 */
+	public function get_public_bars( \WP_REST_Request $request ): \WP_REST_Response {
+		$bars = Options::get_active_bars();
+
+		// Remove admin-only fields for security
+		$public_bars = array_map( function( $bar ) {
+			// Only include fields needed for frontend display
+			return [
+				'id'                       => $bar['id'] ?? '',
+				'position'                 => $bar['position'] ?? 'top',
+				'effect'                   => $bar['effect'] ?? 'none',
+				'messages'                 => $bar['messages'] ?? [],
+				'messages_mobile_visible'  => $bar['messages_mobile_visible'] ?? true,
+				'bg_color'                 => $bar['bg_color'] ?? '#1d2327',
+				'frame_color'              => $bar['frame_color'] ?? '',
+				'frame_width'              => $bar['frame_width'] ?? 0,
+				'hide_on_scroll'           => $bar['hide_on_scroll'] ?? false,
+				'visible'                  => $bar['visible'] ?? true,
+				'scheduled_enabled'        => $bar['scheduled_enabled'] ?? false,
+				'scheduled_from_datetime'  => $bar['scheduled_from_datetime'] ?? '',
+				'scheduled_to_datetime'    => $bar['scheduled_to_datetime'] ?? '',
+			];
+		}, $bars );
+
+		return new \WP_REST_Response( $public_bars, 200 );
 	}
 
 	public function get_bars( \WP_REST_Request $request ): \WP_REST_Response {
