@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(composer test:*)"
+      "Bash(composer test:*)",
+      "Bash(vendor/bin/phpunit plugins/top-bar/tests/)"
     ]
   }
 }
