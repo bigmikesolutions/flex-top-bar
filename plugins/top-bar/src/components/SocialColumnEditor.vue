@@ -105,6 +105,7 @@
 <script setup lang="ts">
 import { __ } from '@wordpress/i18n'
 import { SOCIAL_PLATFORMS, type IconStyle, type SocialBarColumn, type SocialPlatform } from '@/types'
+import { getIconStyleOptions } from '@/constants/iconStyleOptions'
 
 const props = defineProps<{
   barId: string
@@ -118,11 +119,7 @@ const emit = defineEmits<{
   commit: []
 }>()
 
-const iconStyleOptions: { value: IconStyle; label: string }[] = [
-  { value: 'rounded', label: __('Rounded', 'top-bar') },
-  { value: 'square', label: __('Square', 'top-bar') },
-  { value: 'icon_only', label: __('Icon only', 'top-bar') },
-]
+const iconStyleOptions = getIconStyleOptions(__)
 
 function platformLabel(p: SocialPlatform): string {
   const labels: Record<SocialPlatform, string> = {

@@ -237,7 +237,9 @@ function socialColumnClass(column: SocialBarColumn): string {
 
 function socialColumnStyle(column: SocialBarColumn): Record<string, string> {
   return {
-    backgroundColor: column.background_color,
+    // Use CSS vars so we can style per-link pills (rounded vs square) visibly.
+    '--top-bar-social-bg': column.background_color,
+    '--top-bar-social-fg': column.icon_color,
     color: column.icon_color,
   }
 }
@@ -298,7 +300,9 @@ function contactColumnClass(column: ContactBarColumn): string {
 
 function contactColumnStyle(column: ContactBarColumn): Record<string, string> {
   return {
-    backgroundColor: column.background_color,
+    // Use CSS vars so we can style per-entry pills (rounded vs square) visibly.
+    '--top-bar-contact-bg': column.background_color,
+    '--top-bar-contact-fg': column.icon_color,
     color: column.icon_color,
   }
 }
@@ -527,6 +531,8 @@ body.admin-bar .top-bar--top {
   font-weight: 600;
   font-size: 16px;
   line-height: 1.4;
+  background: var(--top-bar-social-bg, transparent);
+  color: var(--top-bar-social-fg, currentColor);
 }
 
 .top-bar-social-column--rounded .top-bar-social-column__link {
@@ -562,6 +568,9 @@ body.admin-bar .top-bar--top {
   font-size: 16px;
   line-height: 1.4;
   word-break: break-word;
+  background: var(--top-bar-contact-bg, transparent);
+  color: var(--top-bar-contact-fg, currentColor);
+  padding: 2px 6px;
 }
 
 .top-bar-contact-column__link {
@@ -570,8 +579,26 @@ body.admin-bar .top-bar--top {
 
 .top-bar-contact-column--rounded .top-bar-contact-column__link,
 .top-bar-contact-column--rounded .top-bar-contact-column__text {
+  border-radius: 999px;
+}
+
+.top-bar-contact-column--square .top-bar-contact-column__link,
+.top-bar-contact-column--square .top-bar-contact-column__text {
   border-radius: 4px;
-  padding: 2px 6px;
+}
+
+.top-bar-contact-column--icon_only .top-bar-contact-column__link,
+.top-bar-contact-column--icon_only .top-bar-contact-column__text {
+  gap: 0;
+  font-size: 0;
+  line-height: 0;
+  text-decoration: none;
+}
+
+.top-bar-contact-column--icon_only .top-bar-icon {
+  width: 22px;
+  height: 22px;
+  flex-basis: 22px;
 }
 
 .top-bar-icon {
