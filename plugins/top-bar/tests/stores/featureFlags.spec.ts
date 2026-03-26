@@ -22,6 +22,7 @@ describe('useFeatureFlagsStore', () => {
       expect(store.flags).toEqual({
         max_bars: 1,
         max_messages: 1,
+        max_columns: 4,
         schedule_enabled: false,
       })
     })
@@ -42,6 +43,7 @@ describe('useFeatureFlagsStore', () => {
       const mockFlags: FeatureFlags = {
         max_bars: 5,
         max_messages: 10,
+        max_columns: 4,
         schedule_enabled: true,
       }
 

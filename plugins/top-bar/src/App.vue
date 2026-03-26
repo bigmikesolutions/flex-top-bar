@@ -58,6 +58,7 @@
           :bar="bar"
           :can-delete="bars.length > 1"
           :max-messages="featureFlags.max_messages"
+          :max-columns="featureFlags.max_columns"
           :schedule-enabled="featureFlags.schedule_enabled"
           @update="handleUpdateBar"
           @delete="handleDeleteBar"

@@ -17,6 +17,7 @@ services:
       FREEMIUS_SECRET_KEY: ${FREEMIUS_SECRET_KEY:-}
       FF_MAX_BARS: ${FF_MAX_BARS:-5}
       FF_MAX_MESSAGES: ${FF_MAX_MESSAGES:-5}
+      FF_MAX_COLUMNS: ${FF_MAX_COLUMNS:-4}
       FF_SCHEDULE: ${FF_SCHEDULE:-true}
       WORDPRESS_CONFIG_EXTRA: |
         define('WP_DEBUG_LOG', true);
@@ -26,6 +27,7 @@ services:
         define('WP_FS__SKIP_EMAIL_ACTIVATION', true);
         define('FF_MAX_BARS', (int) getenv('FF_MAX_BARS'));
         define('FF_MAX_MESSAGES', (int) getenv('FF_MAX_MESSAGES'));
+        define('FF_MAX_COLUMNS', (int) getenv('FF_MAX_COLUMNS'));
         define('FF_SCHEDULE', (bool) getenv('FF_SCHEDULE'));
         $$fs_slug = getenv('FREEMIUS_PRODUCT_SLUG');
         $$fs_secret = getenv('FREEMIUS_SECRET_KEY');

@@ -160,7 +160,7 @@ final class Options {
 					$columns[] = self::normalize_column_row( $col, $default_message, $max_messages );
 				}
 			}
-			$columns = array_values( array_slice( $columns, 0, self::MAX_COLUMNS ) );
+			$columns = array_values( array_slice( $columns, 0, FeatureFlags::instance()->max_columns() ) );
 		}
 
 		if ( $columns === [] ) {
