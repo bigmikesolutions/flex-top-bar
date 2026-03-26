@@ -97,9 +97,27 @@
             v-for="(column, columnIndex) in localBar.columns"
             :key="`${column.id}-${columnIndex}`"
             class="top-bar-column-creator-grid"
+            :class="{
+              'top-bar-column-creator-grid--dragging': dragState.fromIndex === columnIndex,
+              'top-bar-column-creator-grid--drag-over': dragState.overIndex === columnIndex,
+            }"
+            @dragover.prevent="onDragOver(columnIndex)"
+            @dragleave="onDragLeave(columnIndex)"
+            @drop.prevent="onDrop(columnIndex)"
           >
             <div class="item-creator no">
               <p class="bold lg">{{ columnIndex + 1 }}</p>
+              <button
+                v-if="localBar.columns.length > 1"
+                type="button"
+                class="top-bar-btn mint sm"
+                :title="__('Drag to reorder columns', 'top-bar')"
+                draggable="true"
+                @dragstart="onDragStart(columnIndex, $event)"
+                @dragend="onDragEnd"
+              >
+                ⇅
+              </button>
               <button
                 v-if="localBar.columns.length > 1"
                 type="button"
@@ -322,6 +340,47 @@ const props = defineProps<{
 }>()
 
 const maxColumns = computed(() => props.maxColumns)
+
+const dragState = ref<{ fromIndex: number | null; overIndex: number | null }>({
+  fromIndex: null,
+  overIndex: null,
+})
+
+function onDragStart(fromIndex: number, e: DragEvent) {
+  dragState.value = { fromIndex, overIndex: fromIndex }
+  if (e.dataTransfer) {
+    e.dataTransfer.effectAllowed = 'move'
+    e.dataTransfer.setData('text/plain', String(fromIndex))
+  }
+}
+
+function onDragOver(overIndex: number) {
+  if (dragState.value.fromIndex === null) return
+  dragState.value.overIndex = overIndex
+}
+
+function onDragLeave(overIndex: number) {
+  if (dragState.value.overIndex === overIndex) {
+    dragState.value.overIndex = null
+  }
+}
+
+function onDrop(toIndex: number) {
+  const fromIndex = dragState.value.fromIndex
+  dragState.value = { fromIndex: null, overIndex: null }
+  if (fromIndex === null || fromIndex === toIndex) return
+
+  const cols = [...localBar.value.columns]
+  const [moved] = cols.splice(fromIndex, 1)
+  if (!moved) return
+  cols.splice(toIndex, 0, moved)
+  localBar.value = { ...localBar.value, columns: cols }
+  saveChanges()
+}
+
+function onDragEnd() {
+  dragState.value = { fromIndex: null, overIndex: null }
+}
 
 const emit = defineEmits<{
   update: [id: string, updates: Partial<Bar>]
