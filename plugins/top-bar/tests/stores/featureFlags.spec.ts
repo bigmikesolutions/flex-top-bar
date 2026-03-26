@@ -66,6 +66,7 @@ describe('useFeatureFlagsStore', () => {
                 resolve({
                   max_bars: 1,
                   max_messages: 1,
+                  max_columns: 4,
                   schedule_enabled: false,
                 }),
               100
@@ -99,6 +100,7 @@ describe('useFeatureFlagsStore', () => {
       const mockFlags: FeatureFlags = {
         max_bars: 3,
         max_messages: 5,
+        max_columns: 4,
         schedule_enabled: true,
       }
 

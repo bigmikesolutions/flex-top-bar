@@ -30,6 +30,7 @@ final class FeatureFlagsTest extends TestCase {
 
 		$this->assertSame( 1, $flags->max_bars() );
 		$this->assertSame( 1, $flags->max_messages() );
+		$this->assertSame( 4, $flags->max_columns() );
 		$this->assertFalse( $flags->is_schedule_enabled() );
 	}
 
@@ -87,6 +88,48 @@ final class FeatureFlagsTest extends TestCase {
 		$flags = FeatureFlags::instance();
 
 		$this->assertSame( 10, $flags->max_messages() );
+	}
+
+	/**
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
+	 */
+	public function test_loads_max_columns_from_constant(): void {
+		if ( ! defined( 'FF_MAX_COLUMNS' ) ) {
+			define( 'FF_MAX_COLUMNS', 3 );
+		}
+		FeatureFlags::reset_for_tests();
+		$flags = FeatureFlags::instance();
+
+		$this->assertSame( 3, $flags->max_columns() );
+	}
+
+	/**
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
+	 */
+	public function test_enforces_minimum_columns_of_one(): void {
+		if ( ! defined( 'FF_MAX_COLUMNS' ) ) {
+			define( 'FF_MAX_COLUMNS', 0 );
+		}
+		FeatureFlags::reset_for_tests();
+		$flags = FeatureFlags::instance();
+
+		$this->assertSame( 1, $flags->max_columns() );
+	}
+
+	/**
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
+	 */
+	public function test_enforces_maximum_columns_cap(): void {
+		if ( ! defined( 'FF_MAX_COLUMNS' ) ) {
+			define( 'FF_MAX_COLUMNS', 999 );
+		}
+		FeatureFlags::reset_for_tests();
+		$flags = FeatureFlags::instance();
+
+		$this->assertSame( 4, $flags->max_columns() );
 	}
 
 	/**
@@ -179,12 +222,30 @@ final class FeatureFlagsTest extends TestCase {
 	 * @runInSeparateProcess
 	 * @preserveGlobalState disabled
 	 */
+	public function test_handles_non_numeric_max_columns_constant(): void {
+		if ( ! defined( 'FF_MAX_COLUMNS' ) ) {
+			define( 'FF_MAX_COLUMNS', 'invalid' );
+		}
+		FeatureFlags::reset_for_tests();
+		$flags = FeatureFlags::instance();
+
+		// Should fall back to default
+		$this->assertSame( 4, $flags->max_columns() );
+	}
+
+	/**
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
+	 */
 	public function test_loads_all_constants_together(): void {
 		if ( ! defined( 'FF_MAX_BARS' ) ) {
 			define( 'FF_MAX_BARS', 20 );
 		}
 		if ( ! defined( 'FF_MAX_MESSAGES' ) ) {
 			define( 'FF_MAX_MESSAGES', 30 );
+		}
+		if ( ! defined( 'FF_MAX_COLUMNS' ) ) {
+			define( 'FF_MAX_COLUMNS', 2 );
 		}
 		if ( ! defined( 'FF_SCHEDULE' ) ) {
 			define( 'FF_SCHEDULE', true );
@@ -194,6 +255,7 @@ final class FeatureFlagsTest extends TestCase {
 
 		$this->assertSame( 20, $flags->max_bars() );
 		$this->assertSame( 30, $flags->max_messages() );
+		$this->assertSame( 2, $flags->max_columns() );
 		$this->assertTrue( $flags->is_schedule_enabled() );
 	}
 
