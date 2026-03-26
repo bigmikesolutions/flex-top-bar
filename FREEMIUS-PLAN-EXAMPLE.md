@@ -11,6 +11,7 @@ Each plan in Freemius dashboard should define these constants:
 // Define in Freemius plan settings
 FF_MAX_BARS = 1
 FF_MAX_MESSAGES = 1
+FF_MAX_COLUMNS = 1
 FF_SCHEDULE = false
 ```
 
@@ -19,6 +20,7 @@ FF_SCHEDULE = false
 // Define in Freemius plan settings
 FF_MAX_BARS = 5
 FF_MAX_MESSAGES = 10
+FF_MAX_COLUMNS = 4
 FF_SCHEDULE = true
 ```
 
@@ -27,6 +29,7 @@ FF_SCHEDULE = true
 // Define in Freemius plan settings
 FF_MAX_BARS = 20
 FF_MAX_MESSAGES = 50
+FF_MAX_COLUMNS = 10
 FF_SCHEDULE = true
 ```
 

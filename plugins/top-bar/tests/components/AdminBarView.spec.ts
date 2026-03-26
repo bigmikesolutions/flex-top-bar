@@ -43,6 +43,7 @@ describe('AdminBarView', () => {
     bar: mockBar,
     canDelete: true,
     maxMessages: 4,
+    maxColumns: 4,
     scheduleEnabled: true,
   }
 

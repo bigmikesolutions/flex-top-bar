@@ -111,6 +111,7 @@ export interface Bar {
 export interface FeatureFlags {
   max_bars: number
   max_messages: number
+  max_columns: number
   schedule_enabled: boolean
 }
 

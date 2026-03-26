@@ -21,6 +21,21 @@ $bars = [
 		"messages_mobile_visible" => true,
 		"columns" => [
 			[
+				"id" => "image_0",
+				"type" => "social",
+				"icon_style" => "rounded",
+				"background_color" => "#ffffff",
+				"icon_color" => "#ff0000",
+				"links" => [
+					[
+						"platform" => "youtube",
+						"url" => "https://www.youtube.com/",
+					],
+				],
+				"size_percent" => 10,
+				"messages_mobile_visible" => true,
+			],
+			[
 				"id" => "text_1",
 				"type" => "text",
 				"effect" => "fadein",
@@ -33,7 +48,7 @@ $bars = [
 				"type" => "text",
 				"effect" => "blink",
 				"messages" => ["2nd column.", "2nd column effect is working."],
-				"size_percent" => 50,
+				"size_percent" => 33,
 				"messages_mobile_visible" => true,
 			],
 		],

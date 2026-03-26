@@ -233,6 +233,7 @@ describe('ApiClient', () => {
       const mockFlags: FeatureFlags = {
         max_bars: 3,
         max_messages: 5,
+        max_columns: 4,
         schedule_enabled: true,
       }
 

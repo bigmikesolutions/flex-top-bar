@@ -106,6 +106,7 @@
 import { __ } from '@wordpress/i18n'
 import type { ContactBarColumn, ContactKind, IconStyle } from '@/types'
 import { CONTACT_KINDS } from '@/types'
+import { getIconStyleOptions } from '@/constants/iconStyleOptions'
 
 const props = defineProps<{
   barId: string
@@ -119,11 +120,7 @@ const emit = defineEmits<{
   commit: []
 }>()
 
-const iconStyleOptions: { value: IconStyle; label: string }[] = [
-  { value: 'rounded', label: __('Rounded', 'top-bar') },
-  { value: 'square', label: __('Square', 'top-bar') },
-  { value: 'icon_only', label: __('Icon only', 'top-bar') },
-]
+const iconStyleOptions = getIconStyleOptions(__)
 
 function kindLabel(k: ContactKind): string {
   const labels: Record<ContactKind, string> = {

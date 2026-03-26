@@ -142,6 +142,31 @@ export async function resetToTwoColumnBar(page: Page): Promise<void> {
   await waitForTopBarAdminReady(page);
 }
 
+/**
+ * One visible bar with a single column of the requested type for frontend E2E tests.
+ */
+export async function resetToSingleColumnBar(
+  page: Page,
+  type: 'text' | 'social' | 'contact'
+): Promise<void> {
+  const root = process.cwd();
+  const composeFile = `${root}/docker-compose.yml`;
+
+  // Keep bar-level legacy fields consistent with the first column (for backward compat).
+  const command = `docker compose -f "${composeFile}" exec -T wordpress php -r 'require_once "/var/www/html/wp-load.php"; $bars = [[ "id" => "bar_single_col", "name" => "Single column", "visible" => true, "admin_visibile" => true, "scheduled_enabled" => false, "scheduled_from_datetime" => "", "scheduled_to_datetime" => "", "position" => "top", "effect" => "none", "messages" => ["", ""], "messages_mobile_visible" => true, "columns" => [ ${
+    type === 'text'
+      ? `[ "id" => "col_front_text", "type" => "text", "effect" => "none", "messages" => ["Front text", ""], "size_percent" => 100, "messages_mobile_visible" => true ]`
+      : type === 'social'
+        ? `[ "id" => "col_front_social", "type" => "social", "icon_style" => "rounded", "background_color" => "#ffffff", "icon_color" => "#ff0000", "links" => [ [ "platform" => "youtube", "url" => "https://www.youtube.com/" ] ], "size_percent" => 100, "messages_mobile_visible" => true ]`
+        : `[ "id" => "col_front_contact", "type" => "contact", "icon_style" => "rounded", "background_color" => "#ffffff", "icon_color" => "#1d2327", "contacts" => [ [ "kind" => "email", "value" => "hello@example.com" ] ], "size_percent" => 100, "messages_mobile_visible" => true ]`
+  } ], "bg_color" => "#389339", "frame_color" => "", "frame_width" => 0, "hide_on_scroll" => false ]]; update_option("top_bars", $bars);'`;
+
+  execSync(command, { stdio: 'pipe' });
+  await page.goto(TOP_BAR_SETTINGS_PATH);
+  await page.waitForLoadState('domcontentloaded');
+  await waitForTopBarAdminReady(page);
+}
+
 export async function getBarIds(page: Page): Promise<string[]> {
   const count = await page.locator('.top-bar-row.bg').count();
   const ids: string[] = [];

@@ -8,6 +8,7 @@ export const useFeatureFlagsStore = defineStore('featureFlags', () => {
   const flags = ref<FeatureFlags>({
     max_bars: 1,
     max_messages: 1,
+    max_columns: 4,
     schedule_enabled: false,
   })
   const loading = ref(false)

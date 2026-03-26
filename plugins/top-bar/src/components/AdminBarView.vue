@@ -68,7 +68,12 @@
       >
         <div class="item" style="flex: 1 1 220px; min-width: 0;">
           <p class="bold lg">{{ __('Create a design', 'top-bar') }}</p>
-          <p class="xs">{{ __('Create your own top bar. You can add a maximum of 4 columns, choosing different types of content.', 'top-bar') }}</p>
+          <p class="xs">
+            {{
+              __('Create your own top bar. You can add a maximum of %d columns, choosing different types of content.', 'top-bar')
+                .replace('%d', String(maxColumns))
+            }}
+          </p>
         </div>
         <div
           class="item title-with-action__btn"
@@ -152,6 +157,7 @@
                     :value="column.size_percent"
                     @change="onColumnSizeChange(columnIndex, $event)"
                   >
+                    <option :value="10">10%</option>
                     <option :value="25">25%</option>
                     <option :value="33">33%</option>
                     <option :value="50">50%</option>
@@ -179,7 +185,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import type {
   Bar,
   BarColumn,
@@ -194,8 +200,6 @@ import ContactColumnEditor from './ContactColumnEditor.vue'
 import ScheduleSection from './ScheduleSection.vue'
 import SocialColumnEditor from './SocialColumnEditor.vue'
 import TextColumnEditor from './TextColumnEditor.vue'
-
-const maxColumns = 4
 
 function newColumnId(): string {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
@@ -313,8 +317,11 @@ const props = defineProps<{
   bar: Bar
   canDelete: boolean
   maxMessages: number
+  maxColumns: number
   scheduleEnabled: boolean
 }>()
+
+const maxColumns = computed(() => props.maxColumns)
 
 const emit = defineEmits<{
   update: [id: string, updates: Partial<Bar>]
@@ -415,14 +422,15 @@ function onColumnMobileVisibleChange(columnIndex: number, e: Event) {
 }
 
 function addColumn() {
-  if (localBar.value.columns.length >= maxColumns) {
+  if (localBar.value.columns.length >= props.maxColumns) {
     return
   }
   const cols = [...localBar.value.columns]
   const nextCount = cols.length + 1
   const share = defaultSizePercentForColumnCount(nextCount)
-  const resized = cols.map(c => ({ ...c, size_percent: share }))
-  resized.push({
+  // Keep existing column sizes untouched; only choose a default for the new column.
+  const updated = [...cols]
+  updated.push({
     id: newColumnId(),
     type: 'text',
     effect: 'none',
@@ -430,7 +438,7 @@ function addColumn() {
     size_percent: share,
     messages_mobile_visible: true,
   })
-  localBar.value = { ...localBar.value, columns: resized }
+  localBar.value = { ...localBar.value, columns: updated }
   saveChanges()
 }
 
@@ -439,9 +447,6 @@ function removeColumn(columnIndex: number) {
     return
   }
   const cols = localBar.value.columns.filter((_, i) => i !== columnIndex)
-  if (cols.length === 1) {
-    cols[0] = { ...cols[0], size_percent: 100 }
-  }
   localBar.value = { ...localBar.value, columns: cols }
   saveChanges()
 }

@@ -4,6 +4,7 @@ import {
   loginAndOpenTopBarSettings,
   openPanel,
   resetToSingleBar,
+  waitForTopBarPut,
 } from './helpers/topBarHelpers';
 
 declare const process: { env: Record<string, string | undefined>; cwd: () => string };
@@ -11,11 +12,18 @@ declare const require: (name: string) => any;
 
 const { execSync } = require('node:child_process');
 
+/** Layout columns only: direct children of `.top-bar-column-creator` (excludes nested message-row grids). */
+function layoutColumnGrids(page: import('@playwright/test').Page, barRowIndex: number) {
+  return page
+    .locator('.top-bar-row.bg')
+    .nth(barRowIndex)
+    .locator('.top-bar-column-creator')
+    .locator(':scope > .top-bar-column-creator-grid');
+}
+
 test.describe('Feature Flag', () => {
 
   test.describe('max bars', () => {
-
-
 
     test('should enforce max_bars limit when adding bars', async ({ page }) => {
       await loginAndOpenTopBarSettings(page);
@@ -74,6 +82,31 @@ test.describe('Feature Flag', () => {
       expect(frontendBarCount).toBeLessThanOrEqual(adminBarCount);
     });
 
+  });
+
+  test.describe('max columns', () => {
+    test('should enforce max_columns limit when adding columns', async ({ page }) => {
+      await loginAndOpenTopBarSettings(page);
+      await resetToSingleBar(page);
+      await openPanel(page, 0);
+
+      const maxColumns = Number(process.env.FF_MAX_COLUMNS ?? '4');
+      const addColumnBtn = page.getByRole('button', { name: 'Add column' }).first();
+
+      // Start with a single-column bar.
+      await expect(layoutColumnGrids(page, 0)).toHaveCount(1);
+
+      // Add up to the configured max.
+      for (let i = 1; i < maxColumns; i += 1) {
+        await expect(addColumnBtn).toBeEnabled();
+        await Promise.all([waitForTopBarPut(page), addColumnBtn.click()]);
+        await expect(layoutColumnGrids(page, 0)).toHaveCount(i + 1);
+      }
+
+      // Once at cap, button should be disabled and count should not increase.
+      await expect(layoutColumnGrids(page, 0)).toHaveCount(maxColumns);
+      await expect(addColumnBtn).toBeDisabled();
+    });
   });
 
   test.describe('max messages', () => {
