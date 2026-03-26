@@ -208,7 +208,7 @@ final class Options {
 			: self::new_column_id();
 
 		$size_percent = isset( $col['size_percent'] ) ? (int) $col['size_percent'] : 100;
-		if ( ! in_array( $size_percent, [ 25, 33, 50, 75, 100 ], true ) ) {
+		if ( ! in_array( $size_percent, [ 10, 25, 33, 50, 75, 100 ], true ) ) {
 			$size_percent = 100;
 		}
 
@@ -356,9 +356,6 @@ final class Options {
 					$platform = '';
 				}
 				$url = isset( $link['url'] ) ? esc_url_raw( (string) $link['url'] ) : '';
-				if ( $platform === '' && $url === '' ) {
-					continue;
-				}
 				$links[] = [
 					'platform' => $platform,
 					'url'      => $url,
@@ -426,9 +423,6 @@ final class Options {
 				}
 				$raw   = isset( $entry['value'] ) ? (string) $entry['value'] : '';
 				$value = $kind === 'address' ? sanitize_textarea_field( $raw ) : sanitize_text_field( $raw );
-				if ( $kind === '' && $value === '' ) {
-					continue;
-				}
 				$contacts[] = [
 					'kind'  => $kind,
 					'value' => $value,

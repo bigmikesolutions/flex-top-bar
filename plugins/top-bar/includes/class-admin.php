@@ -27,13 +27,17 @@ final class Admin {
 		}
 
 		// Enqueue Vue app
-		$asset_file = TOP_BAR_PLUGIN_DIR . 'assets/dist/js/admin.js';
-		if ( file_exists( $asset_file ) ) {
+		$admin_js  = TOP_BAR_PLUGIN_DIR . 'assets/dist/js/admin.js';
+		$admin_css = TOP_BAR_PLUGIN_DIR . 'assets/dist/css/admin.css';
+		if ( file_exists( $admin_js ) ) {
+			$ver_js  = (string) filemtime( $admin_js );
+			$ver_css = file_exists( $admin_css ) ? (string) filemtime( $admin_css ) : TOP_BAR_VERSION;
+
 			wp_enqueue_script(
 				'top-bar-admin-vue',
 				plugins_url( 'assets/dist/js/admin.js', TOP_BAR_PLUGIN_FILE ),
 				[],
-				TOP_BAR_VERSION,
+				$ver_js,
 				true
 			);
 
@@ -41,7 +45,7 @@ final class Admin {
 				'top-bar-admin-vue',
 				plugins_url( 'assets/dist/css/admin.css', TOP_BAR_PLUGIN_FILE ),
 				[],
-				TOP_BAR_VERSION
+				$ver_css
 			);
 
 			// Pass configuration to Vue

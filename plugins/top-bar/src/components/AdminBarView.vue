@@ -152,6 +152,7 @@
                     :value="column.size_percent"
                     @change="onColumnSizeChange(columnIndex, $event)"
                   >
+                    <option :value="10">10%</option>
                     <option :value="25">25%</option>
                     <option :value="33">33%</option>
                     <option :value="50">50%</option>
@@ -421,8 +422,9 @@ function addColumn() {
   const cols = [...localBar.value.columns]
   const nextCount = cols.length + 1
   const share = defaultSizePercentForColumnCount(nextCount)
-  const resized = cols.map(c => ({ ...c, size_percent: share }))
-  resized.push({
+  // Keep existing column sizes untouched; only choose a default for the new column.
+  const updated = [...cols]
+  updated.push({
     id: newColumnId(),
     type: 'text',
     effect: 'none',
@@ -430,7 +432,7 @@ function addColumn() {
     size_percent: share,
     messages_mobile_visible: true,
   })
-  localBar.value = { ...localBar.value, columns: resized }
+  localBar.value = { ...localBar.value, columns: updated }
   saveChanges()
 }
 
@@ -439,9 +441,6 @@ function removeColumn(columnIndex: number) {
     return
   }
   const cols = localBar.value.columns.filter((_, i) => i !== columnIndex)
-  if (cols.length === 1) {
-    cols[0] = { ...cols[0], size_percent: 100 }
-  }
   localBar.value = { ...localBar.value, columns: cols }
   saveChanges()
 }

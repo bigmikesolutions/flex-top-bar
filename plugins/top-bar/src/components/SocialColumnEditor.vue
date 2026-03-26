@@ -90,15 +90,14 @@
     </fieldset>
 
     <div class="top-bar-row rt">
-      <!-- TODO -->
-      <!-- <button
+      <button
         v-if="column.links.length < maxLinks"
         type="button"
         class="top-bar-btn amber sm right"
         @click="addLink"
       >
         {{ __('Add new social media', 'top-bar') }}
-      </button> -->
+      </button>
     </div>
   </div>
 </template>
