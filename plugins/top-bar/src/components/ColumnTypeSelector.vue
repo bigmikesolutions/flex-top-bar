@@ -2,7 +2,7 @@
   <div class="item-creator">
     <fieldset>
       <legend class="bold">{{ __('Type', 'top-bar') }}</legend>
-      <label v-for="opt in options" :key="opt.value" class="top-bar-column-type-option">
+      <label v-for="opt in options" :key="opt.value" class="top-bar-column-type-option radio">
         <input
           type="radio"
           :name="`column_type_${groupName}`"
@@ -10,8 +10,8 @@
           :checked="columnType === opt.value"
           @change="onSelect(opt.value)"
         />
-        {{ opt.label }}
-      </label>
+        <span>{{ opt.label }}</span>     
+       </label>
     </fieldset>
   </div>
 </template>

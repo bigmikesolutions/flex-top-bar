@@ -50,16 +50,8 @@
         >
           <div class="item-creator no">
             <p class="bold md">{{ index + 1 }}</p>
-            <button
-              v-if="column.links.length > 1"
-              type="button"
-              class="top-bar-btn amber sm"
-              @click="removeLink(index)"
-            >
-              X
-            </button>
           </div>
-          <div class="item-creator vertical">
+          <div class="item-creator grid-2 vertical">
             <label class="screen-reader-text" :for="`social_platform_${barId}_${columnId}_${index}`">
               {{ __('Social network', 'top-bar') }}
             </label>
@@ -84,6 +76,19 @@
               @input="onUrlInput(index, $event)"
               @blur="emit('commit')"
             />
+          </div>
+          <div class="item-creator center">
+           
+               <button
+              v-if="column.links.length > 1"
+              type="button"
+              class="top-bar-btn top-bar-icons delete remove empty"
+              @click="removeLink(index)"
+            >
+              Remove
+            </button>
+
+
           </div>
         </div>
       </div>

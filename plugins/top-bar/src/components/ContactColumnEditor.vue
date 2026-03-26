@@ -49,17 +49,9 @@
           class="top-bar-column-creator-grid"
         >
           <div class="item-creator no">
-            <p class="bold md">{{ index + 1 }}</p>
-            <button
-              v-if="column.contacts.length > 1"
-              type="button"
-              class="top-bar-btn amber sm"
-              @click="removeEntry(index)"
-            >
-              X
-            </button>
+            <p class="bold md">{{ index + 1 }}</p>           
           </div>
-          <div class="item-creator vertical">
+          <div class="item-creator grid-2 vertical">
             <label class="screen-reader-text" :for="`contact_kind_${barId}_${columnId}_${index}`">
               {{ __('Contact type', 'top-bar') }}
             </label>
@@ -85,6 +77,19 @@
               @blur="emit('commit')"
             />
           </div>
+          <div class="item-creator center">
+             <button
+              v-if="column.contacts.length > 1"
+              type="button"
+              class="top-bar-btn top-bar-icons delete remove empty"
+              @click="removeEntry(index)"
+            >
+              Remove
+            </button>
+          </div>
+
+
+          
         </div>
       </div>
     </fieldset>

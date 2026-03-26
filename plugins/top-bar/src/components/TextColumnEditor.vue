@@ -1,5 +1,5 @@
 <template>
-  <div class="item-creator lg">
+  <div class="item-creator grid-3">
     <fieldset class="line">
       <legend class="bold">{{ __('Effect', 'top-bar') }}</legend>
       <label>
@@ -26,23 +26,26 @@
         >
           <div class="item-creator no">
             <p class="bold md">{{ index + 1 }}</p>
-            <button
-              v-if="messages.length > 1"
-              type="button"
-              class="top-bar-btn amber sm"
-              @click="removeMessage(index)"
-            >
-              X
-            </button>
           </div>
-          <div class="item-creator">
+          <div class="item-creator grid-2">
             <textarea
               :value="messages[index]"
+              :name="messages[index]"
               :placeholder="index === 0 ? __('Welcome!', 'top-bar') : ''"
               rows="2"
               @input="onMessageInput(index, $event)"
               @blur="emit('commit')"
             ></textarea>
+          </div>
+          <div class="item-creator center">
+            <button
+              v-if="messages.length > 1"
+              type="button"
+              class="top-bar-btn top-bar-icons delete remove empty"
+              @click="removeMessage(index)"
+            >
+              Remove
+            </button>
           </div>
         </div>
       </div>

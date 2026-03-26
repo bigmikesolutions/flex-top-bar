@@ -106,27 +106,18 @@
             @drop.prevent="onDrop(columnIndex)"
           >
             <div class="item-creator no">
-              <p class="bold lg">{{ columnIndex + 1 }}</p>
               <button
                 v-if="localBar.columns.length > 1"
                 type="button"
-                class="top-bar-btn mint sm"
+                class="top-bar-btn drag-drop"
                 :title="__('Drag to reorder columns', 'top-bar')"
                 draggable="true"
                 @dragstart="onDragStart(columnIndex, $event)"
                 @dragend="onDragEnd"
               >
-                ⇅
+                {{ columnIndex + 1 }}
               </button>
-              <button
-                v-if="localBar.columns.length > 1"
-                type="button"
-                class="top-bar-btn amber sm"
-                :title="__('Remove column', 'top-bar')"
-                @click="removeColumn(columnIndex)"
-              >
-                X
-              </button>
+            
             </div>
 
             <ColumnTypeSelector
@@ -195,6 +186,17 @@
                 </select>
               </fieldset>
             </div>
+            <div class="item item-creator">
+              <button
+                v-if="localBar.columns.length > 1"
+                type="button"
+                class="top-bar-btn top-bar-icons  delete remove empty"
+                :title="__('Remove column', 'top-bar')"
+                @click="removeColumn(columnIndex)"
+              >
+                Remove
+              </button>
+           </div>
           </div>
         </div>
       </div>
