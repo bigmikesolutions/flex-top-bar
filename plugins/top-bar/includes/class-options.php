@@ -235,25 +235,31 @@ final class Options {
 	private static function allowed_social_platforms(): array {
 		return [
 			'facebook',
+			'twitterX',
 			'instagram',
-			'x',
 			'linkedin',
+			'google',
 			'youtube',
-			'tiktok',
-			'pinterest',
+			'apple',
 			'snapchat',
-			'reddit',
-			'tumblr',
-			'whatsapp',
-			'telegram',
-			'discord',
-			'threads',
-			'mastodon',
+			'pinterest',
 			'medium',
 			'github',
+			'threads',
+			'whatsapp',
+			'figma',
 			'dribbble',
-			'behance',
-			'flickr',
+			'reddit',
+			'discord',
+			'tiktok',
+			'tumblr',
+			'telegram',
+			'bluesky',
+			'signal',
+			'vk',
+			'spotify',
+			'twitch',
+			'messenger'
 		];
 	}
 
@@ -265,12 +271,10 @@ final class Options {
 			'email',
 			'phone',
 			'mobile',
-			'address',
 			'location',
+			'chat',
 			'website',
-			'fax',
 			'support',
-			'calendar',
 		];
 	}
 
@@ -327,7 +331,7 @@ final class Options {
 		int $max_links
 	): array {
 		$icon_style = isset( $col['icon_style'] ) ? sanitize_key( (string) $col['icon_style'] ) : 'rounded';
-		if ( ! in_array( $icon_style, [ 'rounded', 'square', 'icon_only' ], true ) ) {
+		if ( ! in_array( $icon_style, [ 'rounded', 'square', 'color', 'black', 'white' ], true ) ) {
 			$icon_style = 'rounded';
 		}
 

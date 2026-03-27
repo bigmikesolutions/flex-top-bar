@@ -9,7 +9,7 @@
       <div class="item nav">
         <button
           type="button"
-          :class="['top-bar-icons', 'top-bar-visibility-toggle', localBar.visible ? 'status-on' : 'status-off']"
+          :class="['top-bar-icons mask black', 'top-bar-visibility-toggle', localBar.visible ? 'status-on' : 'status-off']"
           :aria-label="__('Toggle bar visibility on page', 'top-bar')"
           @click="toggleVisibility"
         >
@@ -17,7 +17,7 @@
         <button
           v-if="canDelete"
           type="button"
-          class="top-bar-icons delete"
+          class="top-bar-icons mask black delete"
           :title="__('Remove', 'top-bar')"
           @click="handleDelete"
         >
@@ -25,14 +25,14 @@
         <button
           v-else
           type="button"
-          class="top-bar-icons delete"
+          class="top-bar-icons mask black delete"
           disabled
           :title="__('At least one bar is required', 'top-bar')"
         >
         </button>
         <button
           type="button"
-          class="top-bar-icons arrow-down top-bar-toggle-options"
+          class="top-bar-icons mask black arrow-down top-bar-toggle-options"
           :aria-expanded="isExpanded"
           @click="toggleExpanded"
         >
@@ -190,7 +190,7 @@
               <button
                 v-if="localBar.columns.length > 1"
                 type="button"
-                class="top-bar-btn top-bar-icons  delete remove empty"
+                class="top-bar-btn top-bar-icons  delete mask black remove empty"
                 :title="__('Remove column', 'top-bar')"
                 @click="removeColumn(columnIndex)"
               >

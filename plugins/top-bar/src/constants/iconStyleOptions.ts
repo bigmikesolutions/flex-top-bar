@@ -5,7 +5,9 @@ export function getIconStyleOptions(translate: typeof __): { value: IconStyle; l
   return [
     { value: 'rounded', label: translate('Rounded', 'top-bar') },
     { value: 'square', label: translate('Square', 'top-bar') },
-    { value: 'icon_only', label: translate('Icon only', 'top-bar') },
+    { value: 'black', label: translate('Black', 'top-bar') },
+    { value: 'white', label: translate('White', 'top-bar') },
+    { value: 'color', label: translate('Color', 'top-bar') },
   ]
 }
 

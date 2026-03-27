@@ -41,7 +41,7 @@
             <button
               v-if="messages.length > 1"
               type="button"
-              class="top-bar-btn top-bar-icons delete remove empty"
+              class="top-bar-btn top-bar-icons delete mask black remove empty"
               @click="removeMessage(index)"
             >
               Remove
