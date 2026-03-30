@@ -355,7 +355,16 @@ final class Options {
 				if ( ! is_array( $link ) ) {
 					continue;
 				}
-				$platform = isset( $link['platform'] ) ? sanitize_key( (string) $link['platform'] ) : '';
+				$platform_raw = isset( $link['platform'] ) ? (string) $link['platform'] : '';
+				// sanitize_key() lowercases, but our canonical UI value is "twitterX" (legacy).
+				if ( $platform_raw === 'twitterX' ) {
+					$platform = 'twitterX';
+				} else {
+					$platform = sanitize_key( $platform_raw );
+					if ( $platform === 'twitterx' ) {
+						$platform = 'twitterX';
+					}
+				}
 				if ( $platform !== '' && ! in_array( $platform, $allowed, true ) ) {
 					$platform = '';
 				}
