@@ -66,11 +66,12 @@ final class Frontend {
 		$frontend_css = TOP_BAR_PLUGIN_DIR . 'assets/dist/css/frontend.css';
 
 		if ( file_exists( $frontend_js ) ) {
+			$ver_js = (string) filemtime( $frontend_js );
 			wp_enqueue_script(
 				'top-bar-frontend',
 				plugins_url( 'assets/dist/js/frontend.js', TOP_BAR_PLUGIN_FILE ),
 				[],
-				TOP_BAR_VERSION,
+				$ver_js,
 				true
 			);
 		}
@@ -81,11 +82,12 @@ final class Frontend {
 		}
 
 		if ( file_exists( $frontend_css ) ) {
+			$ver_css = (string) filemtime( $frontend_css );
 			wp_enqueue_style(
 				'top-bar-frontend',
 				plugins_url( 'assets/dist/css/frontend.css', TOP_BAR_PLUGIN_FILE ),
 				[],
-				TOP_BAR_VERSION
+				$ver_css
 			);
 		}
 

@@ -49,7 +49,7 @@
                 >
                   <span
                     class="top-bar-icon top-bar-icon--social"
-                    :style="iconStyleFromClass(socialIconClass(link.platform), column.icon_color)"
+                    :style="iconStyleFromClass(socialIconClass(link.platform), usesIconColors(column.icon_style) ? column.icon_color : '')"
                     aria-hidden="true"
                   ></span>
                   {{ socialPlatformLabel(link.platform) }}
@@ -72,7 +72,7 @@
                   >
                     <span
                       class="top-bar-icon top-bar-icon--contact"
-                      :style="iconStyleFromClass(contactIconClass(entry.kind), column.icon_color)"
+                      :style="iconStyleFromClass(contactIconClass(entry.kind), usesIconColors(column.icon_style) ? column.icon_color : '')"
                       aria-hidden="true"
                     ></span>
                     {{ contactDisplayLabel(entry.kind, entry.value) }}
@@ -83,7 +83,7 @@
                   >
                     <span
                       class="top-bar-icon top-bar-icon--contact"
-                      :style="iconStyleFromClass(contactIconClass(entry.kind), column.icon_color)"
+                      :style="iconStyleFromClass(contactIconClass(entry.kind), usesIconColors(column.icon_style) ? column.icon_color : '')"
                       aria-hidden="true"
                     ></span>
                     {{ contactDisplayLabel(entry.kind, entry.value) }}
@@ -235,12 +235,18 @@ function socialColumnClass(column: SocialBarColumn): string {
   return `top-bar-social-column--${column.icon_style}`
 }
 
+function usesIconColors(style: SocialBarColumn['icon_style']): boolean {
+  return style === 'rounded' || style === 'square'
+}
+
 function socialColumnStyle(column: SocialBarColumn): Record<string, string> {
+  if (!usesIconColors(column.icon_style)) {
+    return {}
+  }
   return {
     // Use CSS vars so we can style per-link pills (rounded vs square) visibly.
     '--top-bar-social-bg': column.background_color,
     '--top-bar-social-fg': column.icon_color,
-    color: column.icon_color,
   }
 }
 
@@ -305,11 +311,13 @@ function contactColumnClass(column: ContactBarColumn): string {
 }
 
 function contactColumnStyle(column: ContactBarColumn): Record<string, string> {
+  if (!usesIconColors(column.icon_style)) {
+    return {}
+  }
   return {
     // Use CSS vars so we can style per-entry pills (rounded vs square) visibly.
     '--top-bar-contact-bg': column.background_color,
     '--top-bar-contact-fg': column.icon_color,
-    color: column.icon_color,
   }
 }
 
@@ -321,7 +329,7 @@ function contactHref(kind: ContactKind | '', value: string): string {
   if (kind === 'email') {
     return `mailto:${encodeURIComponent(v)}`
   }
-  if (kind === 'phone' || kind === 'mobile' || kind === 'fax') {
+  if (kind === 'phone' || kind === 'mobile') {
     return `tel:${v.replace(/\s/g, '')}`
   }
   if (kind === 'website') {
@@ -537,6 +545,10 @@ body.admin-bar .top-bar--top {
   font-weight: 600;
   font-size: 16px;
   line-height: 1.4;
+}
+
+.top-bar-social-column--rounded .top-bar-social-column__link,
+.top-bar-social-column--square .top-bar-social-column__link {
   background: var(--top-bar-social-bg, transparent);
   color: var(--top-bar-social-fg, currentColor);
 }
@@ -574,9 +586,15 @@ body.admin-bar .top-bar--top {
   font-size: 16px;
   line-height: 1.4;
   word-break: break-word;
+  padding: 2px 6px;
+}
+
+.top-bar-contact-column--rounded .top-bar-contact-column__link,
+.top-bar-contact-column--rounded .top-bar-contact-column__text,
+.top-bar-contact-column--square .top-bar-contact-column__link,
+.top-bar-contact-column--square .top-bar-contact-column__text {
   background: var(--top-bar-contact-bg, transparent);
   color: var(--top-bar-contact-fg, currentColor);
-  padding: 2px 6px;
 }
 
 .top-bar-contact-column__link {
@@ -612,6 +630,7 @@ body.admin-bar .top-bar--top {
   width: 16px;
   height: 16px;
   flex: 0 0 16px;
+  background-color: currentColor;
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   -webkit-mask-size: contain;
