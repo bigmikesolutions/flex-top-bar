@@ -32,7 +32,7 @@
       </label>
     </fieldset>
 
-    <div class="top-bar-grid">
+    <div v-if="column.icon_style === 'rounded' || column.icon_style === 'square'" class="top-bar-grid">
       <div class="item">
         <fieldset class="line">
           <legend class="bold">{{ __('Background color', 'top-bar') }}</legend>

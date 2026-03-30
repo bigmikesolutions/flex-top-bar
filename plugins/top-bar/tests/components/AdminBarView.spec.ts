@@ -381,9 +381,8 @@ describe('AdminBarView', () => {
           bar: barWithColumnMessages(['Hello', 'World']),
         },
       })
-      // Find X buttons - when there are multiple messages, all show X buttons (v-if="localBar.messages.length > 1")
-      const removeButtons = wrapper.findAll('.top-bar-message-list .top-bar-btn.amber.sm').filter(
-        btn => btn.text() === 'X'
+      const removeButtons = wrapper.findAll(
+        '.top-bar-message-list button.top-bar-btn.top-bar-icons.delete.remove.empty'
       )
 
       // Should have 2 X buttons (both messages show button when length > 1)
