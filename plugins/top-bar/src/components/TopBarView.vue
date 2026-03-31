@@ -12,8 +12,8 @@
       :data-top-bar-effect="getBarEffect(bar)"
       :data-top-bar-hide-on-scroll="bar.hide_on_scroll ? '1' : '0'"
     >
-      <div class="top-bar__inner">
-        <div class="top-bar__columns">
+    <div class="top-bar__inner">
+        <div class="top-bar__columns" >
           <div
             v-for="column in getColumns(bar)"
             :key="column.id"
@@ -45,6 +45,7 @@
                   class="top-bar-social-column__link"
                   :href="safeHref(link.url)"
                   target="_blank"
+                  :title="socialPlatformLabel(link.platform)"
                   rel="noopener noreferrer"
                 >
                   <span
@@ -52,7 +53,7 @@
                     :style="iconStyleFromClass(socialIconClass(link.platform), usesIconColors(column.icon_style) ? column.icon_color : '')"
                     aria-hidden="true"
                   ></span>
-                  {{ socialPlatformLabel(link.platform) }}
+                  <!-- {{ socialPlatformLabel(link.platform) }} -->
                 </a>
               </div>
             </template>
@@ -67,15 +68,16 @@
                     v-if="contactHref(entry.kind, entry.value) !== '#'"
                     class="top-bar-contact-column__link"
                     :href="contactHref(entry.kind, entry.value)"
-                    :target="entry.kind === 'website' || entry.kind === 'location' ? '_blank' : undefined"
-                    :rel="entry.kind === 'website' || entry.kind === 'location' ? 'noopener noreferrer' : undefined"
+                    :title="`${contactLabel(entry.kind)}`"
+                    :target="entry.kind === 'website' || entry.kind === 'location'  || entry.kind === 'support' || entry.kind === 'chat' ? '_blank' : undefined"
+                    :rel="entry.kind === 'website' || entry.kind === 'location'  || entry.kind === 'support' || entry.kind === 'chat' ? 'noopener noreferrer' : undefined"
                   >
                     <span
                       class="top-bar-icon top-bar-icon--contact"
                       :style="iconStyleFromClass(contactIconClass(entry.kind), usesIconColors(column.icon_style) ? column.icon_color : '')"
                       aria-hidden="true"
                     ></span>
-                    {{ contactDisplayLabel(entry.kind, entry.value) }}
+                    <!-- {{ contactDisplayLabel(entry.kind, entry.value) }} -->
                   </a>
                   <span
                     v-else
@@ -86,7 +88,7 @@
                       :style="iconStyleFromClass(contactIconClass(entry.kind), usesIconColors(column.icon_style) ? column.icon_color : '')"
                       aria-hidden="true"
                     ></span>
-                    {{ contactDisplayLabel(entry.kind, entry.value) }}
+                    <!-- {{ contactDisplayLabel(entry.kind, entry.value) }} -->
                   </span>
                 </template>
               </div>
@@ -339,7 +341,28 @@ function contactHref(kind: ContactKind | '', value: string): string {
     const q = encodeURIComponent(v)
     return `https://www.google.com/maps/search/?api=1&query=${q}`
   }
+  if (kind === 'support') {
+    return safeHref(v)
+  }
+  if (kind === 'chat') {
+    return safeHref(v)
+  }
+  
   return '#'
+}
+
+function contactLabel(kind: ContactKind | ''): string {
+  const map: Record<ContactKind, string> = {
+    email: 'E-mail address',
+    phone: 'Phone',
+    mobile: 'Mobile phone',
+    website: 'WWW',
+    location: 'Locaction',
+    support: 'Support',
+    chat: 'Chat',
+  }
+
+  return map[kind] ?? kind
 }
 
 function contactDisplayLabel(_kind: ContactKind | '', value: string): string {
@@ -353,7 +376,7 @@ function contactIconClass(kind: ContactKind | ''): string {
   return CONTACT_ICONS_BY_KIND[kind] ?? ''
 }
 
-function iconStyleFromClass(iconClass: string, color: string): Record<string, string> {
+function iconStyleFromClass(iconClass: string, color: string,): Record<string, string> {
   if (!iconClass) {
     return {}
   }
@@ -472,7 +495,7 @@ body.admin-bar .top-bar--top {
   display: flex;
   flex-wrap: wrap;
   width: 100%;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
   gap: 0;
   text-align: center;
@@ -482,6 +505,8 @@ body.admin-bar .top-bar--top {
   box-sizing: border-box;
   padding: 0 8px;
   min-width: 0;
+  margin: 4px 0;
+  display:flex;
 }
 
 /* Transitions for effects */
@@ -531,7 +556,6 @@ body.admin-bar .top-bar--top {
   gap: 8px;
   justify-content: center;
   align-items: center;
-  padding: 6px 10px;
   border-radius: 6px;
   box-sizing: border-box;
 }
@@ -539,8 +563,8 @@ body.admin-bar .top-bar--top {
 .top-bar-social-column__link {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 12px;
+  margin:0 2px;
+  padding: 4px;
   text-decoration: none;
   font-weight: 600;
   font-size: 16px;
@@ -554,7 +578,7 @@ body.admin-bar .top-bar--top {
 }
 
 .top-bar-social-column--rounded .top-bar-social-column__link {
-  border-radius: 999px;
+  border-radius: 100%;
 }
 
 .top-bar-social-column--square .top-bar-social-column__link {
@@ -563,17 +587,22 @@ body.admin-bar .top-bar--top {
 
 .top-bar-social-column--icon_only .top-bar-social-column__link {
   padding: 0 8px;
-  font-size: 0.85rem;
 }
+
+.top-bar-social-column--rounded .top-bar-social-column__link span,
+.top-bar-social-column--square .top-bar-social-column__link span{
+  mask-size:65%
+}
+
+.top-bar-social-column--color .top-bar-social-column__link span path {
+  fill: red; /* teraz dziedziczy kolor z tekstu lub rodzica */
+} 
 
 .top-bar-contact-column {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
   align-items: center;
   justify-content: center;
-  padding: 6px 10px;
-  border-radius: 6px;
+  /* padding: 6px 10px; */
   box-sizing: border-box;
   text-align: center;
 }
@@ -582,11 +611,12 @@ body.admin-bar .top-bar--top {
 .top-bar-contact-column__text {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  margin:0 4px;
   font-size: 16px;
-  line-height: 1.4;
-  word-break: break-word;
+  /* line-height: 1.4; */
+  /* word-break: break-word; */
   padding: 2px 6px;
+  box-sizing:border-box;
 }
 
 .top-bar-contact-column--rounded .top-bar-contact-column__link,
@@ -598,12 +628,18 @@ body.admin-bar .top-bar--top {
 }
 
 .top-bar-contact-column__link {
-  text-decoration: underline;
+  width: 32px;
+  height:32px;
+  max-width:32px;
+  max-height:32px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .top-bar-contact-column--rounded .top-bar-contact-column__link,
 .top-bar-contact-column--rounded .top-bar-contact-column__text {
-  border-radius: 999px;
+  border-radius: 100%;
 }
 
 .top-bar-contact-column--square .top-bar-contact-column__link,
@@ -627,14 +663,13 @@ body.admin-bar .top-bar--top {
 
 .top-bar-icon {
   display: inline-block;
-  width: 16px;
-  height: 16px;
-  flex: 0 0 16px;
+  width: 24px;
+  height: 24px;
   background-color: currentColor;
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   -webkit-mask-size: contain;
-  mask-size: contain;
+  mask-size: auto 80%;
   -webkit-mask-position: center;
   mask-position: center;
 }

@@ -41,6 +41,17 @@
     </div>
 
     <div :class="['top-bar-options', { active: isExpanded }]">
+      <!-- Preview -->
+      <div class="top-bar-grid line-bottom ">
+        <div class="item">
+          <p class="bold lg">Preview</p>
+          <!-- TODO 
+            - Tobar preview here  
+          -->
+            
+        </div>
+      </div>
+
       <!-- Name -->
       <div class="top-bar-grid">
         <div class="item">
@@ -174,6 +185,24 @@
                     <option :value="100">100%</option>
                   </select>
                 </label>
+              </fieldset>
+               <!-- TODO  
+              - dodac pozycjonowanie tresci, chcialem to zrobic css ale sa przypadki ktorych ne jestem w stanie obsluzyc 
+              - wartosci do dodania w style: 
+                justify-content: flex-start;
+                justify-content: center;
+                justify-content: flex-end
+              -->
+              <fieldset>
+                <legend class="bold">{{ __('Content position', 'top-bar') }}</legend>
+                <select
+                  :value="column.messages_mobile_visible"
+                  @change="onColumnMobileVisibleChange(columnIndex, $event)"
+                >
+                  <option :value="true">{{ __('Left', 'top-bar') }}</option>
+                  <option :value="false">{{ __('Center', 'top-bar') }}</option>
+                  <option :value="false">{{ __('Right', 'top-bar') }}</option>
+                </select>
               </fieldset>
               <fieldset>
                 <legend class="bold">{{ __('Visible on the mobile', 'top-bar') }}</legend>
