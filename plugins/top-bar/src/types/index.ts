@@ -1,29 +1,35 @@
 export type ColumnType = 'text' | 'social' | 'contact'
 
-export type IconStyle = 'rounded' | 'square' | 'icon_only'
+export type IconStyle = 'rounded' | 'square' | 'black' | 'white' | 'color'
 
 /** Social platforms (aligned with legacy PHP admin mock). */
 export const SOCIAL_PLATFORMS = [
   'facebook',
+  'twitterX',
   'instagram',
-  'x',
   'linkedin',
+  'google',
   'youtube',
-  'tiktok',
-  'pinterest',
+  'apple',
   'snapchat',
-  'reddit',
-  'tumblr',
-  'whatsapp',
-  'telegram',
-  'discord',
-  'threads',
-  'mastodon',
+  'pinterest',
   'medium',
   'github',
+  'threads',
+  'whatsapp',
+  'figma',
   'dribbble',
-  'behance',
-  'flickr',
+  'reddit',
+  'discord',
+  'tiktok',
+  'tumblr',
+  'telegram',
+  'bluesky',
+  'signal',
+  'vk',
+  'spotify',
+  'twitch',
+  'messenger'
 ] as const
 
 export type SocialPlatform = (typeof SOCIAL_PLATFORMS)[number]
@@ -38,12 +44,10 @@ export const CONTACT_KINDS = [
   'email',
   'phone',
   'mobile',
-  'address',
   'location',
+  'chat',
   'website',
-  'fax',
   'support',
-  'calendar',
 ] as const
 
 export type ContactKind = (typeof CONTACT_KINDS)[number]
@@ -53,12 +57,16 @@ export interface ContactEntry {
   value: string
 }
 
+export const CONTENT_POSITIONS = ['left', 'center', 'right'] as const
+export type ContentPosition = (typeof CONTENT_POSITIONS)[number]
+
 export interface TextBarColumn {
   id: string
   type: 'text'
   effect: 'none' | 'slider' | 'fadein' | 'blink'
   messages: string[]
   size_percent: number
+  content_position: ContentPosition
   messages_mobile_visible: boolean
 }
 
@@ -70,6 +78,7 @@ export interface SocialBarColumn {
   icon_color: string
   links: SocialLink[]
   size_percent: number
+  content_position: ContentPosition
   messages_mobile_visible: boolean
 }
 
@@ -81,6 +90,7 @@ export interface ContactBarColumn {
   icon_color: string
   contacts: ContactEntry[]
   size_percent: number
+  content_position: ContentPosition
   messages_mobile_visible: boolean
 }
 

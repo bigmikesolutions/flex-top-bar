@@ -57,3 +57,6 @@ wp-config.php
 #/wp-content/themes
 plugins/.DS_Store
 .DS_Store
+package.json
+package-lock.json
+docker-compose.yml

@@ -2,18 +2,35 @@
   <div class="item-creator lg">
     <fieldset class="line">
       <legend class="bold">{{ __('Choose the icon appearance', 'top-bar') }}</legend>
-      <label v-for="opt in iconStyleOptions" :key="opt.value" class="top-bar-radio-line">
+      <label v-for="opt in iconStyleOptions" :key="opt.value" :class="['radio', { 'bg-grey radio': opt.value === 'white' }]">
         <input
           type="radio"
           :name="`contact_icon_style_${barId}_${columnId}`"
           :checked="column.icon_style === opt.value"
           @change="patchIconStyle(opt.value)"
         />
-        {{ opt.label }}
+        <span class="top-bar-radio-line">{{ opt.label }}</span>
+      <span></span>
+       <div class="item icons">
+        <span
+          v-for="platform in CONTACT_KINDS"
+          :key="platform"
+          class="top-bar-icons contact"
+          :class="{
+            circle: opt.value === 'rounded',
+            square: opt.value === 'square',
+            'mask black': opt.value === 'black',
+            'mask white': opt.value === 'white',
+            'no-mask': opt.value === 'color',
+            [platform]: true
+          }"
+          :title="kindLabel(platform)"
+        ></span>
+      </div>
       </label>
     </fieldset>
 
-    <div class="top-bar-grid">
+    <div v-if="column.icon_style === 'rounded' || column.icon_style === 'square'" class="top-bar-grid">
       <div class="item">
         <fieldset class="line">
           <legend class="bold">{{ __('Background color', 'top-bar') }}</legend>
@@ -49,17 +66,9 @@
           class="top-bar-column-creator-grid"
         >
           <div class="item-creator no">
-            <p class="bold md">{{ index + 1 }}</p>
-            <button
-              v-if="column.contacts.length > 1"
-              type="button"
-              class="top-bar-btn amber sm"
-              @click="removeEntry(index)"
-            >
-              X
-            </button>
+            <p class="bold md">{{ index + 1 }}</p>           
           </div>
-          <div class="item-creator vertical">
+          <div class="item-creator grid-2 vertical">
             <label class="screen-reader-text" :for="`contact_kind_${barId}_${columnId}_${index}`">
               {{ __('Contact type', 'top-bar') }}
             </label>
@@ -84,6 +93,16 @@
               @input="onValueInput(index, $event)"
               @blur="emit('commit')"
             />
+          </div>
+          <div class="item-creator center">
+             <button
+              v-if="column.contacts.length > 1"
+              type="button"
+              class="top-bar-btn top-bar-icons delete mask black remove empty"
+              @click="removeEntry(index)"
+            >
+              Remove
+            </button>
           </div>
         </div>
       </div>
@@ -127,12 +146,10 @@ function kindLabel(k: ContactKind): string {
     email: __('Email', 'top-bar'),
     phone: __('Phone', 'top-bar'),
     mobile: __('Mobile', 'top-bar'),
-    address: __('Address', 'top-bar'),
-    location: __('Map location', 'top-bar'),
+    location: __('Location', 'top-bar'),
+    chat: __('Chat', 'top-bar'),
     website: __('Website', 'top-bar'),
-    fax: __('Fax', 'top-bar'),
-    support: __('Customer support', 'top-bar'),
-    calendar: __('Appointment / Booking', 'top-bar'),
+    support: __('Support', 'top-bar'),
   }
   return labels[k]
 }

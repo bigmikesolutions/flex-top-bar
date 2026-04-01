@@ -271,7 +271,7 @@ test.describe('single-bar', () => {
       await openPanel(page, 0);
 
       const afterAddCount = await messageList.locator('.top-bar-column-creator-grid').count();
-      const removeButtons = messageList.locator('.item-creator.no').getByRole('button', { name: 'X' });
+      const removeButtons = messageList.locator('button.top-bar-btn.top-bar-icons.delete.mask.black.remove.empty');
       const removeSave = waitForTopBarPut(page);
       await removeButtons.last().click();
       await removeSave;
@@ -291,7 +291,7 @@ test.describe('single-bar', () => {
 
       // Reduce to a single message field.
       while ((await messageList.locator('.top-bar-column-creator-grid').count()) > 1) {
-        const removeLoop = messageList.locator('.item-creator.no').getByRole('button', { name: 'X' });
+        const removeLoop = messageList.locator('button.top-bar-btn.top-bar-icons.delete.mask.black.remove.empty');
         const removeLoopSave = waitForTopBarPut(page);
         await removeLoop.last().click();
         await removeLoopSave;
@@ -299,7 +299,7 @@ test.describe('single-bar', () => {
       }
 
       await expect(messageList.locator('.top-bar-column-creator-grid')).toHaveCount(1);
-      await expect(messageList.locator('.item-creator.no').getByRole('button', { name: 'X' })).toHaveCount(0);
+      await expect(messageList.locator('button.top-bar-btn.top-bar-icons.delete.mask.black.remove.empty')).toHaveCount(0);
     });
   });
 

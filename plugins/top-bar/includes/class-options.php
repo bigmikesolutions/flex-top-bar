@@ -40,6 +40,7 @@ final class Options {
 			'effect'                  => 'none',
 			'messages'                => [ $welcome, '' ],
 			'size_percent'            => 100,
+			'content_position'        => 'center',
 			'messages_mobile_visible' => true,
 		];
 
@@ -171,6 +172,7 @@ final class Options {
 						'messages'                => $messages,
 						'messages_mobile_visible' => $messages_mobile_visible,
 						'size_percent'            => 100,
+						'content_position'        => 'center',
 					],
 					$default_message,
 					$max_messages
@@ -214,19 +216,24 @@ final class Options {
 
 		$mmv = self::parse_bool( $col['messages_mobile_visible'] ?? true, true );
 
+		$content_position = isset( $col['content_position'] ) ? sanitize_key( (string) $col['content_position'] ) : 'center';
+		if ( ! in_array( $content_position, [ 'left', 'center', 'right' ], true ) ) {
+			$content_position = 'center';
+		}
+
 		$type = isset( $col['type'] ) ? sanitize_key( (string) $col['type'] ) : 'text';
 		if ( ! in_array( $type, [ 'text', 'social', 'contact' ], true ) ) {
 			$type = 'text';
 		}
 
 		if ( $type === 'social' ) {
-			return self::normalize_social_column( $col, $id, $size_percent, $mmv, $max_messages );
+			return self::normalize_social_column( $col, $id, $size_percent, $content_position, $mmv, $max_messages );
 		}
 		if ( $type === 'contact' ) {
-			return self::normalize_contact_column( $col, $id, $size_percent, $mmv, $max_messages );
+			return self::normalize_contact_column( $col, $id, $size_percent, $content_position, $mmv, $max_messages );
 		}
 
-		return self::normalize_text_column( $col, $id, $default_message, $max_messages, $size_percent, $mmv );
+		return self::normalize_text_column( $col, $id, $default_message, $max_messages, $size_percent, $content_position, $mmv );
 	}
 
 	/**
@@ -235,25 +242,31 @@ final class Options {
 	private static function allowed_social_platforms(): array {
 		return [
 			'facebook',
+			'twitterX',
 			'instagram',
-			'x',
 			'linkedin',
+			'google',
 			'youtube',
-			'tiktok',
-			'pinterest',
+			'apple',
 			'snapchat',
-			'reddit',
-			'tumblr',
-			'whatsapp',
-			'telegram',
-			'discord',
-			'threads',
-			'mastodon',
+			'pinterest',
 			'medium',
 			'github',
+			'threads',
+			'whatsapp',
+			'figma',
 			'dribbble',
-			'behance',
-			'flickr',
+			'reddit',
+			'discord',
+			'tiktok',
+			'tumblr',
+			'telegram',
+			'bluesky',
+			'signal',
+			'vk',
+			'spotify',
+			'twitch',
+			'messenger'
 		];
 	}
 
@@ -265,12 +278,10 @@ final class Options {
 			'email',
 			'phone',
 			'mobile',
-			'address',
 			'location',
+			'chat',
 			'website',
-			'fax',
 			'support',
-			'calendar',
 		];
 	}
 
@@ -283,6 +294,7 @@ final class Options {
 		string $default_message,
 		int $max_messages,
 		int $size_percent,
+		string $content_position,
 		bool $mmv
 	): array {
 		$effect = isset( $col['effect'] ) ? sanitize_key( (string) $col['effect'] ) : 'none';
@@ -312,6 +324,7 @@ final class Options {
 			'effect'                  => $effect,
 			'messages'                => $messages,
 			'size_percent'            => $size_percent,
+			'content_position'        => $content_position,
 			'messages_mobile_visible' => $mmv,
 		];
 	}
@@ -323,11 +336,12 @@ final class Options {
 		array $col,
 		string $id,
 		int $size_percent,
+		string $content_position,
 		bool $mmv,
 		int $max_links
 	): array {
 		$icon_style = isset( $col['icon_style'] ) ? sanitize_key( (string) $col['icon_style'] ) : 'rounded';
-		if ( ! in_array( $icon_style, [ 'rounded', 'square', 'icon_only' ], true ) ) {
+		if ( ! in_array( $icon_style, [ 'rounded', 'square', 'color', 'black', 'white' ], true ) ) {
 			$icon_style = 'rounded';
 		}
 
@@ -351,7 +365,16 @@ final class Options {
 				if ( ! is_array( $link ) ) {
 					continue;
 				}
-				$platform = isset( $link['platform'] ) ? sanitize_key( (string) $link['platform'] ) : '';
+				$platform_raw = isset( $link['platform'] ) ? (string) $link['platform'] : '';
+				// sanitize_key() lowercases, but our canonical UI value is "twitterX" (legacy).
+				if ( $platform_raw === 'twitterX' ) {
+					$platform = 'twitterX';
+				} else {
+					$platform = sanitize_key( $platform_raw );
+					if ( $platform === 'twitterx' ) {
+						$platform = 'twitterX';
+					}
+				}
 				if ( $platform !== '' && ! in_array( $platform, $allowed, true ) ) {
 					$platform = '';
 				}
@@ -378,6 +401,7 @@ final class Options {
 			'icon_color'              => $icon_color,
 			'links'                   => $links,
 			'size_percent'            => $size_percent,
+			'content_position'        => $content_position,
 			'messages_mobile_visible' => $mmv,
 		];
 	}
@@ -389,11 +413,13 @@ final class Options {
 		array $col,
 		string $id,
 		int $size_percent,
+		string $content_position,
 		bool $mmv,
 		int $max_entries
 	): array {
 		$icon_style = isset( $col['icon_style'] ) ? sanitize_key( (string) $col['icon_style'] ) : 'rounded';
-		if ( ! in_array( $icon_style, [ 'rounded', 'square', 'icon_only' ], true ) ) {
+		// Keep this allowlist in sync with the admin UI options (src/constants/iconStyleOptions.ts).
+		if ( ! in_array( $icon_style, [ 'rounded', 'square', 'black', 'white', 'color' ], true ) ) {
 			$icon_style = 'rounded';
 		}
 
@@ -445,6 +471,7 @@ final class Options {
 			'icon_color'              => $icon_color,
 			'contacts'                => $contacts,
 			'size_percent'            => $size_percent,
+			'content_position'        => $content_position,
 			'messages_mobile_visible' => $mmv,
 		];
 	}

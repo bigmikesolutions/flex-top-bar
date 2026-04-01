@@ -187,8 +187,10 @@ test.describe('multi-column', () => {
       const bar = page.locator('[data-top-bar-id="bar_single_col"]');
       await expect(bar).toHaveCount(1);
       await expect(bar.locator('.top-bar__columns .top-bar__column')).toHaveCount(1);
-      await expect(bar.locator('.top-bar-social-column__link')).toHaveCount(1);
-      await expect(bar).toContainText('YouTube');
+      const socialLink = bar.locator('.top-bar-social-column__link').first();
+      await expect(socialLink).toHaveCount(1);
+      await expect(socialLink).toHaveAttribute('href', /youtube\.com/i);
+      await expect(socialLink.locator('.top-bar-icon--social')).toHaveCount(1);
     });
 
     test('should display a Contact data column on the frontend', async ({ page }) => {
@@ -199,7 +201,9 @@ test.describe('multi-column', () => {
       const bar = page.locator('[data-top-bar-id="bar_single_col"]');
       await expect(bar).toHaveCount(1);
       await expect(bar.locator('.top-bar__columns .top-bar__column')).toHaveCount(1);
-      await expect(bar).toContainText('hello@example.com');
+      const contactLink = bar.locator('.top-bar-contact-column__link').first();
+      await expect(contactLink).toHaveCount(1);
+      await expect(contactLink).toHaveAttribute('href', /mailto:hello%40example\.com/i);
     });
   });
 });

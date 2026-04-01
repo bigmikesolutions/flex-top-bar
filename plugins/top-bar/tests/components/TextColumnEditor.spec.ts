@@ -91,8 +91,8 @@ describe('TextColumnEditor', () => {
   it('emits update to remove message when X is clicked on index > 0', async () => {
     const wrapper = mount(TextColumnEditor, { props: defaultProps })
 
-    const removeButtons = wrapper.findAll('.top-bar-message-list .top-bar-btn.amber.sm').filter(
-      btn => btn.text() === 'X'
+    const removeButtons = wrapper.findAll(
+      '.top-bar-message-list button.top-bar-btn.top-bar-icons.delete.remove.empty'
     )
     expect(removeButtons).toHaveLength(2)
     await removeButtons[1].trigger('click')
@@ -108,8 +108,8 @@ describe('TextColumnEditor', () => {
       },
     })
 
-    const removeButtons = wrapper.findAll('.top-bar-message-list .top-bar-btn.amber.sm').filter(
-      btn => btn.text() === 'X'
+    const removeButtons = wrapper.findAll(
+      '.top-bar-message-list button.top-bar-btn.top-bar-icons.delete.remove.empty'
     )
     expect(removeButtons).toHaveLength(0)
   })

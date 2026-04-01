@@ -9,7 +9,7 @@
       <div class="item nav">
         <button
           type="button"
-          :class="['top-bar-icons', 'top-bar-visibility-toggle', localBar.visible ? 'status-on' : 'status-off']"
+          :class="['top-bar-icons mask black', 'top-bar-visibility-toggle', localBar.visible ? 'status-on' : 'status-off']"
           :aria-label="__('Toggle bar visibility on page', 'top-bar')"
           @click="toggleVisibility"
         >
@@ -17,7 +17,7 @@
         <button
           v-if="canDelete"
           type="button"
-          class="top-bar-icons delete"
+          class="top-bar-icons mask black delete"
           :title="__('Remove', 'top-bar')"
           @click="handleDelete"
         >
@@ -25,14 +25,14 @@
         <button
           v-else
           type="button"
-          class="top-bar-icons delete"
+          class="top-bar-icons mask black delete"
           disabled
           :title="__('At least one bar is required', 'top-bar')"
         >
         </button>
         <button
           type="button"
-          class="top-bar-icons arrow-down top-bar-toggle-options"
+          class="top-bar-icons mask black arrow-down top-bar-toggle-options"
           :aria-expanded="isExpanded"
           @click="toggleExpanded"
         >
@@ -41,6 +41,17 @@
     </div>
 
     <div :class="['top-bar-options', { active: isExpanded }]">
+      <!-- Preview -->
+      <div class="top-bar-grid line-bottom ">
+        <div class="item">
+          <p class="bold lg">Preview</p>
+          <!-- TODO 
+            - Tobar preview here  
+          -->
+            
+        </div>
+      </div>
+
       <!-- Name -->
       <div class="top-bar-grid">
         <div class="item">
@@ -106,27 +117,18 @@
             @drop.prevent="onDrop(columnIndex)"
           >
             <div class="item-creator no">
-              <p class="bold lg">{{ columnIndex + 1 }}</p>
               <button
                 v-if="localBar.columns.length > 1"
                 type="button"
-                class="top-bar-btn mint sm"
+                class="top-bar-btn drag-drop"
                 :title="__('Drag to reorder columns', 'top-bar')"
                 draggable="true"
                 @dragstart="onDragStart(columnIndex, $event)"
                 @dragend="onDragEnd"
               >
-                ⇅
+                {{ columnIndex + 1 }}
               </button>
-              <button
-                v-if="localBar.columns.length > 1"
-                type="button"
-                class="top-bar-btn amber sm"
-                :title="__('Remove column', 'top-bar')"
-                @click="removeColumn(columnIndex)"
-              >
-                X
-              </button>
+            
             </div>
 
             <ColumnTypeSelector
@@ -185,6 +187,14 @@
                 </label>
               </fieldset>
               <fieldset>
+                <legend class="bold">{{ __('Content position', 'top-bar') }}</legend>
+                <select :value="column.content_position" @change="onColumnContentPositionChange(columnIndex, $event)">
+                  <option value="left">{{ __('Left', 'top-bar') }}</option>
+                  <option value="center">{{ __('Center', 'top-bar') }}</option>
+                  <option value="right">{{ __('Right', 'top-bar') }}</option>
+                </select>
+              </fieldset>
+              <fieldset>
                 <legend class="bold">{{ __('Visible on the mobile', 'top-bar') }}</legend>
                 <select
                   :value="column.messages_mobile_visible"
@@ -195,6 +205,17 @@
                 </select>
               </fieldset>
             </div>
+            <div class="item item-creator">
+              <button
+                v-if="localBar.columns.length > 1"
+                type="button"
+                class="top-bar-btn top-bar-icons  delete mask black remove empty"
+                :title="__('Remove column', 'top-bar')"
+                @click="removeColumn(columnIndex)"
+              >
+                Remove
+              </button>
+           </div>
           </div>
         </div>
       </div>
@@ -209,6 +230,7 @@ import type {
   BarColumn,
   ColumnType,
   ContactBarColumn,
+  ContentPosition,
   SocialBarColumn,
 } from '@/types'
 import { __ } from '@wordpress/i18n'
@@ -260,6 +282,7 @@ function defaultColumnForType(
       effect: 'none',
       messages: ['', ''],
       size_percent: sizePercent,
+      content_position: 'center',
       messages_mobile_visible: messagesMobileVisible,
     }
   }
@@ -272,6 +295,7 @@ function defaultColumnForType(
       icon_color: '#1d2327',
       links: [{ platform: '', url: '' }],
       size_percent: sizePercent,
+      content_position: 'center',
       messages_mobile_visible: messagesMobileVisible,
     }
   }
@@ -283,6 +307,7 @@ function defaultColumnForType(
     icon_color: '#1d2327',
     contacts: [{ kind: '', value: '' }],
     size_percent: sizePercent,
+    content_position: 'center',
     messages_mobile_visible: messagesMobileVisible,
   }
 }
@@ -325,6 +350,7 @@ function withColumns(bar: Bar): Bar {
         effect: b.effect,
         messages: [...(b.messages ?? [])],
         size_percent: 100,
+        content_position: 'center',
         messages_mobile_visible: b.messages_mobile_visible,
       },
     ],
@@ -471,6 +497,14 @@ function onColumnSizeChange(columnIndex: number, e: Event) {
   saveChanges()
 }
 
+function onColumnContentPositionChange(columnIndex: number, e: Event) {
+  const raw = (e.target as HTMLSelectElement).value as ContentPosition
+  const cols = [...localBar.value.columns]
+  cols[columnIndex] = { ...cols[columnIndex], content_position: raw }
+  localBar.value = { ...localBar.value, columns: cols }
+  saveChanges()
+}
+
 function onColumnMobileVisibleChange(columnIndex: number, e: Event) {
   const raw = (e.target as HTMLSelectElement).value
   const visible = raw === 'true'
@@ -495,6 +529,7 @@ function addColumn() {
     effect: 'none',
     messages: ['', ''],
     size_percent: share,
+    content_position: 'center',
     messages_mobile_visible: true,
   })
   localBar.value = { ...localBar.value, columns: updated }

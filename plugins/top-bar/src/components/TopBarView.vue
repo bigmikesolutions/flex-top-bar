@@ -12,8 +12,8 @@
       :data-top-bar-effect="getBarEffect(bar)"
       :data-top-bar-hide-on-scroll="bar.hide_on_scroll ? '1' : '0'"
     >
-      <div class="top-bar__inner">
-        <div class="top-bar__columns">
+    <div class="top-bar__inner">
+        <div class="top-bar__columns" >
           <div
             v-for="column in getColumns(bar)"
             :key="column.id"
@@ -22,22 +22,24 @@
             :style="getColumnStyle(column)"
           >
             <template v-if="column.type === 'text'">
-              <template v-if="column.effect === 'none'">
-                {{ getConcatenatedMessage(column) }}
-              </template>
-              <template v-else>
-                <transition :name="getTransitionName(column.effect)" mode="out-in">
-                  <div :key="currentMessageIndex[columnKey(bar.id, column.id)] ?? 0">
-                    {{ getCurrentMessage(bar, column) }}
-                  </div>
-                </transition>
-              </template>
+              <div class="top-bar-text-column" :style="getTextAlignStyle(column)">
+                <template v-if="column.effect === 'none'">
+                  {{ getConcatenatedMessage(column) }}
+                </template>
+                <template v-else>
+                  <transition :name="getTransitionName(column.effect)" mode="out-in">
+                    <div :key="currentMessageIndex[columnKey(bar.id, column.id)] ?? 0">
+                      {{ getCurrentMessage(bar, column) }}
+                    </div>
+                  </transition>
+                </template>
+              </div>
             </template>
             <template v-else-if="column.type === 'social'">
               <div
                 class="top-bar-social-column"
                 :class="socialColumnClass(column)"
-                :style="socialColumnStyle(column)"
+                :style="{ ...socialColumnStyle(column), ...getFlexAlignStyle(column) }"
               >
                 <a
                   v-for="(link, i) in column.links.filter(l => l.url.trim() !== '')"
@@ -45,14 +47,15 @@
                   class="top-bar-social-column__link"
                   :href="safeHref(link.url)"
                   target="_blank"
+                  :title="socialPlatformLabel(link.platform)"
                   rel="noopener noreferrer"
                 >
                   <span
                     class="top-bar-icon top-bar-icon--social"
-                    :style="iconStyleFromClass(socialIconClass(link.platform), column.icon_color)"
+                    :style="iconStyleFromClass(socialIconClass(link.platform), column.icon_style, usesIconColors(column.icon_style) ? column.icon_color : '')"
                     aria-hidden="true"
                   ></span>
-                  {{ socialPlatformLabel(link.platform) }}
+                  <!-- {{ socialPlatformLabel(link.platform) }} -->
                 </a>
               </div>
             </template>
@@ -60,22 +63,23 @@
               <div
                 class="top-bar-contact-column"
                 :class="contactColumnClass(column)"
-                :style="contactColumnStyle(column)"
+                :style="{ ...contactColumnStyle(column), ...getFlexAlignStyle(column) }"
               >
                 <template v-for="(entry, i) in column.contacts.filter(e => e.value.trim() !== '')" :key="`${column.id}-c-${i}`">
                   <a
                     v-if="contactHref(entry.kind, entry.value) !== '#'"
                     class="top-bar-contact-column__link"
                     :href="contactHref(entry.kind, entry.value)"
-                    :target="entry.kind === 'website' || entry.kind === 'location' ? '_blank' : undefined"
-                    :rel="entry.kind === 'website' || entry.kind === 'location' ? 'noopener noreferrer' : undefined"
+                    :title="`${contactLabel(entry.kind)}`"
+                    :target="entry.kind === 'website' || entry.kind === 'location'  || entry.kind === 'support' || entry.kind === 'chat' ? '_blank' : undefined"
+                    :rel="entry.kind === 'website' || entry.kind === 'location'  || entry.kind === 'support' || entry.kind === 'chat' ? 'noopener noreferrer' : undefined"
                   >
                     <span
                       class="top-bar-icon top-bar-icon--contact"
-                      :style="iconStyleFromClass(contactIconClass(entry.kind), column.icon_color)"
+                      :style="iconStyleFromClass(contactIconClass(entry.kind), column.icon_style, usesIconColors(column.icon_style) ? column.icon_color : '')"
                       aria-hidden="true"
                     ></span>
-                    {{ contactDisplayLabel(entry.kind, entry.value) }}
+                    <!-- {{ contactDisplayLabel(entry.kind, entry.value) }} -->
                   </a>
                   <span
                     v-else
@@ -83,10 +87,10 @@
                   >
                     <span
                       class="top-bar-icon top-bar-icon--contact"
-                      :style="iconStyleFromClass(contactIconClass(entry.kind), column.icon_color)"
+                      :style="iconStyleFromClass(contactIconClass(entry.kind), column.icon_style, usesIconColors(column.icon_style) ? column.icon_color : '')"
                       aria-hidden="true"
                     ></span>
-                    {{ contactDisplayLabel(entry.kind, entry.value) }}
+                    <!-- {{ contactDisplayLabel(entry.kind, entry.value) }} -->
                   </span>
                 </template>
               </div>
@@ -132,6 +136,7 @@ function getColumns(bar: Bar): BarColumn[] {
       effect: bar.effect,
       messages: bar.messages,
       size_percent: 100,
+      content_position: 'center',
       messages_mobile_visible: bar.messages_mobile_visible,
     },
   ]
@@ -151,6 +156,21 @@ function getColumnStyle(column: BarColumn) {
     flex: `0 0 ${column.size_percent}%`,
     maxWidth: `${column.size_percent}%`,
   }
+}
+
+function getFlexAlignStyle(column: BarColumn): Record<string, string> {
+  const justifyContent =
+    column.content_position === 'left'
+      ? 'flex-start'
+      : column.content_position === 'right'
+        ? 'flex-end'
+        : 'center'
+  return { justifyContent }
+}
+
+function getTextAlignStyle(column: Extract<BarColumn, { type: 'text' }>): Record<string, string> {
+  const textAlign = column.content_position === 'left' ? 'left' : column.content_position === 'right' ? 'right' : 'center'
+  return { textAlign }
 }
 
 // Fetch bars from public API endpoint
@@ -235,12 +255,18 @@ function socialColumnClass(column: SocialBarColumn): string {
   return `top-bar-social-column--${column.icon_style}`
 }
 
+function usesIconColors(style: SocialBarColumn['icon_style']): boolean {
+  return style === 'rounded' || style === 'square'
+}
+
 function socialColumnStyle(column: SocialBarColumn): Record<string, string> {
+  if (!usesIconColors(column.icon_style)) {
+    return {}
+  }
   return {
     // Use CSS vars so we can style per-link pills (rounded vs square) visibly.
     '--top-bar-social-bg': column.background_color,
     '--top-bar-social-fg': column.icon_color,
-    color: column.icon_color,
   }
 }
 
@@ -250,25 +276,31 @@ function socialPlatformLabel(platform: SocialPlatform | ''): string {
   }
   const map: Record<SocialPlatform, string> = {
     facebook: 'Facebook',
+    twitterX: 'TwitterX',
     instagram: 'Instagram',
-    x: 'X',
-    linkedin: 'LinkedIn',
-    youtube: 'YouTube',
-    tiktok: 'TikTok',
-    pinterest: 'Pinterest',
+    linkedin: 'Linkedin',
+    google: 'Google',
+    youtube: 'Youtube',
+    apple: 'Apple',
     snapchat: 'Snapchat',
-    reddit: 'Reddit',
-    tumblr: 'Tumblr',
-    whatsapp: 'WhatsApp',
-    telegram: 'Telegram',
-    discord: 'Discord',
-    threads: 'Threads',
-    mastodon: 'Mastodon',
+    pinterest: 'Pinterest',
     medium: 'Medium',
-    github: 'GitHub',
+    github: 'Github',
+    threads: 'Threads',
+    whatsapp: 'Whatsapp',
+    figma: 'Figma',
     dribbble: 'Dribbble',
-    behance: 'Behance',
-    flickr: 'Flickr',
+    reddit: 'Reddit',
+    discord: 'Discord',
+    tiktok: 'Tiktok',
+    tumblr: 'Tumblr',
+    telegram: 'Telegram',
+    bluesky: 'Bluesky',
+    signal: 'Signal',
+    vk: 'Vk',
+    spotify: 'Spotify',
+    twitch: 'Twitch',
+    messenger: 'Messenger',
   }
   return map[platform] ?? platform
 }
@@ -299,11 +331,13 @@ function contactColumnClass(column: ContactBarColumn): string {
 }
 
 function contactColumnStyle(column: ContactBarColumn): Record<string, string> {
+  if (!usesIconColors(column.icon_style)) {
+    return {}
+  }
   return {
     // Use CSS vars so we can style per-entry pills (rounded vs square) visibly.
     '--top-bar-contact-bg': column.background_color,
     '--top-bar-contact-fg': column.icon_color,
-    color: column.icon_color,
   }
 }
 
@@ -315,7 +349,7 @@ function contactHref(kind: ContactKind | '', value: string): string {
   if (kind === 'email') {
     return `mailto:${encodeURIComponent(v)}`
   }
-  if (kind === 'phone' || kind === 'mobile' || kind === 'fax') {
+  if (kind === 'phone' || kind === 'mobile') {
     return `tel:${v.replace(/\s/g, '')}`
   }
   if (kind === 'website') {
@@ -325,11 +359,31 @@ function contactHref(kind: ContactKind | '', value: string): string {
     const q = encodeURIComponent(v)
     return `https://www.google.com/maps/search/?api=1&query=${q}`
   }
+  if (kind === 'support') {
+    return safeHref(v)
+  }
+  if (kind === 'chat') {
+    return safeHref(v)
+  }
+  
   return '#'
 }
 
-function contactDisplayLabel(_kind: ContactKind | '', value: string): string {
-  return value.trim()
+function contactLabel(kind: ContactKind | ''): string {
+  if (!kind) {
+    return ''
+  }
+  const map: Record<ContactKind, string> = {
+    email: 'E-mail address',
+    phone: 'Phone',
+    mobile: 'Mobile phone',
+    website: 'WWW',
+    location: 'Locaction',
+    support: 'Support',
+    chat: 'Chat',
+  }
+
+  return map[kind] ?? kind
 }
 
 function contactIconClass(kind: ContactKind | ''): string {
@@ -339,7 +393,7 @@ function contactIconClass(kind: ContactKind | ''): string {
   return CONTACT_ICONS_BY_KIND[kind] ?? ''
 }
 
-function iconStyleFromClass(iconClass: string, color: string): Record<string, string> {
+function iconStyleFromClass(iconClass: string, style: SocialBarColumn['icon_style'], color: string): Record<string, string> {
   if (!iconClass) {
     return {}
   }
@@ -347,8 +401,21 @@ function iconStyleFromClass(iconClass: string, color: string): Record<string, st
   if (!svg) {
     return {}
   }
+  // "color" means: show the original SVG colors (no mask/currentColor).
+  if (style === 'color') {
+    return {
+      backgroundImage: `url("${svg}")`,
+      backgroundColor: 'transparent',
+      backgroundRepeat: 'no-repeat',
+      backgroundPosition: 'center',
+      backgroundSize: 'contain',
+    }
+  }
+  // "black"/"white" should be fixed and not inherit text color.
+  const forced =
+    style === 'black' ? '#000000' : style === 'white' ? '#ffffff' : ''
   return {
-    backgroundColor: color || 'currentColor',
+    backgroundColor: forced || color || 'currentColor',
     WebkitMaskImage: `url("${svg}")`,
     maskImage: `url("${svg}")`,
   }
@@ -458,7 +525,7 @@ body.admin-bar .top-bar--top {
   display: flex;
   flex-wrap: wrap;
   width: 100%;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
   gap: 0;
   text-align: center;
@@ -468,6 +535,12 @@ body.admin-bar .top-bar--top {
   box-sizing: border-box;
   padding: 0 8px;
   min-width: 0;
+  margin: 4px 0;
+  display:flex;
+}
+
+.top-bar-text-column {
+  width: 100%;
 }
 
 /* Transitions for effects */
@@ -513,11 +586,11 @@ body.admin-bar .top-bar--top {
 
 .top-bar-social-column {
   display: flex;
+  width: 100%;
   flex-wrap: wrap;
   gap: 8px;
   justify-content: center;
   align-items: center;
-  padding: 6px 10px;
   border-radius: 6px;
   box-sizing: border-box;
 }
@@ -525,18 +598,22 @@ body.admin-bar .top-bar--top {
 .top-bar-social-column__link {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 12px;
+  margin:0 2px;
+  padding: 4px;
   text-decoration: none;
   font-weight: 600;
   font-size: 16px;
   line-height: 1.4;
+}
+
+.top-bar-social-column--rounded .top-bar-social-column__link,
+.top-bar-social-column--square .top-bar-social-column__link {
   background: var(--top-bar-social-bg, transparent);
   color: var(--top-bar-social-fg, currentColor);
 }
 
 .top-bar-social-column--rounded .top-bar-social-column__link {
-  border-radius: 999px;
+  border-radius: 100%;
 }
 
 .top-bar-social-column--square .top-bar-social-column__link {
@@ -545,17 +622,21 @@ body.admin-bar .top-bar--top {
 
 .top-bar-social-column--icon_only .top-bar-social-column__link {
   padding: 0 8px;
-  font-size: 0.85rem;
 }
+
+.top-bar-social-column--rounded .top-bar-social-column__link span,
+.top-bar-social-column--square .top-bar-social-column__link span{
+  mask-size:65%
+}
+
+/* "color" icons render their native SVG colors (no mask). */
 
 .top-bar-contact-column {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
+  width: 100%;
   align-items: center;
   justify-content: center;
-  padding: 6px 10px;
-  border-radius: 6px;
+  /* padding: 6px 10px; */
   box-sizing: border-box;
   text-align: center;
 }
@@ -564,22 +645,35 @@ body.admin-bar .top-bar--top {
 .top-bar-contact-column__text {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  margin:0 4px;
   font-size: 16px;
-  line-height: 1.4;
-  word-break: break-word;
+  /* line-height: 1.4; */
+  /* word-break: break-word; */
+  padding: 2px 6px;
+  box-sizing:border-box;
+}
+
+.top-bar-contact-column--rounded .top-bar-contact-column__link,
+.top-bar-contact-column--rounded .top-bar-contact-column__text,
+.top-bar-contact-column--square .top-bar-contact-column__link,
+.top-bar-contact-column--square .top-bar-contact-column__text {
   background: var(--top-bar-contact-bg, transparent);
   color: var(--top-bar-contact-fg, currentColor);
-  padding: 2px 6px;
 }
 
 .top-bar-contact-column__link {
-  text-decoration: underline;
+  width: 32px;
+  height:32px;
+  max-width:32px;
+  max-height:32px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .top-bar-contact-column--rounded .top-bar-contact-column__link,
 .top-bar-contact-column--rounded .top-bar-contact-column__text {
-  border-radius: 999px;
+  border-radius: 100%;
 }
 
 .top-bar-contact-column--square .top-bar-contact-column__link,
@@ -603,13 +697,13 @@ body.admin-bar .top-bar--top {
 
 .top-bar-icon {
   display: inline-block;
-  width: 16px;
-  height: 16px;
-  flex: 0 0 16px;
+  width: 24px;
+  height: 24px;
+  background-color: currentColor;
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   -webkit-mask-size: contain;
-  mask-size: contain;
+  mask-size: auto 80%;
   -webkit-mask-position: center;
   mask-position: center;
 }

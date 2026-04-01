@@ -2,18 +2,34 @@
   <div class="item-creator lg">
     <fieldset class="line">
       <legend class="bold">{{ __('Choose the icon appearance', 'top-bar') }}</legend>
-      <label v-for="opt in iconStyleOptions" :key="opt.value" class="top-bar-radio-line">
+      <label v-for="opt in iconStyleOptions" :key="opt.value" :class="['radio', { 'bg-grey radio': opt.value === 'white' }]">
         <input
           type="radio"
           :name="`social_icon_style_${barId}_${columnId}`"
           :checked="column.icon_style === opt.value"
           @change="patchIconStyle(opt.value)"
         />
-        {{ opt.label }}
+        <span></span>
+        <div class="item icons">
+        <span
+            v-for="platform in SOCIAL_PLATFORMS"
+            :key="platform"
+            class="top-bar-icons social-media"
+            :class="{
+              circle: opt.value === 'rounded',
+              square: opt.value === 'square',
+              'no-mask': opt.value === 'color',
+              'mask black': opt.value === 'black',
+              'mask white': opt.value === 'white',
+              [platform === 'twitterX' ? 'twitterX' : platform]: true
+            }"
+            :title="platformLabel(platform)"
+          ></span>
+        </div>
       </label>
     </fieldset>
 
-    <div class="top-bar-grid">
+    <div v-if="column.icon_style === 'rounded' || column.icon_style === 'square'" class="top-bar-grid">
       <div class="item">
         <fieldset class="line">
           <legend class="bold">{{ __('Background color', 'top-bar') }}</legend>
@@ -50,16 +66,8 @@
         >
           <div class="item-creator no">
             <p class="bold md">{{ index + 1 }}</p>
-            <button
-              v-if="column.links.length > 1"
-              type="button"
-              class="top-bar-btn amber sm"
-              @click="removeLink(index)"
-            >
-              X
-            </button>
           </div>
-          <div class="item-creator vertical">
+          <div class="item-creator grid-2 vertical">
             <label class="screen-reader-text" :for="`social_platform_${barId}_${columnId}_${index}`">
               {{ __('Social network', 'top-bar') }}
             </label>
@@ -84,6 +92,16 @@
               @input="onUrlInput(index, $event)"
               @blur="emit('commit')"
             />
+          </div>
+          <div class="item-creator center">           
+            <button
+              v-if="column.links.length > 1"
+              type="button"
+              class="top-bar-btn top-bar-icons delete mask black remove empty"
+              @click="removeLink(index)"
+            >
+              Remove
+            </button>
           </div>
         </div>
       </div>
@@ -124,25 +142,31 @@ const iconStyleOptions = getIconStyleOptions(__)
 function platformLabel(p: SocialPlatform): string {
   const labels: Record<SocialPlatform, string> = {
     facebook: __('Facebook', 'top-bar'),
+    twitterX: __('TwitterX', 'top-bar'),
     instagram: __('Instagram', 'top-bar'),
-    x: __('X (Twitter)', 'top-bar'),
-    linkedin: __('LinkedIn', 'top-bar'),
-    youtube: __('YouTube', 'top-bar'),
-    tiktok: __('TikTok', 'top-bar'),
-    pinterest: __('Pinterest', 'top-bar'),
+    linkedin: __('Linkedin', 'top-bar'),
+    google: __('Google', 'top-bar'),
+    youtube: __('Youtube', 'top-bar'),
+    apple: __('Apple', 'top-bar'),
     snapchat: __('Snapchat', 'top-bar'),
-    reddit: __('Reddit', 'top-bar'),
-    tumblr: __('Tumblr', 'top-bar'),
-    whatsapp: __('WhatsApp', 'top-bar'),
-    telegram: __('Telegram', 'top-bar'),
-    discord: __('Discord', 'top-bar'),
-    threads: __('Threads', 'top-bar'),
-    mastodon: __('Mastodon', 'top-bar'),
+    pinterest: __('Pinterest', 'top-bar'),
     medium: __('Medium', 'top-bar'),
-    github: __('GitHub', 'top-bar'),
+    github: __('Github', 'top-bar'),
+    threads: __('Threads', 'top-bar'),
+    whatsapp: __('Whatsapp', 'top-bar'),
+    figma: __('Figma', 'top-bar'),
     dribbble: __('Dribbble', 'top-bar'),
-    behance: __('Behance', 'top-bar'),
-    flickr: __('Flickr', 'top-bar'),
+    reddit: __('Reddit', 'top-bar'),
+    discord: __('Discord', 'top-bar'),
+    tiktok: __('Tiktok', 'top-bar'),
+    tumblr: __('Tumblr', 'top-bar'),
+    telegram: __('Telegram', 'top-bar'),
+    bluesky: __('Bluesky', 'top-bar'),
+    signal: __('Signal', 'top-bar'),
+    vk: __('Vk', 'top-bar'),
+    spotify: __('Spotify', 'top-bar'),
+    twitch: __('Twitch', 'top-bar'),
+    messenger: __('Messenger', 'top-bar')
   }
   return labels[p]
 }
