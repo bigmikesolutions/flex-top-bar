@@ -235,7 +235,7 @@ final class OptionsEdgeCasesTest extends TestCase {
 		$this->assertSame( '', Options::sanitize_hex_color( 'rgb(255,0,0)' ) );
 	}
 
-	public function test_normalize_bar_removes_frame_when_width_zero(): void {
+	public function test_normalize_bar_preserves_frame_color_when_width_zero(): void {
 		$result = Options::normalize_bar(
 			[
 				'id'          => 'test',
@@ -244,7 +244,7 @@ final class OptionsEdgeCasesTest extends TestCase {
 			]
 		);
 
-		$this->assertSame( '', $result['frame_color'] );
+		$this->assertSame( '#ff0000', $result['frame_color'] );
 		$this->assertSame( 0, $result['frame_width'] );
 	}
 
