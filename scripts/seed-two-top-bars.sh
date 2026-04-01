@@ -89,7 +89,7 @@ $bars = [
 		"hide_on_scroll" => true,
 	],
 	[
-		"id" => "bar_bottom - scheduled",
+		"id" => "bar_bottom_scheduled",
 		"name" => "3rd - bottom scheduled",
 		"visible" => false,
 		"admin_visibile" => false,
