@@ -52,7 +52,7 @@
                 >
                   <span
                     class="top-bar-icon top-bar-icon--social"
-                    :style="iconStyleFromClass(socialIconClass(link.platform), usesIconColors(column.icon_style) ? column.icon_color : '')"
+                    :style="iconStyleFromClass(socialIconClass(link.platform), column.icon_style, usesIconColors(column.icon_style) ? column.icon_color : '')"
                     aria-hidden="true"
                   ></span>
                   <!-- {{ socialPlatformLabel(link.platform) }} -->
@@ -76,7 +76,7 @@
                   >
                     <span
                       class="top-bar-icon top-bar-icon--contact"
-                      :style="iconStyleFromClass(contactIconClass(entry.kind), usesIconColors(column.icon_style) ? column.icon_color : '')"
+                      :style="iconStyleFromClass(contactIconClass(entry.kind), column.icon_style, usesIconColors(column.icon_style) ? column.icon_color : '')"
                       aria-hidden="true"
                     ></span>
                     <!-- {{ contactDisplayLabel(entry.kind, entry.value) }} -->
@@ -87,7 +87,7 @@
                   >
                     <span
                       class="top-bar-icon top-bar-icon--contact"
-                      :style="iconStyleFromClass(contactIconClass(entry.kind), usesIconColors(column.icon_style) ? column.icon_color : '')"
+                      :style="iconStyleFromClass(contactIconClass(entry.kind), column.icon_style, usesIconColors(column.icon_style) ? column.icon_color : '')"
                       aria-hidden="true"
                     ></span>
                     <!-- {{ contactDisplayLabel(entry.kind, entry.value) }} -->
@@ -393,7 +393,7 @@ function contactIconClass(kind: ContactKind | ''): string {
   return CONTACT_ICONS_BY_KIND[kind] ?? ''
 }
 
-function iconStyleFromClass(iconClass: string, color: string,): Record<string, string> {
+function iconStyleFromClass(iconClass: string, style: SocialBarColumn['icon_style'], color: string): Record<string, string> {
   if (!iconClass) {
     return {}
   }
@@ -401,8 +401,20 @@ function iconStyleFromClass(iconClass: string, color: string,): Record<string, s
   if (!svg) {
     return {}
   }
+  // "color" means: show the original SVG colors (no mask/currentColor).
+  if (style === 'color') {
+    return {
+      backgroundImage: `url("${svg}")`,
+      backgroundRepeat: 'no-repeat',
+      backgroundPosition: 'center',
+      backgroundSize: 'contain',
+    }
+  }
+  // "black"/"white" should be fixed and not inherit text color.
+  const forced =
+    style === 'black' ? '#000000' : style === 'white' ? '#ffffff' : ''
   return {
-    backgroundColor: color || 'currentColor',
+    backgroundColor: forced || color || 'currentColor',
     WebkitMaskImage: `url("${svg}")`,
     maskImage: `url("${svg}")`,
   }
@@ -616,9 +628,7 @@ body.admin-bar .top-bar--top {
   mask-size:65%
 }
 
-.top-bar-social-column--color .top-bar-social-column__link span path {
-  fill: red; /* teraz dziedziczy kolor z tekstu lub rodzica */
-} 
+/* "color" icons render their native SVG colors (no mask). */
 
 .top-bar-contact-column {
   display: flex;
