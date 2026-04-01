@@ -405,6 +405,7 @@ function iconStyleFromClass(iconClass: string, style: SocialBarColumn['icon_styl
   if (style === 'color') {
     return {
       backgroundImage: `url("${svg}")`,
+      backgroundColor: 'transparent',
       backgroundRepeat: 'no-repeat',
       backgroundPosition: 'center',
       backgroundSize: 'contain',
