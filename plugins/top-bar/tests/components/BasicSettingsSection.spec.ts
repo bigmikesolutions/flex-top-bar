@@ -14,6 +14,7 @@ describe('BasicSettingsSection', () => {
     effect: 'none',
     messages: ['Hello'],
     size_percent: 100,
+    content_position: 'center',
     messages_mobile_visible: true,
   }
 

@@ -186,22 +186,12 @@
                   </select>
                 </label>
               </fieldset>
-               <!-- TODO  
-              - dodac pozycjonowanie tresci, chcialem to zrobic css ale sa przypadki ktorych ne jestem w stanie obsluzyc 
-              - wartosci do dodania w style: 
-                justify-content: flex-start;
-                justify-content: center;
-                justify-content: flex-end
-              -->
               <fieldset>
                 <legend class="bold">{{ __('Content position', 'top-bar') }}</legend>
-                <select
-                  :value="column.messages_mobile_visible"
-                  @change="onColumnMobileVisibleChange(columnIndex, $event)"
-                >
-                  <option :value="true">{{ __('Left', 'top-bar') }}</option>
-                  <option :value="false">{{ __('Center', 'top-bar') }}</option>
-                  <option :value="false">{{ __('Right', 'top-bar') }}</option>
+                <select :value="column.content_position" @change="onColumnContentPositionChange(columnIndex, $event)">
+                  <option value="left">{{ __('Left', 'top-bar') }}</option>
+                  <option value="center">{{ __('Center', 'top-bar') }}</option>
+                  <option value="right">{{ __('Right', 'top-bar') }}</option>
                 </select>
               </fieldset>
               <fieldset>
@@ -240,6 +230,7 @@ import type {
   BarColumn,
   ColumnType,
   ContactBarColumn,
+  ContentPosition,
   SocialBarColumn,
 } from '@/types'
 import { __ } from '@wordpress/i18n'
@@ -291,6 +282,7 @@ function defaultColumnForType(
       effect: 'none',
       messages: ['', ''],
       size_percent: sizePercent,
+      content_position: 'center',
       messages_mobile_visible: messagesMobileVisible,
     }
   }
@@ -303,6 +295,7 @@ function defaultColumnForType(
       icon_color: '#1d2327',
       links: [{ platform: '', url: '' }],
       size_percent: sizePercent,
+      content_position: 'center',
       messages_mobile_visible: messagesMobileVisible,
     }
   }
@@ -314,6 +307,7 @@ function defaultColumnForType(
     icon_color: '#1d2327',
     contacts: [{ kind: '', value: '' }],
     size_percent: sizePercent,
+    content_position: 'center',
     messages_mobile_visible: messagesMobileVisible,
   }
 }
@@ -356,6 +350,7 @@ function withColumns(bar: Bar): Bar {
         effect: b.effect,
         messages: [...(b.messages ?? [])],
         size_percent: 100,
+        content_position: 'center',
         messages_mobile_visible: b.messages_mobile_visible,
       },
     ],
@@ -502,6 +497,14 @@ function onColumnSizeChange(columnIndex: number, e: Event) {
   saveChanges()
 }
 
+function onColumnContentPositionChange(columnIndex: number, e: Event) {
+  const raw = (e.target as HTMLSelectElement).value as ContentPosition
+  const cols = [...localBar.value.columns]
+  cols[columnIndex] = { ...cols[columnIndex], content_position: raw }
+  localBar.value = { ...localBar.value, columns: cols }
+  saveChanges()
+}
+
 function onColumnMobileVisibleChange(columnIndex: number, e: Event) {
   const raw = (e.target as HTMLSelectElement).value
   const visible = raw === 'true'
@@ -526,6 +529,7 @@ function addColumn() {
     effect: 'none',
     messages: ['', ''],
     size_percent: share,
+    content_position: 'center',
     messages_mobile_visible: true,
   })
   localBar.value = { ...localBar.value, columns: updated }

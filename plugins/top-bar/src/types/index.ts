@@ -57,12 +57,16 @@ export interface ContactEntry {
   value: string
 }
 
+export const CONTENT_POSITIONS = ['left', 'center', 'right'] as const
+export type ContentPosition = (typeof CONTENT_POSITIONS)[number]
+
 export interface TextBarColumn {
   id: string
   type: 'text'
   effect: 'none' | 'slider' | 'fadein' | 'blink'
   messages: string[]
   size_percent: number
+  content_position: ContentPosition
   messages_mobile_visible: boolean
 }
 
@@ -74,6 +78,7 @@ export interface SocialBarColumn {
   icon_color: string
   links: SocialLink[]
   size_percent: number
+  content_position: ContentPosition
   messages_mobile_visible: boolean
 }
 
@@ -85,6 +90,7 @@ export interface ContactBarColumn {
   icon_color: string
   contacts: ContactEntry[]
   size_percent: number
+  content_position: ContentPosition
   messages_mobile_visible: boolean
 }
 

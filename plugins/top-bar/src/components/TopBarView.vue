@@ -22,22 +22,24 @@
             :style="getColumnStyle(column)"
           >
             <template v-if="column.type === 'text'">
-              <template v-if="column.effect === 'none'">
-                {{ getConcatenatedMessage(column) }}
-              </template>
-              <template v-else>
-                <transition :name="getTransitionName(column.effect)" mode="out-in">
-                  <div :key="currentMessageIndex[columnKey(bar.id, column.id)] ?? 0">
-                    {{ getCurrentMessage(bar, column) }}
-                  </div>
-                </transition>
-              </template>
+              <div class="top-bar-text-column" :style="getTextAlignStyle(column)">
+                <template v-if="column.effect === 'none'">
+                  {{ getConcatenatedMessage(column) }}
+                </template>
+                <template v-else>
+                  <transition :name="getTransitionName(column.effect)" mode="out-in">
+                    <div :key="currentMessageIndex[columnKey(bar.id, column.id)] ?? 0">
+                      {{ getCurrentMessage(bar, column) }}
+                    </div>
+                  </transition>
+                </template>
+              </div>
             </template>
             <template v-else-if="column.type === 'social'">
               <div
                 class="top-bar-social-column"
                 :class="socialColumnClass(column)"
-                :style="socialColumnStyle(column)"
+                :style="{ ...socialColumnStyle(column), ...getFlexAlignStyle(column) }"
               >
                 <a
                   v-for="(link, i) in column.links.filter(l => l.url.trim() !== '')"
@@ -61,7 +63,7 @@
               <div
                 class="top-bar-contact-column"
                 :class="contactColumnClass(column)"
-                :style="contactColumnStyle(column)"
+                :style="{ ...contactColumnStyle(column), ...getFlexAlignStyle(column) }"
               >
                 <template v-for="(entry, i) in column.contacts.filter(e => e.value.trim() !== '')" :key="`${column.id}-c-${i}`">
                   <a
@@ -134,6 +136,7 @@ function getColumns(bar: Bar): BarColumn[] {
       effect: bar.effect,
       messages: bar.messages,
       size_percent: 100,
+      content_position: 'center',
       messages_mobile_visible: bar.messages_mobile_visible,
     },
   ]
@@ -153,6 +156,21 @@ function getColumnStyle(column: BarColumn) {
     flex: `0 0 ${column.size_percent}%`,
     maxWidth: `${column.size_percent}%`,
   }
+}
+
+function getFlexAlignStyle(column: BarColumn): Record<string, string> {
+  const justifyContent =
+    column.content_position === 'left'
+      ? 'flex-start'
+      : column.content_position === 'right'
+        ? 'flex-end'
+        : 'center'
+  return { justifyContent }
+}
+
+function getTextAlignStyle(column: Extract<BarColumn, { type: 'text' }>): Record<string, string> {
+  const textAlign = column.content_position === 'left' ? 'left' : column.content_position === 'right' ? 'right' : 'center'
+  return { textAlign }
 }
 
 // Fetch bars from public API endpoint
@@ -352,6 +370,9 @@ function contactHref(kind: ContactKind | '', value: string): string {
 }
 
 function contactLabel(kind: ContactKind | ''): string {
+  if (!kind) {
+    return ''
+  }
   const map: Record<ContactKind, string> = {
     email: 'E-mail address',
     phone: 'Phone',
@@ -363,10 +384,6 @@ function contactLabel(kind: ContactKind | ''): string {
   }
 
   return map[kind] ?? kind
-}
-
-function contactDisplayLabel(_kind: ContactKind | '', value: string): string {
-  return value.trim()
 }
 
 function contactIconClass(kind: ContactKind | ''): string {
@@ -509,6 +526,10 @@ body.admin-bar .top-bar--top {
   display:flex;
 }
 
+.top-bar-text-column {
+  width: 100%;
+}
+
 /* Transitions for effects */
 .slide-enter-active,
 .slide-leave-active {
@@ -552,6 +573,7 @@ body.admin-bar .top-bar--top {
 
 .top-bar-social-column {
   display: flex;
+  width: 100%;
   flex-wrap: wrap;
   gap: 8px;
   justify-content: center;
@@ -600,6 +622,7 @@ body.admin-bar .top-bar--top {
 
 .top-bar-contact-column {
   display: flex;
+  width: 100%;
   align-items: center;
   justify-content: center;
   /* padding: 6px 10px; */

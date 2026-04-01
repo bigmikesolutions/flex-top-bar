@@ -40,6 +40,7 @@ final class Options {
 			'effect'                  => 'none',
 			'messages'                => [ $welcome, '' ],
 			'size_percent'            => 100,
+			'content_position'        => 'center',
 			'messages_mobile_visible' => true,
 		];
 
@@ -171,6 +172,7 @@ final class Options {
 						'messages'                => $messages,
 						'messages_mobile_visible' => $messages_mobile_visible,
 						'size_percent'            => 100,
+						'content_position'        => 'center',
 					],
 					$default_message,
 					$max_messages
@@ -214,19 +216,24 @@ final class Options {
 
 		$mmv = self::parse_bool( $col['messages_mobile_visible'] ?? true, true );
 
+		$content_position = isset( $col['content_position'] ) ? sanitize_key( (string) $col['content_position'] ) : 'center';
+		if ( ! in_array( $content_position, [ 'left', 'center', 'right' ], true ) ) {
+			$content_position = 'center';
+		}
+
 		$type = isset( $col['type'] ) ? sanitize_key( (string) $col['type'] ) : 'text';
 		if ( ! in_array( $type, [ 'text', 'social', 'contact' ], true ) ) {
 			$type = 'text';
 		}
 
 		if ( $type === 'social' ) {
-			return self::normalize_social_column( $col, $id, $size_percent, $mmv, $max_messages );
+			return self::normalize_social_column( $col, $id, $size_percent, $content_position, $mmv, $max_messages );
 		}
 		if ( $type === 'contact' ) {
-			return self::normalize_contact_column( $col, $id, $size_percent, $mmv, $max_messages );
+			return self::normalize_contact_column( $col, $id, $size_percent, $content_position, $mmv, $max_messages );
 		}
 
-		return self::normalize_text_column( $col, $id, $default_message, $max_messages, $size_percent, $mmv );
+		return self::normalize_text_column( $col, $id, $default_message, $max_messages, $size_percent, $content_position, $mmv );
 	}
 
 	/**
@@ -287,6 +294,7 @@ final class Options {
 		string $default_message,
 		int $max_messages,
 		int $size_percent,
+		string $content_position,
 		bool $mmv
 	): array {
 		$effect = isset( $col['effect'] ) ? sanitize_key( (string) $col['effect'] ) : 'none';
@@ -316,6 +324,7 @@ final class Options {
 			'effect'                  => $effect,
 			'messages'                => $messages,
 			'size_percent'            => $size_percent,
+			'content_position'        => $content_position,
 			'messages_mobile_visible' => $mmv,
 		];
 	}
@@ -327,6 +336,7 @@ final class Options {
 		array $col,
 		string $id,
 		int $size_percent,
+		string $content_position,
 		bool $mmv,
 		int $max_links
 	): array {
@@ -391,6 +401,7 @@ final class Options {
 			'icon_color'              => $icon_color,
 			'links'                   => $links,
 			'size_percent'            => $size_percent,
+			'content_position'        => $content_position,
 			'messages_mobile_visible' => $mmv,
 		];
 	}
@@ -402,6 +413,7 @@ final class Options {
 		array $col,
 		string $id,
 		int $size_percent,
+		string $content_position,
 		bool $mmv,
 		int $max_entries
 	): array {
@@ -458,6 +470,7 @@ final class Options {
 			'icon_color'              => $icon_color,
 			'contacts'                => $contacts,
 			'size_percent'            => $size_percent,
+			'content_position'        => $content_position,
 			'messages_mobile_visible' => $mmv,
 		];
 	}
