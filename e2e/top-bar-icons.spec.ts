@@ -11,7 +11,7 @@ import {
 
 test.describe('icons - social media', () => {
 
-  test('should change social icon appearance (rounded → square with custom colors) and render on frontend', async ({
+  test('should change social icon appearance (rounded/square/black/white/color) and render on frontend', async ({
     page,
   }) => {
     await loginAndOpenTopBarSettings(page);
@@ -113,4 +113,106 @@ test.describe('icons - social media', () => {
     await assertFrontendStyle('color');
   });
 
+});
+
+test.describe('icons - contact column', () => {
+  test('should change contact icon appearance (rounded/square/black/white/color) and render on frontend', async ({
+    page,
+  }) => {
+    await loginAndOpenTopBarSettings(page);
+    await resetToSingleColumnBar(page, 'contact');
+    await openPanel(page, 0);
+
+    const barId = await getBarIdByIndex(page, 0);
+    const columnId = 'col_front_contact';
+
+    const appearanceFieldset = page
+      .locator('.top-bar-row.bg')
+      .first()
+      .locator('fieldset')
+      .filter({ has: page.locator('legend', { hasText: 'Choose the icon appearance' }) })
+      .first();
+    const styleLabels = appearanceFieldset.locator('label');
+    await expect(styleLabels).toHaveCount(5);
+
+    async function setStyleByIndex(index: number) {
+      const save = waitForTopBarPut(page);
+      await styleLabels.nth(index).click({ force: true });
+      await save;
+    }
+
+    async function setPillColors(bg: string, fg: string) {
+      const bgInput = page.locator(`#contact_bg_${barId}_${columnId}`);
+      const iconInput = page.locator(`#contact_icon_${barId}_${columnId}`);
+      await expect(bgInput).toBeVisible();
+      await expect(iconInput).toBeVisible();
+
+      await bgInput.fill(bg);
+      const bgSave = waitForTopBarPut(page);
+      await bgInput.blur();
+      await bgSave;
+
+      await iconInput.fill(fg);
+      const fgSave = waitForTopBarPut(page);
+      await iconInput.blur();
+      await fgSave;
+    }
+
+    async function assertFrontendStyle(expected: 'rounded' | 'square' | 'black' | 'white' | 'color') {
+      await page.goto('/');
+      const bar = page.locator(`[data-top-bar-id="${barId}"]`);
+      const contactColumn = bar.locator('.top-bar-contact-column');
+      const icon = contactColumn.locator('.top-bar-icon--contact').first();
+
+      await expect(contactColumn).toHaveClass(new RegExp(`top-bar-contact-column--${expected}`));
+      await expect(icon).toHaveCount(1);
+
+      if (expected === 'color') {
+        await expect(icon).toHaveAttribute('style', /background-image:\s*url\(/i);
+        await expect(icon).not.toHaveAttribute('style', /mask-image/i);
+      } else {
+        await expect(icon).toHaveAttribute('style', /mask-image/i);
+      }
+    }
+
+    // Verify all appearance options:
+    // 0 Rounded, 1 Square, 2 Black, 3 White, 4 Color (per iconStyleOptions)
+
+    // Square + custom colors
+    await setStyleByIndex(1);
+    await setPillColors('#123456', '#abcdef');
+    await assertFrontendStyle('square');
+    await expect(page.locator(`[data-top-bar-id="${barId}"] .top-bar-contact-column`)).toHaveAttribute(
+      'style',
+      /--top-bar-contact-bg:\s*#123456/i
+    );
+    await expect(page.locator(`[data-top-bar-id="${barId}"] .top-bar-contact-column`)).toHaveAttribute(
+      'style',
+      /--top-bar-contact-fg:\s*#abcdef/i
+    );
+
+    // Rounded
+    await loginAndOpenTopBarSettings(page);
+    await openPanel(page, 0);
+    await setStyleByIndex(0);
+    await assertFrontendStyle('rounded');
+
+    // Black
+    await loginAndOpenTopBarSettings(page);
+    await openPanel(page, 0);
+    await setStyleByIndex(2);
+    await assertFrontendStyle('black');
+
+    // White
+    await loginAndOpenTopBarSettings(page);
+    await openPanel(page, 0);
+    await setStyleByIndex(3);
+    await assertFrontendStyle('white');
+
+    // Color (original SVG colors)
+    await loginAndOpenTopBarSettings(page);
+    await openPanel(page, 0);
+    await setStyleByIndex(4);
+    await assertFrontendStyle('color');
+  });
 });
