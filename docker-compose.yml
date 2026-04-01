@@ -4,7 +4,7 @@ services:
     container_name: wp-wordpress
     restart: unless-stopped
     ports:
-      - "9090:80"
+      - "8080:80"
     environment:
       WORDPRESS_DB_HOST: db
       WORDPRESS_DB_USER: ${MYSQL_USER:-wordpress}
