@@ -21,8 +21,15 @@
       <div class="top-bar-message-list">
         <div
           v-for="(_message, index) in messages"
-          :key="index"
+          :key="`${index}-${messages[index]}`"
           class="top-bar-column-creator-grid"
+          draggable="true"
+          :data-dragging="draggingIndex === index ? 'true' : 'false'"
+          @dragstart="onDragStart(index, $event)"
+          @dragend="onDragEnd"
+          @dragenter="onDragEnter(index, $event)"
+          @dragover="onDragOver(index, $event)"
+          @drop="onDrop(index, $event)"
         >
           <div class="item-creator no">
             <p class="bold md">{{ index + 1 }}</p>
@@ -66,6 +73,7 @@
 
 <script setup lang="ts">
 import { __ } from '@wordpress/i18n'
+import { ref } from 'vue'
 import type { Bar, TextBarColumn } from '@/types'
 
 const props = defineProps<{
@@ -82,9 +90,26 @@ const emit = defineEmits<{
   update: [updates: Partial<Pick<TextBarColumn, 'effect' | 'messages'>>]
 }>()
 
+const draggingIndex = ref<number | null>(null)
+
 function onEffectChange(e: Event) {
   const value = (e.target as HTMLSelectElement).value as Bar['effect']
   emit('update', { effect: value })
+}
+
+function canDropAt(targetIndex: number, fromIndex: number | null) {
+  if (fromIndex === null) return false
+  if (fromIndex === targetIndex) return false
+  if (fromIndex < 0 || fromIndex >= props.messages.length) return false
+  if (targetIndex < 0 || targetIndex >= props.messages.length) return false
+  return true
+}
+
+function onDragEnter(targetIndex: number, e: DragEvent) {
+  const from = draggingIndex.value
+  if (!canDropAt(targetIndex, from)) return
+  e.preventDefault()
+  if (e.dataTransfer) e.dataTransfer.dropEffect = 'move'
 }
 
 function onMessageInput(index: number, e: Event) {
@@ -105,5 +130,46 @@ function removeMessage(index: number) {
     const next = props.messages.filter((_, i) => i !== index)
     emit('update', { messages: next })
   }
+}
+
+function onDragStart(index: number, e: DragEvent) {
+  if (props.messages.length <= 1) return
+  draggingIndex.value = index
+  e.dataTransfer?.setData('text/plain', String(index))
+  if (e.dataTransfer) e.dataTransfer.effectAllowed = 'move'
+}
+
+function onDragEnd() {
+  draggingIndex.value = null
+}
+
+function onDragOver(targetIndex: number, e: DragEvent) {
+  const from = draggingIndex.value
+  if (!canDropAt(targetIndex, from)) return
+  e.preventDefault()
+  if (e.dataTransfer) e.dataTransfer.dropEffect = 'move'
+}
+
+function onDrop(targetIndex: number, e: DragEvent) {
+  e.preventDefault()
+
+  const from =
+    draggingIndex.value ??
+    (() => {
+      const raw = e.dataTransfer?.getData('text/plain') ?? ''
+      const parsed = Number.parseInt(raw, 10)
+      return Number.isFinite(parsed) ? parsed : null
+    })()
+
+  if (!canDropAt(targetIndex, from)) return
+
+  const fromIndex = from as number
+  const next = [...props.messages]
+  const [moved] = next.splice(fromIndex, 1)
+  next.splice(targetIndex, 0, moved ?? '')
+
+  emit('update', { messages: next })
+  emit('commit')
+  draggingIndex.value = null
 }
 </script>
