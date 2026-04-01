@@ -1,10 +1,13 @@
 <template>
-  <div v-if="visibleBars.length > 0" class="top-bar-container">
+  <div
+    v-if="visibleBars.length > 0"
+    :class="['top-bar-container', { 'top-bar-container--preview': !!props.preview }]"
+  >
     <div
       v-for="bar in visibleBars"
       :key="bar.id"
       :id="`top-bar-${bar.id}`"
-      :class="['top-bar', `top-bar--${bar.position}`]"
+      :class="['top-bar', props.preview ? 'top-bar--preview' : `top-bar--${bar.position}`]"
       :style="getBarStyles(bar)"
       role="banner"
       :data-top-bar-id="bar.id"
@@ -103,7 +106,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import type {
   Bar,
   BarColumn,
@@ -118,6 +121,11 @@ import {
   ICONS,
   SOCIAL_ICONS_BY_PLATFORM,
 } from '@/constants/icons'
+
+const props = defineProps<{
+  barsOverride?: Bar[]
+  preview?: boolean
+}>()
 
 const bars = ref<Bar[]>([])
 const currentMessageIndex = ref<Record<string, number>>({})
@@ -201,6 +209,25 @@ async function fetchBars() {
   } catch (error) {
     console.error('Failed to load top bars:', error)
   }
+}
+
+function stopAllRotations() {
+  Object.keys(intervals.value).forEach(stopMessageRotation)
+  currentMessageIndex.value = {}
+  intervals.value = {}
+}
+
+function initRotations(nextBars: Bar[]) {
+  stopAllRotations()
+  nextBars.forEach(b => {
+    getColumns(b).forEach(column => {
+      if (column.type === 'text' && column.effect !== 'none' && column.messages.length > 1) {
+        const key = columnKey(b.id, column.id)
+        currentMessageIndex.value[key] = 0
+        startMessageRotation(b, column)
+      }
+    })
+  })
 }
 
 // Filter bars by visibility and scheduling
@@ -464,14 +491,29 @@ function handleScroll() {
 }
 
 onMounted(() => {
-  fetchBars()
+  if (props.barsOverride?.length) {
+    bars.value = props.barsOverride
+    initRotations(bars.value)
+  } else {
+    fetchBars()
+  }
   window.addEventListener('scroll', handleScroll, { passive: true })
 })
 
 onUnmounted(() => {
-  Object.keys(intervals.value).forEach(stopMessageRotation)
+  stopAllRotations()
   window.removeEventListener('scroll', handleScroll)
 })
+
+watch(
+  () => props.barsOverride,
+  next => {
+    if (next?.length) {
+      bars.value = next
+      initRotations(bars.value)
+    }
+  }
+)
 </script>
 
 <style scoped>
@@ -511,6 +553,21 @@ body.admin-bar .top-bar--top {
   bottom: 0;
   left: 0;
   right: 0;
+}
+
+/* Admin preview must not be fixed to viewport */
+.top-bar--preview {
+  position: relative !important;
+  top: auto !important;
+  bottom: auto !important;
+  left: auto !important;
+  right: auto !important;
+  z-index: auto !important;
+}
+
+.top-bar-container--preview {
+  position: relative;
+  z-index: auto;
 }
 
 .top-bar__inner {

@@ -63,7 +63,7 @@ final class Frontend {
 
 		// Enqueue Vue frontend app
 		$frontend_js = TOP_BAR_PLUGIN_DIR . 'assets/dist/js/frontend.js';
-		$frontend_css = TOP_BAR_PLUGIN_DIR . 'assets/dist/css/frontend.css';
+		$frontend_css = TOP_BAR_PLUGIN_DIR . 'assets/dist/css/style.css';
 
 		if ( file_exists( $frontend_js ) ) {
 			$ver_js = (string) filemtime( $frontend_js );
@@ -85,7 +85,7 @@ final class Frontend {
 			$ver_css = (string) filemtime( $frontend_css );
 			wp_enqueue_style(
 				'top-bar-frontend',
-				plugins_url( 'assets/dist/css/frontend.css', TOP_BAR_PLUGIN_FILE ),
+				plugins_url( 'assets/dist/css/style.css', TOP_BAR_PLUGIN_FILE ),
 				[],
 				$ver_css
 			);

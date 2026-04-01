@@ -45,7 +45,7 @@
       <div class="top-bar-grid line-bottom ">
         <div class="item">
           <p class="bold lg">Preview</p>
-          <TopBarPreviewView :bar="localBar" />
+          <TopBarView :bars-override="[localBar]" preview />
         </div>
       </div>
 
@@ -237,7 +237,7 @@ import ContactColumnEditor from './ContactColumnEditor.vue'
 import ScheduleSection from './ScheduleSection.vue'
 import SocialColumnEditor from './SocialColumnEditor.vue'
 import TextColumnEditor from './TextColumnEditor.vue'
-import TopBarPreviewView from './TopBarPreviewView.vue'
+import TopBarView from './TopBarView.vue'
 
 function newColumnId(): string {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
