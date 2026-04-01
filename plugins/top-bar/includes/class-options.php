@@ -145,12 +145,9 @@ final class Options {
 		$bg    = isset( $bar['bg_color'] ) ? self::sanitize_hex_color( (string) $bar['bg_color'] ) : '';
 		$width = isset( $bar['frame_width'] ) ? (int) $bar['frame_width'] : 0;
 		$width = max( 0, min( 10, $width ) );
-		$frame = $width > 0 && isset( $bar['frame_color'] ) ? self::sanitize_hex_color( (string) $bar['frame_color'] ) : '';
-
-		// Clear frame if width is 0
-		if ( $width === 0 ) {
-			$frame = '';
-		}
+		// Preserve frame color even when width is 0 so the user's color choice isn't lost.
+		// Rendering still depends on width > 0 in the frontend/admin preview styles.
+		$frame = isset( $bar['frame_color'] ) ? self::sanitize_hex_color( (string) $bar['frame_color'] ) : '';
 
 		$max_messages = FeatureFlags::instance()->max_messages();
 

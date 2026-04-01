@@ -51,7 +51,7 @@
             />
             <select
               v-model.number="model.frame_width"
-              @change="emit('save')"
+              @change="onFrameWidthChange"
             >
               <option v-for="px in 11" :key="px - 1" :value="px - 1">{{ px - 1 }}px</option>
             </select>
@@ -85,4 +85,14 @@ const model = defineModel<Bar>({ required: true })
 const emit = defineEmits<{
   save: []
 }>()
+
+function onFrameWidthChange(e: Event) {
+  const nextWidth = Number((e.target as HTMLSelectElement).value)
+  // `input[type="color"]` may show a default color even when the model is empty.
+  // Ensure the border becomes visible as soon as width > 0.
+  if (nextWidth > 0 && !model.value.frame_color) {
+    model.value.frame_color = '#000000'
+  }
+  emit('save')
+}
 </script>
