@@ -40,15 +40,17 @@
       </div>
     </div>
 
-    <div :class="['top-bar-options', { active: isExpanded }]">
-      <!-- Preview -->
-      <div class="top-bar-grid line-bottom ">
-        <div class="item">
-          <p class="bold lg">Preview</p>
+    <!-- Preview (always visible) -->
+    <div class="top-bar-grid line-bottom ">
+      <div class="item">
+        <p class="bold lg">Preview</p>
+        <div class="top-bar-admin-preview">
           <TopBarView :bars-override="[localBar]" preview />
         </div>
       </div>
+    </div>
 
+    <div :class="['top-bar-options', { active: isExpanded }]">
       <!-- Name -->
       <div class="top-bar-grid">
         <div class="item">
@@ -564,3 +566,32 @@ function handleDelete() {
   }
 }
 </script>
+
+<style scoped>
+.top-bar-admin-preview {
+  /* Keep preview full-width and avoid layout shifts. */
+  max-width: 100%;
+}
+
+/* Only adjust the Top Bar columns layout inside the preview. */
+.top-bar-admin-preview :deep(.top-bar__columns) {
+  flex-wrap: nowrap;
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-gutter: stable;
+  -webkit-overflow-scrolling: touch;
+}
+
+
+
+.top-bar-admin-preview :deep(.top-bar) {
+  width: 100%;
+}
+
+/* Prevent the preview bar from overlaying other admin content (e.g. 2nd preview). */
+.top-bar-admin-preview :deep(.top-bar-container),
+.top-bar-admin-preview :deep(.top-bar) {
+  z-index: auto !important;
+}
+</style>

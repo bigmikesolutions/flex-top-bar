@@ -230,8 +230,12 @@ function initRotations(nextBars: Bar[]) {
   })
 }
 
-// Filter bars by visibility and scheduling
+// Filter bars by visibility and scheduling (except in admin preview mode).
 const visibleBars = computed(() => {
+  if (props.preview) {
+    // In admin preview we always render the provided bar(s), even if invisible/scheduled.
+    return bars.value
+  }
   return bars.value.filter(bar => {
     // Check if visible
     if (!bar.visible) return false
