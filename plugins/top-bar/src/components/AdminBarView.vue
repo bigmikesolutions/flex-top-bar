@@ -40,8 +40,8 @@
       </div>
     </div>
 
-    <!-- Preview (always visible) -->
-    <div class="top-bar-grid line-bottom ">
+    <!-- Preview (sticky within this bar row) -->
+    <div class="top-bar-grid line-bottom top-bar-admin-preview-row">
       <div class="item">
         <p class="bold lg">Preview</p>
         <div class="top-bar-admin-preview">
@@ -593,5 +593,13 @@ function handleDelete() {
 .top-bar-admin-preview :deep(.top-bar-container),
 .top-bar-admin-preview :deep(.top-bar) {
   z-index: auto !important;
+}
+
+/* Keep preview visible while editing this single bar row. */
+.top-bar-admin-preview-row {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: #fff;
 }
 </style>
