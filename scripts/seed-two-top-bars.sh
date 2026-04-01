@@ -74,13 +74,45 @@ $bars = [
 		"messages_mobile_visible" => false,
 		"columns" => [
 			[
+				"id" => "image_0",
+				"type" => "social",
+				"icon_style" => "color",
+				"background_color" => "#ffffff",
+				"icon_color" => "#ff0000",
+				"links" => [
+					[
+						"platform" => "facebook",
+						"url" => "https://www.facebook.com/",
+					],
+				],
+				"size_percent" => 10,
+				"content_position" => "right",
+				"messages_mobile_visible" => true,
+			],
+			[
 				"id" => "col_bar_bottom",
 				"type" => "text",
 				"effect" => "blink",
 				"messages" => ["Bottom bar.", "Hidden on scroll."],
-				"size_percent" => 100,
+				"size_percent" => 50,
 				"content_position" => "center",
 				"messages_mobile_visible" => false,
+			],
+				[
+				"id" => "image_1",
+				"type" => "social",
+				"icon_style" => "white",
+				"background_color" => "#ffffff",
+				"icon_color" => "#ff0000",
+				"links" => [
+					[
+						"platform" => "apple",
+						"url" => "https://www.apple.com/pl",
+					],
+				],
+				"size_percent" => 10,
+				"content_position" => "left",
+				"messages_mobile_visible" => true,
 			],
 		],
 		"bg_color" => "#3b3893",
