@@ -9,11 +9,8 @@
           :checked="column.icon_style === opt.value"
           @change="patchIconStyle(opt.value)"
         />
+        <span class="top-bar-radio-line">{{ opt.label }}</span>
       <span></span>
-      <!-- TODO 
-        - Usunać opcje COLOR 
-        - Przy zmianie radio na black, white, przeskakuje do pierwszego radio buttona, hoy wie czemu :D
-      -->
        <div class="item icons">
         <span
           v-for="platform in CONTACT_KINDS"
@@ -24,6 +21,7 @@
             square: opt.value === 'square',
             'mask black': opt.value === 'black',
             'mask white': opt.value === 'white',
+            'no-mask': opt.value === 'color',
             [platform]: true
           }"
           :title="kindLabel(platform)"

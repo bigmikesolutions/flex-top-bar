@@ -418,7 +418,8 @@ final class Options {
 		int $max_entries
 	): array {
 		$icon_style = isset( $col['icon_style'] ) ? sanitize_key( (string) $col['icon_style'] ) : 'rounded';
-		if ( ! in_array( $icon_style, [ 'rounded', 'square', 'icon_only' ], true ) ) {
+		// Keep this allowlist in sync with the admin UI options (src/constants/iconStyleOptions.ts).
+		if ( ! in_array( $icon_style, [ 'rounded', 'square', 'black', 'white', 'color' ], true ) ) {
 			$icon_style = 'rounded';
 		}
 
