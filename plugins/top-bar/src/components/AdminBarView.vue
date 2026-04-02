@@ -1,7 +1,6 @@
 <!-- TOOD 
 - DODAC plugin do stylizacji Select 
 
-- datetime-local dziala tylko po kliknieciu w ikone. Powinno byc w cale pole.
 - Wyciagnac nazwe pluginu z Settings do glownych menu
 - Zmienic nazwe pluginu
 - Dodac przycisk publish (dodalem do belki button + ikona)
