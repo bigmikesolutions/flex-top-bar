@@ -352,6 +352,19 @@ final class Options {
 			$icon_color = '#1d2327';
 		}
 
+		$icon_border_width = isset( $col['icon_border_width'] ) ? (int) $col['icon_border_width'] : 0;
+		if ( $icon_border_width < 0 ) {
+			$icon_border_width = 0;
+		}
+		if ( $icon_border_width > 10 ) {
+			$icon_border_width = 10;
+		}
+
+		$icon_border_color = isset( $col['icon_border_color'] ) ? self::sanitize_hex_color( (string) $col['icon_border_color'] ) : '';
+		if ( $icon_border_color === '' ) {
+			$icon_border_color = '#1d2327';
+		}
+
 		$allowed = self::allowed_social_platforms();
 		$links   = [];
 		if ( isset( $col['links'] ) && is_array( $col['links'] ) ) {
@@ -396,6 +409,8 @@ final class Options {
 			'icon_style'              => $icon_style,
 			'background_color'        => $bg,
 			'icon_color'              => $icon_color,
+			'icon_border_width'       => $icon_border_width,
+			'icon_border_color'       => $icon_border_color,
 			'links'                   => $links,
 			'size_percent'            => $size_percent,
 			'content_position'        => $content_position,
@@ -428,6 +443,19 @@ final class Options {
 		$icon_color = isset( $col['icon_color'] ) ? self::sanitize_hex_color( (string) $col['icon_color'] ) : '';
 		if ( $icon_color === '' ) {
 			$icon_color = '#1d2327';
+		}
+
+		$icon_border_width = isset( $col['icon_border_width'] ) ? (int) $col['icon_border_width'] : 0;
+		if ( $icon_border_width < 0 ) {
+			$icon_border_width = 0;
+		}
+		if ( $icon_border_width > 10 ) {
+			$icon_border_width = 10;
+		}
+
+		$icon_border_color = isset( $col['icon_border_color'] ) ? self::sanitize_hex_color( (string) $col['icon_border_color'] ) : '';
+		if ( $icon_border_color === '' ) {
+			$icon_border_color = '#1d2327';
 		}
 
 		$allowed  = self::allowed_contact_kinds();
@@ -466,6 +494,8 @@ final class Options {
 			'icon_style'              => $icon_style,
 			'background_color'        => $bg,
 			'icon_color'              => $icon_color,
+			'icon_border_width'       => $icon_border_width,
+			'icon_border_color'       => $icon_border_color,
 			'contacts'                => $contacts,
 			'size_percent'            => $size_percent,
 			'content_position'        => $content_position,

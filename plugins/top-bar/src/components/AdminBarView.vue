@@ -4,7 +4,7 @@
 - Wyciagnac nazwe pluginu z Settings do glownych menu
 - Zmienic nazwe pluginu
 - Dodac przycisk publish (dodalem do belki button + ikona)
-- Dodac do opcji ikon (border i border color) -> dodalem takie pola
+- Dodac do opcji ikon (border i border color) border size -> dodalem takie pola
 
 // Do przemyslenia
 - Dodac tooltipy do buttonow
@@ -316,6 +316,8 @@ function defaultColumnForType(
       icon_style: 'rounded',
       background_color: '#ffffff',
       icon_color: '#1d2327',
+      icon_border_width: 0,
+      icon_border_color: '#1d2327',
       links: [{ platform: '', url: '' }],
       size_percent: sizePercent,
       content_position: 'center',
@@ -328,6 +330,8 @@ function defaultColumnForType(
     icon_style: 'rounded',
     background_color: '#ffffff',
     icon_color: '#1d2327',
+    icon_border_width: 0,
+    icon_border_color: '#1d2327',
     contacts: [{ kind: '', value: '' }],
     size_percent: sizePercent,
     content_position: 'center',

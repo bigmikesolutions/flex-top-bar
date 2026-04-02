@@ -60,7 +60,9 @@
         <fieldset class="line vertical">
           <legend class="bold">{{ __('Border size & Color', 'top-bar') }}</legend>
           <select
-            :value="0"            
+            :id="`social_icon_border_width_${barId}_${columnId}`"
+            :value="column.icon_border_width"
+            @change="onBorderWidthChange"
           >
             <option :value="0">0px</option>
             <option :value="1">1px</option>
@@ -75,10 +77,10 @@
             <option :value="10">10</option>
           </select>
           <input
-            :id="`social_icon_${barId}_${columnId}`"
+            :id="`social_icon_border_color_${barId}_${columnId}`"
             type="color"
-            :value="column.icon_color"
-            @input="onIconColorInput"
+            :value="column.icon_border_color"
+            @input="onBorderColorInput"
             @blur="emit('commit')"
           />
         </fieldset>
@@ -211,6 +213,16 @@ function onBgInput(e: Event) {
 
 function onIconColorInput(e: Event) {
   emit('patch', { icon_color: (e.target as HTMLInputElement).value })
+}
+
+function onBorderWidthChange(e: Event) {
+  const next = Number.parseInt((e.target as HTMLSelectElement).value, 10)
+  emit('patch', { icon_border_width: Number.isFinite(next) ? next : 0 })
+  emit('commit')
+}
+
+function onBorderColorInput(e: Event) {
+  emit('patch', { icon_border_color: (e.target as HTMLInputElement).value })
 }
 
 function onPlatformChange(index: number, e: Event) {

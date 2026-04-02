@@ -76,6 +76,8 @@ export interface SocialBarColumn {
   icon_style: IconStyle
   background_color: string
   icon_color: string
+  icon_border_width: number
+  icon_border_color: string
   links: SocialLink[]
   size_percent: number
   content_position: ContentPosition
@@ -88,6 +90,8 @@ export interface ContactBarColumn {
   icon_style: IconStyle
   background_color: string
   icon_color: string
+  icon_border_width: number
+  icon_border_color: string
   contacts: ContactEntry[]
   size_percent: number
   content_position: ContentPosition

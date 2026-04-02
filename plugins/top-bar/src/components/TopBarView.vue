@@ -298,6 +298,8 @@ function socialColumnStyle(column: SocialBarColumn): Record<string, string> {
     // Use CSS vars so we can style per-link pills (rounded vs square) visibly.
     '--top-bar-social-bg': column.background_color,
     '--top-bar-social-fg': column.icon_color,
+    '--top-bar-social-bw': `${column.icon_border_width ?? 0}px`,
+    '--top-bar-social-bc': column.icon_border_color || 'transparent',
   }
 }
 
@@ -372,6 +374,8 @@ function contactColumnStyle(column: ContactBarColumn): Record<string, string> {
     // Use CSS vars so we can style per-entry pills (rounded vs square) visibly.
     '--top-bar-contact-bg': column.background_color,
     '--top-bar-contact-fg': column.icon_color,
+    '--top-bar-contact-bw': `${column.icon_border_width ?? 0}px`,
+    '--top-bar-contact-bc': column.icon_border_color || 'transparent',
   }
 }
 
@@ -693,6 +697,11 @@ body.admin-bar .top-bar--top {
   mask-size:65%
 }
 
+.top-bar-social-column--rounded .top-bar-social-column__link,
+.top-bar-social-column--square .top-bar-social-column__link {
+  border: var(--top-bar-social-bw, 0px) solid var(--top-bar-social-bc, transparent);
+}
+
 /* "color" icons render their native SVG colors (no mask). */
 
 .top-bar-contact-column {
@@ -723,6 +732,7 @@ body.admin-bar .top-bar--top {
 .top-bar-contact-column--square .top-bar-contact-column__text {
   background: var(--top-bar-contact-bg, transparent);
   color: var(--top-bar-contact-fg, currentColor);
+  border: var(--top-bar-contact-bw, 0px) solid var(--top-bar-contact-bc, transparent);
 }
 
 .top-bar-contact-column__link {
