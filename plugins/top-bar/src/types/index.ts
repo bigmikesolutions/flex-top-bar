@@ -143,6 +143,7 @@ export interface TopBarConfig {
   apiRoot: string
   nonce: string
   i18n: Record<string, string>
+  version?: string
 }
 
 // Global window interface

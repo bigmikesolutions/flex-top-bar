@@ -7,7 +7,7 @@ const { execSync } = require('node:child_process');
 
 const ADMIN_USER = process.env.WP_ADMIN_USER ?? 'admin';
 const ADMIN_PASS = process.env.WP_ADMIN_PASSWORD ?? 'admin';
-const TOP_BAR_SETTINGS_PATH = '/wp-admin/options-general.php?page=top-bar';
+const TOP_BAR_SETTINGS_PATH = '/wp-admin/admin.php?page=flex-top-bar';
 
 export const MAX_BARS = 5;
 

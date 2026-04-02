@@ -1,7 +1,5 @@
 <!-- TOOD 
-- Zmienic nazwe pluginu
 - Dodac przycisk publish (dodalem do belki button + ikona)
-- Dodac do opcji ikon (border i border color) border size -> dodalem takie pola
 
 // Do przemyslenia
 - Dodac tooltipy do buttonow
@@ -16,7 +14,7 @@
     <!-- Navigation -->
     <div class="top-bar-nav">
       <div class="item name">
-        <p class="lg bold">{{ bar.name || __('Top Bar', 'top-bar') }}</p>
+        <p class="lg bold">{{ bar.name || __('Flex Top Bar', 'top-bar') }}</p>
       </div>
 
       <div class="item nav">

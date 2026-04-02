@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: Top Bar
+ * Plugin Name: Flex Top Bar
  * Description: Displays a simple info bar at the top or bottom of the menu.
  * Version:     1.0.5
  * Author:      Big Mike Solutions

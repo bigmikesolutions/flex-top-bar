@@ -63,6 +63,7 @@ final class Admin {
 				[
 					'apiRoot' => esc_url_raw( rest_url( 'top-bar/v1' ) ),
 					'nonce'   => wp_create_nonce( 'wp_rest' ),
+					'version' => defined( 'TOP_BAR_VERSION' ) ? TOP_BAR_VERSION : '',
 					'i18n'    => [
 						'welcome'     => __( 'Welcome to Top Bar plugin', 'top-bar' ),
 						'addNew'      => __( 'Add new Top Bar', 'top-bar' ),
@@ -77,10 +78,10 @@ final class Admin {
 
 	public function add_menu_page(): void {
 		$this->hook_suffix = (string) add_menu_page(
-			__( 'Top Bar', 'top-bar' ),
-			__( 'Top Bar', 'top-bar' ),
+			__( 'Flex Top Bar', 'top-bar' ),
+			__( 'Flex Top Bar', 'top-bar' ),
 			'manage_options',
-			'top-bar',
+			'flex-top-bar',
 			[ $this, 'render_settings_page' ],
 			'dashicons-megaphone'
 		);
