@@ -161,6 +161,19 @@ describe('useBarsStore', () => {
       expect(store.publishedBars).toEqual([mockBar])
     })
 
+    it('only updates publishedBars for the published id', async () => {
+      const store = useBarsStore()
+      const other = { ...mockBar, id: 'bar_2', bg_color: '#222222' }
+      store.publishedBars = [mockBar, other]
+
+      const updated = { ...mockBar, bg_color: '#999999' }
+      vi.mocked(api.publishBar).mockResolvedValueOnce(updated)
+
+      await store.publishBar('bar_1')
+
+      expect(store.publishedBars).toEqual([updated, other])
+    })
+
     it('sets error on publishBar failure', async () => {
       const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
       vi.mocked(api.publishBar).mockRejectedValueOnce(new Error('Publish failed'))
