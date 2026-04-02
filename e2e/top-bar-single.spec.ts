@@ -15,6 +15,18 @@ declare const process: { env: Record<string, string | undefined> };
 
 test.describe('single-bar', () => {
 
+  async function publishBar(page: Page, barIndex: number, barId: string): Promise<void> {
+    page.once('dialog', (d) => d.accept());
+    const publishBtn = page.locator('.top-bar-row.bg').nth(barIndex).locator('button.top-bar-icons.publish');
+    const publishSave = page.waitForResponse((r) => {
+      if (r.request().method() !== 'POST' || !r.ok()) return false;
+      const url = decodeURIComponent(r.url());
+      return new RegExp(`/top-bar/v1/bars/${barId}/publish`, 'i').test(url);
+    });
+    await publishBtn.click();
+    await publishSave;
+  }
+
   test.describe('basic settings - position', () => {
     test('should save bar as top and render it at top', async ({ page }) => {
       await loginAndOpenTopBarSettings(page);
@@ -22,6 +34,7 @@ test.describe('single-bar', () => {
 
       const id0 = await getBarIdByIndex(page, 0);
       await setBarPosition(page, 0, 'top');
+      await publishBar(page, 0, id0);
 
       await page.goto('/');
 
@@ -37,6 +50,7 @@ test.describe('single-bar', () => {
 
       const id0 = await getBarIdByIndex(page, 0);
       await setBarPosition(page, 0, 'bottom');
+      await publishBar(page, 0, id0);
 
       await page.goto('/');
 
@@ -56,6 +70,7 @@ test.describe('single-bar', () => {
       const id0 = await getBarIdByIndex(page, 0);
       await setBarPosition(page, 0, 'top');
       await setBarHideOnScroll(page, 0, true);
+      await publishBar(page, 0, id0);
 
       await page.goto('/');
 
@@ -83,6 +98,7 @@ test.describe('single-bar', () => {
       const id0 = await getBarIdByIndex(page, 0);
       await setBarPosition(page, 0, 'top');
       await setBarHideOnScroll(page, 0, false);
+      await publishBar(page, 0, id0);
 
       await page.goto('/');
 
@@ -109,6 +125,7 @@ test.describe('single-bar', () => {
       const id0 = await getBarIdByIndex(page, 0);
       await setBarPosition(page, 0, 'bottom');
       await setBarHideOnScroll(page, 0, true);
+      await publishBar(page, 0, id0);
 
       await page.goto('/');
 
@@ -134,6 +151,7 @@ test.describe('single-bar', () => {
       const id0 = await getBarIdByIndex(page, 0);
       await setBarPosition(page, 0, 'bottom');
       await setBarHideOnScroll(page, 0, false);
+      await publishBar(page, 0, id0);
 
       await page.goto('/');
 
@@ -369,6 +387,17 @@ test.describe('single-bar', () => {
       await effectSelect.selectOption(effect);
       await effectSave;
 
+      // Publish this bar so frontend reflects the draft changes.
+      page.once('dialog', (d) => d.accept());
+      const publishBtn = barRow.locator('button.top-bar-icons.publish');
+      const publishSave = page.waitForResponse((r) => {
+        if (r.request().method() !== 'POST' || !r.ok()) return false;
+        const url = decodeURIComponent(r.url());
+        return new RegExp(`/top-bar/v1/bars/${id0}/publish`, 'i').test(url);
+      });
+      await publishBtn.click();
+      await publishSave;
+
       return id0;
     }
 
@@ -444,6 +473,17 @@ test.describe('single-bar', () => {
       const mobileSave = waitForTopBarPut(page);
       await mobileVisibility.selectOption({ label: mobileVisible ? 'On' : 'Off' });
       await mobileSave;
+
+      // Frontend reads published bars only.
+      page.once('dialog', (d) => d.accept());
+      const publishBtn = barRow.locator('button.top-bar-icons.publish');
+      const publishSave = page.waitForResponse((r) => {
+        if (r.request().method() !== 'POST' || !r.ok()) return false;
+        const url = decodeURIComponent(r.url());
+        return new RegExp(`/top-bar/v1/bars/${id0}/publish`, 'i').test(url);
+      });
+      await publishBtn.click();
+      await publishSave;
 
       return id0;
     }
