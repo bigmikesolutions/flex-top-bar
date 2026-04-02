@@ -45,6 +45,10 @@ class ApiClient {
     return this.request<Bar[]>('/bars')
   }
 
+  async getPublishedBars(): Promise<Bar[]> {
+    return this.request<Bar[]>('/published-bars')
+  }
+
   async createBar(bar: Partial<Bar>): Promise<Bar> {
     return this.request<Bar>('/bars', {
       method: 'POST',

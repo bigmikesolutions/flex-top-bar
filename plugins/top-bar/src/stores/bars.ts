@@ -6,6 +6,7 @@ import { api } from '@/api/client'
 export const useBarsStore = defineStore('bars', () => {
   // State
   const bars = ref<Bar[]>([])
+  const publishedBars = ref<Bar[]>([])
   const loading = ref(false)
   const error = ref<string | null>(null)
 
@@ -18,7 +19,12 @@ export const useBarsStore = defineStore('bars', () => {
     loading.value = true
     error.value = null
     try {
-      bars.value = await api.getBars()
+      const [draft, published] = await Promise.all([
+        api.getBars(),
+        api.getPublishedBars(),
+      ])
+      bars.value = draft
+      publishedBars.value = published
     } catch (e) {
       error.value = e instanceof Error ? e.message : 'Failed to fetch bars'
       console.error('Failed to fetch bars:', e)
@@ -99,6 +105,7 @@ export const useBarsStore = defineStore('bars', () => {
   return {
     // State
     bars,
+    publishedBars,
     loading,
     error,
     // Getters

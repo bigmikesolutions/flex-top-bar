@@ -44,6 +44,17 @@ final class API {
 			]
 		);
 
+		// Get published bars (for admin "unpublished changes" indicator).
+		register_rest_route(
+			self::NAMESPACE,
+			'/published-bars',
+			[
+				'methods'             => 'GET',
+				'callback'            => [ $this, 'get_published_bars' ],
+				'permission_callback' => [ $this, 'check_permissions' ],
+			]
+		);
+
 		// Create new bar
 		register_rest_route(
 			self::NAMESPACE,
@@ -139,6 +150,11 @@ final class API {
 
 	public function get_bars( \WP_REST_Request $request ): \WP_REST_Response {
 		$bars = Options::get_bars();
+		return new \WP_REST_Response( $bars, 200 );
+	}
+
+	public function get_published_bars( \WP_REST_Request $request ): \WP_REST_Response {
+		$bars = Options::get_published_bars();
 		return new \WP_REST_Response( $bars, 200 );
 	}
 

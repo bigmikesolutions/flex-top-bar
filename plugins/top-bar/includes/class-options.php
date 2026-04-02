@@ -135,9 +135,11 @@ final class Options {
 		if ( is_array( $draft ) ) {
 			return;
 		}
-		$published = get_option( self::OPTION_BARS, [] );
-		if ( ! is_array( $published ) ) {
-			$published = [];
+		$published = get_option( self::OPTION_BARS, null );
+		if ( ! is_array( $published ) || $published === [] ) {
+			// Seed a stable initial published state so ids stay consistent.
+			$published = [ self::default_bar() ];
+			update_option( self::OPTION_BARS, $published );
 		}
 		update_option( self::OPTION_BARS_DRAFT, $published );
 	}

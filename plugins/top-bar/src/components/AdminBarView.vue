@@ -43,7 +43,7 @@
         </button>
         <button
           type="button"
-          class="top-bar-icons mask black publish"
+          :class="['top-bar-icons mask black publish', { 'top-bar-publish--dirty': hasUnpublishedChanges }]"
           :title="__('Publish Flex Bar', 'top-bar')"
           @click="handlePublish"
         >
@@ -258,7 +258,6 @@ import ScheduleSection from './ScheduleSection.vue'
 import SocialColumnEditor from './SocialColumnEditor.vue'
 import TextColumnEditor from './TextColumnEditor.vue'
 import TopBarView from './TopBarView.vue'
-import { api } from '@/api/client'
 
 function newColumnId(): string {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
@@ -382,6 +381,7 @@ function withColumns(bar: Bar): Bar {
 
 const props = defineProps<{
   bar: Bar
+  publishedBar?: Bar
   canDelete: boolean
   maxMessages: number
   maxColumns: number
@@ -434,10 +434,31 @@ function onDragEnd() {
 const emit = defineEmits<{
   update: [id: string, updates: Partial<Bar>]
   delete: [id: string]
+  publish: []
 }>()
 
 const localBar = ref<Bar>(withColumns(cloneBar(props.bar)))
 const isExpanded = ref(props.bar.admin_visibile !== false)
+
+function stripAdminOnlyFields(b: Bar): unknown {
+  const { admin_visibile, ...rest } = b as any
+  return rest
+}
+
+const hasUnpublishedChanges = computed(() => {
+  if (!props.publishedBar) {
+    // Draft bar not present in published set yet (e.g., newly created).
+    return true
+  }
+  try {
+    return (
+      JSON.stringify(stripAdminOnlyFields(localBar.value)) !==
+      JSON.stringify(stripAdminOnlyFields(props.publishedBar))
+    )
+  } catch {
+    return false
+  }
+})
 
 // Re-sync when the bar id or server column set changes (fetch, PUT response).
 watch(
@@ -593,12 +614,7 @@ async function handlePublish() {
   if (!confirm(__('Publish changes to frontend?', 'top-bar'))) {
     return
   }
-  try {
-    await api.publish()
-  } catch (e) {
-    console.error('Failed to publish:', e)
-    alert(__('Publish failed. Please try again.', 'top-bar'))
-  }
+  emit('publish')
 }
 </script>
 
@@ -636,5 +652,12 @@ async function handlePublish() {
   top: 0;
   z-index: 5;
   background: #fff;
+}
+
+.top-bar-icons.publish.top-bar-publish--dirty {
+  /* Publish icon uses mask; background controls icon color. */
+  background: rgba(33, 80, 237, 0.85) !important;
+  box-shadow: 0 0 0 4px rgba(33, 80, 237, 0.16);
+  border-radius: 6px;
 }
 </style>
