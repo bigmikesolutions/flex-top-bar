@@ -1,7 +1,5 @@
 <!-- TOOD 
 - DODAC plugin do stylizacji Select 
-- Walidacja: Opcja Text edytor -> Gdy Effect None, ukryć tworzenie kolumn (Add new text) -> Opcja statycznego pojedynczego tekstu.
-  Pokazac button dopiero w momencie wybrania Slide, fadeIn itp
 
 - datetime-local dziala tylko po kliknieciu w ikone. Powinno byc w cale pole.
 - Wyciagnac nazwe pluginu z Settings do glownych menu
