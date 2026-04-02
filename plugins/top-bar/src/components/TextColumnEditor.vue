@@ -21,7 +21,7 @@
       <div class="top-bar-message-list">
         <div
           v-for="(_message, index) in effect === 'none' ? messages.slice(0, 1) : messages"
-          :key="`${index}-${messages[index]}`"
+          :key="index"
           class="top-bar-column-creator-grid"
           draggable="true"
           :data-dragging="draggingIndex === index ? 'true' : 'false'"

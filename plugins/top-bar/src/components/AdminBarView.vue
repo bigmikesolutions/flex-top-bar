@@ -12,10 +12,6 @@
 - Gdy ustawie dwa TopBary w pozycji TOP, jeden nachodzi na drugi. dobrze by bylo aby jeden byl pod drugim itp. To samo w pozycji bottom
 - Moze dodac opcje: zamykania recznego lub po czasie dla danego TopBar ? Wtedy jeden mozna zrobic statycznie, drugi pod spodem znikal by po np 30sek 
 
-BUGI
-- Gdy usuwam bar z Scheduled wywala blad : An error occurred
-- Po dodaniu slider, wpisywanie tekstu w textarea muli
-
 -->
 
 
