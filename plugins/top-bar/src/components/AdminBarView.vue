@@ -1,5 +1,4 @@
 <!-- TOOD 
-- wyrzucic z Contact data ikony COlOR
 - DODAC plugin do stylizacji Select 
 - Walidacja: Opcja Text edytor -> Gdy Effect None, ukryć tworzenie kolumn (Add new text) -> Opcja statycznego pojedynczego tekstu.
   Pokazac button dopiero w momencie wybrania Slide, fadeIn itp

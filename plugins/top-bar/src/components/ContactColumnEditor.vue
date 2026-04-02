@@ -166,7 +166,7 @@ const emit = defineEmits<{
   commit: []
 }>()
 
-const iconStyleOptions = getIconStyleOptions(__)
+const iconStyleOptions = getIconStyleOptions(__).filter((o) => o.value !== 'color')
 
 function kindLabel(k: ContactKind): string {
   const labels: Record<ContactKind, string> = {
