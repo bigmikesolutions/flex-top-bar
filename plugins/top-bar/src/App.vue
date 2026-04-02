@@ -59,12 +59,14 @@
           v-for="bar in bars"
           :key="bar.id"
           :bar="bar"
+          :published-bar="publishedBarsById.get(bar.id)"
           :can-delete="bars.length > 1"
           :max-messages="featureFlags.max_messages"
           :max-columns="featureFlags.max_columns"
           :schedule-enabled="featureFlags.schedule_enabled"
           @update="handleUpdateBar"
           @delete="handleDeleteBar"
+          @publish="handlePublish"
         />
 
         <div class="top-bar-row rt">
@@ -93,6 +95,13 @@ const showMaxBarsWarning = ref(false)
 const pluginVersion = (window.topBarConfig?.version || '').trim()
 
 const bars = computed(() => barsStore.bars)
+const publishedBarsById = computed(() => {
+  const map = new Map<string, Bar>()
+  for (const b of barsStore.publishedBars) {
+    map.set(b.id, b)
+  }
+  return map
+})
 const isLoading = computed(() => barsStore.loading || flagsStore.loading)
 const featureFlags = computed(() => flagsStore.flags)
 const canAddBar = computed(() => bars.value.length < featureFlags.value.max_bars)
@@ -136,6 +145,14 @@ async function handleDeleteBar(id: string) {
     await barsStore.deleteBar(id)
   } catch (error) {
     console.error('Failed to delete bar:', error)
+  }
+}
+
+async function handlePublish(id: string) {
+  try {
+    await barsStore.publishBar(id)
+  } catch (error) {
+    console.error('Failed to publish:', error)
   }
 }
 </script>

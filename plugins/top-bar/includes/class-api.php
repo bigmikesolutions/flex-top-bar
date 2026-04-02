@@ -44,6 +44,17 @@ final class API {
 			]
 		);
 
+		// Get published bars (for admin "unpublished changes" indicator).
+		register_rest_route(
+			self::NAMESPACE,
+			'/published-bars',
+			[
+				'methods'             => 'GET',
+				'callback'            => [ $this, 'get_published_bars' ],
+				'permission_callback' => [ $this, 'check_permissions' ],
+			]
+		);
+
 		// Create new bar
 		register_rest_route(
 			self::NAMESPACE,
@@ -75,6 +86,28 @@ final class API {
 			[
 				'methods'             => 'DELETE',
 				'callback'            => [ $this, 'delete_bar' ],
+				'permission_callback' => [ $this, 'check_permissions' ],
+			]
+		);
+
+		// Publish draft -> published.
+		register_rest_route(
+			self::NAMESPACE,
+			'/publish',
+			[
+				'methods'             => 'POST',
+				'callback'            => [ $this, 'publish' ],
+				'permission_callback' => [ $this, 'check_permissions' ],
+			]
+		);
+
+		// Publish a single bar (draft -> published).
+		register_rest_route(
+			self::NAMESPACE,
+			'/bars/(?P<id>[a-z0-9_]+)/publish',
+			[
+				'methods'             => 'POST',
+				'callback'            => [ $this, 'publish_bar' ],
 				'permission_callback' => [ $this, 'check_permissions' ],
 			]
 		);
@@ -131,6 +164,11 @@ final class API {
 		return new \WP_REST_Response( $bars, 200 );
 	}
 
+	public function get_published_bars( \WP_REST_Request $request ): \WP_REST_Response {
+		$bars = Options::get_published_bars();
+		return new \WP_REST_Response( $bars, 200 );
+	}
+
 	public function create_bar( \WP_REST_Request $request ): \WP_REST_Response {
 		$bars = Options::get_bars();
 
@@ -144,7 +182,7 @@ final class API {
 		$params  = $request->get_json_params();
 		$new_bar = Options::normalize_bar( is_array( $params ) ? $params : [] );
 		$bars[]  = $new_bar;
-		update_option( Options::OPTION_BARS, $bars );
+		update_option( Options::OPTION_BARS_DRAFT, $bars );
 
 		return new \WP_REST_Response( $new_bar, 201 );
 	}
@@ -159,7 +197,7 @@ final class API {
 				$bars[ $idx ] = Options::normalize_bar(
 					array_merge( $bar, is_array( $params ) ? $params : [] )
 				);
-				update_option( Options::OPTION_BARS, $bars );
+				update_option( Options::OPTION_BARS_DRAFT, $bars );
 				return new \WP_REST_Response( $bars[ $idx ], 200 );
 			}
 		}
@@ -190,8 +228,25 @@ final class API {
 			);
 		}
 
-		update_option( Options::OPTION_BARS, array_values( $filtered ) );
+		update_option( Options::OPTION_BARS_DRAFT, array_values( $filtered ) );
 		return new \WP_REST_Response( null, 204 );
+	}
+
+	public function publish( \WP_REST_Request $request ): \WP_REST_Response {
+		$published = Options::publish_draft_to_published();
+		return new \WP_REST_Response( $published, 200 );
+	}
+
+	public function publish_bar( \WP_REST_Request $request ): \WP_REST_Response {
+		$id = (string) $request->get_param( 'id' );
+		$bar = Options::publish_bar( $id );
+		if ( ! is_array( $bar ) ) {
+			return new \WP_REST_Response(
+				[ 'error' => __( 'Bar not found', 'top-bar' ) ],
+				404
+			);
+		}
+		return new \WP_REST_Response( $bar, 200 );
 	}
 
 	public function get_feature_flags( \WP_REST_Request $request ): \WP_REST_Response {

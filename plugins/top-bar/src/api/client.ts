@@ -45,6 +45,10 @@ class ApiClient {
     return this.request<Bar[]>('/bars')
   }
 
+  async getPublishedBars(): Promise<Bar[]> {
+    return this.request<Bar[]>('/published-bars')
+  }
+
   async createBar(bar: Partial<Bar>): Promise<Bar> {
     return this.request<Bar>('/bars', {
       method: 'POST',
@@ -63,6 +67,14 @@ class ApiClient {
     return this.request<void>(`/bars/${id}`, {
       method: 'DELETE',
     })
+  }
+
+  async publish(): Promise<Bar[]> {
+    return this.request<Bar[]>('/publish', { method: 'POST' })
+  }
+
+  async publishBar(id: string): Promise<Bar> {
+    return this.request<Bar>(`/bars/${id}/publish`, { method: 'POST' })
   }
 
   async getFeatureFlags(): Promise<FeatureFlags> {

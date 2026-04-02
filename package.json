@@ -17,6 +17,7 @@
     "test:e2e:multi-column": "playwright test --workers=1 e2e/top-bar-multi-column.spec.ts",
     "test:e2e:feature-flags": "playwright test --workers=1 e2e/feature-flags.spec.ts",
     "test:e2e:icons": "playwright test --workers=1 e2e/top-bar-icons.spec.ts",
+    "test:e2e:publish": "playwright test --workers=1 e2e/top-bar-publish.spec.ts",
     "test:e2e:headed": "playwright test --workers=1 --headed",
     "test:e2e:ui": "playwright test --workers=1 --ui",
     "watch:styles": "npm run build -w plugins/top-bar -- --watch"

@@ -7,9 +7,12 @@ import type { Bar } from '@/types'
 vi.mock('@/api/client', () => ({
   api: {
     getBars: vi.fn(),
+    getPublishedBars: vi.fn(),
     createBar: vi.fn(),
     updateBar: vi.fn(),
     deleteBar: vi.fn(),
+    publish: vi.fn(),
+    publishBar: vi.fn(),
   },
 }))
 
@@ -90,11 +93,13 @@ describe('useBarsStore', () => {
     it('fetches bars successfully', async () => {
       const bars = [mockBar]
       vi.mocked(api.getBars).mockResolvedValueOnce(bars)
+      vi.mocked(api.getPublishedBars).mockResolvedValueOnce(bars)
 
       const store = useBarsStore()
       await store.fetchBars()
 
       expect(store.bars).toEqual(bars)
+      expect(store.publishedBars).toEqual(bars)
       expect(store.loading).toBe(false)
       expect(store.error).toBeNull()
     })
@@ -103,6 +108,7 @@ describe('useBarsStore', () => {
       vi.mocked(api.getBars).mockImplementationOnce(
         () => new Promise(resolve => setTimeout(() => resolve([]), 100))
       )
+      vi.mocked(api.getPublishedBars).mockResolvedValueOnce([])
 
       const store = useBarsStore()
       const promise = store.fetchBars()
@@ -124,6 +130,56 @@ describe('useBarsStore', () => {
       expect(store.loading).toBe(false)
       expect(consoleError).toHaveBeenCalled()
 
+      consoleError.mockRestore()
+    })
+  })
+
+  describe('publish', () => {
+    it('calls api.publish', async () => {
+      vi.mocked(api.publish).mockResolvedValueOnce([mockBar])
+      const store = useBarsStore()
+      await store.publish()
+      expect(api.publish).toHaveBeenCalledTimes(1)
+    })
+
+    it('sets error on publish failure', async () => {
+      const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+      vi.mocked(api.publish).mockRejectedValueOnce(new Error('Publish failed'))
+      const store = useBarsStore()
+      await expect(store.publish()).rejects.toThrow('Publish failed')
+      expect(store.error).toBe('Publish failed')
+      consoleError.mockRestore()
+    })
+  })
+
+  describe('publishBar', () => {
+    it('calls api.publishBar with id', async () => {
+      vi.mocked(api.publishBar).mockResolvedValueOnce(mockBar)
+      const store = useBarsStore()
+      await store.publishBar('bar_1')
+      expect(api.publishBar).toHaveBeenCalledWith('bar_1')
+      expect(store.publishedBars).toEqual([mockBar])
+    })
+
+    it('only updates publishedBars for the published id', async () => {
+      const store = useBarsStore()
+      const other = { ...mockBar, id: 'bar_2', bg_color: '#222222' }
+      store.publishedBars = [mockBar, other]
+
+      const updated = { ...mockBar, bg_color: '#999999' }
+      vi.mocked(api.publishBar).mockResolvedValueOnce(updated)
+
+      await store.publishBar('bar_1')
+
+      expect(store.publishedBars).toEqual([updated, other])
+    })
+
+    it('sets error on publishBar failure', async () => {
+      const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+      vi.mocked(api.publishBar).mockRejectedValueOnce(new Error('Publish failed'))
+      const store = useBarsStore()
+      await expect(store.publishBar('bar_1')).rejects.toThrow('Publish failed')
+      expect(store.error).toBe('Publish failed')
       consoleError.mockRestore()
     })
   })

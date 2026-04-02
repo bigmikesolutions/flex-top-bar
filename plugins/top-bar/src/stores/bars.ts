@@ -6,6 +6,7 @@ import { api } from '@/api/client'
 export const useBarsStore = defineStore('bars', () => {
   // State
   const bars = ref<Bar[]>([])
+  const publishedBars = ref<Bar[]>([])
   const loading = ref(false)
   const error = ref<string | null>(null)
 
@@ -18,7 +19,12 @@ export const useBarsStore = defineStore('bars', () => {
     loading.value = true
     error.value = null
     try {
-      bars.value = await api.getBars()
+      const [draft, published] = await Promise.all([
+        api.getBars(),
+        api.getPublishedBars(),
+      ])
+      bars.value = draft
+      publishedBars.value = published
     } catch (e) {
       error.value = e instanceof Error ? e.message : 'Failed to fetch bars'
       console.error('Failed to fetch bars:', e)
@@ -78,6 +84,42 @@ export const useBarsStore = defineStore('bars', () => {
     }
   }
 
+  async function publish() {
+    loading.value = true
+    error.value = null
+    try {
+      await api.publish()
+    } catch (e) {
+      error.value = e instanceof Error ? e.message : 'Failed to publish'
+      console.error('Failed to publish:', e)
+      throw e
+    } finally {
+      loading.value = false
+    }
+  }
+
+  async function publishBar(id: string) {
+    loading.value = true
+    error.value = null
+    try {
+      const published = await api.publishBar(id)
+      const idx = publishedBars.value.findIndex((b) => b.id === id)
+      if (idx === -1) {
+        publishedBars.value = [...publishedBars.value, published]
+      } else {
+        const next = [...publishedBars.value]
+        next[idx] = published
+        publishedBars.value = next
+      }
+    } catch (e) {
+      error.value = e instanceof Error ? e.message : 'Failed to publish'
+      console.error('Failed to publish:', e)
+      throw e
+    } finally {
+      loading.value = false
+    }
+  }
+
   function clearError() {
     error.value = null
   }
@@ -85,6 +127,7 @@ export const useBarsStore = defineStore('bars', () => {
   return {
     // State
     bars,
+    publishedBars,
     loading,
     error,
     // Getters
@@ -95,6 +138,8 @@ export const useBarsStore = defineStore('bars', () => {
     createBar,
     updateBar,
     deleteBar,
+    publish,
+    publishBar,
     clearError,
   }
 })

@@ -7,9 +7,23 @@ import {
   MAX_BARS,
   setBarPosition,
   resetToSingleBar,
+  waitForTopBarPut,
 } from './helpers/topBarHelpers';
 
 test.describe('multi-bar', () => {
+  async function publishBarByIndex(page: any, index: number): Promise<void> {
+    const barId = await getBarIdByIndex(page, index);
+    page.once('dialog', (d: any) => d.accept());
+    const publishBtn = page.locator('.top-bar-row.bg').nth(index).locator('button.top-bar-icons.publish');
+    const publishSave = page.waitForResponse((r: any) => {
+      if (r.request().method() !== 'POST' || !r.ok()) return false;
+      const url = decodeURIComponent(r.url());
+      return new RegExp(`/top-bar/v1/bars/${barId}/publish`, 'i').test(url);
+    });
+    await publishBtn.click();
+    await publishSave;
+  }
+
   test('should create 2 top bars and display both on frontend', async ({ page }) => {
     await loginAndOpenTopBarSettings(page);
     await resetToSingleBar(page);
@@ -21,6 +35,10 @@ test.describe('multi-bar', () => {
     // Set both to top position
     await setBarPosition(page, 0, 'top');
     await setBarPosition(page, 1, 'top');
+
+    // Publish both bars so frontend can see them (frontend reads published bars only).
+    await publishBarByIndex(page, 0);
+    await publishBarByIndex(page, 1);
 
     // Verify on frontend
     await page.goto('/');
@@ -39,6 +57,11 @@ test.describe('multi-bar', () => {
     const createdIds = await getBarIds(page);
     expect(createdIds).toHaveLength(3);
 
+    // Publish all bars so frontend can see them.
+    await publishBarByIndex(page, 0);
+    await publishBarByIndex(page, 1);
+    await publishBarByIndex(page, 2);
+
     // Delete first bar
     const removedId = createdIds[0];
     const firstBar = page.locator('.top-bar-row.bg').first();
@@ -46,7 +69,14 @@ test.describe('multi-bar', () => {
 
     // Handle confirmation dialog
     page.on('dialog', dialog => dialog.accept());
+    const deleteSave = page.waitForResponse((r) => {
+      if (r.request().method() !== 'DELETE') return false;
+      if (![200, 204].includes(r.status())) return false;
+      const url = decodeURIComponent(r.url());
+      return /top-bar\/v1\/bars\/[a-z0-9_]+/i.test(url);
+    });
     await deleteButton.click();
+    await deleteSave;
     await page.waitForTimeout(500); // Wait for Vue to remove bar
 
     // Verify on frontend

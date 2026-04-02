@@ -36,6 +36,19 @@ test.describe('icons - social media', () => {
       await save;
     }
 
+    async function publishThisBar() {
+      // Publish draft -> frontend for this bar.
+      page.once('dialog', (d) => d.accept());
+      const publishBtn = page.locator('.top-bar-row.bg').first().locator('button.top-bar-icons.publish');
+      const publishSave = page.waitForResponse((r) => {
+        if (r.request().method() !== 'POST' || !r.ok()) return false;
+        const url = decodeURIComponent(r.url());
+        return new RegExp(`/top-bar/v1/bars/${barId}/publish`, 'i').test(url);
+      });
+      await publishBtn.click();
+      await publishSave;
+    }
+
     async function setPillColors(bg: string, fg: string) {
       const bgInput = page.locator(`#social_bg_${barId}_${columnId}`);
       const iconInput = page.locator(`#social_icon_${barId}_${columnId}`);
@@ -78,6 +91,7 @@ test.describe('icons - social media', () => {
     // Square + custom colors
     await setStyleByIndex(1);
     await setPillColors('#123456', '#abcdef');
+    await publishThisBar();
     await assertFrontendStyle('square');
     await expect(page.locator(`[data-top-bar-id="${barId}"] .top-bar-social-column`)).toHaveAttribute(
       'style',
@@ -92,24 +106,28 @@ test.describe('icons - social media', () => {
     await loginAndOpenTopBarSettings(page);
     await openPanel(page, 0);
     await setStyleByIndex(0);
+    await publishThisBar();
     await assertFrontendStyle('rounded');
 
     // Black
     await loginAndOpenTopBarSettings(page);
     await openPanel(page, 0);
     await setStyleByIndex(2);
+    await publishThisBar();
     await assertFrontendStyle('black');
 
     // White
     await loginAndOpenTopBarSettings(page);
     await openPanel(page, 0);
     await setStyleByIndex(3);
+    await publishThisBar();
     await assertFrontendStyle('white');
 
     // Color (original SVG colors)
     await loginAndOpenTopBarSettings(page);
     await openPanel(page, 0);
     await setStyleByIndex(4);
+    await publishThisBar();
     await assertFrontendStyle('color');
   });
 
@@ -140,6 +158,18 @@ test.describe('icons - contact column', () => {
       const save = waitForTopBarPut(page);
       await styleLabels.nth(index).click({ force: true });
       await save;
+    }
+
+    async function publishThisBar() {
+      page.once('dialog', (d) => d.accept());
+      const publishBtn = page.locator('.top-bar-row.bg').first().locator('button.top-bar-icons.publish');
+      const publishSave = page.waitForResponse((r) => {
+        if (r.request().method() !== 'POST' || !r.ok()) return false;
+        const url = decodeURIComponent(r.url());
+        return new RegExp(`/top-bar/v1/bars/${barId}/publish`, 'i').test(url);
+      });
+      await publishBtn.click();
+      await publishSave;
     }
 
     async function setPillColors(bg: string, fg: string) {
@@ -177,6 +207,7 @@ test.describe('icons - contact column', () => {
     // Square + custom colors
     await setStyleByIndex(1);
     await setPillColors('#123456', '#abcdef');
+    await publishThisBar();
     await assertFrontendStyle('square');
     await expect(page.locator(`[data-top-bar-id="${barId}"] .top-bar-contact-column`)).toHaveAttribute(
       'style',
@@ -191,18 +222,21 @@ test.describe('icons - contact column', () => {
     await loginAndOpenTopBarSettings(page);
     await openPanel(page, 0);
     await setStyleByIndex(0);
+    await publishThisBar();
     await assertFrontendStyle('rounded');
 
     // Black
     await loginAndOpenTopBarSettings(page);
     await openPanel(page, 0);
     await setStyleByIndex(2);
+    await publishThisBar();
     await assertFrontendStyle('black');
 
     // White
     await loginAndOpenTopBarSettings(page);
     await openPanel(page, 0);
     await setStyleByIndex(3);
+    await publishThisBar();
     await assertFrontendStyle('white');
   });
 });
