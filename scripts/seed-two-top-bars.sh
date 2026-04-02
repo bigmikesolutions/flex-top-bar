@@ -175,6 +175,8 @@ $bars = [
 ];
 
 update_option("top_bars", $bars);
-echo "Seeded option top_bars with 3 bars (top, bottom, scheduled)." . PHP_EOL;
+// Admin edits drafts; keep draft in sync with published for seeds.
+update_option("top_bars_draft", $bars);
+echo "Seeded options top_bars + top_bars_draft with 3 bars (top, bottom, scheduled)." . PHP_EOL;
 '
 

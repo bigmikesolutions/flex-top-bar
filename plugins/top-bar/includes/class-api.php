@@ -79,6 +79,17 @@ final class API {
 			]
 		);
 
+		// Publish draft -> published.
+		register_rest_route(
+			self::NAMESPACE,
+			'/publish',
+			[
+				'methods'             => 'POST',
+				'callback'            => [ $this, 'publish' ],
+				'permission_callback' => [ $this, 'check_permissions' ],
+			]
+		);
+
 		// Get feature flags
 		register_rest_route(
 			self::NAMESPACE,
@@ -144,7 +155,7 @@ final class API {
 		$params  = $request->get_json_params();
 		$new_bar = Options::normalize_bar( is_array( $params ) ? $params : [] );
 		$bars[]  = $new_bar;
-		update_option( Options::OPTION_BARS, $bars );
+		update_option( Options::OPTION_BARS_DRAFT, $bars );
 
 		return new \WP_REST_Response( $new_bar, 201 );
 	}
@@ -159,7 +170,7 @@ final class API {
 				$bars[ $idx ] = Options::normalize_bar(
 					array_merge( $bar, is_array( $params ) ? $params : [] )
 				);
-				update_option( Options::OPTION_BARS, $bars );
+				update_option( Options::OPTION_BARS_DRAFT, $bars );
 				return new \WP_REST_Response( $bars[ $idx ], 200 );
 			}
 		}
@@ -190,8 +201,13 @@ final class API {
 			);
 		}
 
-		update_option( Options::OPTION_BARS, array_values( $filtered ) );
+		update_option( Options::OPTION_BARS_DRAFT, array_values( $filtered ) );
 		return new \WP_REST_Response( null, 204 );
+	}
+
+	public function publish( \WP_REST_Request $request ): \WP_REST_Response {
+		$published = Options::publish_draft_to_published();
+		return new \WP_REST_Response( $published, 200 );
 	}
 
 	public function get_feature_flags( \WP_REST_Request $request ): \WP_REST_Response {

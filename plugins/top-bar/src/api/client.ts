@@ -65,6 +65,10 @@ class ApiClient {
     })
   }
 
+  async publish(): Promise<Bar[]> {
+    return this.request<Bar[]>('/publish', { method: 'POST' })
+  }
+
   async getFeatureFlags(): Promise<FeatureFlags> {
     return this.request<FeatureFlags>('/feature-flags')
   }

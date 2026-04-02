@@ -16,6 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class Options {
 
 	public const OPTION_BARS = 'top_bars';
+	public const OPTION_BARS_DRAFT = 'top_bars_draft';
 
 	/** At least one bar configuration must exist. */
 	public const MIN_BARS = 1;
@@ -72,6 +73,31 @@ final class Options {
 	 * @return list<array<string, mixed>>
 	 */
 	public static function get_bars(): array {
+		// Admin edits drafts; published bars are served to the frontend separately.
+		self::ensure_draft_initialized();
+		$stored = get_option( self::OPTION_BARS_DRAFT );
+		if ( ! is_array( $stored ) || $stored === [] ) {
+			return [ self::default_bar() ];
+		}
+		$out = [];
+		foreach ( $stored as $row ) {
+			if ( is_array( $row ) ) {
+				$out[] = self::normalize_bar( $row );
+			}
+		}
+		if ( $out === [] ) {
+			return [ self::default_bar() ];
+		}
+		$out = array_slice( $out, 0, FeatureFlags::instance()->max_bars() );
+		return $out;
+	}
+
+	/**
+	 * Published bars from DB.
+	 *
+	 * @return list<array<string, mixed>>
+	 */
+	public static function get_published_bars(): array {
 		$stored = get_option( self::OPTION_BARS );
 		if ( ! is_array( $stored ) || $stored === [] ) {
 			return [ self::default_bar() ];
@@ -87,6 +113,33 @@ final class Options {
 		}
 		$out = array_slice( $out, 0, FeatureFlags::instance()->max_bars() );
 		return $out;
+	}
+
+	/**
+	 * Copy draft bars into published bars.
+	 *
+	 * @return list<array<string, mixed>> Published bars.
+	 */
+	public static function publish_draft_to_published(): array {
+		self::ensure_draft_initialized();
+		$draft = self::get_bars();
+		update_option( self::OPTION_BARS, $draft );
+		return self::get_published_bars();
+	}
+
+	/**
+	 * If draft bars don't exist yet, seed them from published bars.
+	 */
+	private static function ensure_draft_initialized(): void {
+		$draft = get_option( self::OPTION_BARS_DRAFT, null );
+		if ( is_array( $draft ) ) {
+			return;
+		}
+		$published = get_option( self::OPTION_BARS, [] );
+		if ( ! is_array( $published ) ) {
+			$published = [];
+		}
+		update_option( self::OPTION_BARS_DRAFT, $published );
 	}
 
 	/**
@@ -530,7 +583,7 @@ final class Options {
 	public static function get_active_bars(): array {
 		return array_values(
 			array_filter(
-				self::get_bars(),
+				self::get_published_bars(),
 				static fn( $bar ) => is_array( $bar ) && ( $bar['visible'] ?? false )
 			)
 		);

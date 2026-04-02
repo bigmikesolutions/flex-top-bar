@@ -78,6 +78,20 @@ export const useBarsStore = defineStore('bars', () => {
     }
   }
 
+  async function publish() {
+    loading.value = true
+    error.value = null
+    try {
+      await api.publish()
+    } catch (e) {
+      error.value = e instanceof Error ? e.message : 'Failed to publish'
+      console.error('Failed to publish:', e)
+      throw e
+    } finally {
+      loading.value = false
+    }
+  }
+
   function clearError() {
     error.value = null
   }
@@ -95,6 +109,7 @@ export const useBarsStore = defineStore('bars', () => {
     createBar,
     updateBar,
     deleteBar,
+    publish,
     clearError,
   }
 })

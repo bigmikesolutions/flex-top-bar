@@ -44,8 +44,8 @@
         <button
           type="button"
           class="top-bar-icons mask black publish"
-          disabled
           :title="__('Publish Flex Bar', 'top-bar')"
+          @click="handlePublish"
         >
         </button>
         <button
@@ -258,6 +258,7 @@ import ScheduleSection from './ScheduleSection.vue'
 import SocialColumnEditor from './SocialColumnEditor.vue'
 import TextColumnEditor from './TextColumnEditor.vue'
 import TopBarView from './TopBarView.vue'
+import { api } from '@/api/client'
 
 function newColumnId(): string {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
@@ -585,6 +586,18 @@ function saveChanges() {
 function handleDelete() {
   if (confirm(__('Are you sure you want to delete this bar?', 'top-bar'))) {
     emit('delete', props.bar.id)
+  }
+}
+
+async function handlePublish() {
+  if (!confirm(__('Publish changes to frontend?', 'top-bar'))) {
+    return
+  }
+  try {
+    await api.publish()
+  } catch (e) {
+    console.error('Failed to publish:', e)
+    alert(__('Publish failed. Please try again.', 'top-bar'))
   }
 }
 </script>
