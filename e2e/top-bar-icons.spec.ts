@@ -133,7 +133,8 @@ test.describe('icons - contact column', () => {
       .filter({ has: page.locator('legend', { hasText: 'Choose the icon appearance' }) })
       .first();
     const styleLabels = appearanceFieldset.locator('label');
-    await expect(styleLabels).toHaveCount(5);
+    // Contact editor hides "color" option (only 4 appearances available).
+    await expect(styleLabels).toHaveCount(4);
 
     async function setStyleByIndex(index: number) {
       const save = waitForTopBarPut(page);
@@ -158,7 +159,7 @@ test.describe('icons - contact column', () => {
       await fgSave;
     }
 
-    async function assertFrontendStyle(expected: 'rounded' | 'square' | 'black' | 'white' | 'color') {
+    async function assertFrontendStyle(expected: 'rounded' | 'square' | 'black' | 'white') {
       await page.goto('/');
       const bar = page.locator(`[data-top-bar-id="${barId}"]`);
       const contactColumn = bar.locator('.top-bar-contact-column');
@@ -167,16 +168,11 @@ test.describe('icons - contact column', () => {
       await expect(contactColumn).toHaveClass(new RegExp(`top-bar-contact-column--${expected}`));
       await expect(icon).toHaveCount(1);
 
-      if (expected === 'color') {
-        await expect(icon).toHaveAttribute('style', /background-image:\s*url\(/i);
-        await expect(icon).not.toHaveAttribute('style', /mask-image/i);
-      } else {
-        await expect(icon).toHaveAttribute('style', /mask-image/i);
-      }
+      await expect(icon).toHaveAttribute('style', /mask-image/i);
     }
 
     // Verify all appearance options:
-    // 0 Rounded, 1 Square, 2 Black, 3 White, 4 Color (per iconStyleOptions)
+    // 0 Rounded, 1 Square, 2 Black, 3 White
 
     // Square + custom colors
     await setStyleByIndex(1);
@@ -208,11 +204,5 @@ test.describe('icons - contact column', () => {
     await openPanel(page, 0);
     await setStyleByIndex(3);
     await assertFrontendStyle('white');
-
-    // Color (original SVG colors)
-    await loginAndOpenTopBarSettings(page);
-    await openPanel(page, 0);
-    await setStyleByIndex(4);
-    await assertFrontendStyle('color');
   });
 });
