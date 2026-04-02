@@ -1,11 +1,3 @@
-<!-- TODO 
-- Ikona instagrama:
-Trzeba podmienic style:
-Gdy ikona jest color ma wczytac z icons.ts sciezke instagramColor
-w innym przypadku instagramMono 
-
--->
-
 <template>
   <div
     v-if="visibleBars.length > 0"
@@ -63,7 +55,7 @@ w innym przypadku instagramMono
                 >
                   <span
                     class="top-bar-icon top-bar-icon--social"
-                    :style="iconStyleFromClass(socialIconClass(link.platform), column.icon_style, usesIconColors(column.icon_style) ? column.icon_color : '')"
+                    :style="iconStyleFromClass(socialIconClass(link.platform, column.icon_style), column.icon_style, usesIconColors(column.icon_style) ? column.icon_color : '')"
                     aria-hidden="true"
                   ></span>
                   <!-- {{ socialPlatformLabel(link.platform) }} -->
@@ -344,9 +336,12 @@ function socialPlatformLabel(platform: SocialPlatform | ''): string {
   return map[platform] ?? platform
 }
 
-function socialIconClass(platform: SocialPlatform | ''): string {
+function socialIconClass(platform: SocialPlatform | '', style: SocialBarColumn['icon_style']): string {
   if (!platform) {
     return ''
+  }
+  if (platform === 'instagram') {
+    return style === 'color' ? 'instagramColor' : 'instagramMono'
   }
   return SOCIAL_ICONS_BY_PLATFORM[platform] ?? ''
 }
