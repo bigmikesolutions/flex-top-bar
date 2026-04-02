@@ -55,6 +55,33 @@
           />
         </fieldset>
       </div>
+      <div class="item">
+        <fieldset class="line vertical">
+          <legend class="bold">{{ __('Border size & Color', 'top-bar') }}</legend>
+          <select
+            :value="0"            
+          >
+            <option :value="0">0px</option>
+            <option :value="1">1px</option>
+            <option :value="2">2px</option>
+            <option :value="3">3px</option>
+            <option :value="4">4px</option>
+            <option :value="5">5px</option>
+            <option :value="6">6px</option>
+            <option :value="7">7px</option>
+            <option :value="8">8px</option>
+            <option :value="9">9px</option>
+            <option :value="10">10</option>
+          </select>
+          <input
+            :id="`social_icon_${barId}_${columnId}`"
+            type="color"
+            :value="column.icon_color"
+            @input="onIconColorInput"
+            @blur="emit('commit')"
+          />
+        </fieldset>
+      </div>
     </div>
 
     <fieldset class="line">

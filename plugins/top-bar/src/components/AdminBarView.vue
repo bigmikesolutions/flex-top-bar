@@ -1,3 +1,25 @@
+<!-- TOOD 
+- wyrzucic z Contact data ikony COlOR
+- DODAC plugin do stylizacji Select 
+- Walidacja: Opcja Text edytor -> Gdy Effect None, ukryć tworzenie kolumn (Add new text) -> Opcja statycznego pojedynczego tekstu.
+  Pokazac button dopiero w momencie wybrania Slide, fadeIn itp
+
+- datetime-local dziala tylko po kliknieciu w ikone. Powinno byc w cale pole.
+- Wyciagnac nazwe pluginu z Settings do glownych menu
+- Zmienic nazwe pluginu
+- Dodac przycisk publish (dodalem do belki button + ikona)
+- Dodac do opcji ikon (border i border color) -> dodalem takie pola
+
+// Do przemyslenia
+- Dodac tooltipy do buttonow
+
+BUGI
+- Gdy usuwam bar z Scheduled wywala blad : An error occurred
+- Po dodaniu slider, wpisywanie tekstu w textarea muli
+
+-->
+
+
 <template>
   <div class="top-bar-row bg">
     <!-- Navigation -->
@@ -32,6 +54,13 @@
         </button>
         <button
           type="button"
+          class="top-bar-icons mask black publish"
+          disabled
+          :title="__('Publish Flex Bar', 'top-bar')"
+        >
+        </button>
+        <button
+          type="button"
           class="top-bar-icons mask black arrow-down top-bar-toggle-options"
           :aria-expanded="isExpanded"
           @click="toggleExpanded"
@@ -41,7 +70,7 @@
     </div>
 
     <!-- Preview (sticky within this bar row) -->
-    <div class="top-bar-grid line-bottom top-bar-admin-preview-row">
+    <div class="top-bar-grid top-bar-admin-preview-row">
       <div class="item">
         <p class="bold lg">Preview</p>
         <div class="top-bar-admin-preview">
@@ -86,7 +115,7 @@
           </p>
         </div>
         <div
-          class="item title-with-action__btn"
+          class="item title-with-action__btn right"
           style="flex: 0 0 auto; min-width: min(100%, 11rem); border-left: none !important; padding-left: 0 !important;"
         >
           <button
@@ -208,7 +237,7 @@
               <button
                 v-if="localBar.columns.length > 1"
                 type="button"
-                class="top-bar-btn top-bar-icons  delete mask black remove empty"
+                class="top-bar-btn top-bar-icons delete mask black remove empty"
                 :title="__('Remove column', 'top-bar')"
                 @click="removeColumn(columnIndex)"
               >

@@ -12,19 +12,21 @@
         <span></span>
         <div class="item icons">
         <span
-            v-for="platform in SOCIAL_PLATFORMS"
-            :key="platform"
-            class="top-bar-icons social-media"
-            :class="{
-              circle: opt.value === 'rounded',
-              square: opt.value === 'square',
-              'no-mask': opt.value === 'color',
-              'mask black': opt.value === 'black',
-              'mask white': opt.value === 'white',
-              [platform === 'twitterX' ? 'twitterX' : platform]: true
-            }"
-            :title="platformLabel(platform)"
-          ></span>
+          v-for="platform in SOCIAL_PLATFORMS"
+          :key="platform"
+          class="top-bar-icons social-media"
+          :class="{
+            circle: opt.value === 'rounded',
+            square: opt.value === 'square',
+            'no-mask': opt.value === 'color',
+            'mask black': opt.value === 'black',
+            'mask white': opt.value === 'white',
+            color: platformLabel(platform) === 'Instagram' && opt.value === 'color',
+            monochrome: platformLabel(platform) === 'Instagram' && (opt.value === 'black' || opt.value === 'white' || opt.value === 'rounded' || opt.value === 'square'),
+
+            [platform === 'twitterX' ? 'twitterX' : platform]: true
+          }"
+          :title="platformLabel(platform)"></span>
         </div>
       </label>
     </fieldset>
@@ -45,6 +47,33 @@
       <div class="item">
         <fieldset class="line">
           <legend class="bold">{{ __('Color icon', 'top-bar') }}</legend>
+          <input
+            :id="`social_icon_${barId}_${columnId}`"
+            type="color"
+            :value="column.icon_color"
+            @input="onIconColorInput"
+            @blur="emit('commit')"
+          />
+        </fieldset>
+      </div>
+      <div class="item">
+        <fieldset class="line vertical">
+          <legend class="bold">{{ __('Border size & Color', 'top-bar') }}</legend>
+          <select
+            :value="0"            
+          >
+            <option :value="0">0px</option>
+            <option :value="1">1px</option>
+            <option :value="2">2px</option>
+            <option :value="3">3px</option>
+            <option :value="4">4px</option>
+            <option :value="5">5px</option>
+            <option :value="6">6px</option>
+            <option :value="7">7px</option>
+            <option :value="8">8px</option>
+            <option :value="9">9px</option>
+            <option :value="10">10</option>
+          </select>
           <input
             :id="`social_icon_${barId}_${columnId}`"
             type="color"

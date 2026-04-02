@@ -1,3 +1,11 @@
+<!-- TODO 
+- Ikona instagrama:
+Trzeba podmienic style:
+Gdy ikona jest color ma wczytac z icons.ts sciezke instagramColor
+w innym przypadku instagramMono 
+
+-->
+
 <template>
   <div
     v-if="visibleBars.length > 0"
