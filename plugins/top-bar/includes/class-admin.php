@@ -77,13 +77,21 @@ final class Admin {
 
 
 	public function add_menu_page(): void {
+		$icon_svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none">'
+			. '<rect x="2" y="3" width="16" height="3" rx="1" fill="currentColor"/>'
+			. '<rect x="2" y="8" width="5" height="9" rx="1" fill="currentColor" opacity="0.85"/>'
+			. '<rect x="7.5" y="8" width="5" height="9" rx="1" fill="currentColor" opacity="0.65"/>'
+			. '<rect x="13" y="8" width="5" height="9" rx="1" fill="currentColor" opacity="0.45"/>'
+			. '</svg>';
+		$icon_url = 'data:image/svg+xml;base64,' . base64_encode( $icon_svg );
+
 		$this->hook_suffix = (string) add_menu_page(
 			__( 'Flex Top Bar', 'top-bar' ),
 			__( 'Flex Top Bar', 'top-bar' ),
 			'manage_options',
 			'flex-top-bar',
 			[ $this, 'render_settings_page' ],
-			'dashicons-megaphone'
+			$icon_url
 		);
 	}
 
