@@ -1,9 +1,20 @@
+<!-- TOOD 
+- Dodac przycisk publish (dodalem do belki button + ikona)
+
+// Do przemyslenia
+- Dodac tooltipy do buttonow
+- Gdy ustawie dwa TopBary w pozycji TOP, jeden nachodzi na drugi. dobrze by bylo aby jeden byl pod drugim itp. To samo w pozycji bottom
+- Moze dodac opcje: zamykania recznego lub po czasie dla danego TopBar ? Wtedy jeden mozna zrobic statycznie, drugi pod spodem znikal by po np 30sek 
+
+-->
+
+
 <template>
   <div class="top-bar-row bg">
     <!-- Navigation -->
     <div class="top-bar-nav">
       <div class="item name">
-        <p class="lg bold">{{ bar.name || __('Top Bar', 'top-bar') }}</p>
+        <p class="lg bold">{{ bar.name || __('Flex Top Bar', 'top-bar') }}</p>
       </div>
 
       <div class="item nav">
@@ -32,6 +43,13 @@
         </button>
         <button
           type="button"
+          class="top-bar-icons mask black publish"
+          disabled
+          :title="__('Publish Flex Bar', 'top-bar')"
+        >
+        </button>
+        <button
+          type="button"
           class="top-bar-icons mask black arrow-down top-bar-toggle-options"
           :aria-expanded="isExpanded"
           @click="toggleExpanded"
@@ -41,7 +59,7 @@
     </div>
 
     <!-- Preview (sticky within this bar row) -->
-    <div class="top-bar-grid line-bottom top-bar-admin-preview-row">
+    <div class="top-bar-grid top-bar-admin-preview-row">
       <div class="item">
         <p class="bold lg">Preview</p>
         <div class="top-bar-admin-preview">
@@ -86,7 +104,7 @@
           </p>
         </div>
         <div
-          class="item title-with-action__btn"
+          class="item title-with-action__btn right"
           style="flex: 0 0 auto; min-width: min(100%, 11rem); border-left: none !important; padding-left: 0 !important;"
         >
           <button
@@ -208,7 +226,7 @@
               <button
                 v-if="localBar.columns.length > 1"
                 type="button"
-                class="top-bar-btn top-bar-icons  delete mask black remove empty"
+                class="top-bar-btn top-bar-icons delete mask black remove empty"
                 :title="__('Remove column', 'top-bar')"
                 @click="removeColumn(columnIndex)"
               >
@@ -293,6 +311,8 @@ function defaultColumnForType(
       icon_style: 'rounded',
       background_color: '#ffffff',
       icon_color: '#1d2327',
+      icon_border_width: 0,
+      icon_border_color: '#1d2327',
       links: [{ platform: '', url: '' }],
       size_percent: sizePercent,
       content_position: 'center',
@@ -305,6 +325,8 @@ function defaultColumnForType(
     icon_style: 'rounded',
     background_color: '#ffffff',
     icon_color: '#1d2327',
+    icon_border_width: 0,
+    icon_border_color: '#1d2327',
     contacts: [{ kind: '', value: '' }],
     size_percent: sizePercent,
     content_position: 'center',

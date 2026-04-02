@@ -32,6 +32,17 @@ describe('TextColumnEditor', () => {
     const wrapper = mount(TextColumnEditor, { props: defaultProps })
 
     const textareas = wrapper.findAll('textarea')
+    // When effect is "none", UI is a static single text field.
+    expect(textareas).toHaveLength(1)
+    expect(textareas[0].element.value).toBe('Hello')
+  })
+
+  it('renders all textareas when effect is not none', () => {
+    const wrapper = mount(TextColumnEditor, {
+      props: { ...defaultProps, effect: 'slider' },
+    })
+
+    const textareas = wrapper.findAll('textarea')
     expect(textareas).toHaveLength(2)
     expect(textareas[0].element.value).toBe('Hello')
     expect(textareas[1].element.value).toBe('World')
@@ -67,7 +78,9 @@ describe('TextColumnEditor', () => {
   })
 
   it('emits update with extended messages when add is clicked', async () => {
-    const wrapper = mount(TextColumnEditor, { props: defaultProps })
+    const wrapper = mount(TextColumnEditor, {
+      props: { ...defaultProps, effect: 'slider' },
+    })
 
     await wrapper.find('.top-bar-btn.amber.sm.right').trigger('click')
 
@@ -80,6 +93,7 @@ describe('TextColumnEditor', () => {
     const wrapper = mount(TextColumnEditor, {
       props: {
         ...defaultProps,
+        effect: 'slider',
         messages: ['1', '2', '3', '4'],
         maxMessages: 4,
       },
@@ -89,7 +103,9 @@ describe('TextColumnEditor', () => {
   })
 
   it('emits update to remove message when X is clicked on index > 0', async () => {
-    const wrapper = mount(TextColumnEditor, { props: defaultProps })
+    const wrapper = mount(TextColumnEditor, {
+      props: { ...defaultProps, effect: 'slider' },
+    })
 
     const removeButtons = wrapper.findAll(
       '.top-bar-message-list button.top-bar-btn.top-bar-icons.delete.remove.empty'
@@ -104,10 +120,21 @@ describe('TextColumnEditor', () => {
     const wrapper = mount(TextColumnEditor, {
       props: {
         ...defaultProps,
+        effect: 'slider',
         messages: ['Only'],
       },
     })
 
+    const removeButtons = wrapper.findAll(
+      '.top-bar-message-list button.top-bar-btn.top-bar-icons.delete.remove.empty'
+    )
+    expect(removeButtons).toHaveLength(0)
+  })
+
+  it('does not render add/remove controls when effect is none', () => {
+    const wrapper = mount(TextColumnEditor, { props: defaultProps })
+
+    expect(wrapper.find('.top-bar-btn.amber.sm.right').exists()).toBe(false)
     const removeButtons = wrapper.findAll(
       '.top-bar-message-list button.top-bar-btn.top-bar-icons.delete.remove.empty'
     )

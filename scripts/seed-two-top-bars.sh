@@ -26,6 +26,8 @@ $bars = [
 				"icon_style" => "rounded",
 				"background_color" => "#ffffff",
 				"icon_color" => "#ff0000",
+				"icon_border_width" => 0,
+				"icon_border_color" => "#1d2327",
 				"links" => [
 					[
 						"platform" => "youtube",
@@ -79,6 +81,26 @@ $bars = [
 				"icon_style" => "color",
 				"background_color" => "#ffffff",
 				"icon_color" => "#ff0000",
+				"icon_border_width" => 4,
+				"icon_border_color" => "#ff4500",
+				"links" => [
+					[
+						"platform" => "spotify",
+						"url" => "https://www.spotify.com/",
+					],
+				],
+				"size_percent" => 10,
+				"content_position" => "right",
+				"messages_mobile_visible" => true,
+			],
+			[
+				"id" => "image_1",
+				"type" => "social",
+				"icon_style" => "rounded",
+				"background_color" => "#ffffff",
+				"icon_color" => "#ff0000",
+				"icon_border_width" => 4,
+				"icon_border_color" => "#ff4500",
 				"links" => [
 					[
 						"platform" => "facebook",
@@ -99,11 +121,13 @@ $bars = [
 				"messages_mobile_visible" => false,
 			],
 				[
-				"id" => "image_1",
+				"id" => "image_2",
 				"type" => "social",
 				"icon_style" => "white",
 				"background_color" => "#ffffff",
 				"icon_color" => "#ff0000",
+				"icon_border_width" => 0,
+				"icon_border_color" => "#1d2327",
 				"links" => [
 					[
 						"platform" => "apple",

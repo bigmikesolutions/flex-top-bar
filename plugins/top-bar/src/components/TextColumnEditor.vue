@@ -20,8 +20,8 @@
 
       <div class="top-bar-message-list">
         <div
-          v-for="(_message, index) in messages"
-          :key="`${index}-${messages[index]}`"
+          v-for="(_message, index) in effect === 'none' ? messages.slice(0, 1) : messages"
+          :key="index"
           class="top-bar-column-creator-grid"
           draggable="true"
           :data-dragging="draggingIndex === index ? 'true' : 'false'"
@@ -46,7 +46,7 @@
           </div>
           <div class="item-creator center">
             <button
-              v-if="messages.length > 1"
+              v-if="effect !== 'none' && messages.length > 1"
               type="button"
               class="top-bar-btn top-bar-icons delete mask black remove empty"
               @click="removeMessage(index)"
@@ -60,7 +60,7 @@
 
     <div class="top-bar-row rt">
       <button
-        v-if="messages.length < maxMessages"
+        v-if="effect !== 'none' && messages.length < maxMessages"
         type="button"
         class="top-bar-btn amber sm right"
         @click="addMessage"

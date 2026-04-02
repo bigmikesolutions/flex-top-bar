@@ -15,14 +15,22 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 final class Admin {
 
+	/**
+	 * Hook suffix returned by add_menu_page().
+	 *
+	 * @var string
+	 */
+	private string $hook_suffix = '';
+
 	public function __construct() {
-		add_action( 'admin_menu', [ $this, 'add_settings_page' ] );
+		add_action( 'admin_menu', [ $this, 'add_menu_page' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_vue_app' ] );
 		add_filter( 'script_loader_tag', [ $this, 'add_module_type_to_script' ], 10, 3 );
 	}
 
 	public function enqueue_vue_app( string $hook ): void {
-		if ( $hook !== 'settings_page_top-bar' ) {
+		// Use the actual hook suffix returned by add_menu_page() to avoid mismatches.
+		if ( $this->hook_suffix === '' || $hook !== $this->hook_suffix ) {
 			return;
 		}
 
@@ -55,6 +63,7 @@ final class Admin {
 				[
 					'apiRoot' => esc_url_raw( rest_url( 'top-bar/v1' ) ),
 					'nonce'   => wp_create_nonce( 'wp_rest' ),
+					'version' => defined( 'TOP_BAR_VERSION' ) ? TOP_BAR_VERSION : '',
 					'i18n'    => [
 						'welcome'     => __( 'Welcome to Top Bar plugin', 'top-bar' ),
 						'addNew'      => __( 'Add new Top Bar', 'top-bar' ),
@@ -67,13 +76,22 @@ final class Admin {
 	}
 
 
-	public function add_settings_page(): void {
-		add_options_page(
-			__( 'Top Bar', 'top-bar' ),
-			__( 'Top Bar', 'top-bar' ),
+	public function add_menu_page(): void {
+		$icon_svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none">'
+			. '<rect x="2" y="3" width="16" height="3" rx="1" fill="currentColor"/>'
+			. '<rect x="2" y="8" width="5" height="9" rx="1" fill="currentColor" opacity="0.85"/>'
+			. '<rect x="7.5" y="8" width="5" height="9" rx="1" fill="currentColor" opacity="0.65"/>'
+			. '<rect x="13" y="8" width="5" height="9" rx="1" fill="currentColor" opacity="0.45"/>'
+			. '</svg>';
+		$icon_url = 'data:image/svg+xml;base64,' . base64_encode( $icon_svg );
+
+		$this->hook_suffix = (string) add_menu_page(
+			__( 'Flex Top Bar', 'top-bar' ),
+			__( 'Flex Top Bar', 'top-bar' ),
 			'manage_options',
-			'top-bar',
-			[ $this, 'render_settings_page' ]
+			'flex-top-bar',
+			[ $this, 'render_settings_page' ],
+			$icon_url
 		);
 	}
 

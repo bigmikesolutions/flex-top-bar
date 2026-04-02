@@ -1,6 +1,9 @@
 <template>
   <div id="top-bar" class="wrap">
-    <h1>{{ __('Top Bar', 'top-bar') }}</h1>
+    <h1 class="top-bar-admin-title">
+      {{ __('Flex Top Bar', 'top-bar') }}
+      <span v-if="pluginVersion" class="top-bar-admin-version">v{{ pluginVersion }}</span>
+    </h1>
 
     <!-- Loading state -->
     <div v-if="isLoading" class="notice notice-info">
@@ -87,6 +90,7 @@ const flagsStore = useFeatureFlagsStore()
 
 const isAdding = ref(false)
 const showMaxBarsWarning = ref(false)
+const pluginVersion = (window.topBarConfig?.version || '').trim()
 
 const bars = computed(() => barsStore.bars)
 const isLoading = computed(() => barsStore.loading || flagsStore.loading)
@@ -135,3 +139,17 @@ async function handleDeleteBar(id: string) {
   }
 }
 </script>
+
+<style scoped>
+.top-bar-admin-title {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.top-bar-admin-version {
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0.7;
+}
+</style>

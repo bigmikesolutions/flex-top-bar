@@ -55,6 +55,35 @@
           />
         </fieldset>
       </div>
+      <div class="item">
+        <fieldset class="line vertical">
+          <legend class="bold">{{ __('Border size & Color', 'top-bar') }}</legend>
+          <select
+            :id="`contact_icon_border_width_${barId}_${columnId}`"
+            :value="column.icon_border_width"
+            @change="onBorderWidthChange"
+          >
+            <option :value="0">0px</option>
+            <option :value="1">1px</option>
+            <option :value="2">2px</option>
+            <option :value="3">3px</option>
+            <option :value="4">4px</option>
+            <option :value="5">5px</option>
+            <option :value="6">6px</option>
+            <option :value="7">7px</option>
+            <option :value="8">8px</option>
+            <option :value="9">9px</option>
+            <option :value="10">10</option>
+          </select>
+          <input
+            :id="`contact_icon_border_color_${barId}_${columnId}`"
+            type="color"
+            :value="column.icon_border_color"
+            @input="onBorderColorInput"
+            @blur="emit('commit')"
+          />
+        </fieldset>
+      </div>
     </div>
 
     <fieldset class="line">
@@ -139,7 +168,7 @@ const emit = defineEmits<{
   commit: []
 }>()
 
-const iconStyleOptions = getIconStyleOptions(__)
+const iconStyleOptions = getIconStyleOptions(__).filter((o) => o.value !== 'color')
 
 function kindLabel(k: ContactKind): string {
   const labels: Record<ContactKind, string> = {
@@ -165,6 +194,16 @@ function onBgInput(e: Event) {
 
 function onIconColorInput(e: Event) {
   emit('patch', { icon_color: (e.target as HTMLInputElement).value })
+}
+
+function onBorderWidthChange(e: Event) {
+  const next = Number.parseInt((e.target as HTMLSelectElement).value, 10)
+  emit('patch', { icon_border_width: Number.isFinite(next) ? next : 0 })
+  emit('commit')
+}
+
+function onBorderColorInput(e: Event) {
+  emit('patch', { icon_border_color: (e.target as HTMLInputElement).value })
 }
 
 function onKindChange(index: number, e: Event) {

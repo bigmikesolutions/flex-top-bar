@@ -32,6 +32,7 @@
               v-model="model.scheduled_from_datetime"
               type="datetime-local"
               class="top-bar-life-time-datetime"
+              @click="openPicker"
               @blur="emit('save')"
             />
           </label>
@@ -46,6 +47,7 @@
               v-model="model.scheduled_to_datetime"
               type="datetime-local"
               class="top-bar-life-time-datetime"
+              @click="openPicker"
               @blur="emit('save')"
             />
           </label>
@@ -68,4 +70,10 @@ const model = defineModel<Bar>({ required: true })
 const emit = defineEmits<{
   save: []
 }>()
+
+function openPicker(e: Event) {
+  const input = e.target as HTMLInputElement
+  // Improves UX in browsers that require clicking the calendar icon.
+  input.showPicker?.()
+}
 </script>

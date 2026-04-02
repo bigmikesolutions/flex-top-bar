@@ -51,8 +51,9 @@ describe('AdminBarView', () => {
   function barWithColumnMessages(messages: string[]): Bar {
     return {
       ...mockBar,
+      effect: 'slider',
       messages,
-      columns: [{ ...mockColumn, messages }],
+      columns: [{ ...mockColumn, effect: 'slider', messages }],
     }
   }
 
@@ -316,7 +317,9 @@ describe('AdminBarView', () => {
 
   describe('messages', () => {
     it('renders all messages', () => {
-      const wrapper = mount(AdminBarView, { props: defaultProps })
+      const wrapper = mount(AdminBarView, {
+        props: { ...defaultProps, bar: barWithColumnMessages(['Hello', 'World']) },
+      })
       const textareas = wrapper.findAll('textarea')
 
       expect(textareas).toHaveLength(2)

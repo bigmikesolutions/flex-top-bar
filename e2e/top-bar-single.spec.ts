@@ -243,6 +243,14 @@ test.describe('single-bar', () => {
       await ensureAtLeastBars(page, 1);
       await openPanel(page, 0);
 
+      // "Add new text" is only available when effect is not "none".
+      const effectSelect = page.locator('select').filter({
+        has: page.locator('option[value="slider"]'),
+      }).first();
+      const effectSave = waitForTopBarPut(page);
+      await effectSelect.selectOption('slider');
+      await effectSave;
+
       const messageList = page.locator('.top-bar-message-list').first();
       const addTextButton = page.getByRole('button', { name: 'Add new text' }).first();
       const beforeCount = await messageList.locator('.top-bar-column-creator-grid').count();
@@ -261,6 +269,14 @@ test.describe('single-bar', () => {
       await resetToSingleBar(page);
       await ensureAtLeastBars(page, 1);
       await openPanel(page, 0);
+
+      // "Add new text" is only available when effect is not "none".
+      const effectSelect = page.locator('select').filter({
+        has: page.locator('option[value="slider"]'),
+      }).first();
+      const effectSave = waitForTopBarPut(page);
+      await effectSelect.selectOption('slider');
+      await effectSave;
 
       const messageList = page.locator('.top-bar-message-list').first();
       const addTextButton = page.getByRole('button', { name: 'Add new text' }).first();
@@ -325,16 +341,17 @@ test.describe('single-bar', () => {
       const messageList = barRow.locator('.top-bar-message-list').first();
       const addTextButton = page.getByRole('button', { name: 'Add new text' }).first();
 
+      // Ensure UI allows multi-message editing (Add button is hidden for effect "none").
+      const preSave = waitForTopBarPut(page);
+      await effectSelect.selectOption('slider');
+      await preSave;
+
       while ((await messageList.locator('.top-bar-column-creator-grid').count()) < 2) {
         const addLoopSave = waitForTopBarPut(page);
         await addTextButton.click();
         await addLoopSave;
         await openPanel(page, 0);
       }
-
-      const effectSave = waitForTopBarPut(page);
-      await effectSelect.selectOption(effect);
-      await effectSave;
 
       const textareas = barRow.locator('.top-bar-message-list textarea');
       await textareas.nth(0).fill(firstMessage);
@@ -346,6 +363,11 @@ test.describe('single-bar', () => {
       const msg1Save = waitForTopBarPut(page);
       await textareas.nth(1).blur();
       await msg1Save;
+
+      // Apply requested effect after messages are configured.
+      const effectSave = waitForTopBarPut(page);
+      await effectSelect.selectOption(effect);
+      await effectSave;
 
       return id0;
     }

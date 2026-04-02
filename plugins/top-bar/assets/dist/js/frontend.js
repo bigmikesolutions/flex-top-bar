@@ -1,1 +1,1 @@
-import{r as e,t}from"./TopBarView-Bzu4URLa.js";function n(){let n=document.getElementById(`top-bar-frontend-mount`);n&&e(t).mount(n)}document.readyState===`loading`?document.addEventListener(`DOMContentLoaded`,n):n();
+import{r as e,t}from"./TopBarView-79uY6Iw8.js";function n(){let n=document.getElementById(`top-bar-frontend-mount`);n&&e(t).mount(n)}document.readyState===`loading`?document.addEventListener(`DOMContentLoaded`,n):n();
