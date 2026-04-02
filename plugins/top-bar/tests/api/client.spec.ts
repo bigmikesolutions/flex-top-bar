@@ -94,6 +94,51 @@ describe('ApiClient', () => {
     })
   })
 
+  describe('getPublishedBars', () => {
+    it('fetches published bars from API', async () => {
+      const mockBars: Bar[] = []
+      vi.mocked(fetch).mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockBars,
+      } as Response)
+
+      const result = await api.getPublishedBars()
+
+      expect(fetch).toHaveBeenCalledWith(
+        '/wp-json/top-bar/v1/published-bars',
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            'Content-Type': 'application/json',
+          }),
+        })
+      )
+      expect(result).toEqual(mockBars)
+    })
+  })
+
+  describe('publish', () => {
+    it('posts publish request', async () => {
+      const published: Bar[] = []
+      vi.mocked(fetch).mockResolvedValueOnce({
+        ok: true,
+        json: async () => published,
+      } as Response)
+
+      const result = await api.publish()
+
+      expect(fetch).toHaveBeenCalledWith(
+        '/wp-json/top-bar/v1/publish',
+        expect.objectContaining({
+          method: 'POST',
+          headers: expect.objectContaining({
+            'Content-Type': 'application/json',
+          }),
+        })
+      )
+      expect(result).toEqual(published)
+    })
+  })
+
   describe('createBar', () => {
     it('creates a new bar', async () => {
       const newBar: Partial<Bar> = {

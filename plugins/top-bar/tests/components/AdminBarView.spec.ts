@@ -42,6 +42,7 @@ describe('AdminBarView', () => {
 
   const defaultProps = {
     bar: mockBar,
+    publishedBar: mockBar,
     canDelete: true,
     maxMessages: 4,
     maxColumns: 4,
@@ -97,7 +98,7 @@ describe('AdminBarView', () => {
           bar: { ...mockBar, name: '' },
         },
       })
-      expect(wrapper.text()).toContain('Top Bar')
+      expect(wrapper.text()).toContain('Flex Top Bar')
     })
 
     it('renders expanded by default when admin_visibile is true', () => {
@@ -113,6 +114,30 @@ describe('AdminBarView', () => {
         },
       })
       expect(wrapper.find('.top-bar-options').classes()).not.toContain('active')
+    })
+  })
+
+  describe('publish', () => {
+    it('emits publish when publish button is clicked', async () => {
+      // confirm() is used by the component in the browser.
+      vi.stubGlobal('confirm', () => true)
+      const wrapper = mount(AdminBarView, { props: defaultProps })
+      const btn = wrapper.find('button.top-bar-icons.publish')
+      expect(btn.exists()).toBe(true)
+      await btn.trigger('click')
+      expect(wrapper.emitted('publish')).toBeTruthy()
+    })
+
+    it('adds dirty class when draft differs from published', () => {
+      const wrapper = mount(AdminBarView, {
+        props: {
+          ...defaultProps,
+          bar: { ...mockBar, bg_color: '#111111' },
+          publishedBar: { ...mockBar, bg_color: '#222222' },
+        },
+      })
+      const btn = wrapper.find('button.top-bar-icons.publish')
+      expect(btn.classes()).toContain('top-bar-publish--dirty')
     })
   })
 
