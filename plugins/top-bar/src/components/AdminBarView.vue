@@ -1,6 +1,4 @@
 <!-- TOOD 
-- Dodac przycisk publish (dodalem do belki button + ikona)
-
 // Do przemyslenia
 - Dodac tooltipy do buttonow
 - Gdy ustawie dwa TopBary w pozycji TOP, jeden nachodzi na drugi. dobrze by bylo aby jeden byl pod drugim itp. To samo w pozycji bottom
