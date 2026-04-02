@@ -101,6 +101,17 @@ final class API {
 			]
 		);
 
+		// Publish a single bar (draft -> published).
+		register_rest_route(
+			self::NAMESPACE,
+			'/bars/(?P<id>[a-z0-9_]+)/publish',
+			[
+				'methods'             => 'POST',
+				'callback'            => [ $this, 'publish_bar' ],
+				'permission_callback' => [ $this, 'check_permissions' ],
+			]
+		);
+
 		// Get feature flags
 		register_rest_route(
 			self::NAMESPACE,
@@ -224,6 +235,18 @@ final class API {
 	public function publish( \WP_REST_Request $request ): \WP_REST_Response {
 		$published = Options::publish_draft_to_published();
 		return new \WP_REST_Response( $published, 200 );
+	}
+
+	public function publish_bar( \WP_REST_Request $request ): \WP_REST_Response {
+		$id = (string) $request->get_param( 'id' );
+		$bar = Options::publish_bar( $id );
+		if ( ! is_array( $bar ) ) {
+			return new \WP_REST_Response(
+				[ 'error' => __( 'Bar not found', 'top-bar' ) ],
+				404
+			);
+		}
+		return new \WP_REST_Response( $bar, 200 );
 	}
 
 	public function get_feature_flags( \WP_REST_Request $request ): \WP_REST_Response {

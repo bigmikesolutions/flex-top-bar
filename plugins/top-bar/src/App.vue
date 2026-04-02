@@ -148,11 +148,9 @@ async function handleDeleteBar(id: string) {
   }
 }
 
-async function handlePublish() {
+async function handlePublish(id: string) {
   try {
-    await barsStore.publish()
-    // Refresh draft + published state so "dirty" indicators reset.
-    await barsStore.fetchBars()
+    await barsStore.publishBar(id)
   } catch (error) {
     console.error('Failed to publish:', error)
   }

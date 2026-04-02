@@ -434,7 +434,7 @@ function onDragEnd() {
 const emit = defineEmits<{
   update: [id: string, updates: Partial<Bar>]
   delete: [id: string]
-  publish: []
+  publish: [id: string]
 }>()
 
 const localBar = ref<Bar>(withColumns(cloneBar(props.bar)))
@@ -614,7 +614,7 @@ async function handlePublish() {
   if (!confirm(__('Publish changes to frontend?', 'top-bar'))) {
     return
   }
-  emit('publish')
+  emit('publish', props.bar.id)
 }
 </script>
 

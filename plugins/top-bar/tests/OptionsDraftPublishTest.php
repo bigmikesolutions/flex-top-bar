@@ -7,6 +7,7 @@
 declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
+use TopBar\FeatureFlags;
 use TopBar\Options;
 
 require_once __DIR__ . '/bootstrap.php';
@@ -16,6 +17,10 @@ final class OptionsDraftPublishTest extends TestCase {
 	protected function setUp(): void {
 		parent::setUp();
 		$GLOBALS['wp_test_options'] = [];
+		if ( ! defined( 'FF_MAX_BARS' ) ) {
+			define( 'FF_MAX_BARS', 5 );
+		}
+		FeatureFlags::reset_for_tests();
 	}
 
 	public function test_get_bars_initializes_draft_from_published_and_seeds_published_if_missing(): void {
@@ -43,6 +48,36 @@ final class OptionsDraftPublishTest extends TestCase {
 
 		$published2 = Options::get_published_bars();
 		$this->assertSame( '#ff0000', $published2[0]['bg_color'] );
+	}
+
+	public function test_publish_bar_only_updates_that_bar(): void {
+		$draft = Options::get_bars();
+		$bar0_id = (string) ( $draft[0]['id'] ?? '' );
+
+		// Create a second bar in both draft + published.
+		$bar2 = Options::default_bar();
+		$bar2['id'] = 'bar_two';
+		$bar2['bg_color'] = '#00ff00';
+		update_option( Options::OPTION_BARS, [ $draft[0], $bar2 ] );
+		update_option( Options::OPTION_BARS_DRAFT, [ $draft[0], $bar2 ] );
+
+		// Change draft for bar0 only.
+		$draft2 = Options::get_bars();
+		$draft2[0]['bg_color'] = '#abcdef';
+		$draft2[1] = $bar2;
+		update_option( Options::OPTION_BARS_DRAFT, $draft2 );
+
+		$published_before = Options::get_published_bars();
+		$this->assertSame( '#00ff00', $published_before[1]['bg_color'] );
+
+		$published_bar = Options::publish_bar( $bar0_id );
+		$this->assertNotNull( $published_bar );
+		$this->assertSame( '#abcdef', $published_bar['bg_color'] );
+
+		$published_after = Options::get_published_bars();
+		$this->assertSame( '#abcdef', $published_after[0]['bg_color'] );
+		// Second bar should remain unchanged.
+		$this->assertSame( '#00ff00', $published_after[1]['bg_color'] );
 	}
 
 	public function test_get_active_bars_uses_published_not_draft(): void {

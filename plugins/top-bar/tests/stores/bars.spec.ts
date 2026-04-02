@@ -12,6 +12,7 @@ vi.mock('@/api/client', () => ({
     updateBar: vi.fn(),
     deleteBar: vi.fn(),
     publish: vi.fn(),
+    publishBar: vi.fn(),
   },
 }))
 
@@ -146,6 +147,25 @@ describe('useBarsStore', () => {
       vi.mocked(api.publish).mockRejectedValueOnce(new Error('Publish failed'))
       const store = useBarsStore()
       await expect(store.publish()).rejects.toThrow('Publish failed')
+      expect(store.error).toBe('Publish failed')
+      consoleError.mockRestore()
+    })
+  })
+
+  describe('publishBar', () => {
+    it('calls api.publishBar with id', async () => {
+      vi.mocked(api.publishBar).mockResolvedValueOnce(mockBar)
+      const store = useBarsStore()
+      await store.publishBar('bar_1')
+      expect(api.publishBar).toHaveBeenCalledWith('bar_1')
+      expect(store.publishedBars).toEqual([mockBar])
+    })
+
+    it('sets error on publishBar failure', async () => {
+      const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+      vi.mocked(api.publishBar).mockRejectedValueOnce(new Error('Publish failed'))
+      const store = useBarsStore()
+      await expect(store.publishBar('bar_1')).rejects.toThrow('Publish failed')
       expect(store.error).toBe('Publish failed')
       consoleError.mockRestore()
     })

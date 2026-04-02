@@ -126,6 +126,7 @@ describe('AdminBarView', () => {
       expect(btn.exists()).toBe(true)
       await btn.trigger('click')
       expect(wrapper.emitted('publish')).toBeTruthy()
+      expect(wrapper.emitted('publish')?.[0]).toEqual(['bar_1'])
     })
 
     it('adds dirty class when draft differs from published', () => {

@@ -128,6 +128,45 @@ final class Options {
 	}
 
 	/**
+	 * Publish a single bar from draft into published.
+	 *
+	 * @return array<string, mixed>|null The published bar, or null when not found in draft.
+	 */
+	public static function publish_bar( string $bar_id ): ?array {
+		self::ensure_draft_initialized();
+
+		$draft = self::get_bars();
+		$draft_bar = null;
+		foreach ( $draft as $b ) {
+			if ( is_array( $b ) && ( $b['id'] ?? '' ) === $bar_id ) {
+				$draft_bar = $b;
+				break;
+			}
+		}
+		if ( ! is_array( $draft_bar ) ) {
+			return null;
+		}
+
+		$published = self::get_published_bars();
+		$found = false;
+		foreach ( $published as $idx => $b ) {
+			if ( is_array( $b ) && ( $b['id'] ?? '' ) === $bar_id ) {
+				$published[ $idx ] = $draft_bar;
+				$found = true;
+				break;
+			}
+		}
+		if ( ! $found ) {
+			$published[] = $draft_bar;
+		}
+
+		$published = array_values( array_slice( $published, 0, FeatureFlags::instance()->max_bars() ) );
+		update_option( self::OPTION_BARS, $published );
+
+		return self::normalize_bar( $draft_bar );
+	}
+
+	/**
 	 * If draft bars don't exist yet, seed them from published bars.
 	 */
 	private static function ensure_draft_initialized(): void {

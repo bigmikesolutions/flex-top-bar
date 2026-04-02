@@ -98,6 +98,28 @@ export const useBarsStore = defineStore('bars', () => {
     }
   }
 
+  async function publishBar(id: string) {
+    loading.value = true
+    error.value = null
+    try {
+      const published = await api.publishBar(id)
+      const idx = publishedBars.value.findIndex((b) => b.id === id)
+      if (idx === -1) {
+        publishedBars.value = [...publishedBars.value, published]
+      } else {
+        const next = [...publishedBars.value]
+        next[idx] = published
+        publishedBars.value = next
+      }
+    } catch (e) {
+      error.value = e instanceof Error ? e.message : 'Failed to publish'
+      console.error('Failed to publish:', e)
+      throw e
+    } finally {
+      loading.value = false
+    }
+  }
+
   function clearError() {
     error.value = null
   }
@@ -117,6 +139,7 @@ export const useBarsStore = defineStore('bars', () => {
     updateBar,
     deleteBar,
     publish,
+    publishBar,
     clearError,
   }
 })
