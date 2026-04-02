@@ -1,7 +1,4 @@
 <!-- TOOD 
-- DODAC plugin do stylizacji Select 
-
-- Wyciagnac nazwe pluginu z Settings do glownych menu
 - Zmienic nazwe pluginu
 - Dodac przycisk publish (dodalem do belki button + ikona)
 - Dodac do opcji ikon (border i border color) border size -> dodalem takie pola

@@ -15,14 +15,22 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 final class Admin {
 
+	/**
+	 * Hook suffix returned by add_menu_page().
+	 *
+	 * @var string
+	 */
+	private string $hook_suffix = '';
+
 	public function __construct() {
-		add_action( 'admin_menu', [ $this, 'add_settings_page' ] );
+		add_action( 'admin_menu', [ $this, 'add_menu_page' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_vue_app' ] );
 		add_filter( 'script_loader_tag', [ $this, 'add_module_type_to_script' ], 10, 3 );
 	}
 
 	public function enqueue_vue_app( string $hook ): void {
-		if ( $hook !== 'settings_page_top-bar' ) {
+		// Use the actual hook suffix returned by add_menu_page() to avoid mismatches.
+		if ( $this->hook_suffix === '' || $hook !== $this->hook_suffix ) {
 			return;
 		}
 
@@ -67,13 +75,14 @@ final class Admin {
 	}
 
 
-	public function add_settings_page(): void {
-		add_options_page(
+	public function add_menu_page(): void {
+		$this->hook_suffix = (string) add_menu_page(
 			__( 'Top Bar', 'top-bar' ),
 			__( 'Top Bar', 'top-bar' ),
 			'manage_options',
 			'top-bar',
-			[ $this, 'render_settings_page' ]
+			[ $this, 'render_settings_page' ],
+			'dashicons-megaphone'
 		);
 	}
 
