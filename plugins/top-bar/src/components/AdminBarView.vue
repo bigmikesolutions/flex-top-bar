@@ -42,7 +42,8 @@
         <button
           type="button"
           :class="['top-bar-icons mask black publish', { 'top-bar-publish--dirty': hasUnpublishedChanges }]"
-          :title="__('Publish Flex Bar', 'top-bar')"
+          :title="publishButtonTooltip"
+          :aria-label="publishButtonTooltip"
           @click="handlePublish"
         >
         </button>
@@ -457,6 +458,12 @@ const hasUnpublishedChanges = computed(() => {
     return false
   }
 })
+
+const publishButtonTooltip = computed(() =>
+  hasUnpublishedChanges.value
+    ? __('Pending changes ready to be published', 'top-bar')
+    : __('There are no changes to publish', 'top-bar'),
+)
 
 // Re-sync when the bar id or server column set changes (fetch, PUT response).
 watch(

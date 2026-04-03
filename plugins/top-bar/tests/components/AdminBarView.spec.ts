@@ -140,6 +140,26 @@ describe('AdminBarView', () => {
       const btn = wrapper.find('button.top-bar-icons.publish')
       expect(btn.classes()).toContain('top-bar-publish--dirty')
     })
+
+    it('shows pending-publish tooltip when draft differs from published', () => {
+      const wrapper = mount(AdminBarView, {
+        props: {
+          ...defaultProps,
+          bar: { ...mockBar, bg_color: '#111111' },
+          publishedBar: { ...mockBar, bg_color: '#222222' },
+        },
+      })
+      const btn = wrapper.find('button.top-bar-icons.publish')
+      expect(btn.attributes('title')).toBe('Pending changes ready to be published')
+      expect(btn.attributes('aria-label')).toBe('Pending changes ready to be published')
+    })
+
+    it('shows no-changes tooltip when draft matches published', () => {
+      const wrapper = mount(AdminBarView, { props: defaultProps })
+      const btn = wrapper.find('button.top-bar-icons.publish')
+      expect(btn.attributes('title')).toBe('There are no changes to publish')
+      expect(btn.attributes('aria-label')).toBe('There are no changes to publish')
+    })
   })
 
   describe('visibility toggle', () => {
