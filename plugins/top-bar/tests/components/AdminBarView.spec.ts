@@ -8,6 +8,13 @@ import type { Bar, BarColumn } from '@/types'
 // Mock @wordpress/i18n
 vi.mock('@wordpress/i18n', () => ({
   __: (text: string) => text,
+  sprintf: (format: string, ...args: unknown[]) => {
+    let s = format
+    args.forEach((arg, i) => {
+      s = s.replace(new RegExp(`%${i + 1}\\$d`, 'g'), String(arg))
+    })
+    return s
+  },
 }))
 
 describe('AdminBarView', () => {

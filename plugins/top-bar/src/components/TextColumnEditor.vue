@@ -63,6 +63,7 @@
         v-if="effect !== 'none' && messages.length < maxMessages"
         type="button"
         class="top-bar-btn amber sm right"
+        :title="addTextTooltip"
         @click="addMessage"
       >
         {{ __('Add new text', 'top-bar') }}
@@ -72,8 +73,8 @@
 </template>
 
 <script setup lang="ts">
-import { __ } from '@wordpress/i18n'
-import { ref } from 'vue'
+import { __, sprintf } from '@wordpress/i18n'
+import { computed, ref } from 'vue'
 import type { Bar, TextBarColumn } from '@/types'
 
 const props = defineProps<{
@@ -83,6 +84,24 @@ const props = defineProps<{
   messages: string[]
   maxMessages: number
 }>()
+
+const addTextTooltip = computed(() => {
+  const max = props.maxMessages
+  const remaining = Math.max(0, max - props.messages.length)
+  const lead = sprintf(
+    __(
+      'Your plan allows you to add yet %1$d more text field(s) out of %2$d.',
+      'top-bar',
+    ),
+    remaining,
+    max,
+  )
+  const tail = __(
+    'If you want to change limits, check other plans on the plugin page or contact us.',
+    'top-bar',
+  )
+  return `${lead} ${tail}`
+})
 
 const emit = defineEmits<{
   patch: [updates: Partial<Pick<TextBarColumn, 'messages'>>]
