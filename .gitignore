@@ -21,6 +21,9 @@ node_modules/
 test-results/
 .idea
 
+# Plugin release zips (npm run package:top-bar)
+/release/
+
 # Configuration
 wp-config.php
 .env

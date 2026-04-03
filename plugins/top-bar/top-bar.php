@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Flex Top Bar
  * Description: Displays a simple info bar at the top or bottom of the menu.
- * Version:     1.0.5
+ * Version:     0.1.0
  * Author:      Big Mike Solutions
  * License:     GPL-2.0-or-later
  * Text Domain: top-bar

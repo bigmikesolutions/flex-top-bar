@@ -1,5 +1,7 @@
 {
-  "name": "wordpress-top-bar-e2e",
+  "name": "wordpress-plugins",
+  "description": "WordPress plugins created by Big Mike Solutions.",
+  "author": "BigMikeSolutions",
   "private": true,
   "devDependencies": {
     "@playwright/test": "^1.55.0",
@@ -20,7 +22,8 @@
     "test:e2e:publish": "playwright test --workers=1 e2e/top-bar-publish.spec.ts",
     "test:e2e:headed": "playwright test --workers=1 --headed",
     "test:e2e:ui": "playwright test --workers=1 --ui",
-    "watch:styles": "npm run build -w plugins/top-bar -- --watch"
+    "watch:styles": "npm run build -w plugins/top-bar -- --watch",
+    "package:top-bar": "npm run package:zip -w plugins/top-bar"
   },
   "workspaces": [
     "plugins/top-bar"
