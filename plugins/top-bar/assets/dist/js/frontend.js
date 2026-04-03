@@ -1,1 +1,0 @@
-import{r as e,t}from"./TopBarView-CYvXwdlq.js";function n(){let n=document.getElementById(`top-bar-frontend-mount`);n&&e(t).mount(n)}document.readyState===`loading`?document.addEventListener(`DOMContentLoaded`,n):n();
