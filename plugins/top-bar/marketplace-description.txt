@@ -1,0 +1,58 @@
+================================================================================
+FLEX TOP BAR — COPY FOR WORDPRESS.ORG / FREEMIUS / PRODUCT PAGES
+(Paste sections as needed; trim lines starting with ===)
+================================================================================
+
+ONE-LINE PITCH (plugin directory summary)
+-----------------------------------------
+Stop losing attention above the fold. Flex Top Bar gives you a modern, visual editor, real-time preview, and pro layouts so every promo, link, and CTA actually gets seen.
+
+
+LONG DESCRIPTION (main listing body)
+------------------------------------
+
+Your site only gets one first impression — and most visitors decide in seconds. 
+Flex Top Bar turns that tiny strip of screen into your highest-converting asset: announcements, sales, trust signals, social proof, and contact paths, 
+all in a polished bar that looks like it was custom-built for your brand.
+
+Forget clunky forms and “save” marathons. The admin is a fast, beautiful experience with live preview: you see exactly what visitors will see as you work. 
+Changes save automatically, so you stay in flow and ship updates the moment inspiration strikes.
+
+BUILD BARS THAT WORK AS HARD AS YOU DO
+
+• Multiple bars — Run separate campaigns, audiences, or messages without hacking your theme.
+• Mix-and-match columns — Combine rich text, social icons, and contact blocks in one responsive row. Resize columns, align content left/center/right, and reorder by drag-and-drop.
+• Text that moves people — Static message, or eye-catching motion: slider, fade-in, and blink effects for multi-line messaging when you need the extra punch.
+• Social & contact, done right — Major social platforms with flexible icon styles and colors; contact rows for email, phone, location, chat, and more — styled to match your bar.
+• Top or bottom placement, your rules — Pin to the top or bottom, control borders and colors, and optionally hide the bar on scroll for a cleaner reading experience.
+• Mobile isn’t an afterthought — Control whether message content shows on small screens, column by column.
+• Draft vs. published — Tune in private, then publish when it’s perfect. Know at a glance when live visitors haven’t seen your latest changes yet.
+• Schedule visibility (where included in your plan) — Show the bar only in the window that matters for launches, holidays, and limited-time offers.
+
+WHO IT’S FOR
+
+Store owners, agencies, membership sites, and anyone who is tired of “good enough” announcement plugins. If your message matters, your bar should look and behave like a product — not an afterthought.
+
+Install Flex Top Bar. Claim the strip of screen your competitors ignore — and give every visitor a reason to stay, click, and convert.
+
+
+BULLET LIST ONLY (quick feature grid)
+---------------------------------------
+• Visual admin + live preview
+• Auto-save — no classic “Save” treadmill
+• Multiple announcement bars
+• Multi-column layouts: text, social links, contact blocks
+• Drag-and-drop column order; flexible column widths
+• Text effects: none, slider, fade-in, blink
+• Top or bottom position; optional hide on scroll
+• Full color & border controls
+• Per-column mobile visibility
+• Draft / publish workflow with change awareness
+• Optional scheduling by date & time (plan-dependent)
+
+
+SEO / KEYWORDS (optional)
+-------------------------
+announcement bar, notification bar, hello bar, promo bar, top bar, bottom bar, sticky bar, social bar, contact bar, WooCommerce banner, marketing bar, WordPress banner plugin
+
+================================================================================

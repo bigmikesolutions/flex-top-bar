@@ -1,7 +1,7 @@
 {
   "name": "flex-top-bar",
   "version": "0.1.0",
-  "description": "Flex top bar editor - add top bars in a way you have never seen before.",
+  "description": "Flex Top Bar — a lightning-fast admin, live preview, multi-column layouts, animations, scheduling, and publish control. Turn visitors into customers before they scroll.",
   "author": "Big Mike Solutions",
   "main": "index.js",
   "directories": {
