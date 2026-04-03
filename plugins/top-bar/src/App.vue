@@ -35,6 +35,7 @@
           v-if="canAddBar"
           type="button"
           class="top-bar-btn mint md"
+          :title="addBarTooltip"
           @click="handleAddBar"
         >
           {{ __('Add new Top Bar', 'top-bar') }}
@@ -49,6 +50,7 @@
             type="button"
             class="top-bar-btn mint sm"
             :disabled="isAdding"
+            :title="addBarTooltip"
             @click="handleAddBar"
           >
             {{ isAdding ? __('Adding...', 'top-bar') : __('Add new Top Bar', 'top-bar') }}
@@ -83,7 +85,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useBarsStore } from '@/stores/bars'
 import { useFeatureFlagsStore } from '@/stores/featureFlags'
-import { __ } from '@wordpress/i18n'
+import { __, sprintf } from '@wordpress/i18n'
 import BarItem from '@/components/AdminBarView.vue'
 import type { Bar } from '@/types'
 
@@ -105,6 +107,24 @@ const publishedBarsById = computed(() => {
 const isLoading = computed(() => barsStore.loading || flagsStore.loading)
 const featureFlags = computed(() => flagsStore.flags)
 const canAddBar = computed(() => bars.value.length < featureFlags.value.max_bars)
+
+const addBarTooltip = computed(() => {
+  const maxBars = featureFlags.value.max_bars
+  const remaining = Math.max(0, maxBars - bars.value.length)
+  const lead = sprintf(
+    __(
+      'Your plan allows you to add yet %1$d more top bar(s) out of %2$d.',
+      'top-bar',
+    ),
+    remaining,
+    maxBars,
+  )
+  const tail = __(
+    'If you want to change limits, check other plans on the plugin page or contact us.',
+    'top-bar',
+  )
+  return `${lead} ${tail}`
+})
 
 onMounted(async () => {
   await Promise.all([
