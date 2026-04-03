@@ -21,6 +21,9 @@ node_modules/
 test-results/
 .idea
 
+# Plugin release zips (npm run package:top-bar)
+/release/
+
 # Configuration
 wp-config.php
 .env
@@ -49,6 +52,7 @@ wp-config.php
 # Note: If you wish to whitelist plugins,
 # uncomment the next line
 #/wp-content/plugins
+plugins/top-bar/assets/dist/** 
 
 # All themes
 #

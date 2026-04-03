@@ -1,7 +1,8 @@
 {
-  "name": "top-bar",
-  "version": "1.0.0",
-  "description": "Displays a simple info bar at the top or bottom of the menu.",
+  "name": "flex-top-bar",
+  "version": "0.1.0",
+  "description": "Flex Top Bar — a lightning-fast admin, live preview, multi-column layouts, animations, scheduling, and publish control. Turn visitors into customers before they scroll.",
+  "author": "Big Mike Solutions",
   "main": "index.js",
   "directories": {
     "test": "tests"
@@ -9,6 +10,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "package:zip": "npm run build && bash scripts/package-zip.sh",
+    "package:top-bar": "npm run package:zip",
     "preview": "vite preview",
     "type-check": "tsc --noEmit",
     "test": "vitest run",
@@ -17,8 +20,6 @@
     "test:coverage": "vitest --coverage"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
   "type": "module",
   "devDependencies": {
     "@types/node": "^25.5.0",
