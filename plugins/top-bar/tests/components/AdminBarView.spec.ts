@@ -180,6 +180,25 @@ describe('AdminBarView', () => {
       expect(toggleButton.classes()).toContain('status-off')
     })
 
+    it('shows hide tooltip when bar is visible', () => {
+      const wrapper = mount(AdminBarView, { props: defaultProps })
+      const toggleButton = wrapper.find('.top-bar-visibility-toggle')
+      expect(toggleButton.attributes('title')).toBe('Hide this bar on the site')
+      expect(toggleButton.attributes('aria-label')).toBe('Hide this bar on the site')
+    })
+
+    it('shows show tooltip when bar is hidden', () => {
+      const wrapper = mount(AdminBarView, {
+        props: {
+          ...defaultProps,
+          bar: { ...mockBar, visible: false },
+        },
+      })
+      const toggleButton = wrapper.find('.top-bar-visibility-toggle')
+      expect(toggleButton.attributes('title')).toBe('Show this bar on the site')
+      expect(toggleButton.attributes('aria-label')).toBe('Show this bar on the site')
+    })
+
     it('emits update event when visibility is toggled', async () => {
       const wrapper = mount(AdminBarView, { props: defaultProps })
       const toggleButton = wrapper.find('.top-bar-visibility-toggle')
@@ -198,6 +217,8 @@ describe('AdminBarView', () => {
       const wrapper = mount(AdminBarView, { props: defaultProps })
       const deleteButton = wrapper.findAll('.delete').find(btn => !btn.attributes('disabled'))
       expect(deleteButton?.exists()).toBe(true)
+      expect(deleteButton?.attributes('title')).toBe('Delete this top bar')
+      expect(deleteButton?.attributes('aria-label')).toBe('Delete this top bar')
     })
 
     it('shows disabled delete button when canDelete is false', () => {
@@ -206,7 +227,12 @@ describe('AdminBarView', () => {
       })
       const deleteButton = wrapper.find('.delete[disabled]')
       expect(deleteButton.exists()).toBe(true)
-      expect(deleteButton.attributes('title')).toBe('At least one bar is required')
+      expect(deleteButton.attributes('title')).toBe(
+        'Cannot delete: at least one top bar must remain',
+      )
+      expect(deleteButton.attributes('aria-label')).toBe(
+        'Cannot delete: at least one top bar must remain',
+      )
     })
 
     it('emits delete event when delete is confirmed', async () => {

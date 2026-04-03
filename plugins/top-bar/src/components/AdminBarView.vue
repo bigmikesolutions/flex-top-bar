@@ -1,12 +1,3 @@
-<!-- TOOD 
-// Do przemyslenia
-- Dodac tooltipy do buttonow
-- Gdy ustawie dwa TopBary w pozycji TOP, jeden nachodzi na drugi. dobrze by bylo aby jeden byl pod drugim itp. To samo w pozycji bottom
-- Moze dodac opcje: zamykania recznego lub po czasie dla danego TopBar ? Wtedy jeden mozna zrobic statycznie, drugi pod spodem znikal by po np 30sek 
-
--->
-
-
 <template>
   <div class="top-bar-row bg">
     <!-- Navigation -->
@@ -19,7 +10,8 @@
         <button
           type="button"
           :class="['top-bar-icons mask black', 'top-bar-visibility-toggle', localBar.visible ? 'status-on' : 'status-off']"
-          :aria-label="__('Toggle bar visibility on page', 'top-bar')"
+          :title="visibilityToggleTooltip"
+          :aria-label="visibilityToggleTooltip"
           @click="toggleVisibility"
         >
         </button>
@@ -27,7 +19,8 @@
           v-if="canDelete"
           type="button"
           class="top-bar-icons mask black delete"
-          :title="__('Remove', 'top-bar')"
+          :title="__('Delete this top bar', 'top-bar')"
+          :aria-label="__('Delete this top bar', 'top-bar')"
           @click="handleDelete"
         >
         </button>
@@ -36,7 +29,8 @@
           type="button"
           class="top-bar-icons mask black delete"
           disabled
-          :title="__('At least one bar is required', 'top-bar')"
+          :title="__('Cannot delete: at least one top bar must remain', 'top-bar')"
+          :aria-label="__('Cannot delete: at least one top bar must remain', 'top-bar')"
         >
         </button>
         <button
@@ -438,6 +432,12 @@ const emit = defineEmits<{
 
 const localBar = ref<Bar>(withColumns(cloneBar(props.bar)))
 const isExpanded = ref(props.bar.admin_visibile !== false)
+
+const visibilityToggleTooltip = computed(() =>
+  localBar.value.visible
+    ? __('Hide this bar on the site', 'top-bar')
+    : __('Show this bar on the site', 'top-bar'),
+)
 
 function stripAdminOnlyFields(b: Bar): unknown {
   const { admin_visibile, ...rest } = b as any
