@@ -272,12 +272,16 @@ describe('useBarsStore', () => {
       vi.mocked(api.deleteBar).mockResolvedValueOnce(undefined)
 
       const store = useBarsStore()
-      store.bars = [mockBar, { ...mockBar, id: 'bar_2' }]
+      const bar2 = { ...mockBar, id: 'bar_2' }
+      store.bars = [mockBar, bar2]
+      store.publishedBars = [mockBar, bar2]
 
       await store.deleteBar('bar_1')
 
       expect(store.bars).toHaveLength(1)
       expect(store.bars[0].id).toBe('bar_2')
+      expect(store.publishedBars).toHaveLength(1)
+      expect(store.publishedBars[0].id).toBe('bar_2')
       expect(store.loading).toBe(false)
       expect(store.error).toBeNull()
     })
