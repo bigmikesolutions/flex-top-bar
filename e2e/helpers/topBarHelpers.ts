@@ -9,6 +9,9 @@ const ADMIN_USER = process.env.WP_ADMIN_USER ?? 'admin';
 const ADMIN_PASS = process.env.WP_ADMIN_PASSWORD ?? 'admin';
 const TOP_BAR_SETTINGS_PATH = '/wp-admin/admin.php?page=flex-top-bar';
 
+/** WordPress admin after login (covers admin.php, index.php, load-scripts.php, etc.). */
+const WP_ADMIN_URL_REGEX = /\/wp-admin\//;
+
 export const MAX_BARS = 5;
 
 export function toDatetimeLocalValue(date: Date): string {
@@ -34,19 +37,22 @@ export async function waitForTopBarPut(page: Page): Promise<void> {
 /**
  * Wait until the Top Bar admin UI finished loading (not the Loading… notice).
  * Do not require "Add new Top Bar" — that control is omitted when already at max_bars.
+ * Long timeout: CI can be slow; #top-bar is Vue-rendered after admin.js (see build in e2e workflow).
  */
 export async function waitForTopBarAdminReady(page: Page): Promise<void> {
-  await page.waitForSelector('#top-bar-app', { state: 'visible', timeout: 10000 });
   await page
     .locator('#top-bar')
     .locator('.top-bar-row.center.empty, .top-bar-row.bg, .notice-error')
     .first()
-    .waitFor({ state: 'visible', timeout: 15000 });
+    .waitFor({ state: 'visible', timeout: 45000 });
 }
 
 export async function loginAndOpenTopBarSettings(page: Page): Promise<void> {
+  const gotoSettings = () =>
+    page.goto(TOP_BAR_SETTINGS_PATH, { waitUntil: 'load', timeout: 30000 });
+
   // Go straight to the admin settings page; WP redirects to login if needed.
-  await page.goto(TOP_BAR_SETTINGS_PATH, { waitUntil: 'domcontentloaded', timeout: 20000 });
+  await gotoSettings();
 
   const loginInput = page.locator('input[name="log"]');
   const topBarRoot = page.locator('#top-bar');
@@ -56,24 +62,25 @@ export async function loginAndOpenTopBarSettings(page: Page): Promise<void> {
   if (!hasLogin && !hasTopBar) {
     // One retry in case WordPress is still finishing startup.
     await page.waitForTimeout(2000);
-    await page.goto(TOP_BAR_SETTINGS_PATH, { waitUntil: 'domcontentloaded', timeout: 20000 });
+    await gotoSettings();
   }
 
   if (await loginInput.count()) {
     await loginInput.first().fill(ADMIN_USER);
     await page.locator('input[name="pwd"]').first().fill(ADMIN_PASS);
     await page.locator('input[name="wp-submit"]').first().click();
+    await page.waitForURL(WP_ADMIN_URL_REGEX, { timeout: 30000 });
   }
 
-  await page.goto(TOP_BAR_SETTINGS_PATH, { waitUntil: 'domcontentloaded', timeout: 20000 });
-  const finalTopBar = page.locator('#top-bar').first();
-  await finalTopBar.waitFor({ state: 'visible', timeout: 15000 }).catch(async () => {
+  await gotoSettings();
+
+  try {
+    await waitForTopBarAdminReady(page);
+  } catch {
     const url = page.url();
     const title = await page.title();
     throw new Error(`Failed to open Top Bar settings. URL: ${url}, title: ${title}`);
-  });
-
-  await waitForTopBarAdminReady(page);
+  }
 }
 
 export async function ensureAtLeastBars(page: Page, expectedBars: number): Promise<void> {
