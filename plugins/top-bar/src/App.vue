@@ -77,6 +77,20 @@
           </p>
         </div>
       </template>
+
+      <div class="top-bar-row center top-bar-powered-by">
+        <p class="description top-bar-powered-by__text">
+          <img
+            :src="bmsFavicon"
+            alt=""
+            width="18"
+            height="18"
+            class="top-bar-powered-by__icon"
+            aria-hidden="true"
+          />
+          {{ poweredByFooterText }}
+        </p>
+      </div>
     </template>
   </div>
 </template>
@@ -88,6 +102,14 @@ import { useFeatureFlagsStore } from '@/stores/featureFlags'
 import { __, sprintf } from '@wordpress/i18n'
 import BarItem from '@/components/AdminBarView.vue'
 import type { Bar } from '@/types'
+
+const bmsFavicon = computed(() => {
+  const fromWp = (window.topBarConfig?.bmsFaviconUrl || '').trim()
+  if (fromWp) {
+    return fromWp
+  }
+  return new URL('../assets/img/bms-favicon.png', import.meta.url).href
+})
 
 const barsStore = useBarsStore()
 const flagsStore = useFeatureFlagsStore()
@@ -125,6 +147,13 @@ const addBarTooltip = computed(() => {
   )
   return `${lead} ${tail}`
 })
+
+const poweredByFooterText = computed(() =>
+  sprintf(
+    __('Powered by BigMikeSolutions. All rights reserved. %d', 'top-bar'),
+    new Date().getFullYear(),
+  ),
+)
 
 onMounted(async () => {
   await Promise.all([
@@ -188,5 +217,23 @@ async function handlePublish(id: string) {
   font-size: 12px;
   font-weight: 600;
   opacity: 0.7;
+}
+
+.top-bar-powered-by {
+  margin-top: 28px;
+}
+
+.top-bar-powered-by__text {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  text-align: center;
+}
+
+.top-bar-powered-by__icon {
+  display: block;
+  flex-shrink: 0;
+  object-fit: contain;
 }
 </style>

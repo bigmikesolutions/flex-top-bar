@@ -61,9 +61,10 @@ final class Admin {
 				'top-bar-admin-vue',
 				'topBarConfig',
 				[
-					'apiRoot' => esc_url_raw( rest_url( 'top-bar/v1' ) ),
-					'nonce'   => wp_create_nonce( 'wp_rest' ),
-					'version' => defined( 'TOP_BAR_VERSION' ) ? TOP_BAR_VERSION : '',
+					'apiRoot'         => esc_url_raw( rest_url( 'top-bar/v1' ) ),
+					'nonce'           => wp_create_nonce( 'wp_rest' ),
+					'version'         => defined( 'TOP_BAR_VERSION' ) ? TOP_BAR_VERSION : '',
+					'bmsFaviconUrl'   => esc_url_raw( plugins_url( 'assets/img/bms-favicon.png', TOP_BAR_PLUGIN_FILE ) ),
 					'i18n'    => [
 						'welcome'     => __( 'Welcome to Top Bar plugin', 'top-bar' ),
 						'addNew'      => __( 'Add new Top Bar', 'top-bar' ),
