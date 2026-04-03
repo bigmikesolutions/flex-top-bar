@@ -12,7 +12,7 @@ env:
 jobs:
   php-unit-tests:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
 
     steps:
       - name: Checkout
@@ -23,6 +23,18 @@ jobs:
         with:
           php-version: "8.3"
           tools: composer:v2
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Build Top Bar Vite assets
+        run: npm run build:top-bar
 
       - name: Install Composer dependencies
         run: composer install --no-interaction --prefer-dist
@@ -48,7 +60,7 @@ jobs:
         run: npm ci
 
       - name: Run npm unit tests
-        run: npm test --workspace=top-bar
+        run: npm test
 
   e2e:
     needs: [php-unit-tests, npm-unit-tests]

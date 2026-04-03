@@ -32,7 +32,7 @@ This file mirrors `.cursor/rules/*.mdc` so behavior stays consistent across tool
 - **i18n:** `@wordpress/i18n` `__()` consistent with existing components.
 - **Mobile visibility on frontend:** Class **`top-bar--messages-mobile-hidden`** on the bar root (`TopBarFrontend.vue`); do not assume a `data-top-bar-mobile-visible` attribute unless you add it in the component.
 
-After Vue/TS changes, rebuild assets: `npm run build -w top-bar`.
+After Vue/TS changes, rebuild assets: `npm run build:top-bar` (from repo root) or `npm run build -w plugins/top-bar`.
 
 ---
 
