@@ -104,6 +104,7 @@
             type="button"
             class="top-bar-btn mint sm"
             :disabled="localBar.columns.length >= maxColumns"
+            :title="addColumnTooltip"
             @click="addColumn"
           >
             {{ __('Add column', 'top-bar') }}
@@ -243,7 +244,7 @@ import type {
   ContentPosition,
   SocialBarColumn,
 } from '@/types'
-import { __ } from '@wordpress/i18n'
+import { __, sprintf } from '@wordpress/i18n'
 import BasicSettingsSection from './BasicSettingsSection.vue'
 import ColumnTypeSelector from './ColumnTypeSelector.vue'
 import ContactColumnEditor from './ContactColumnEditor.vue'
@@ -464,6 +465,32 @@ const publishButtonTooltip = computed(() =>
     ? __('Pending changes ready to be published', 'top-bar')
     : __('There are no changes to publish', 'top-bar'),
 )
+
+const addColumnTooltip = computed(() => {
+  const max = maxColumns.value
+  const count = localBar.value.columns.length
+  const tail = __(
+    'If you want to change limits, check other plans on the plugin page or contact us.',
+    'top-bar',
+  )
+  if (count >= max) {
+    const lead = sprintf(
+      __('You have reached the maximum of %1$d columns for your plan.', 'top-bar'),
+      max,
+    )
+    return `${lead} ${tail}`
+  }
+  const remaining = Math.max(0, max - count)
+  const lead = sprintf(
+    __(
+      'Your plan allows you to add yet %1$d more column(s) out of %2$d.',
+      'top-bar',
+    ),
+    remaining,
+    max,
+  )
+  return `${lead} ${tail}`
+})
 
 // Re-sync when the bar id or server column set changes (fetch, PUT response).
 watch(

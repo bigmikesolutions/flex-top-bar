@@ -98,6 +98,33 @@ describe('AdminBarView', () => {
       expect(directLayoutRows.length).toBe(2)
     })
 
+    it('sets add column button tooltip with remaining slots when under max columns', () => {
+      const wrapper = mount(AdminBarView, { props: defaultProps })
+      const btn = wrapper.find('.title-with-action__btn .top-bar-btn.mint.sm')
+      expect(btn.attributes('title')).toBe(
+        'Your plan allows you to add yet 3 more column(s) out of 4. If you want to change limits, check other plans on the plugin page or contact us.',
+      )
+    })
+
+    it('sets add column button tooltip when at max columns', () => {
+      const col = (id: string): BarColumn => ({
+        ...mockColumn,
+        id,
+      })
+      const barFourCols: Bar = {
+        ...mockBar,
+        columns: [col('c1'), col('c2'), col('c3'), col('c4')],
+      }
+      const wrapper = mount(AdminBarView, {
+        props: { ...defaultProps, bar: barFourCols, maxColumns: 4 },
+      })
+      const btn = wrapper.find('.title-with-action__btn .top-bar-btn.mint.sm')
+      expect(btn.attributes('disabled')).toBeDefined()
+      expect(btn.attributes('title')).toBe(
+        'You have reached the maximum of 4 columns for your plan. If you want to change limits, check other plans on the plugin page or contact us.',
+      )
+    })
+
     it('renders default name when bar name is empty', () => {
       const wrapper = mount(AdminBarView, {
         props: {
