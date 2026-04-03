@@ -8,6 +8,13 @@ import type { Bar, BarColumn } from '@/types'
 // Mock @wordpress/i18n
 vi.mock('@wordpress/i18n', () => ({
   __: (text: string) => text,
+  sprintf: (format: string, ...args: unknown[]) => {
+    let s = format
+    args.forEach((arg, i) => {
+      s = s.replace(new RegExp(`%${i + 1}\\$d`, 'g'), String(arg))
+    })
+    return s
+  },
 }))
 
 describe('AdminBarView', () => {
@@ -91,6 +98,33 @@ describe('AdminBarView', () => {
       expect(directLayoutRows.length).toBe(2)
     })
 
+    it('sets add column button tooltip with remaining slots when under max columns', () => {
+      const wrapper = mount(AdminBarView, { props: defaultProps })
+      const btn = wrapper.find('.title-with-action__btn .top-bar-btn.mint.sm')
+      expect(btn.attributes('title')).toBe(
+        'Your plan allows you to add yet 3 more column(s) out of 4. If you want to change limits, check other plans on the plugin page or contact us.',
+      )
+    })
+
+    it('sets add column button tooltip when at max columns', () => {
+      const col = (id: string): BarColumn => ({
+        ...mockColumn,
+        id,
+      })
+      const barFourCols: Bar = {
+        ...mockBar,
+        columns: [col('c1'), col('c2'), col('c3'), col('c4')],
+      }
+      const wrapper = mount(AdminBarView, {
+        props: { ...defaultProps, bar: barFourCols, maxColumns: 4 },
+      })
+      const btn = wrapper.find('.title-with-action__btn .top-bar-btn.mint.sm')
+      expect(btn.attributes('disabled')).toBeDefined()
+      expect(btn.attributes('title')).toBe(
+        'You have reached the maximum of 4 columns for your plan. If you want to change limits, check other plans on the plugin page or contact us.',
+      )
+    })
+
     it('renders default name when bar name is empty', () => {
       const wrapper = mount(AdminBarView, {
         props: {
@@ -140,6 +174,26 @@ describe('AdminBarView', () => {
       const btn = wrapper.find('button.top-bar-icons.publish')
       expect(btn.classes()).toContain('top-bar-publish--dirty')
     })
+
+    it('shows pending-publish tooltip when draft differs from published', () => {
+      const wrapper = mount(AdminBarView, {
+        props: {
+          ...defaultProps,
+          bar: { ...mockBar, bg_color: '#111111' },
+          publishedBar: { ...mockBar, bg_color: '#222222' },
+        },
+      })
+      const btn = wrapper.find('button.top-bar-icons.publish')
+      expect(btn.attributes('title')).toBe('Pending changes ready to be published')
+      expect(btn.attributes('aria-label')).toBe('Pending changes ready to be published')
+    })
+
+    it('shows no-changes tooltip when draft matches published', () => {
+      const wrapper = mount(AdminBarView, { props: defaultProps })
+      const btn = wrapper.find('button.top-bar-icons.publish')
+      expect(btn.attributes('title')).toBe('There are no changes to publish')
+      expect(btn.attributes('aria-label')).toBe('There are no changes to publish')
+    })
   })
 
   describe('visibility toggle', () => {
@@ -160,6 +214,25 @@ describe('AdminBarView', () => {
       expect(toggleButton.classes()).toContain('status-off')
     })
 
+    it('shows hide tooltip when bar is visible', () => {
+      const wrapper = mount(AdminBarView, { props: defaultProps })
+      const toggleButton = wrapper.find('.top-bar-visibility-toggle')
+      expect(toggleButton.attributes('title')).toBe('Hide this bar on the site')
+      expect(toggleButton.attributes('aria-label')).toBe('Hide this bar on the site')
+    })
+
+    it('shows show tooltip when bar is hidden', () => {
+      const wrapper = mount(AdminBarView, {
+        props: {
+          ...defaultProps,
+          bar: { ...mockBar, visible: false },
+        },
+      })
+      const toggleButton = wrapper.find('.top-bar-visibility-toggle')
+      expect(toggleButton.attributes('title')).toBe('Show this bar on the site')
+      expect(toggleButton.attributes('aria-label')).toBe('Show this bar on the site')
+    })
+
     it('emits update event when visibility is toggled', async () => {
       const wrapper = mount(AdminBarView, { props: defaultProps })
       const toggleButton = wrapper.find('.top-bar-visibility-toggle')
@@ -178,6 +251,8 @@ describe('AdminBarView', () => {
       const wrapper = mount(AdminBarView, { props: defaultProps })
       const deleteButton = wrapper.findAll('.delete').find(btn => !btn.attributes('disabled'))
       expect(deleteButton?.exists()).toBe(true)
+      expect(deleteButton?.attributes('title')).toBe('Delete this top bar')
+      expect(deleteButton?.attributes('aria-label')).toBe('Delete this top bar')
     })
 
     it('shows disabled delete button when canDelete is false', () => {
@@ -186,7 +261,12 @@ describe('AdminBarView', () => {
       })
       const deleteButton = wrapper.find('.delete[disabled]')
       expect(deleteButton.exists()).toBe(true)
-      expect(deleteButton.attributes('title')).toBe('At least one bar is required')
+      expect(deleteButton.attributes('title')).toBe(
+        'Cannot delete: at least one top bar must remain',
+      )
+      expect(deleteButton.attributes('aria-label')).toBe(
+        'Cannot delete: at least one top bar must remain',
+      )
     })
 
     it('emits delete event when delete is confirmed', async () => {
@@ -449,11 +529,14 @@ describe('AdminBarView', () => {
       expect(wrapper.text()).toContain('Scheduled')
     })
 
-    it('hides scheduling section when scheduleEnabled is false', () => {
+    it('shows scheduling as unavailable when scheduleEnabled is false', () => {
       const wrapper = mount(AdminBarView, {
         props: { ...defaultProps, scheduleEnabled: false },
       })
-      expect(wrapper.text()).not.toContain('Scheduled')
+      expect(wrapper.text()).toContain('Scheduled')
+      expect(wrapper.text()).toContain('Not available on your plan.')
+      const checkbox = wrapper.find('.top-bar-toggle-life-time')
+      expect((checkbox.element as HTMLInputElement).disabled).toBe(true)
     })
 
     it('toggles scheduled_enabled', async () => {

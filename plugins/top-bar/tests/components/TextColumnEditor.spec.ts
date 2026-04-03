@@ -5,6 +5,13 @@ import type { Bar } from '@/types'
 
 vi.mock('@wordpress/i18n', () => ({
   __: (text: string) => text,
+  sprintf: (format: string, ...args: unknown[]) => {
+    let s = format
+    args.forEach((arg, i) => {
+      s = s.replace(new RegExp(`%${i + 1}\\$d`, 'g'), String(arg))
+    })
+    return s
+  },
 }))
 
 describe('TextColumnEditor', () => {
@@ -75,6 +82,21 @@ describe('TextColumnEditor', () => {
     await wrapper.findAll('textarea')[0].trigger('blur')
 
     expect(wrapper.emitted('commit')).toBeTruthy()
+  })
+
+  it('sets add button tooltip with remaining and max text fields', () => {
+    const wrapper = mount(TextColumnEditor, {
+      props: {
+        ...defaultProps,
+        effect: 'slider',
+        messages: ['Hello', 'World'],
+        maxMessages: 4,
+      },
+    })
+    const btn = wrapper.find('.top-bar-btn.amber.sm.right')
+    expect(btn.attributes('title')).toBe(
+      'Your plan allows you to add yet 2 more text field(s) out of 4. If you want to change limits, check other plans on the plugin page or contact us.',
+    )
   })
 
   it('emits update with extended messages when add is clicked', async () => {

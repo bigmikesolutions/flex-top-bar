@@ -443,7 +443,7 @@ test.describe('single-bar', () => {
         .toBe(messageTwo);
     });
 
-    test('should show concatenated messages on frontend when effect is none', async ({ page }) => {
+    test('should show only the first message on frontend when effect is none', async ({ page }) => {
       const messageOne = 'No effect first';
       const messageTwo = 'No effect second';
       const id0 = await configureEffectAndMessages(page, 'none', messageOne, messageTwo);
@@ -451,7 +451,8 @@ test.describe('single-bar', () => {
       await page.goto('/');
       const topBarInner = page.locator(`[data-top-bar-id="${id0}"] .top-bar__inner`);
 
-      await expect(topBarInner).toContainText(`${messageOne} ${messageTwo}`);
+      await expect(topBarInner).toContainText(messageOne);
+      await expect(topBarInner).not.toContainText(messageTwo);
     });
   });
 

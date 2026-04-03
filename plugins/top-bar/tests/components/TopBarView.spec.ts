@@ -203,7 +203,7 @@ describe('TopBarView', () => {
     expect(wrapper.find('.top-bar').exists()).toBe(true)
   })
 
-  it('concatenates messages for "none" effect', async () => {
+  it('shows only the first message for "none" effect', async () => {
     const multiMessageBar: Bar = {
       ...mockBars[0],
       effect: 'none',
@@ -230,7 +230,8 @@ describe('TopBarView', () => {
     await wrapper.vm.$nextTick()
     await new Promise(resolve => setTimeout(resolve, 0))
 
-    expect(wrapper.text()).toContain('Hello World Test')
+    expect(wrapper.text()).toContain('Hello')
+    expect(wrapper.text()).not.toContain('World')
   })
 
   it('handles API error gracefully', async () => {

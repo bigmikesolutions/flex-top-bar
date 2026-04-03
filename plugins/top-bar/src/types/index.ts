@@ -144,6 +144,8 @@ export interface TopBarConfig {
   nonce: string
   i18n: Record<string, string>
   version?: string
+  /** Absolute URL to BMS favicon (WordPress `plugins_url`); used for admin footer branding. */
+  bmsFaviconUrl?: string
 }
 
 // Global window interface

@@ -1,12 +1,3 @@
-<!-- TOOD 
-// Do przemyslenia
-- Dodac tooltipy do buttonow
-- Gdy ustawie dwa TopBary w pozycji TOP, jeden nachodzi na drugi. dobrze by bylo aby jeden byl pod drugim itp. To samo w pozycji bottom
-- Moze dodac opcje: zamykania recznego lub po czasie dla danego TopBar ? Wtedy jeden mozna zrobic statycznie, drugi pod spodem znikal by po np 30sek 
-
--->
-
-
 <template>
   <div class="top-bar-row bg">
     <!-- Navigation -->
@@ -19,7 +10,8 @@
         <button
           type="button"
           :class="['top-bar-icons mask black', 'top-bar-visibility-toggle', localBar.visible ? 'status-on' : 'status-off']"
-          :aria-label="__('Toggle bar visibility on page', 'top-bar')"
+          :title="visibilityToggleTooltip"
+          :aria-label="visibilityToggleTooltip"
           @click="toggleVisibility"
         >
         </button>
@@ -27,7 +19,8 @@
           v-if="canDelete"
           type="button"
           class="top-bar-icons mask black delete"
-          :title="__('Remove', 'top-bar')"
+          :title="__('Delete this top bar', 'top-bar')"
+          :aria-label="__('Delete this top bar', 'top-bar')"
           @click="handleDelete"
         >
         </button>
@@ -36,13 +29,15 @@
           type="button"
           class="top-bar-icons mask black delete"
           disabled
-          :title="__('At least one bar is required', 'top-bar')"
+          :title="__('Cannot delete: at least one top bar must remain', 'top-bar')"
+          :aria-label="__('Cannot delete: at least one top bar must remain', 'top-bar')"
         >
         </button>
         <button
           type="button"
           :class="['top-bar-icons mask black publish', { 'top-bar-publish--dirty': hasUnpublishedChanges }]"
-          :title="__('Publish Flex Bar', 'top-bar')"
+          :title="publishButtonTooltip"
+          :aria-label="publishButtonTooltip"
           @click="handlePublish"
         >
         </button>
@@ -85,7 +80,12 @@
 
       <BasicSettingsSection v-model="localBar" @save="saveChanges" />
 
-      <ScheduleSection v-model="localBar" :schedule-enabled="scheduleEnabled" @save="saveChanges" />
+      <ScheduleSection
+        v-model="localBar"
+        :schedule-enabled="scheduleEnabled"
+        :section-tooltip="scheduleSectionTooltip"
+        @save="saveChanges"
+      />
 
       <!-- Messages section title + add column. Inline flex avoids #top-bar .top-bar-grid { grid } collapsing the 2nd column to 0 width. -->
       <div
@@ -109,6 +109,7 @@
             type="button"
             class="top-bar-btn mint sm"
             :disabled="localBar.columns.length >= maxColumns"
+            :title="addColumnTooltip"
             @click="addColumn"
           >
             {{ __('Add column', 'top-bar') }}
@@ -248,7 +249,7 @@ import type {
   ContentPosition,
   SocialBarColumn,
 } from '@/types'
-import { __ } from '@wordpress/i18n'
+import { __, sprintf } from '@wordpress/i18n'
 import BasicSettingsSection from './BasicSettingsSection.vue'
 import ColumnTypeSelector from './ColumnTypeSelector.vue'
 import ContactColumnEditor from './ContactColumnEditor.vue'
@@ -438,6 +439,12 @@ const emit = defineEmits<{
 const localBar = ref<Bar>(withColumns(cloneBar(props.bar)))
 const isExpanded = ref(props.bar.admin_visibile !== false)
 
+const visibilityToggleTooltip = computed(() =>
+  localBar.value.visible
+    ? __('Hide this bar on the site', 'top-bar')
+    : __('Show this bar on the site', 'top-bar'),
+)
+
 function stripAdminOnlyFields(b: Bar): unknown {
   const { admin_visibile, ...rest } = b as any
   return rest
@@ -456,6 +463,54 @@ const hasUnpublishedChanges = computed(() => {
   } catch {
     return false
   }
+})
+
+const publishButtonTooltip = computed(() =>
+  hasUnpublishedChanges.value
+    ? __('Pending changes ready to be published', 'top-bar')
+    : __('There are no changes to publish', 'top-bar'),
+)
+
+const addColumnTooltip = computed(() => {
+  const max = maxColumns.value
+  const count = localBar.value.columns.length
+  const tail = __(
+    'If you want to change limits, check other plans on the plugin page or contact us.',
+    'top-bar',
+  )
+  if (count >= max) {
+    const lead = sprintf(
+      __('You have reached the maximum of %1$d columns for your plan.', 'top-bar'),
+      max,
+    )
+    return `${lead} ${tail}`
+  }
+  const remaining = Math.max(0, max - count)
+  const lead = sprintf(
+    __(
+      'Your plan allows you to add yet %1$d more column(s) out of %2$d.',
+      'top-bar',
+    ),
+    remaining,
+    max,
+  )
+  return `${lead} ${tail}`
+})
+
+const scheduleSectionTooltip = computed(() => {
+  const tail = __(
+    'Set start and end dates to control when the bar is visible.',
+    'top-bar',
+  )
+  if (!props.scheduleEnabled) {
+    const lead = __("Your plan doesn't include scheduling.", 'top-bar')
+    return `${lead} ${tail}`
+  }
+  const lead = __(
+    'Your plan includes scheduling for this top bar. ',
+    'top-bar',
+  )
+  return `${lead} ${tail}`
 })
 
 // Re-sync when the bar id or server column set changes (fetch, PUT response).
