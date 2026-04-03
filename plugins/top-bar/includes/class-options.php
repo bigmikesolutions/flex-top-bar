@@ -128,6 +128,31 @@ final class Options {
 	}
 
 	/**
+	 * Remove a bar from the published snapshot (e.g. after draft delete).
+	 * Keeps the live site in sync without a separate publish step.
+	 */
+	public static function remove_bar_from_published( string $bar_id ): void {
+		$published = get_option( self::OPTION_BARS, [] );
+		if ( ! is_array( $published ) || $published === [] ) {
+			return;
+		}
+		$filtered = [];
+		foreach ( $published as $row ) {
+			if ( ! is_array( $row ) ) {
+				continue;
+			}
+			if ( (string) ( $row['id'] ?? '' ) === $bar_id ) {
+				continue;
+			}
+			$filtered[] = self::normalize_bar( $row );
+		}
+		if ( $filtered === [] ) {
+			return;
+		}
+		update_option( self::OPTION_BARS, array_values( $filtered ) );
+	}
+
+	/**
 	 * Publish a single bar from draft into published.
 	 *
 	 * @return array<string, mixed>|null The published bar, or null when not found in draft.

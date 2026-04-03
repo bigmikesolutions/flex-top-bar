@@ -75,6 +75,7 @@ export const useBarsStore = defineStore('bars', () => {
     try {
       await api.deleteBar(id)
       bars.value = bars.value.filter(b => b.id !== id)
+      publishedBars.value = publishedBars.value.filter(b => b.id !== id)
     } catch (e) {
       error.value = e instanceof Error ? e.message : 'Failed to delete bar'
       console.error('Failed to delete bar:', e)

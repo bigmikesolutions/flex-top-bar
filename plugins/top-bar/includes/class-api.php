@@ -229,6 +229,7 @@ final class API {
 		}
 
 		update_option( Options::OPTION_BARS_DRAFT, array_values( $filtered ) );
+		Options::remove_bar_from_published( $id );
 		return new \WP_REST_Response( null, 204 );
 	}
 
