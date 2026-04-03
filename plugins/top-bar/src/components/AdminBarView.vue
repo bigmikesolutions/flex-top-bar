@@ -80,7 +80,12 @@
 
       <BasicSettingsSection v-model="localBar" @save="saveChanges" />
 
-      <ScheduleSection v-model="localBar" :schedule-enabled="scheduleEnabled" @save="saveChanges" />
+      <ScheduleSection
+        v-model="localBar"
+        :schedule-enabled="scheduleEnabled"
+        :section-tooltip="scheduleSectionTooltip"
+        @save="saveChanges"
+      />
 
       <!-- Messages section title + add column. Inline flex avoids #top-bar .top-bar-grid { grid } collapsing the 2nd column to 0 width. -->
       <div
@@ -488,6 +493,22 @@ const addColumnTooltip = computed(() => {
     ),
     remaining,
     max,
+  )
+  return `${lead} ${tail}`
+})
+
+const scheduleSectionTooltip = computed(() => {
+  const tail = __(
+    'Set start and end dates to control when the bar is visible.',
+    'top-bar',
+  )
+  if (!props.scheduleEnabled) {
+    const lead = __("Your plan doesn't include scheduling.", 'top-bar')
+    return `${lead} ${tail}`
+  }
+  const lead = __(
+    'Your plan includes scheduling for this top bar. ',
+    'top-bar',
   )
   return `${lead} ${tail}`
 })

@@ -41,11 +41,18 @@ describe('ScheduleSection', () => {
     vi.clearAllMocks()
   })
 
-  it('renders nothing when scheduleEnabled is false', () => {
+  it('renders disabled scheduling row when scheduleEnabled is false', () => {
     const wrapper = mount(ScheduleSection, {
-      props: { modelValue: mockBar, scheduleEnabled: false },
+      props: {
+        modelValue: mockBar,
+        scheduleEnabled: false,
+        sectionTooltip: "Your plan doesn't include scheduling.",
+      },
     })
-    expect(wrapper.text()).not.toContain('Scheduled')
+    expect(wrapper.text()).toContain('Scheduled')
+    expect(wrapper.text()).toContain('Not available on your plan.')
+    const checkbox = wrapper.find('.top-bar-toggle-life-time')
+    expect((checkbox.element as HTMLInputElement).disabled).toBe(true)
   })
 
   it('renders Scheduled label when scheduleEnabled is true', () => {

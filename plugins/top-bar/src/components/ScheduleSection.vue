@@ -2,7 +2,11 @@
   <template v-if="scheduleEnabled">
     <div class="top-bar-grid title">
       <div class="item">
-        <label class="check top-bar-life-time-checkbox">
+        <label
+          class="check top-bar-life-time-checkbox"
+          :title="sectionTooltip || undefined"
+          :aria-label="sectionTooltip || undefined"
+        >
           <input
             v-model="model.scheduled_enabled"
             type="checkbox"
@@ -55,15 +59,39 @@
       </div>
     </div>
   </template>
+  <template v-else>
+    <div class="top-bar-grid title">
+      <div class="item">
+        <label
+          class="check top-bar-life-time-checkbox top-bar-schedule--disabled"
+          :title="sectionTooltip || undefined"
+          :aria-label="sectionTooltip || undefined"
+        >
+          <input type="checkbox" disabled class="top-bar-toggle-life-time" />
+          <span class="lifetime-label">
+            <p class="bold lg">{{ __('Scheduled', 'top-bar') }}</p>
+          </span>
+          <span class="lifetime-description">
+            <p class="xs">{{ __('Not available on your plan.', 'top-bar') }}</p>
+          </span>
+        </label>
+      </div>
+    </div>
+  </template>
 </template>
 
 <script setup lang="ts">
 import type { Bar } from '@/types'
 import { __ } from '@wordpress/i18n'
 
-defineProps<{
-  scheduleEnabled: boolean
-}>()
+withDefaults(
+  defineProps<{
+    scheduleEnabled: boolean
+    /** Plan / limits hint (native tooltip on the Scheduled row). */
+    sectionTooltip?: string
+  }>(),
+  { sectionTooltip: '' },
+)
 
 const model = defineModel<Bar>({ required: true })
 
@@ -77,3 +105,10 @@ function openPicker(e: Event) {
   input.showPicker?.()
 }
 </script>
+
+<style scoped>
+.top-bar-schedule--disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+</style>

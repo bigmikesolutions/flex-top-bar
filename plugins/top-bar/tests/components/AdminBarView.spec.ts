@@ -529,11 +529,14 @@ describe('AdminBarView', () => {
       expect(wrapper.text()).toContain('Scheduled')
     })
 
-    it('hides scheduling section when scheduleEnabled is false', () => {
+    it('shows scheduling as unavailable when scheduleEnabled is false', () => {
       const wrapper = mount(AdminBarView, {
         props: { ...defaultProps, scheduleEnabled: false },
       })
-      expect(wrapper.text()).not.toContain('Scheduled')
+      expect(wrapper.text()).toContain('Scheduled')
+      expect(wrapper.text()).toContain('Not available on your plan.')
+      const checkbox = wrapper.find('.top-bar-toggle-life-time')
+      expect((checkbox.element as HTMLInputElement).disabled).toBe(true)
     })
 
     it('toggles scheduled_enabled', async () => {
