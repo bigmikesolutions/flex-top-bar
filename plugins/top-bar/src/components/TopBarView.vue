@@ -27,7 +27,7 @@
             <template v-if="column.type === 'text'">
               <div class="top-bar-text-column" :style="getTextAlignStyle(column)">
                 <template v-if="column.effect === 'none'">
-                  {{ getConcatenatedMessage(column) }}
+                  {{ getFirstMessage(column) }}
                 </template>
                 <template v-else>
                   <transition :name="getTransitionName(column.effect)" mode="out-in">
@@ -272,8 +272,8 @@ function getBarStyles(bar: Bar) {
   return styles
 }
 
-function getConcatenatedMessage(column: TextBarColumn): string {
-  return column.messages.filter(m => m.trim()).join(' ')
+function getFirstMessage(column: TextBarColumn): string {
+  return column.messages[0] ?? ''
 }
 
 function getCurrentMessage(bar: Bar, column: TextBarColumn): string {
