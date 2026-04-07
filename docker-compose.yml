@@ -18,7 +18,7 @@ services:
       FF_MAX_BARS: ${FF_MAX_BARS:-5}
       FF_MAX_MESSAGES: ${FF_MAX_MESSAGES:-5}
       FF_MAX_COLUMNS: ${FF_MAX_COLUMNS:-4}
-      FF_SCHEDULE: ${FF_SCHEDULE:-true}
+      FF_SCHEDULE: ${FF_SCHEDULE:-1}
       WORDPRESS_CONFIG_EXTRA: |
         define('WP_DEBUG_LOG', true);
         define('WP_DEBUG_DISPLAY', true);
