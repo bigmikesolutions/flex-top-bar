@@ -66,8 +66,33 @@ describe('ScheduleSection', () => {
     const wrapper = mount(ScheduleSection, {
       props: { modelValue: mockBar, scheduleEnabled: true },
     })
-    await wrapper.find('.top-bar-toggle-life-time').setChecked(true)
+    const checkbox = wrapper.find('.top-bar-toggle-life-time')
+    ;(checkbox.element as HTMLInputElement).checked = true
+    await checkbox.trigger('change')
     expect(wrapper.emitted('save')).toBeTruthy()
+  })
+
+  it('clears dates when scheduling is turned off', async () => {
+    const wrapper = mount(ScheduleSection, {
+      props: {
+        modelValue: {
+          ...mockBar,
+          scheduled_enabled: true,
+          scheduled_from_datetime: '2026-03-25T10:00',
+          scheduled_to_datetime: '2026-03-25T18:00',
+        },
+        scheduleEnabled: true,
+      },
+    })
+
+    const checkbox = wrapper.find('.top-bar-toggle-life-time')
+    ;(checkbox.element as HTMLInputElement).checked = false
+    await checkbox.trigger('change')
+
+    expect(wrapper.emitted('save')).toBeTruthy()
+    // v-model mutates modelValue; verify it was cleared before save.
+    expect((wrapper.props('modelValue') as Bar).scheduled_from_datetime).toBe('')
+    expect((wrapper.props('modelValue') as Bar).scheduled_to_datetime).toBe('')
   })
 
   it('shows datetime inputs when scheduled_enabled is true', () => {

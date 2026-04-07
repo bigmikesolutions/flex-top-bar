@@ -11,7 +11,7 @@
             v-model="model.scheduled_enabled"
             type="checkbox"
             class="top-bar-toggle-life-time"
-            @change="emit('save')"
+            @change="onScheduledToggle"
           />
           <span class="lifetime-label">
             <p class="bold lg">{{ __('Scheduled', 'top-bar') }}</p>
@@ -98,6 +98,16 @@ const model = defineModel<Bar>({ required: true })
 const emit = defineEmits<{
   save: []
 }>()
+
+function onScheduledToggle() {
+  // When disabling scheduling, clear any dates before saving. Otherwise the backend
+  // normalization will re-enable scheduling if dates are still present.
+  if (!model.value.scheduled_enabled) {
+    model.value.scheduled_from_datetime = ''
+    model.value.scheduled_to_datetime = ''
+  }
+  emit('save')
+}
 
 function openPicker(e: Event) {
   const input = e.target as HTMLInputElement
