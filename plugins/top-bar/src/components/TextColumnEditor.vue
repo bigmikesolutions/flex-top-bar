@@ -5,7 +5,9 @@
       <label>
         <select
           :id="`effect_${barId}_${columnId}`"
-          :value="effect"
+          :value="effectiveEffect"
+          :disabled="isEffectDisabled"
+          :title="effectTooltip"
           @change="onEffectChange"
         >
           <option value="none">{{ __('None', 'top-bar') }}</option>
@@ -20,7 +22,7 @@
 
       <div class="top-bar-message-list">
         <div
-          v-for="(_message, index) in effect === 'none' ? messages.slice(0, 1) : messages"
+          v-for="(_message, index) in effectiveEffect === 'none' ? messages.slice(0, 1) : messages"
           :key="index"
           class="top-bar-column-creator-grid"
           draggable="true"
@@ -46,7 +48,7 @@
           </div>
           <div class="item-creator center">
             <button
-              v-if="effect !== 'none' && messages.length > 1"
+              v-if="effectiveEffect !== 'none' && messages.length > 1"
               type="button"
               class="top-bar-btn top-bar-icons delete mask black remove empty"
               @click="removeMessage(index)"
@@ -60,7 +62,7 @@
 
     <div class="top-bar-row rt">
       <button
-        v-if="effect !== 'none' && messages.length < maxMessages"
+        v-if="effectiveEffect !== 'none' && messages.length < maxMessages"
         type="button"
         class="top-bar-btn amber sm right"
         :title="addTextTooltip"
@@ -74,7 +76,7 @@
 
 <script setup lang="ts">
 import { __, sprintf } from '@wordpress/i18n'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import type { Bar, TextBarColumn } from '@/types'
 
 const props = defineProps<{
@@ -84,6 +86,9 @@ const props = defineProps<{
   messages: string[]
   maxMessages: number
 }>()
+
+const isEffectDisabled = computed(() => props.maxMessages <= 1)
+const effectiveEffect = computed<Bar['effect']>(() => (isEffectDisabled.value ? 'none' : props.effect))
 
 const addTextTooltip = computed(() => {
   const max = props.maxMessages
@@ -103,6 +108,19 @@ const addTextTooltip = computed(() => {
   return `${lead} ${tail}`
 })
 
+const effectTooltip = computed(() => {
+  if (!isEffectDisabled.value) return ''
+  const tail = __(
+    'If you want to change limits, check other plans on the plugin page or contact us.',
+    'top-bar',
+  )
+  const lead = __(
+    'Your plan allows only one text field, so effects are not available.',
+    'top-bar',
+  )
+  return `${lead} ${tail}`
+})
+
 const emit = defineEmits<{
   patch: [updates: Partial<Pick<TextBarColumn, 'messages'>>]
   commit: []
@@ -112,9 +130,20 @@ const emit = defineEmits<{
 const draggingIndex = ref<number | null>(null)
 
 function onEffectChange(e: Event) {
+  if (isEffectDisabled.value) return
   const value = (e.target as HTMLSelectElement).value as Bar['effect']
   emit('update', { effect: value })
 }
+
+watch(
+  () => [props.maxMessages, props.effect] as const,
+  () => {
+    if (props.maxMessages <= 1 && props.effect !== 'none') {
+      emit('update', { effect: 'none' })
+    }
+  },
+  { immediate: true },
+)
 
 function canDropAt(targetIndex: number, fromIndex: number | null) {
   if (fromIndex === null) return false

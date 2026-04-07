@@ -337,6 +337,46 @@ describe('AdminBarView', () => {
   })
 
   describe('form fields', () => {
+    it('forces column size to 100% and disables size select when maxColumns is 1', () => {
+      const barOneColNonFull: Bar = {
+        ...mockBar,
+        columns: [{ ...mockColumn, size_percent: 50 }],
+      }
+      const wrapper = mount(AdminBarView, {
+        props: { ...defaultProps, bar: barOneColNonFull, maxColumns: 1 },
+      })
+
+      const sizeSelect = wrapper
+        .findAll('fieldset')
+        .find((f) => f.text().includes('Size column'))
+        ?.find('select')
+
+      expect(sizeSelect).toBeTruthy()
+      expect(sizeSelect?.attributes('disabled')).toBeDefined()
+      expect((sizeSelect?.element as HTMLSelectElement).value).toBe('100')
+    })
+
+    it('normalizes emitted columns[*].size_percent to 100 when maxColumns is 1', async () => {
+      const barOneColNonFull: Bar = {
+        ...mockBar,
+        columns: [{ ...mockColumn, size_percent: 33 }],
+      }
+      const wrapper = mount(AdminBarView, {
+        props: { ...defaultProps, bar: barOneColNonFull, maxColumns: 1 },
+      })
+
+      const nameInput = wrapper.find('input[type="text"]')
+      await nameInput.trigger('blur')
+
+      const updateEvents = wrapper.emitted('update')
+      expect(updateEvents).toBeTruthy()
+      const lastEvent = updateEvents?.[updateEvents.length - 1]
+      expect(lastEvent?.[0]).toBe('bar_1')
+      expect(lastEvent?.[1]).toMatchObject({
+        columns: [{ size_percent: 100 }],
+      })
+    })
+
     it('updates name field', async () => {
       const wrapper = mount(AdminBarView, { props: defaultProps })
       const nameInput = wrapper.find('input[type="text"]')
