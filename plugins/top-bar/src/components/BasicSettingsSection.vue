@@ -6,7 +6,7 @@
       </div>
     </div>
 
-    <div class="top-bar-grid bg bg-blue">
+    <div class="top-bar-grid bg bg-blue options">
       <div class="item">
         <fieldset class="clear">
           <legend class="bold">{{ __('Position', 'top-bar') }}</legend>
@@ -20,14 +20,14 @@
           </select>
         </fieldset>
       </div>
-      <div class="item">
+      <!-- <div class="item">
         <fieldset class="clear">
           <legend class="bold">Fonts</legend>
           <select disabled>
             <option>Roboto</option>
           </select>
         </fieldset>
-      </div>
+      </div> -->
       <div class="item">
         <fieldset class="clear">
           <legend class="bold">{{ __('Background', 'top-bar') }}</legend>
@@ -50,6 +50,7 @@
               @change="emit('save')"
             />
             <select
+              class="border"  
               v-model.number="model.frame_width"
               @change="onFrameWidthChange"
             >

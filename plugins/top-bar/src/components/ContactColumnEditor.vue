@@ -1,5 +1,5 @@
 <template>
-  <div class="item-creator lg">
+  <div class="item-creator grid-3">
     <fieldset class="line">
       <legend class="bold">{{ __('Choose the icon appearance', 'top-bar') }}</legend>
       <label v-for="opt in iconStyleOptions" :key="opt.value" :class="['radio', { 'bg-grey radio': opt.value === 'white' }]">
@@ -9,7 +9,6 @@
           :checked="column.icon_style === opt.value"
           @change="patchIconStyle(opt.value)"
         />
-        <span class="top-bar-radio-line">{{ opt.label }}</span>
       <span></span>
        <div class="item icons">
         <span
@@ -30,7 +29,7 @@
       </label>
     </fieldset>
 
-    <div v-if="column.icon_style === 'rounded' || column.icon_style === 'square'" class="top-bar-grid">
+    <div v-if="column.icon_style === 'rounded' || column.icon_style === 'square'" class="top-bar-grid options">
       <div class="item">
         <fieldset class="line">
           <legend class="bold">{{ __('Background color', 'top-bar') }}</legend>
@@ -59,6 +58,7 @@
         <fieldset class="line vertical">
           <legend class="bold">{{ __('Border size & Color', 'top-bar') }}</legend>
           <select
+            class="border"
             :id="`contact_icon_border_width_${barId}_${columnId}`"
             :value="column.icon_border_width"
             @change="onBorderWidthChange"
@@ -97,10 +97,10 @@
           <div class="item-creator no">
             <p class="bold md">{{ index + 1 }}</p>           
           </div>
-          <div class="item-creator grid-2 vertical">
-            <label class="screen-reader-text" :for="`contact_kind_${barId}_${columnId}_${index}`">
+          <div class="item-creator vertical">
+            <!-- <label class="screen-reader-text" :for="`contact_kind_${barId}_${columnId}_${index}`">
               {{ __('Contact type', 'top-bar') }}
-            </label>
+            </label> -->
             <select
               :id="`contact_kind_${barId}_${columnId}_${index}`"
               :value="column.contacts[index]?.kind ?? ''"
@@ -111,9 +111,9 @@
                 {{ kindLabel(k) }}
               </option>
             </select>
-            <label class="screen-reader-text" :for="`contact_value_${barId}_${columnId}_${index}`">
+            <!-- <label class="screen-reader-text" :for="`contact_value_${barId}_${columnId}_${index}`">
               {{ __('Contact value', 'top-bar') }}
-            </label>
+            </label> -->
             <input
               :id="`contact_value_${barId}_${columnId}_${index}`"
               type="text"
@@ -125,11 +125,11 @@
           </div>
           <div class="item-creator center">
              <button
-              v-if="column.contacts.length > 1"
-              type="button"
-              class="top-bar-btn top-bar-icons delete mask black remove empty"
-              @click="removeEntry(index)"
-            >
+                v-if="column.contacts.length > 1"
+                type="button"
+                class="top-bar-btn top-bar-icons delete mask black remove empty"
+                @click="removeEntry(index)"
+              >
               Remove
             </button>
           </div>
@@ -244,7 +244,7 @@ function removeEntry(index: number) {
   margin-bottom: 6px;
 }
 
-.screen-reader-text {
+/* .screen-reader-text {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -254,5 +254,5 @@ function removeEntry(index: number) {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
-}
+} */
 </style>

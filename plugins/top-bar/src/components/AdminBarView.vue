@@ -143,97 +143,97 @@
                 @dragend="onDragEnd"
               >
                 {{ columnIndex + 1 }}
-              </button>
-            
+              </button>            
             </div>
+            <div class="top-bar-column-creator-grid responsive">
+                <ColumnTypeSelector
+                  :group-name="`${bar.id}_${column.id}`"
+                  :column-type="column.type"
+                  @update:column-type="onColumnTypeChange(columnIndex, $event)"
+                />
 
-            <ColumnTypeSelector
-              :group-name="`${bar.id}_${column.id}`"
-              :column-type="column.type"
-              @update:column-type="onColumnTypeChange(columnIndex, $event)"
-            />
+                <TextColumnEditor
+                  v-if="column.type === 'text'"
+                  :bar-id="bar.id"
+                  :column-id="column.id"
+                  :effect="column.effect"
+                  :messages="column.messages"
+                  :max-messages="maxMessages"
+                  @patch="onColumnMessagesPatch(columnIndex, $event)"
+                  @commit="saveChanges"
+                  @update="onTextColumnPersist(columnIndex, $event)"
+                />
 
-            <TextColumnEditor
-              v-if="column.type === 'text'"
-              :bar-id="bar.id"
-              :column-id="column.id"
-              :effect="column.effect"
-              :messages="column.messages"
-              :max-messages="maxMessages"
-              @patch="onColumnMessagesPatch(columnIndex, $event)"
-              @commit="saveChanges"
-              @update="onTextColumnPersist(columnIndex, $event)"
-            />
+                <SocialColumnEditor
+                  v-else-if="column.type === 'social'"
+                  :bar-id="bar.id"
+                  :column-id="column.id"
+                  :column="column"
+                  :max-links="maxMessages"
+                  @patch="onSocialColumnPatch(columnIndex, $event)"
+                  @commit="saveChanges"
+                />
 
-            <SocialColumnEditor
-              v-else-if="column.type === 'social'"
-              :bar-id="bar.id"
-              :column-id="column.id"
-              :column="column"
-              :max-links="maxMessages"
-              @patch="onSocialColumnPatch(columnIndex, $event)"
-              @commit="saveChanges"
-            />
+                <ContactColumnEditor
+                  v-else-if="column.type === 'contact'"
+                  :bar-id="bar.id"
+                  :column-id="column.id"
+                  :column="column"
+                  :max-entries="maxMessages"
+                  @patch="onContactColumnPatch(columnIndex, $event)"
+                  @commit="saveChanges"
+                />
 
-            <ContactColumnEditor
-              v-else-if="column.type === 'contact'"
-              :bar-id="bar.id"
-              :column-id="column.id"
-              :column="column"
-              :max-entries="maxMessages"
-              @patch="onContactColumnPatch(columnIndex, $event)"
-              @commit="saveChanges"
-            />
-
-            <div class="item item-creator">
-              <fieldset>
-                <legend class="bold">{{ __('Size column', 'top-bar') }}</legend>
-                <label>
-                  <select
-                    :value="maxColumns <= 1 ? 100 : column.size_percent"
-                    :disabled="maxColumns <= 1"
-                    :title="columnSizeTooltip"
-                    @change="onColumnSizeChange(columnIndex, $event)"
+                <div class="item item-creator">
+                  <fieldset>
+                    <legend class="bold">{{ __('Size column', 'top-bar') }}</legend>
+                    <label>
+                      <select
+                        :value="maxColumns <= 1 ? 100 : column.size_percent"
+                        :disabled="maxColumns <= 1"
+                        :title="columnSizeTooltip"
+                        @change="onColumnSizeChange(columnIndex, $event)"
+                      >
+                        <option :value="10">10%</option>
+                        <option :value="25">25%</option>
+                        <option :value="33">33%</option>
+                        <option :value="50">50%</option>
+                        <option :value="75">75%</option>
+                        <option :value="100">100%</option>
+                      </select>
+                    </label>
+                  </fieldset>
+                  <fieldset>
+                    <legend class="bold">{{ __('Content position', 'top-bar') }}</legend>
+                    <select :value="column.content_position" @change="onColumnContentPositionChange(columnIndex, $event)">
+                      <option value="left">{{ __('Left', 'top-bar') }}</option>
+                      <option value="center">{{ __('Center', 'top-bar') }}</option>
+                      <option value="right">{{ __('Right', 'top-bar') }}</option>
+                    </select>
+                  </fieldset>
+                  <fieldset>
+                    <legend class="bold">{{ __('Visible on the mobile', 'top-bar') }}</legend>
+                    <select
+                      :value="column.messages_mobile_visible"
+                      @change="onColumnMobileVisibleChange(columnIndex, $event)"
+                    >
+                      <option :value="true">{{ __('On', 'top-bar') }}</option>
+                      <option :value="false">{{ __('Off', 'top-bar') }}</option>
+                    </select>
+                  </fieldset>
+                </div>
+                <div class="item item-creator remove">
+                  <button
+                    v-if="localBar.columns.length > 1"
+                    type="button"
+                    class="top-bar-btn top-bar-icons delete mask black remove empty"
+                    :title="__('Remove column', 'top-bar')"
+                    @click="removeColumn(columnIndex)"
                   >
-                    <option :value="10">10%</option>
-                    <option :value="25">25%</option>
-                    <option :value="33">33%</option>
-                    <option :value="50">50%</option>
-                    <option :value="75">75%</option>
-                    <option :value="100">100%</option>
-                  </select>
-                </label>
-              </fieldset>
-              <fieldset>
-                <legend class="bold">{{ __('Content position', 'top-bar') }}</legend>
-                <select :value="column.content_position" @change="onColumnContentPositionChange(columnIndex, $event)">
-                  <option value="left">{{ __('Left', 'top-bar') }}</option>
-                  <option value="center">{{ __('Center', 'top-bar') }}</option>
-                  <option value="right">{{ __('Right', 'top-bar') }}</option>
-                </select>
-              </fieldset>
-              <fieldset>
-                <legend class="bold">{{ __('Visible on the mobile', 'top-bar') }}</legend>
-                <select
-                  :value="column.messages_mobile_visible"
-                  @change="onColumnMobileVisibleChange(columnIndex, $event)"
-                >
-                  <option :value="true">{{ __('On', 'top-bar') }}</option>
-                  <option :value="false">{{ __('Off', 'top-bar') }}</option>
-                </select>
-              </fieldset>
+                    Remove
+                  </button>
+              </div>
             </div>
-            <div class="item item-creator">
-              <button
-                v-if="localBar.columns.length > 1"
-                type="button"
-                class="top-bar-btn top-bar-icons delete mask black remove empty"
-                :title="__('Remove column', 'top-bar')"
-                @click="removeColumn(columnIndex)"
-              >
-                Remove
-              </button>
-           </div>
           </div>
         </div>
       </div>

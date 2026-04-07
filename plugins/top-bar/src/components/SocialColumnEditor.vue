@@ -1,5 +1,5 @@
 <template>
-  <div class="item-creator lg">
+  <div class="item-creator grid-3">
     <fieldset class="line">
       <legend class="bold">{{ __('Choose the icon appearance', 'top-bar') }}</legend>
       <label v-for="opt in iconStyleOptions" :key="opt.value" :class="['radio', { 'bg-grey radio': opt.value === 'white' }]">
@@ -31,7 +31,7 @@
       </label>
     </fieldset>
 
-    <div v-if="column.icon_style === 'rounded' || column.icon_style === 'square'" class="top-bar-grid">
+    <div v-if="column.icon_style === 'rounded' || column.icon_style === 'square'" class="top-bar-grid options">
       <div class="item">
         <fieldset class="line">
           <legend class="bold">{{ __('Background color', 'top-bar') }}</legend>
@@ -60,6 +60,7 @@
         <fieldset class="line vertical">
           <legend class="bold">{{ __('Border size & Color', 'top-bar') }}</legend>
           <select
+            class="border"
             :id="`social_icon_border_width_${barId}_${columnId}`"
             :value="column.icon_border_width"
             @change="onBorderWidthChange"
@@ -98,10 +99,10 @@
           <div class="item-creator no">
             <p class="bold md">{{ index + 1 }}</p>
           </div>
-          <div class="item-creator grid-2 vertical">
-            <label class="screen-reader-text" :for="`social_platform_${barId}_${columnId}_${index}`">
+          <div class="item-creator vertical">
+            <!-- <label class="screen-reader-text" :for="`social_platform_${barId}_${columnId}_${index}`">
               {{ __('Social network', 'top-bar') }}
-            </label>
+            </label> -->
             <select
               :id="`social_platform_${barId}_${columnId}_${index}`"
               :value="column.links[index]?.platform ?? ''"
@@ -112,9 +113,9 @@
                 {{ platformLabel(p) }}
               </option>
             </select>
-            <label class="screen-reader-text" :for="`social_url_${barId}_${columnId}_${index}`">
+            <!-- <label class="screen-reader-text" :for="`social_url_${barId}_${columnId}_${index}`">
               {{ __('Profile link', 'top-bar') }}
-            </label>
+            </label> -->
             <input
               :id="`social_url_${barId}_${columnId}_${index}`"
               type="url"
@@ -263,7 +264,7 @@ function removeLink(index: number) {
   margin-bottom: 6px;
 }
 
-.screen-reader-text {
+/* .screen-reader-text {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -273,5 +274,5 @@ function removeLink(index: number) {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
-}
+} */
 </style>

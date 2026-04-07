@@ -25,7 +25,7 @@
 
     <div
       v-if="model.scheduled_enabled"
-      class="top-bar-grid bg bg-amber top-bar-lifetime-panel"
+      class="top-bar-grid bg bg-amber top-bar-lifetime-panel options"
     >
       <div class="item">
         <fieldset class="clear">
