@@ -595,7 +595,6 @@
 
   select {
     width: 100%;
-    min-width: 100%;
     height: 46px;
     max-height: none;
     border: 1px solid fade(@black,20);
@@ -619,6 +618,10 @@
       6px 6px,
       100% 100%;
     background-repeat: no-repeat;
+
+    @media (max-width: 1280px) {     
+      min-width: 100%;
+    }
 
     &:focus {
       border:1px solid fade(@black,60);
