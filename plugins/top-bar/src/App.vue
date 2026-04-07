@@ -32,7 +32,7 @@
         <p class="xlg bold">{{ __('Welcome to Top Bar plugin', 'top-bar') }}</p>
         <p class="xs">{{ __('Click the button to add your first Top Bar', 'top-bar') }}</p>
         <button
-          v-if="canAddBar"
+          :disabled="!canAddBar"
           type="button"
           class="top-bar-btn mint md"
           :title="addBarTooltip"
@@ -46,10 +46,9 @@
       <template v-else>
         <div class="top-bar-row rt">
           <button
-            v-if="canAddBar"
             type="button"
             class="top-bar-btn mint sm"
-            :disabled="isAdding"
+            :disabled="!canAddBar || isAdding"
             :title="addBarTooltip"
             @click="handleAddBar"
           >

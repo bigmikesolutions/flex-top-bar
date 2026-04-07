@@ -190,7 +190,9 @@
                 <legend class="bold">{{ __('Size column', 'top-bar') }}</legend>
                 <label>
                   <select
-                    :value="column.size_percent"
+                    :value="maxColumns <= 1 ? 100 : column.size_percent"
+                    :disabled="maxColumns <= 1"
+                    :title="columnSizeTooltip"
                     @change="onColumnSizeChange(columnIndex, $event)"
                   >
                     <option :value="10">10%</option>
@@ -439,6 +441,13 @@ const emit = defineEmits<{
 const localBar = ref<Bar>(withColumns(cloneBar(props.bar)))
 const isExpanded = ref(props.bar.admin_visibile !== false)
 
+function normalizeColumnSizesForPlan() {
+  if (maxColumns.value > 1) return
+  if (!localBar.value.columns?.length) return
+  const cols = localBar.value.columns.map((c) => ({ ...c, size_percent: 100 }))
+  localBar.value = { ...localBar.value, columns: cols }
+}
+
 const visibilityToggleTooltip = computed(() =>
   localBar.value.visible
     ? __('Hide this bar on the site', 'top-bar')
@@ -497,6 +506,20 @@ const addColumnTooltip = computed(() => {
   return `${lead} ${tail}`
 })
 
+const columnSizeTooltip = computed(() => {
+  const max = maxColumns.value
+  if (max > 1) return ''
+  const tail = __(
+    'If you want to change limits, check other plans on the plugin page or contact us.',
+    'top-bar',
+  )
+  const lead = __(
+    'Your plan allows only one column, so the column size is fixed.',
+    'top-bar',
+  )
+  return `${lead} ${tail}`
+})
+
 const scheduleSectionTooltip = computed(() => {
   const tail = __(
     'Set start and end dates to control when the bar is visible.',
@@ -518,6 +541,7 @@ watch(
   () => [props.bar.id, JSON.stringify(props.bar.columns ?? null)] as const,
   () => {
     localBar.value = withColumns(cloneBar(props.bar))
+    normalizeColumnSizesForPlan()
     isExpanded.value = props.bar.admin_visibile !== false
   },
   { immediate: true },
@@ -653,6 +677,7 @@ function toggleExpanded() {
 }
 
 function saveChanges() {
+  normalizeColumnSizesForPlan()
   syncBarRootForPersist()
   emit('update', props.bar.id, localBar.value)
 }

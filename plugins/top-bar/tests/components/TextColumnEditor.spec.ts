@@ -64,6 +64,28 @@ describe('TextColumnEditor', () => {
     expect(wrapper.emitted('update')?.[0]).toEqual([{ effect: 'slider' }])
   })
 
+  it('disables effect and forces none when only one message is allowed', () => {
+    const wrapper = mount(TextColumnEditor, {
+      props: { ...defaultProps, effect: 'slider', maxMessages: 1 },
+    })
+
+    const select = wrapper.find('#effect_bar_1_col_1')
+    expect(select.attributes('disabled')).toBeDefined()
+    expect((select.element as HTMLSelectElement).value).toBe('none')
+
+    // Normalizes persisted value so parents don't keep a non-none effect.
+    expect(wrapper.emitted('update')?.[0]).toEqual([{ effect: 'none' }])
+  })
+
+  it('does not emit effect changes when effect select is disabled', async () => {
+    const wrapper = mount(TextColumnEditor, {
+      props: { ...defaultProps, effect: 'none', maxMessages: 1 },
+    })
+    const select = wrapper.find('#effect_bar_1_col_1')
+    await select.setValue('slider')
+    expect(wrapper.emitted('update')).toBeFalsy()
+  })
+
   it('emits patch on message input without commit', async () => {
     const wrapper = mount(TextColumnEditor, { props: defaultProps })
 
