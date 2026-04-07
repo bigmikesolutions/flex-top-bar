@@ -3,7 +3,7 @@ import { mount } from '@vue/test-utils'
 import AdminBarView from '@/components/AdminBarView.vue'
 import ColumnTypeSelector from '@/components/ColumnTypeSelector.vue'
 import TextColumnEditor from '@/components/TextColumnEditor.vue'
-import type { Bar, BarColumn } from '@/types'
+import type { Bar, BarColumn, TextBarColumn } from '@/types'
 
 // Mock @wordpress/i18n
 vi.mock('@wordpress/i18n', () => ({
@@ -18,7 +18,7 @@ vi.mock('@wordpress/i18n', () => ({
 }))
 
 describe('AdminBarView', () => {
-  const mockColumn: BarColumn = {
+  const mockColumn: TextBarColumn = {
     id: 'col_test',
     type: 'text',
     effect: 'none',
@@ -82,6 +82,7 @@ describe('AdminBarView', () => {
         effect: 'blink',
         messages: ['Second', ''],
         size_percent: 50,
+        content_position: 'center',
         messages_mobile_visible: true,
       }
       const barTwoCols: Bar = {
@@ -574,7 +575,7 @@ describe('AdminBarView', () => {
         props: { ...defaultProps, scheduleEnabled: false },
       })
       expect(wrapper.text()).toContain('Scheduled')
-      expect(wrapper.text()).toContain('Not available on your plan.')
+      expect(wrapper.text()).toContain('Schedule when the bar should be visible.')
       const checkbox = wrapper.find('.top-bar-toggle-life-time')
       expect((checkbox.element as HTMLInputElement).disabled).toBe(true)
     })
@@ -583,7 +584,9 @@ describe('AdminBarView', () => {
       const wrapper = mount(AdminBarView, { props: defaultProps })
       const checkbox = wrapper.find('.top-bar-toggle-life-time')
 
-      await checkbox.setChecked(true)
+      ;(checkbox.element as HTMLInputElement).checked = true
+      await checkbox.trigger('change')
+      await wrapper.vm.$nextTick()
 
       expect(wrapper.emitted('update')).toBeTruthy()
       const updateEvent = wrapper.emitted('update')?.[0]
@@ -597,6 +600,7 @@ describe('AdminBarView', () => {
           bar: { ...mockBar, scheduled_enabled: true },
         },
       })
+      await wrapper.vm.$nextTick()
 
       expect(wrapper.find('#scheduled_from_bar_1').exists()).toBe(true)
       expect(wrapper.find('#scheduled_to_bar_1').exists()).toBe(true)
@@ -616,6 +620,7 @@ describe('AdminBarView', () => {
           bar: { ...mockBar, scheduled_enabled: true },
         },
       })
+      await wrapper.vm.$nextTick()
 
       const fromInput = wrapper.find('#scheduled_from_bar_1')
       await fromInput.setValue('2026-03-25T10:00')
@@ -635,6 +640,7 @@ describe('AdminBarView', () => {
           bar: { ...mockBar, scheduled_enabled: true },
         },
       })
+      await wrapper.vm.$nextTick()
 
       const toInput = wrapper.find('#scheduled_to_bar_1')
       await toInput.setValue('2026-03-25T18:00')

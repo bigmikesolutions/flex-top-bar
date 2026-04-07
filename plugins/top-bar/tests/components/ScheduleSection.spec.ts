@@ -50,7 +50,7 @@ describe('ScheduleSection', () => {
       },
     })
     expect(wrapper.text()).toContain('Scheduled')
-    expect(wrapper.text()).toContain('Not available on your plan.')
+    expect(wrapper.text()).toContain('Schedule when the bar should be visible.')
     const checkbox = wrapper.find('.top-bar-toggle-life-time')
     expect((checkbox.element as HTMLInputElement).disabled).toBe(true)
   })

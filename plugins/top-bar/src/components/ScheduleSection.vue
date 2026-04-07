@@ -72,7 +72,7 @@
             <p class="bold lg">{{ __('Scheduled', 'top-bar') }}</p>
           </span>
           <span class="lifetime-description">
-            <p class="xs">{{ __('Not available on your plan.', 'top-bar') }}</p>
+            <p class="xs">{{ __('Schedule when the bar should be visible.', 'top-bar') }}</p>
           </span>
         </label>
       </div>
