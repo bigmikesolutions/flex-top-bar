@@ -55,4 +55,9 @@ SEO / KEYWORDS (optional)
 -------------------------
 announcement bar, notification bar, hello bar, promo bar, top bar, bottom bar, sticky bar, social bar, contact bar, WooCommerce banner, marketing bar, WordPress banner plugin
 
+
+DISCLAIMER (optional, short)
+----------------------------
+Flex Top Bar is provided "AS IS" without warranties of any kind. Use at your own risk. To the maximum extent permitted by law, the author is not liable for any damages or losses arising from use of the plugin.
+
 ================================================================================

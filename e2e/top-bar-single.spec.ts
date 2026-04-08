@@ -199,30 +199,27 @@ test.describe('single-bar', () => {
       const barRow = page.locator('.top-bar-row.bg').nth(0);
 
       // Scheduling is a plan feature flag (FF_SCHEDULE). Skip if disabled in this environment.
-      const scheduleDisabled = await barRow
-        .locator('.top-bar-life-time-checkbox')
-        .evaluate((el) => el.classList.contains('top-bar-schedule--disabled'))
-        .catch(() => false);
-      test.skip(scheduleDisabled, 'Scheduling feature flag is disabled (FF_SCHEDULE=false).');
+      const scheduleToggle = barRow.locator('.top-bar-toggle-life-time');
+      const toggleDisabled = await scheduleToggle.isDisabled().catch(() => false);
+      test.skip(toggleDisabled, 'Scheduling feature flag is disabled (FF_SCHEDULE=false).');
 
-      // Enable scheduling (Vue auto-saves on change)
-      const scheduleSave = waitForTopBarPut(page);
-      await barRow.locator('label.top-bar-life-time-checkbox').click();
-      await scheduleSave;
+      // Enable scheduling (Vue auto-saves on change).
+      if (!(await scheduleToggle.isChecked().catch(() => false))) {
+        await Promise.all([
+          waitForTopBarPut(page),
+          scheduleToggle.check({ force: true }),
+        ]);
+      }
 
-      await expect(barRow.locator('.top-bar-toggle-life-time')).toBeChecked({ timeout: 15000 });
+      await expect(scheduleToggle).toBeChecked({ timeout: 15000 });
+
+      const schedulePanel = barRow.locator('.top-bar-lifetime-panel');
+      await expect(schedulePanel).toBeVisible({ timeout: 15000 });
 
       // Find schedule inputs by labels (IDs can vary if bar IDs differ).
-      const fromInput = barRow
-        .locator('fieldset')
-        .filter({ has: barRow.locator('legend', { hasText: 'From' }) })
-        .locator('input[type="datetime-local"]')
-        .first();
-      const toInput = barRow
-        .locator('fieldset')
-        .filter({ has: barRow.locator('legend', { hasText: 'To' }) })
-        .locator('input[type="datetime-local"]')
-        .first();
+      const dateInputs = schedulePanel.locator('input.top-bar-life-time-datetime[type="datetime-local"]');
+      const fromInput = dateInputs.nth(0);
+      const toInput = dateInputs.nth(1);
       await expect(fromInput).toBeVisible({ timeout: 15000 });
       await expect(toInput).toBeVisible({ timeout: 15000 });
       await fromInput.fill('2099-03-21T11:00');
@@ -257,11 +254,9 @@ test.describe('single-bar', () => {
       const barId = await getBarIdByIndex(page, 0);
       const barRow = page.locator('.top-bar-row.bg').nth(0);
 
-      const scheduleDisabled = await barRow
-        .locator('.top-bar-life-time-checkbox')
-        .evaluate((el) => el.classList.contains('top-bar-schedule--disabled'))
-        .catch(() => false);
-      test.skip(scheduleDisabled, 'Scheduling feature flag is disabled (FF_SCHEDULE=false).');
+      const scheduleToggle = barRow.locator('.top-bar-toggle-life-time');
+      const toggleDisabled = await scheduleToggle.isDisabled().catch(() => false);
+      test.skip(toggleDisabled, 'Scheduling feature flag is disabled (FF_SCHEDULE=false).');
 
       // Wide range around now to avoid timezone edge cases.
       const now = new Date();
@@ -270,22 +265,21 @@ test.describe('single-bar', () => {
       const fromValue = toDatetimeLocalValue(from);
       const toValue = toDatetimeLocalValue(to);
 
-      const scheduleSave2 = waitForTopBarPut(page);
-      await barRow.locator('label.top-bar-life-time-checkbox').click();
-      await scheduleSave2;
+      if (!(await scheduleToggle.isChecked().catch(() => false))) {
+        await Promise.all([
+          waitForTopBarPut(page),
+          scheduleToggle.check({ force: true }),
+        ]);
+      }
 
-      await expect(barRow.locator('.top-bar-toggle-life-time')).toBeChecked({ timeout: 15000 });
+      await expect(scheduleToggle).toBeChecked({ timeout: 15000 });
 
-      const fromInput = barRow
-        .locator('fieldset')
-        .filter({ has: barRow.locator('legend', { hasText: 'From' }) })
-        .locator('input[type="datetime-local"]')
-        .first();
-      const toInput = barRow
-        .locator('fieldset')
-        .filter({ has: barRow.locator('legend', { hasText: 'To' }) })
-        .locator('input[type="datetime-local"]')
-        .first();
+      const schedulePanel = barRow.locator('.top-bar-lifetime-panel');
+      await expect(schedulePanel).toBeVisible({ timeout: 15000 });
+
+      const dateInputs = schedulePanel.locator('input.top-bar-life-time-datetime[type="datetime-local"]');
+      const fromInput = dateInputs.nth(0);
+      const toInput = dateInputs.nth(1);
       await expect(fromInput).toBeVisible({ timeout: 15000 });
       await expect(toInput).toBeVisible({ timeout: 15000 });
       await fromInput.fill(fromValue);

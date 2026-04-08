@@ -98,12 +98,25 @@ export async function loginAndOpenTopBarSettings(page: Page): Promise<void> {
     await loginInput.first().fill(ADMIN_USER);
     await page.locator('input[name="pwd"]').first().fill(ADMIN_PASS);
     const submit = page.locator('input[name="wp-submit"]').first();
-    await Promise.all([
-      // `waitForURL` defaults to waiting for the full "load" event; WP admin often keeps the page
-      // "loading" longer than necessary. `domcontentloaded` is enough for our subsequent UI checks.
-      page.waitForURL(WP_ADMIN_URL_REGEX, { timeout: 45000, waitUntil: 'domcontentloaded' }),
-      submit.click(),
-    ]);
+    try {
+      await Promise.all([
+        // `waitForURL` defaults to waiting for the full "load" event; WP admin often keeps the page
+        // "loading" longer than necessary. `domcontentloaded` is enough for our subsequent UI checks.
+        page.waitForURL(WP_ADMIN_URL_REGEX, { timeout: 45000, waitUntil: 'domcontentloaded' }),
+        submit.click(),
+      ]);
+    } catch (err) {
+      // WP login can trigger navigation races (redirects / frame detach) that surface as ERR_ABORTED.
+      // If that happens, proceed and rely on the subsequent settings open + readiness checks.
+      const msg = String((err as any)?.message ?? err);
+      const isRetryable =
+        msg.includes('net::ERR_ABORTED') ||
+        msg.toLowerCase().includes('frame was detached') ||
+        msg.toLowerCase().includes('navigation');
+      if (!isRetryable) {
+        throw err;
+      }
+    }
   }
 
   await gotoSettings();
