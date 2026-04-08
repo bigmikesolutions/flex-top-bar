@@ -3,7 +3,7 @@
     <!-- Navigation -->
     <div class="top-bar-nav">
       <div class="item name">
-        <p class="lg bold">{{ bar.name || __('Flex Top Bar', 'top-bar') }}</p>
+        <p class="lg bold">{{ bar.name || __('Flex Top Bar', 'flex-top-bar') }}</p>
       </div>
 
       <div class="item nav">
@@ -19,8 +19,8 @@
           v-if="canDelete"
           type="button"
           class="top-bar-icons mask black delete"
-          :title="__('Delete this top bar', 'top-bar')"
-          :aria-label="__('Delete this top bar', 'top-bar')"
+          :title="__('Delete this top bar', 'flex-top-bar')"
+          :aria-label="__('Delete this top bar', 'flex-top-bar')"
           @click="handleDelete"
         >
         </button>
@@ -29,8 +29,8 @@
           type="button"
           class="top-bar-icons mask black delete"
           disabled
-          :title="__('Cannot delete: at least one top bar must remain', 'top-bar')"
-          :aria-label="__('Cannot delete: at least one top bar must remain', 'top-bar')"
+          :title="__('Cannot delete: at least one top bar must remain', 'flex-top-bar')"
+          :aria-label="__('Cannot delete: at least one top bar must remain', 'flex-top-bar')"
         >
         </button>
         <button
@@ -66,12 +66,12 @@
       <div class="top-bar-grid">
         <div class="item">
           <fieldset class="clear">
-            <legend class="bold lg">{{ __('Name', 'top-bar') }}</legend>
+            <legend class="bold lg">{{ __('Name', 'flex-top-bar') }}</legend>
             <input
               :id="`name_${bar.id}`"
               v-model="localBar.name"
               type="text"
-              :placeholder="__('Name of Top Bar', 'top-bar')"
+              :placeholder="__('Name of Top Bar', 'flex-top-bar')"
               @blur="saveChanges"
             />
           </fieldset>
@@ -93,10 +93,10 @@
         style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 16px; width: 100%; box-sizing: border-box;"
       >
         <div class="item" style="flex: 1 1 220px; min-width: 0;">
-          <p class="bold lg">{{ __('Create a design', 'top-bar') }}</p>
+          <p class="bold lg">{{ __('Create a design', 'flex-top-bar') }}</p>
           <p class="xs">
             {{
-              __('Create your own top bar. You can add a maximum of %d columns, choosing different types of content.', 'top-bar')
+              __('Create your own top bar. You can add a maximum of %d columns, choosing different types of content.', 'flex-top-bar')
                 .replace('%d', String(maxColumns))
             }}
           </p>
@@ -112,7 +112,7 @@
             :title="addColumnTooltip"
             @click="addColumn"
           >
-            {{ __('Add column', 'top-bar') }}
+            {{ __('Add column', 'flex-top-bar') }}
           </button>
         </div>
       </div>
@@ -137,7 +137,7 @@
                 v-if="localBar.columns.length > 1"
                 type="button"
                 class="top-bar-btn drag-drop"
-                :title="__('Drag to reorder columns', 'top-bar')"
+                :title="__('Drag to reorder columns', 'flex-top-bar')"
                 draggable="true"
                 @dragstart="onDragStart(columnIndex, $event)"
                 @dragend="onDragEnd"
@@ -186,7 +186,7 @@
 
                 <div class="item item-creator">
                   <fieldset>
-                    <legend class="bold">{{ __('Size column', 'top-bar') }}</legend>
+                    <legend class="bold">{{ __('Size column', 'flex-top-bar') }}</legend>
                     <label>
                       <select
                         :value="maxColumns <= 1 ? 100 : column.size_percent"
@@ -204,21 +204,21 @@
                     </label>
                   </fieldset>
                   <fieldset>
-                    <legend class="bold">{{ __('Content position', 'top-bar') }}</legend>
+                    <legend class="bold">{{ __('Content position', 'flex-top-bar') }}</legend>
                     <select :value="column.content_position" @change="onColumnContentPositionChange(columnIndex, $event)">
-                      <option value="left">{{ __('Left', 'top-bar') }}</option>
-                      <option value="center">{{ __('Center', 'top-bar') }}</option>
-                      <option value="right">{{ __('Right', 'top-bar') }}</option>
+                      <option value="left">{{ __('Left', 'flex-top-bar') }}</option>
+                      <option value="center">{{ __('Center', 'flex-top-bar') }}</option>
+                      <option value="right">{{ __('Right', 'flex-top-bar') }}</option>
                     </select>
                   </fieldset>
                   <fieldset>
-                    <legend class="bold">{{ __('Visible on the mobile', 'top-bar') }}</legend>
+                    <legend class="bold">{{ __('Visible on the mobile', 'flex-top-bar') }}</legend>
                     <select
                       :value="column.messages_mobile_visible"
                       @change="onColumnMobileVisibleChange(columnIndex, $event)"
                     >
-                      <option :value="true">{{ __('On', 'top-bar') }}</option>
-                      <option :value="false">{{ __('Off', 'top-bar') }}</option>
+                      <option :value="true">{{ __('On', 'flex-top-bar') }}</option>
+                      <option :value="false">{{ __('Off', 'flex-top-bar') }}</option>
                     </select>
                   </fieldset>
                 </div>
@@ -227,7 +227,7 @@
                     v-if="localBar.columns.length > 1"
                     type="button"
                     class="top-bar-btn top-bar-icons delete mask black remove empty"
-                    :title="__('Remove column', 'top-bar')"
+                    :title="__('Remove column', 'flex-top-bar')"
                     @click="removeColumn(columnIndex)"
                   >
                     Remove
@@ -450,8 +450,8 @@ function normalizeColumnSizesForPlan() {
 
 const visibilityToggleTooltip = computed(() =>
   localBar.value.visible
-    ? __('Hide this bar on the site', 'top-bar')
-    : __('Show this bar on the site', 'top-bar'),
+    ? __('Hide this bar on the site', 'flex-top-bar')
+    : __('Show this bar on the site', 'flex-top-bar'),
 )
 
 function stripAdminOnlyFields(b: Bar): unknown {
@@ -476,8 +476,8 @@ const hasUnpublishedChanges = computed(() => {
 
 const publishButtonTooltip = computed(() =>
   hasUnpublishedChanges.value
-    ? __('Pending changes ready to be published', 'top-bar')
-    : __('There are no changes to publish', 'top-bar'),
+    ? __('Pending changes ready to be published', 'flex-top-bar')
+    : __('There are no changes to publish', 'flex-top-bar'),
 )
 
 const addColumnTooltip = computed(() => {
@@ -485,11 +485,11 @@ const addColumnTooltip = computed(() => {
   const count = localBar.value.columns.length
   const tail = __(
     'If you want to change limits, check other plans on the plugin page or contact us.',
-    'top-bar',
+    'flex-top-bar',
   )
   if (count >= max) {
     const lead = sprintf(
-      __('You have reached the maximum of %1$d columns for your plan.', 'top-bar'),
+      __('You have reached the maximum of %1$d columns for your plan.', 'flex-top-bar'),
       max,
     )
     return `${lead} ${tail}`
@@ -498,7 +498,7 @@ const addColumnTooltip = computed(() => {
   const lead = sprintf(
     __(
       'Your plan allows you to add yet %1$d more column(s) out of %2$d.',
-      'top-bar',
+      'flex-top-bar',
     ),
     remaining,
     max,
@@ -511,11 +511,11 @@ const columnSizeTooltip = computed(() => {
   if (max > 1) return ''
   const tail = __(
     'If you want to change limits, check other plans on the plugin page or contact us.',
-    'top-bar',
+    'flex-top-bar',
   )
   const lead = __(
     'Your plan allows only one column, so the column size is fixed.',
-    'top-bar',
+    'flex-top-bar',
   )
   return `${lead} ${tail}`
 })
@@ -523,15 +523,15 @@ const columnSizeTooltip = computed(() => {
 const scheduleSectionTooltip = computed(() => {
   const tail = __(
     'Set start and end dates to control when the bar is visible.',
-    'top-bar',
+    'flex-top-bar',
   )
   if (!props.scheduleEnabled) {
-    const lead = __("Your plan doesn't include scheduling.", 'top-bar')
+    const lead = __("Your plan doesn't include scheduling.", 'flex-top-bar')
     return `${lead} ${tail}`
   }
   const lead = __(
     'Your plan includes scheduling for this top bar. ',
-    'top-bar',
+    'flex-top-bar',
   )
   return `${lead} ${tail}`
 })
@@ -683,13 +683,13 @@ function saveChanges() {
 }
 
 function handleDelete() {
-  if (confirm(__('Are you sure you want to delete this bar?', 'top-bar'))) {
+  if (confirm(__('Are you sure you want to delete this bar?', 'flex-top-bar'))) {
     emit('delete', props.bar.id)
   }
 }
 
 async function handlePublish() {
-  if (!confirm(__('Publish changes to frontend?', 'top-bar'))) {
+  if (!confirm(__('Publish changes to frontend?', 'flex-top-bar'))) {
     return
   }
   emit('publish', props.bar.id)

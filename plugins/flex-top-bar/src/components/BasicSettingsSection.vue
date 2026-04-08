@@ -2,21 +2,21 @@
   <div>
     <div class="top-bar-grid title">
       <div class="item">
-        <p class="bold lg">{{ __('Basic settings', 'top-bar') }}</p>
+        <p class="bold lg">{{ __('Basic settings', 'flex-top-bar') }}</p>
       </div>
     </div>
 
     <div class="top-bar-grid bg bg-blue options">
       <div class="item">
         <fieldset class="clear">
-          <legend class="bold">{{ __('Position', 'top-bar') }}</legend>
+          <legend class="bold">{{ __('Position', 'flex-top-bar') }}</legend>
           <select
             :id="`position_${model.id}`"
             v-model="model.position"
             @change="emit('save')"
           >
-            <option value="top">{{ __('Top', 'top-bar') }}</option>
-            <option value="bottom">{{ __('Bottom', 'top-bar') }}</option>
+            <option value="top">{{ __('Top', 'flex-top-bar') }}</option>
+            <option value="bottom">{{ __('Bottom', 'flex-top-bar') }}</option>
           </select>
         </fieldset>
       </div>
@@ -30,7 +30,7 @@
       </div> -->
       <div class="item">
         <fieldset class="clear">
-          <legend class="bold">{{ __('Background', 'top-bar') }}</legend>
+          <legend class="bold">{{ __('Background', 'flex-top-bar') }}</legend>
           <input
             :id="`bg_color_${model.id}`"
             v-model="model.bg_color"
@@ -41,7 +41,7 @@
       </div>
       <div class="item">
         <fieldset class="clear">
-          <legend class="bold">{{ __('Border frame', 'top-bar') }}</legend>
+          <legend class="bold">{{ __('Border frame', 'flex-top-bar') }}</legend>
           <div class="top-bar-border-frame-controls">
             <input
               :id="`frame_color_${model.id}`"
@@ -61,16 +61,16 @@
       </div>
       <div class="item">
         <fieldset class="clear">
-          <legend class="bold">{{ __('On scroll', 'top-bar') }}</legend>
+          <legend class="bold">{{ __('On scroll', 'flex-top-bar') }}</legend>
           <select
             :id="`hide_on_scroll_${model.id}`"
             v-model="model.hide_on_scroll"
             @change="emit('save')"
           >
-            <option :value="false">{{ __('Keep showing', 'top-bar') }}</option>
-            <option :value="true">{{ __('Hide on scroll', 'top-bar') }}</option>
+            <option :value="false">{{ __('Keep showing', 'flex-top-bar') }}</option>
+            <option :value="true">{{ __('Hide on scroll', 'flex-top-bar') }}</option>
           </select>
-          <p class="xs">{{ __('Whether the bar stays visible or hides when the user scrolls the page.', 'top-bar') }}</p>
+          <p class="xs">{{ __('Whether the bar stays visible or hides when the user scrolls the page.', 'flex-top-bar') }}</p>
         </fieldset>
       </div>
     </div>

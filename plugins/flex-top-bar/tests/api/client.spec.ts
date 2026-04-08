@@ -7,7 +7,7 @@ global.fetch = vi.fn()
 // Mock window.topBarConfig before importing
 beforeAll(() => {
   global.window.topBarConfig = {
-    apiRoot: '/wp-json/top-bar/v1',
+    apiRoot: '/wp-json/flex-top-bar/v1',
     nonce: 'test-nonce-123',
   }
 })
@@ -61,7 +61,7 @@ describe('ApiClient', () => {
       const result = await api.getBars()
 
       expect(fetch).toHaveBeenCalledWith(
-        '/wp-json/top-bar/v1/bars',
+        '/wp-json/flex-top-bar/v1/bars',
         expect.objectContaining({
           headers: expect.objectContaining({
             'Content-Type': 'application/json',
@@ -105,7 +105,7 @@ describe('ApiClient', () => {
       const result = await api.getPublishedBars()
 
       expect(fetch).toHaveBeenCalledWith(
-        '/wp-json/top-bar/v1/published-bars',
+        '/wp-json/flex-top-bar/v1/published-bars',
         expect.objectContaining({
           headers: expect.objectContaining({
             'Content-Type': 'application/json',
@@ -127,7 +127,7 @@ describe('ApiClient', () => {
       const result = await api.publish()
 
       expect(fetch).toHaveBeenCalledWith(
-        '/wp-json/top-bar/v1/publish',
+        '/wp-json/flex-top-bar/v1/publish',
         expect.objectContaining({
           method: 'POST',
           headers: expect.objectContaining({
@@ -150,7 +150,7 @@ describe('ApiClient', () => {
       const result = await api.publishBar('bar_1')
 
       expect(fetch).toHaveBeenCalledWith(
-        '/wp-json/top-bar/v1/bars/bar_1/publish',
+        '/wp-json/flex-top-bar/v1/bars/bar_1/publish',
         expect.objectContaining({
           method: 'POST',
           headers: expect.objectContaining({
@@ -207,7 +207,7 @@ describe('ApiClient', () => {
       const result = await api.createBar(newBar)
 
       expect(fetch).toHaveBeenCalledWith(
-        '/wp-json/top-bar/v1/bars',
+        '/wp-json/flex-top-bar/v1/bars',
         expect.objectContaining({
           method: 'POST',
           body: JSON.stringify(newBar),
@@ -264,7 +264,7 @@ describe('ApiClient', () => {
       const result = await api.updateBar('bar_1', updates)
 
       expect(fetch).toHaveBeenCalledWith(
-        '/wp-json/top-bar/v1/bars/bar_1',
+        '/wp-json/flex-top-bar/v1/bars/bar_1',
         expect.objectContaining({
           method: 'PUT',
           body: JSON.stringify(updates),
@@ -287,7 +287,7 @@ describe('ApiClient', () => {
       const result = await api.deleteBar('bar_1')
 
       expect(fetch).toHaveBeenCalledWith(
-        '/wp-json/top-bar/v1/bars/bar_1',
+        '/wp-json/flex-top-bar/v1/bars/bar_1',
         expect.objectContaining({
           method: 'DELETE',
           headers: expect.objectContaining({
@@ -316,7 +316,7 @@ describe('ApiClient', () => {
       const result = await api.getFeatureFlags()
 
       expect(fetch).toHaveBeenCalledWith(
-        '/wp-json/top-bar/v1/feature-flags',
+        '/wp-json/flex-top-bar/v1/feature-flags',
         expect.objectContaining({
           headers: expect.objectContaining({
             'Content-Type': 'application/json',
@@ -340,7 +340,7 @@ describe('ApiClient', () => {
       const { api: newApi } = await import('@/api/client')
       await newApi.getBars()
 
-      expect(fetch).toHaveBeenCalledWith('/wp-json/top-bar/v1/bars', {
+      expect(fetch).toHaveBeenCalledWith('/wp-json/flex-top-bar/v1/bars', {
         headers: {
           'Content-Type': 'application/json',
           'X-WP-Nonce': '',

@@ -1,7 +1,7 @@
 <template>
   <div class="item-creator grid-3">
     <fieldset class="line">
-      <legend class="bold">{{ __('Choose the icon appearance', 'top-bar') }}</legend>
+      <legend class="bold">{{ __('Choose the icon appearance', 'flex-top-bar') }}</legend>
       <label v-for="opt in iconStyleOptions" :key="opt.value" :class="['radio', { 'bg-grey radio': opt.value === 'white' }]">
         <input
           type="radio"
@@ -32,7 +32,7 @@
     <div v-if="column.icon_style === 'rounded' || column.icon_style === 'square'" class="top-bar-grid options">
       <div class="item">
         <fieldset class="line">
-          <legend class="bold">{{ __('Background color', 'top-bar') }}</legend>
+          <legend class="bold">{{ __('Background color', 'flex-top-bar') }}</legend>
           <input
             :id="`contact_bg_${barId}_${columnId}`"
             type="color"
@@ -44,7 +44,7 @@
       </div>
       <div class="item">
         <fieldset class="line">
-          <legend class="bold">{{ __('Color icon', 'top-bar') }}</legend>
+          <legend class="bold">{{ __('Color icon', 'flex-top-bar') }}</legend>
           <input
             :id="`contact_icon_${barId}_${columnId}`"
             type="color"
@@ -56,7 +56,7 @@
       </div>
       <div class="item">
         <fieldset class="line vertical">
-          <legend class="bold">{{ __('Border size & Color', 'top-bar') }}</legend>
+          <legend class="bold">{{ __('Border size & Color', 'flex-top-bar') }}</legend>
           <select
             class="border"
             :id="`contact_icon_border_width_${barId}_${columnId}`"
@@ -87,7 +87,7 @@
     </div>
 
     <fieldset class="line">
-      <legend class="bold">{{ __('Add your contact', 'top-bar') }}</legend>
+      <legend class="bold">{{ __('Add your contact', 'flex-top-bar') }}</legend>
       <div class="top-bar-message-list">
         <div
           v-for="(_entry, index) in column.contacts"
@@ -99,26 +99,26 @@
           </div>
           <div class="item-creator vertical">
             <!-- <label class="screen-reader-text" :for="`contact_kind_${barId}_${columnId}_${index}`">
-              {{ __('Contact type', 'top-bar') }}
+              {{ __('Contact type', 'flex-top-bar') }}
             </label> -->
             <select
               :id="`contact_kind_${barId}_${columnId}_${index}`"
               :value="column.contacts[index]?.kind ?? ''"
               @change="onKindChange(index, $event)"
             >
-              <option value="">{{ __('Select type', 'top-bar') }}</option>
+              <option value="">{{ __('Select type', 'flex-top-bar') }}</option>
               <option v-for="k in CONTACT_KINDS" :key="k" :value="k">
                 {{ kindLabel(k) }}
               </option>
             </select>
             <!-- <label class="screen-reader-text" :for="`contact_value_${barId}_${columnId}_${index}`">
-              {{ __('Contact value', 'top-bar') }}
+              {{ __('Contact value', 'flex-top-bar') }}
             </label> -->
             <input
               :id="`contact_value_${barId}_${columnId}_${index}`"
               type="text"
               :value="column.contacts[index]?.value ?? ''"
-              :placeholder="__('Your contact details', 'top-bar')"
+              :placeholder="__('Your contact details', 'flex-top-bar')"
               @input="onValueInput(index, $event)"
               @blur="emit('commit')"
             />
@@ -144,7 +144,7 @@
         class="top-bar-btn amber sm right"
         @click="addEntry"
       >
-        {{ __('Add new contact', 'top-bar') }}
+        {{ __('Add new contact', 'flex-top-bar') }}
       </button>
     </div>
   </div>
@@ -172,13 +172,13 @@ const iconStyleOptions = getIconStyleOptions(__).filter((o) => o.value !== 'colo
 
 function kindLabel(k: ContactKind): string {
   const labels: Record<ContactKind, string> = {
-    email: __('Email', 'top-bar'),
-    phone: __('Phone', 'top-bar'),
-    mobile: __('Mobile', 'top-bar'),
-    location: __('Location', 'top-bar'),
-    chat: __('Chat', 'top-bar'),
-    website: __('Website', 'top-bar'),
-    support: __('Support', 'top-bar'),
+    email: __('Email', 'flex-top-bar'),
+    phone: __('Phone', 'flex-top-bar'),
+    mobile: __('Mobile', 'flex-top-bar'),
+    location: __('Location', 'flex-top-bar'),
+    chat: __('Chat', 'flex-top-bar'),
+    website: __('Website', 'flex-top-bar'),
+    support: __('Support', 'flex-top-bar'),
   }
   return labels[k]
 }

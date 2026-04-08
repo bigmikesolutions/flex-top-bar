@@ -5,11 +5,11 @@
 
 ## Setup Complete
 
-Freemius SDK has been integrated into the Top Bar plugin. The SDK is initialized in `top-bar.php`.
+Freemius SDK has been integrated into the Top Bar plugin. The SDK is initialized in `flex-top-bar.php`.
 
 ## Configuration
 
-Update these placeholder values in `top-bar.php` with your actual Freemius credentials:
+Update these placeholder values in `flex-top-bar.php` with your actual Freemius credentials:
 
 ```php
 'id'         => 'YOUR_PLUGIN_ID',      // Replace with your plugin ID from Freemius dashboard
@@ -20,7 +20,7 @@ To get these values:
 1. Sign up at https://freemius.com
 2. Add your plugin to the Freemius dashboard
 3. Copy the Plugin ID and Public Key from the dashboard
-4. Update the values in `top-bar.php`
+4. Update the values in `flex-top-bar.php`
 
 ## How to Add License Checks
 
@@ -94,7 +94,7 @@ if ( isset( $_GET['top_bar_add'] ) ) {
 ## Next Steps
 
 1. Create a Freemius account and register your plugin
-2. Update the plugin ID and public key in `top-bar.php`
+2. Update the plugin ID and public key in `flex-top-bar.php`
 3. Set up your pricing plans in the Freemius dashboard
 4. Test the licensing flow in a staging environment
 5. Add license checks to premium features as needed

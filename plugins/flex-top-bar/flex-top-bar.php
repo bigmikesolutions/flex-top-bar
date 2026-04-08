@@ -19,9 +19,21 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'TOP_BAR_VERSION', '0.1.0' );
-define( 'TOP_BAR_PLUGIN_FILE', __FILE__ );
-define( 'TOP_BAR_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
+// Namespaced constants to avoid collisions with other plugins.
+define( 'FLEX_TOP_BAR_VERSION', '0.1.0' );
+define( 'FLEX_TOP_BAR_PLUGIN_FILE', __FILE__ );
+define( 'FLEX_TOP_BAR_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
+
+// Backwards-compat aliases (keep older internal references working).
+if ( ! defined( 'TOP_BAR_VERSION' ) ) {
+	define( 'TOP_BAR_VERSION', FLEX_TOP_BAR_VERSION );
+}
+if ( ! defined( 'TOP_BAR_PLUGIN_FILE' ) ) {
+	define( 'TOP_BAR_PLUGIN_FILE', FLEX_TOP_BAR_PLUGIN_FILE );
+}
+if ( ! defined( 'TOP_BAR_PLUGIN_DIR' ) ) {
+	define( 'TOP_BAR_PLUGIN_DIR', FLEX_TOP_BAR_PLUGIN_DIR );
+}
 
 // Freemius integration
 if ( ! function_exists( 'ftb_fs' ) ) {

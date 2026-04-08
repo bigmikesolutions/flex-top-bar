@@ -2,8 +2,8 @@
   <div class="top-bar-grid">
     <div class="item">
       <label>
-        <p class="bold lg">{{ __('Messages', 'top-bar') }}</p>
-        <p class="xs">{{ __('Content to display in the bar', 'top-bar') }}</p>
+        <p class="bold lg">{{ __('Messages', 'flex-top-bar') }}</p>
+        <p class="xs">{{ __('Content to display in the bar', 'flex-top-bar') }}</p>
       </label>
     </div>
     <div class="item">
@@ -11,7 +11,7 @@
         <div v-for="(message, index) in localMessages" :key="index" class="top-bar-message-row">
           <textarea
             v-model="localMessages[index]"
-            :placeholder="__('Enter message...', 'top-bar')"
+            :placeholder="__('Enter message...', 'flex-top-bar')"
             rows="2"
             class="large-text"
             @blur="handleUpdate"
@@ -20,7 +20,7 @@
             v-if="canRemove(index)"
             type="button"
             class="top-bar-icons delete"
-            :title="__('Remove message', 'top-bar')"
+            :title="__('Remove message', 'flex-top-bar')"
             @click="removeMessage(index)"
           >
             <span class="dashicons dashicons-no"></span>
@@ -32,7 +32,7 @@
           class="top-bar-add-message button button-secondary"
           @click="addMessage"
         >
-          {{ __('Add Message', 'top-bar') }}
+          {{ __('Add Message', 'flex-top-bar') }}
         </button>
       </div>
     </div>

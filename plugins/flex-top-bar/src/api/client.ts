@@ -5,7 +5,7 @@ class ApiClient {
   private nonce: string
 
   constructor() {
-    this.baseUrl = window.topBarConfig?.apiRoot || '/wp-json/top-bar/v1'
+    this.baseUrl = window.topBarConfig?.apiRoot || '/wp-json/flex-top-bar/v1'
     this.nonce = window.topBarConfig?.nonce || ''
   }
 

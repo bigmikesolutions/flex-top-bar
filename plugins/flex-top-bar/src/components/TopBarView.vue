@@ -186,7 +186,7 @@ async function fetchBars() {
   try {
     // Use public endpoint (no auth required for frontend)
     // Using query string format for compatibility with sites without pretty permalinks
-    const response = await fetch('/?rest_route=/top-bar/v1/public-bars')
+    const response = await fetch('/?rest_route=/flex-top-bar/v1/public-bars')
     if (!response.ok) {
       throw new Error('Failed to fetch bars')
     }

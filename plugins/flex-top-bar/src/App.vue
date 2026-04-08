@@ -1,20 +1,20 @@
 <template>
   <div id="flex-top-bar-admin" class="wrap">
     <h1 class="top-bar-admin-title">
-      {{ __('Flex Top Bar', 'top-bar') }}
+      {{ __('Flex Top Bar', 'flex-top-bar') }}
       <span v-if="pluginVersion" class="top-bar-admin-version">v{{ pluginVersion }}</span>
     </h1>
 
     <!-- Loading state -->
     <div v-if="isLoading" class="notice notice-info">
-      <p>{{ __('Loading...', 'top-bar') }}</p>
+      <p>{{ __('Loading...', 'flex-top-bar') }}</p>
     </div>
 
     <!-- Error state -->
     <div v-else-if="barsStore.error" class="notice notice-error is-dismissible">
       <p>{{ barsStore.error }}</p>
       <button type="button" class="notice-dismiss" @click="barsStore.clearError">
-        <span class="screen-reader-text">{{ __('Dismiss this notice.', 'top-bar') }}</span>
+        <span class="screen-reader-text">{{ __('Dismiss this notice.', 'flex-top-bar') }}</span>
       </button>
     </div>
 
@@ -23,14 +23,14 @@
       <!-- Max bars warning -->
       <div v-if="showMaxBarsWarning" class="notice notice-warning">
         <p>
-          {{ __('You can add at most %d top bars.', 'top-bar').replace('%d', String(featureFlags.max_bars)) }}
+          {{ __('You can add at most %d top bars.', 'flex-top-bar').replace('%d', String(featureFlags.max_bars)) }}
         </p>
       </div>
 
       <!-- Empty state -->
       <div v-if="bars.length === 0" class="top-bar-row center empty">
-        <p class="xlg bold">{{ __('Welcome to Top Bar plugin', 'top-bar') }}</p>
-        <p class="xs">{{ __('Click the button to add your first Top Bar', 'top-bar') }}</p>
+        <p class="xlg bold">{{ __('Welcome to Top Bar plugin', 'flex-top-bar') }}</p>
+        <p class="xs">{{ __('Click the button to add your first Top Bar', 'flex-top-bar') }}</p>
         <button
           :disabled="!canAddBar"
           type="button"
@@ -38,7 +38,7 @@
           :title="addBarTooltip"
           @click="handleAddBar"
         >
-          {{ __('Add new Top Bar', 'top-bar') }}
+          {{ __('Add new Top Bar', 'flex-top-bar') }}
         </button>
       </div>
 
@@ -52,7 +52,7 @@
             :title="addBarTooltip"
             @click="handleAddBar"
           >
-            {{ isAdding ? __('Adding...', 'top-bar') : __('Add new Top Bar', 'top-bar') }}
+            {{ isAdding ? __('Adding...', 'flex-top-bar') : __('Add new Top Bar', 'flex-top-bar') }}
           </button>
         </div>
 
@@ -72,7 +72,7 @@
 
         <div class="top-bar-row rt">
           <p class="description">
-            {{ __('Changes are saved automatically.', 'top-bar') }}
+            {{ __('Changes are saved automatically.', 'flex-top-bar') }}
           </p>
         </div>
       </template>
@@ -135,21 +135,21 @@ const addBarTooltip = computed(() => {
   const lead = sprintf(
     __(
       'Your plan allows you to add yet %1$d more top bar(s) out of %2$d.',
-      'top-bar',
+      'flex-top-bar',
     ),
     remaining,
     maxBars,
   )
   const tail = __(
     'If you want to change limits, check other plans on the plugin page or contact us.',
-    'top-bar',
+    'flex-top-bar',
   )
   return `${lead} ${tail}`
 })
 
 const poweredByFooterText = computed(() =>
   sprintf(
-    __('Powered by BigMikeSolutions. All rights reserved. %d', 'top-bar'),
+    __('Powered by BigMikeSolutions. All rights reserved. %d', 'flex-top-bar'),
     new Date().getFullYear(),
   ),
 )

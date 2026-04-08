@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Build a WordPress-ready zip of the top-bar plugin (for WP.org / Freemius).
 # Run from repo: npm run package:zip -w plugins/flex-top-bar
-# Optional: ./scripts/package-zip.sh 1.0.6   (override version read from top-bar.php, for logging only)
+# Optional: ./scripts/package-zip.sh 1.0.6   (override version read from flex-top-bar.php, for logging only)
 
 set -euo pipefail
 
@@ -14,14 +14,14 @@ mkdir -p "$RELEASE_DIR"
 VERSION="${1:-}"
 if [[ -z "$VERSION" ]]; then
   VERSION="$(
-    grep -m1 'Version:' "$TOP_BAR_DIR/top-bar.php" \
+    grep -m1 'Version:' "$TOP_BAR_DIR/flex-top-bar.php" \
       | sed -E 's/.*Version:[[:space:]]+([0-9.]+).*/\1/' \
       | tr -d '\r'
   )"
 fi
 
 if [[ -z "$VERSION" ]]; then
-  echo "Could not read Version from top-bar.php; pass version as first arg." >&2
+  echo "Could not read Version from flex-top-bar.php; pass version as first arg." >&2
   exit 1
 fi
 

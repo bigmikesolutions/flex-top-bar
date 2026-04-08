@@ -15,16 +15,23 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 final class API {
 
-	private const NAMESPACE = 'top-bar/v1';
+	private const NAMESPACE_NEW = 'flex-top-bar/v1';
+	private const NAMESPACE_LEGACY = 'top-bar/v1';
 
 	public function __construct() {
 		add_action( 'rest_api_init', [ $this, 'register_routes' ] );
 	}
 
 	public function register_routes(): void {
+		$this->register_routes_for_namespace( self::NAMESPACE_NEW );
+		// Backwards-compatible alias.
+		$this->register_routes_for_namespace( self::NAMESPACE_LEGACY );
+	}
+
+	private function register_routes_for_namespace( string $ns ): void {
 		// Public endpoint for frontend (no auth required)
 		register_rest_route(
-			self::NAMESPACE,
+			$ns,
 			'/public-bars',
 			[
 				'methods'             => 'GET',
@@ -35,7 +42,7 @@ final class API {
 
 		// Get all bars
 		register_rest_route(
-			self::NAMESPACE,
+			$ns,
 			'/bars',
 			[
 				'methods'             => 'GET',
@@ -46,7 +53,7 @@ final class API {
 
 		// Get published bars (for admin "unpublished changes" indicator).
 		register_rest_route(
-			self::NAMESPACE,
+			$ns,
 			'/published-bars',
 			[
 				'methods'             => 'GET',
@@ -57,7 +64,7 @@ final class API {
 
 		// Create new bar
 		register_rest_route(
-			self::NAMESPACE,
+			$ns,
 			'/bars',
 			[
 				'methods'             => 'POST',
@@ -69,7 +76,7 @@ final class API {
 
 		// Update bar
 		register_rest_route(
-			self::NAMESPACE,
+			$ns,
 			'/bars/(?P<id>[a-z0-9_]+)',
 			[
 				'methods'             => 'PUT',
@@ -81,7 +88,7 @@ final class API {
 
 		// Delete bar
 		register_rest_route(
-			self::NAMESPACE,
+			$ns,
 			'/bars/(?P<id>[a-z0-9_]+)',
 			[
 				'methods'             => 'DELETE',
@@ -92,7 +99,7 @@ final class API {
 
 		// Publish draft -> published.
 		register_rest_route(
-			self::NAMESPACE,
+			$ns,
 			'/publish',
 			[
 				'methods'             => 'POST',
@@ -103,7 +110,7 @@ final class API {
 
 		// Publish a single bar (draft -> published).
 		register_rest_route(
-			self::NAMESPACE,
+			$ns,
 			'/bars/(?P<id>[a-z0-9_]+)/publish',
 			[
 				'methods'             => 'POST',
@@ -114,7 +121,7 @@ final class API {
 
 		// Get feature flags
 		register_rest_route(
-			self::NAMESPACE,
+			$ns,
 			'/feature-flags',
 			[
 				'methods'             => 'GET',
@@ -174,7 +181,7 @@ final class API {
 
 		if ( count( $bars ) >= FeatureFlags::instance()->max_bars() ) {
 			return new \WP_REST_Response(
-				[ 'error' => __( 'Maximum number of bars reached', 'top-bar' ) ],
+				[ 'error' => __( 'Maximum number of bars reached', 'flex-top-bar' ) ],
 				403
 			);
 		}
@@ -203,7 +210,7 @@ final class API {
 		}
 
 		return new \WP_REST_Response(
-			[ 'error' => __( 'Bar not found', 'top-bar' ) ],
+			[ 'error' => __( 'Bar not found', 'flex-top-bar' ) ],
 			404
 		);
 	}
@@ -214,7 +221,7 @@ final class API {
 
 		if ( count( $bars ) <= Options::MIN_BARS ) {
 			return new \WP_REST_Response(
-				[ 'error' => __( 'Cannot delete last bar', 'top-bar' ) ],
+				[ 'error' => __( 'Cannot delete last bar', 'flex-top-bar' ) ],
 				403
 			);
 		}
@@ -223,7 +230,7 @@ final class API {
 
 		if ( count( $filtered ) === count( $bars ) ) {
 			return new \WP_REST_Response(
-				[ 'error' => __( 'Bar not found', 'top-bar' ) ],
+				[ 'error' => __( 'Bar not found', 'flex-top-bar' ) ],
 				404
 			);
 		}
@@ -243,7 +250,7 @@ final class API {
 		$bar = Options::publish_bar( $id );
 		if ( ! is_array( $bar ) ) {
 			return new \WP_REST_Response(
-				[ 'error' => __( 'Bar not found', 'top-bar' ) ],
+				[ 'error' => __( 'Bar not found', 'flex-top-bar' ) ],
 				404
 			);
 		}

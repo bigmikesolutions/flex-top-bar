@@ -8,8 +8,8 @@
           @change="handleEnabledChange"
         />
         <span class="lifetime-label">
-          <p class="bold lg">{{ __('Scheduled', 'top-bar') }}</p>
-          <p class="xs">{{ __('Schedule when the bar should be visible', 'top-bar') }}</p>
+          <p class="bold lg">{{ __('Scheduled', 'flex-top-bar') }}</p>
+          <p class="xs">{{ __('Schedule when the bar should be visible', 'flex-top-bar') }}</p>
         </span>
       </label>
     </div>
@@ -19,8 +19,8 @@
     <div class="top-bar-grid">
       <div class="item">
         <label :for="`scheduled_from_${barId}`">
-          <p class="bold">{{ __('From', 'top-bar') }}</p>
-          <p class="xs">{{ __('Start date and time', 'top-bar') }}</p>
+          <p class="bold">{{ __('From', 'flex-top-bar') }}</p>
+          <p class="xs">{{ __('Start date and time', 'flex-top-bar') }}</p>
         </label>
       </div>
       <div class="item">
@@ -37,8 +37,8 @@
     <div class="top-bar-grid">
       <div class="item">
         <label :for="`scheduled_to_${barId}`">
-          <p class="bold">{{ __('To', 'top-bar') }}</p>
-          <p class="xs">{{ __('End date and time', 'top-bar') }}</p>
+          <p class="bold">{{ __('To', 'flex-top-bar') }}</p>
+          <p class="xs">{{ __('End date and time', 'flex-top-bar') }}</p>
         </label>
       </div>
       <div class="item">
@@ -101,14 +101,14 @@ const validationError = computed(() => {
   if (!localEnabled.value) return ''
 
   if (!localFrom.value || !localTo.value) {
-    return __('Both start and end dates are required', 'top-bar')
+    return __('Both start and end dates are required', 'flex-top-bar')
   }
 
   const from = new Date(localFrom.value)
   const to = new Date(localTo.value)
 
   if (to <= from) {
-    return __('End date must be after start date', 'top-bar')
+    return __('End date must be after start date', 'flex-top-bar')
   }
 
   return ''

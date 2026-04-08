@@ -1,7 +1,7 @@
 <template>
   <div class="item-creator grid-3">
     <fieldset class="line">
-      <legend class="bold">{{ __('Choose the icon appearance', 'top-bar') }}</legend>
+      <legend class="bold">{{ __('Choose the icon appearance', 'flex-top-bar') }}</legend>
       <label v-for="opt in iconStyleOptions" :key="opt.value" :class="['radio', { 'bg-grey radio': opt.value === 'white' }]">
         <input
           type="radio"
@@ -34,7 +34,7 @@
     <div v-if="column.icon_style === 'rounded' || column.icon_style === 'square'" class="top-bar-grid options">
       <div class="item">
         <fieldset class="line">
-          <legend class="bold">{{ __('Background color', 'top-bar') }}</legend>
+          <legend class="bold">{{ __('Background color', 'flex-top-bar') }}</legend>
           <input
             :id="`social_bg_${barId}_${columnId}`"
             type="color"
@@ -46,7 +46,7 @@
       </div>
       <div class="item">
         <fieldset class="line">
-          <legend class="bold">{{ __('Color icon', 'top-bar') }}</legend>
+          <legend class="bold">{{ __('Color icon', 'flex-top-bar') }}</legend>
           <input
             :id="`social_icon_${barId}_${columnId}`"
             type="color"
@@ -58,7 +58,7 @@
       </div>
       <div class="item">
         <fieldset class="line vertical">
-          <legend class="bold">{{ __('Border size & Color', 'top-bar') }}</legend>
+          <legend class="bold">{{ __('Border size & Color', 'flex-top-bar') }}</legend>
           <select
             class="border"
             :id="`social_icon_border_width_${barId}_${columnId}`"
@@ -89,7 +89,7 @@
     </div>
 
     <fieldset class="line">
-      <legend class="bold">{{ __('Social links', 'top-bar') }}</legend>
+      <legend class="bold">{{ __('Social links', 'flex-top-bar') }}</legend>
       <div class="top-bar-message-list">
         <div
           v-for="(_link, index) in column.links"
@@ -105,7 +105,7 @@
               :value="column.links[index]?.platform ?? ''"
               @change="onPlatformChange(index, $event)"
             >
-              <option value="">{{ __('Select social media', 'top-bar') }}</option>
+              <option value="">{{ __('Select social media', 'flex-top-bar') }}</option>
               <option v-for="p in SOCIAL_PLATFORMS" :key="p" :value="p">
                 {{ platformLabel(p) }}
               </option>
@@ -114,7 +114,7 @@
               :id="`social_url_${barId}_${columnId}_${index}`"
               type="url"
               :value="column.links[index]?.url ?? ''"
-              :placeholder="__('Your profile link', 'top-bar')"
+              :placeholder="__('Your profile link', 'flex-top-bar')"
               @input="onUrlInput(index, $event)"
               @blur="emit('commit')"
             />
@@ -140,7 +140,7 @@
         class="top-bar-btn amber sm right"
         @click="addLink"
       >
-        {{ __('Add new social media', 'top-bar') }}
+        {{ __('Add new social media', 'flex-top-bar') }}
       </button>
     </div>
   </div>
@@ -167,32 +167,32 @@ const iconStyleOptions = getIconStyleOptions(__)
 
 function platformLabel(p: SocialPlatform): string {
   const labels: Record<SocialPlatform, string> = {
-    facebook: __('Facebook', 'top-bar'),
-    twitterX: __('TwitterX', 'top-bar'),
-    instagram: __('Instagram', 'top-bar'),
-    linkedin: __('Linkedin', 'top-bar'),
-    google: __('Google', 'top-bar'),
-    youtube: __('Youtube', 'top-bar'),
-    apple: __('Apple', 'top-bar'),
-    snapchat: __('Snapchat', 'top-bar'),
-    pinterest: __('Pinterest', 'top-bar'),
-    medium: __('Medium', 'top-bar'),
-    github: __('Github', 'top-bar'),
-    threads: __('Threads', 'top-bar'),
-    whatsapp: __('Whatsapp', 'top-bar'),
-    figma: __('Figma', 'top-bar'),
-    dribbble: __('Dribbble', 'top-bar'),
-    reddit: __('Reddit', 'top-bar'),
-    discord: __('Discord', 'top-bar'),
-    tiktok: __('Tiktok', 'top-bar'),
-    tumblr: __('Tumblr', 'top-bar'),
-    telegram: __('Telegram', 'top-bar'),
-    bluesky: __('Bluesky', 'top-bar'),
-    signal: __('Signal', 'top-bar'),
-    vk: __('Vk', 'top-bar'),
-    spotify: __('Spotify', 'top-bar'),
-    twitch: __('Twitch', 'top-bar'),
-    messenger: __('Messenger', 'top-bar')
+    facebook: __('Facebook', 'flex-top-bar'),
+    twitterX: __('TwitterX', 'flex-top-bar'),
+    instagram: __('Instagram', 'flex-top-bar'),
+    linkedin: __('Linkedin', 'flex-top-bar'),
+    google: __('Google', 'flex-top-bar'),
+    youtube: __('Youtube', 'flex-top-bar'),
+    apple: __('Apple', 'flex-top-bar'),
+    snapchat: __('Snapchat', 'flex-top-bar'),
+    pinterest: __('Pinterest', 'flex-top-bar'),
+    medium: __('Medium', 'flex-top-bar'),
+    github: __('Github', 'flex-top-bar'),
+    threads: __('Threads', 'flex-top-bar'),
+    whatsapp: __('Whatsapp', 'flex-top-bar'),
+    figma: __('Figma', 'flex-top-bar'),
+    dribbble: __('Dribbble', 'flex-top-bar'),
+    reddit: __('Reddit', 'flex-top-bar'),
+    discord: __('Discord', 'flex-top-bar'),
+    tiktok: __('Tiktok', 'flex-top-bar'),
+    tumblr: __('Tumblr', 'flex-top-bar'),
+    telegram: __('Telegram', 'flex-top-bar'),
+    bluesky: __('Bluesky', 'flex-top-bar'),
+    signal: __('Signal', 'flex-top-bar'),
+    vk: __('Vk', 'flex-top-bar'),
+    spotify: __('Spotify', 'flex-top-bar'),
+    twitch: __('Twitch', 'flex-top-bar'),
+    messenger: __('Messenger', 'flex-top-bar')
   }
   return labels[p]
 }

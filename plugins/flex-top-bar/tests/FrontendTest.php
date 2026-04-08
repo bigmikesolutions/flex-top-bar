@@ -67,7 +67,7 @@ final class FrontendTest extends TestCase {
 		$frontend->maybe_render_bar();
 		$html = (string) ob_get_clean();
 
-		$this->assertStringContainsString( 'id="top-bar-frontend-mount"', $html );
+		$this->assertStringContainsString( 'id="flex-top-bar-frontend-mount"', $html );
 	}
 
 	public function test_maybe_output_bar_fallback_outputs_script_when_active_bar_exists(): void {
@@ -99,8 +99,8 @@ final class FrontendTest extends TestCase {
 		$frontend->maybe_output_bar_fallback();
 		$html = (string) ob_get_clean();
 
-		$this->assertStringContainsString( 'id="top-bar-fallback"', $html );
-		$this->assertStringContainsString( 'top-bar-frontend-mount', $html );
+		$this->assertStringContainsString( 'id="flex-top-bar-fallback"', $html );
+		$this->assertStringContainsString( 'flex-top-bar-frontend-mount', $html );
 	}
 
 	public function test_enqueue_assets_enqueues_vue_frontend(): void {
@@ -133,7 +133,7 @@ final class FrontendTest extends TestCase {
 		$script_handles = array_column( $GLOBALS['wp_test_enqueued_scripts'], 'handle' );
 
 		// Vue frontend assets should be enqueued
-		$this->assertContains( 'top-bar-frontend', $style_handles );
-		$this->assertContains( 'top-bar-frontend', $script_handles );
+		$this->assertContains( 'flex-top-bar-frontend', $style_handles );
+		$this->assertContains( 'flex-top-bar-frontend', $script_handles );
 	}
 }

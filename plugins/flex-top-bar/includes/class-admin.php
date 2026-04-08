@@ -35,41 +35,41 @@ final class Admin {
 		}
 
 		// Enqueue Vue app
-		$admin_js  = TOP_BAR_PLUGIN_DIR . 'assets/dist/js/admin.js';
-		$admin_css = TOP_BAR_PLUGIN_DIR . 'assets/dist/css/style.css';
+		$admin_js  = FLEX_TOP_BAR_PLUGIN_DIR . 'assets/dist/js/admin.js';
+		$admin_css = FLEX_TOP_BAR_PLUGIN_DIR . 'assets/dist/css/style.css';
 		if ( file_exists( $admin_js ) ) {
 			$ver_js  = (string) filemtime( $admin_js );
-			$ver_css = file_exists( $admin_css ) ? (string) filemtime( $admin_css ) : TOP_BAR_VERSION;
+			$ver_css = file_exists( $admin_css ) ? (string) filemtime( $admin_css ) : FLEX_TOP_BAR_VERSION;
 
 			wp_enqueue_script(
-				'top-bar-admin-vue',
-				plugins_url( 'assets/dist/js/admin.js', TOP_BAR_PLUGIN_FILE ),
+				'flex-top-bar-admin-vue',
+				plugins_url( 'assets/dist/js/admin.js', FLEX_TOP_BAR_PLUGIN_FILE ),
 				[],
 				$ver_js,
 				true
 			);
 
 			wp_enqueue_style(
-				'top-bar-admin-vue',
-				plugins_url( 'assets/dist/css/style.css', TOP_BAR_PLUGIN_FILE ),
+				'flex-top-bar-admin-vue',
+				plugins_url( 'assets/dist/css/style.css', FLEX_TOP_BAR_PLUGIN_FILE ),
 				[],
 				$ver_css
 			);
 
 			// Pass configuration to Vue
 			wp_localize_script(
-				'top-bar-admin-vue',
+				'flex-top-bar-admin-vue',
 				'topBarConfig',
 				[
-					'apiRoot'         => esc_url_raw( rest_url( 'top-bar/v1' ) ),
+					'apiRoot'         => esc_url_raw( rest_url( 'flex-top-bar/v1' ) ),
 					'nonce'           => wp_create_nonce( 'wp_rest' ),
-					'version'         => defined( 'TOP_BAR_VERSION' ) ? TOP_BAR_VERSION : '',
-					'bmsFaviconUrl'   => esc_url_raw( plugins_url( 'assets/img/bms-favicon.png', TOP_BAR_PLUGIN_FILE ) ),
+					'version'         => (string) FLEX_TOP_BAR_VERSION,
+					'bmsFaviconUrl'   => esc_url_raw( plugins_url( 'assets/img/bms-favicon.png', FLEX_TOP_BAR_PLUGIN_FILE ) ),
 					'i18n'    => [
-						'welcome'     => __( 'Welcome to Top Bar plugin', 'top-bar' ),
-						'addNew'      => __( 'Add new Top Bar', 'top-bar' ),
-						'loading'     => __( 'Loading...', 'top-bar' ),
-						'saveChanges' => __( 'Save Changes', 'top-bar' ),
+						'welcome'     => __( 'Welcome to Top Bar plugin', 'flex-top-bar' ),
+						'addNew'      => __( 'Add new Top Bar', 'flex-top-bar' ),
+						'loading'     => __( 'Loading...', 'flex-top-bar' ),
+						'saveChanges' => __( 'Save Changes', 'flex-top-bar' ),
 					],
 				]
 			);
@@ -87,8 +87,8 @@ final class Admin {
 		$icon_url = 'data:image/svg+xml;base64,' . base64_encode( $icon_svg );
 
 		$this->hook_suffix = (string) add_menu_page(
-			__( 'Flex Top Bar', 'top-bar' ),
-			__( 'Flex Top Bar', 'top-bar' ),
+			__( 'Flex Top Bar', 'flex-top-bar' ),
+			__( 'Flex Top Bar', 'flex-top-bar' ),
 			'manage_options',
 			'flex-top-bar',
 			[ $this, 'render_settings_page' ],
@@ -105,7 +105,7 @@ final class Admin {
 	 * @param string $src    Script source URL.
 	 */
 	public function add_module_type_to_script( string $tag, string $handle, string $src ): string {
-		if ( 'top-bar-admin-vue' === $handle ) {
+		if ( 'flex-top-bar-admin-vue' === $handle ) {
 			$tag = str_replace( '<script ', '<script type="module" ', $tag );
 		}
 		return $tag;

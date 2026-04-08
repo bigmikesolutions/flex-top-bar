@@ -1,7 +1,7 @@
 <template>
   <div class="item-creator grid-3">
     <fieldset class="line">
-      <legend class="bold">{{ __('Effect', 'top-bar') }}</legend>
+      <legend class="bold">{{ __('Effect', 'flex-top-bar') }}</legend>
       <label>
         <select
           :id="`effect_${barId}_${columnId}`"
@@ -10,15 +10,15 @@
           :title="effectTooltip"
           @change="onEffectChange"
         >
-          <option value="none">{{ __('None', 'top-bar') }}</option>
-          <option value="slider">{{ __('Slider', 'top-bar') }}</option>
-          <option value="fadein">{{ __('Fade In', 'top-bar') }}</option>
-          <option value="blink">{{ __('Blink', 'top-bar') }}</option>
+          <option value="none">{{ __('None', 'flex-top-bar') }}</option>
+          <option value="slider">{{ __('Slider', 'flex-top-bar') }}</option>
+          <option value="fadein">{{ __('Fade In', 'flex-top-bar') }}</option>
+          <option value="blink">{{ __('Blink', 'flex-top-bar') }}</option>
         </select>
       </label>
     </fieldset>
     <fieldset class="line">
-      <legend class="bold">{{ __('Add multi fields', 'top-bar') }}</legend>
+      <legend class="bold">{{ __('Add multi fields', 'flex-top-bar') }}</legend>
 
       <div class="top-bar-message-list">
         <div
@@ -40,7 +40,7 @@
             <textarea
               :value="messages[index]"
               :name="messages[index]"
-              :placeholder="index === 0 ? __('Welcome!', 'top-bar') : ''"
+              :placeholder="index === 0 ? __('Welcome!', 'flex-top-bar') : ''"
               rows="2"
               @input="onMessageInput(index, $event)"
               @blur="emit('commit')"
@@ -68,7 +68,7 @@
         :title="addTextTooltip"
         @click="addMessage"
       >
-        {{ __('Add new text', 'top-bar') }}
+        {{ __('Add new text', 'flex-top-bar') }}
       </button>
     </div>
   </div>
@@ -96,14 +96,14 @@ const addTextTooltip = computed(() => {
   const lead = sprintf(
     __(
       'Your plan allows you to add yet %1$d more text field(s) out of %2$d.',
-      'top-bar',
+      'flex-top-bar',
     ),
     remaining,
     max,
   )
   const tail = __(
     'If you want to change limits, check other plans on the plugin page or contact us.',
-    'top-bar',
+    'flex-top-bar',
   )
   return `${lead} ${tail}`
 })
@@ -112,11 +112,11 @@ const effectTooltip = computed(() => {
   if (!isEffectDisabled.value) return ''
   const tail = __(
     'If you want to change limits, check other plans on the plugin page or contact us.',
-    'top-bar',
+    'flex-top-bar',
   )
   const lead = __(
     'Your plan allows only one text field, so effects are not available.',
-    'top-bar',
+    'flex-top-bar',
   )
   return `${lead} ${tail}`
 })

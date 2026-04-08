@@ -1,7 +1,7 @@
 <template>
   <div class="item-creator">
     <fieldset>
-      <legend class="bold">{{ __('Type', 'top-bar') }}</legend>
+      <legend class="bold">{{ __('Type', 'flex-top-bar') }}</legend>
       <label v-for="opt in options" :key="opt.value" class="top-bar-column-type-option radio">
         <input
           type="radio"
@@ -31,9 +31,9 @@ const emit = defineEmits<{
 }>()
 
 const options: { value: ColumnType; label: string }[] = [
-  { value: 'text', label: __('Text Editor', 'top-bar') },
-  { value: 'social', label: __('Social media', 'top-bar') },
-  { value: 'contact', label: __('Contact data', 'top-bar') },
+  { value: 'text', label: __('Text Editor', 'flex-top-bar') },
+  { value: 'social', label: __('Social media', 'flex-top-bar') },
+  { value: 'contact', label: __('Contact data', 'flex-top-bar') },
 ]
 
 function onSelect(value: ColumnType) {

@@ -14,10 +14,10 @@
             @change="onScheduledToggle"
           />
           <span class="lifetime-label">
-            <p class="bold lg">{{ __('Scheduled', 'top-bar') }}</p>
+            <p class="bold lg">{{ __('Scheduled', 'flex-top-bar') }}</p>
           </span>
           <span class="lifetime-description">
-            <p class="xs">{{ __('Schedule when the bar should be visible.', 'top-bar') }}</p>
+            <p class="xs">{{ __('Schedule when the bar should be visible.', 'flex-top-bar') }}</p>
           </span>
         </label>
       </div>
@@ -29,7 +29,7 @@
     >
       <div class="item">
         <fieldset class="clear">
-          <legend class="bold">{{ __('From', 'top-bar') }}</legend>
+          <legend class="bold">{{ __('From', 'flex-top-bar') }}</legend>
           <label>
             <input
               :id="`scheduled_from_${model.id}`"
@@ -44,7 +44,7 @@
       </div>
       <div class="item">
         <fieldset class="clear">
-          <legend class="bold">{{ __('To', 'top-bar') }}</legend>
+          <legend class="bold">{{ __('To', 'flex-top-bar') }}</legend>
           <label>
             <input
               :id="`scheduled_to_${model.id}`"
@@ -69,10 +69,10 @@
         >
           <input type="checkbox" disabled class="top-bar-toggle-life-time" />
           <span class="lifetime-label">
-            <p class="bold lg">{{ __('Scheduled', 'top-bar') }}</p>
+            <p class="bold lg">{{ __('Scheduled', 'flex-top-bar') }}</p>
           </span>
           <span class="lifetime-description">
-            <p class="xs">{{ __('Schedule when the bar should be visible.', 'top-bar') }}</p>
+            <p class="xs">{{ __('Schedule when the bar should be visible.', 'flex-top-bar') }}</p>
           </span>
         </label>
       </div>
