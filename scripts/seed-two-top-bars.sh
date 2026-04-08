@@ -6,6 +6,12 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 docker compose -f "${ROOT_DIR}/docker-compose.yml" exec -T wordpress php -r '
 require_once "/var/www/html/wp-load.php";
 
+// Clean old plugin state so seeding is deterministic.
+delete_option("flex_top_bar_bars");
+delete_option("flex_top_bar_bars_draft");
+delete_option("top_bars");
+delete_option("top_bars_draft");
+
 $bars = [
 	[
 		"id" => "bar_top",
