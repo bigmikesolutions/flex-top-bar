@@ -1,5 +1,5 @@
 <template>
-  <div id="top-bar" class="wrap">
+  <div id="flex-top-bar-admin" class="wrap">
     <h1 class="top-bar-admin-title">
       {{ __('Flex Top Bar', 'top-bar') }}
       <span v-if="pluginVersion" class="top-bar-admin-version">v{{ pluginVersion }}</span>
