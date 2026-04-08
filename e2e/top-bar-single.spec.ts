@@ -462,8 +462,11 @@ test.describe('single-bar', () => {
             if (r.request().method() !== 'POST' || !r.ok()) return false;
             const url = decodeURIComponent(r.url());
             return (
-              new RegExp(`/top-bar/v1/bars/${id0}/publish`, 'i').test(url) ||
-              /\/top-bar\/v1\/publish/i.test(url)
+              // Pretty: /wp-json/flex-top-bar/v1/bars/{id}/publish
+              // Plain:  ?rest_route=/flex-top-bar/v1/bars/{id}/publish
+              // Back-compat: allow older `top-bar/v1` namespace too.
+              new RegExp(`/(flex-top-bar|top-bar)/v1/bars/${id0}/publish`, 'i').test(url) ||
+              /\/(flex-top-bar|top-bar)\/v1\/publish/i.test(url)
             );
           },
           { timeout: 45000 }
@@ -558,8 +561,11 @@ test.describe('single-bar', () => {
             if (r.request().method() !== 'POST' || !r.ok()) return false;
             const url = decodeURIComponent(r.url());
             return (
-              new RegExp(`/top-bar/v1/bars/${id0}/publish`, 'i').test(url) ||
-              /\/top-bar\/v1\/publish/i.test(url)
+              // Pretty: /wp-json/flex-top-bar/v1/bars/{id}/publish
+              // Plain:  ?rest_route=/flex-top-bar/v1/bars/{id}/publish
+              // Back-compat: allow older `top-bar/v1` namespace too.
+              new RegExp(`/(flex-top-bar|top-bar)/v1/bars/${id0}/publish`, 'i').test(url) ||
+              /\/(flex-top-bar|top-bar)\/v1\/publish/i.test(url)
             );
           },
           { timeout: 45000 }
