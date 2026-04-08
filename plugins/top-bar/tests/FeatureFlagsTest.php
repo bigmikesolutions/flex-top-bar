@@ -7,10 +7,10 @@
 
 declare(strict_types=1);
 
-namespace TopBar\Tests;
+namespace FlexTopBar\Tests;
 
 use PHPUnit\Framework\TestCase;
-use TopBar\FeatureFlags;
+use FlexTopBar\FeatureFlags;
 
 final class FeatureFlagsTest extends TestCase {
 

@@ -7,11 +7,11 @@
 
 declare(strict_types=1);
 
-namespace TopBar\Tests;
+namespace FlexTopBar\Tests;
 
 use PHPUnit\Framework\TestCase;
-use TopBar\Frontend;
-use TopBar\Options;
+use FlexTopBar\Frontend;
+use FlexTopBar\Options;
 
 final class FrontendTest extends TestCase {
 

@@ -5,14 +5,14 @@
  * Version:     0.1.0
  * Author:      Big Mike Solutions
  * License:     GPL-2.0-or-later
- * Text Domain: top-bar
+ * Text Domain: flex-top-bar
  *
- * @package TopBar
+ * @package FlexTopBar
  */
 
 declare(strict_types=1);
 
-namespace TopBar;
+namespace FlexTopBar;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;

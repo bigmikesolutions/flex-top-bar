@@ -7,8 +7,8 @@
 declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
-use TopBar\FeatureFlags;
-use TopBar\Options;
+use FlexTopBar\FeatureFlags;
+use FlexTopBar\Options;
 
 require_once __DIR__ . '/bootstrap.php';
 

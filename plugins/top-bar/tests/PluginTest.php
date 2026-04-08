@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace TopBar\Tests;
+namespace FlexTopBar\Tests;
 
 use PHPUnit\Framework\TestCase;
 
@@ -33,6 +33,6 @@ final class PluginTest extends TestCase {
 
 	public function test_plugin_namespace(): void {
 		$content = (string) file_get_contents( dirname( __DIR__ ) . '/top-bar.php' );
-		$this->assertStringContainsString( 'namespace TopBar;', $content );
+		$this->assertStringContainsString( 'namespace FlexTopBar;', $content );
 	}
 }

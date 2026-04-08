@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace TopBar;
+namespace FlexTopBar;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
