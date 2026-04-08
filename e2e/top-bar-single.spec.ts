@@ -8,6 +8,7 @@ import {
   getBarIdByIndex,
   setBarPosition,
   setBarHideOnScroll,
+  waitForTopBarPutWhere,
   waitForTopBarPut,
 } from './helpers/topBarHelpers';
 
@@ -200,16 +201,20 @@ test.describe('single-bar', () => {
 
       // Scheduling is a plan feature flag (FF_SCHEDULE). Skip if disabled in this environment.
       const scheduleToggle = barRow.locator('.top-bar-toggle-life-time');
+      const scheduleLabel = barRow.locator('.top-bar-life-time-checkbox');
 
       // Enable scheduling (Vue auto-saves on change).
       if (!(await scheduleToggle.isChecked().catch(() => false))) {
+        // The checkbox input can be visually hidden; click the visible label/control instead.
         await Promise.all([
-          waitForTopBarPut(page),
-          scheduleToggle.check({ force: true }),
+          waitForTopBarPutWhere(page, (body) => body.includes('"scheduled_enabled":true')),
+          scheduleLabel.click({ force: true }),
         ]);
       }
 
       await expect(scheduleToggle).toBeChecked({ timeout: 15000 });
+      // Toggling can re-render/collapse the options panel; ensure it's open before interacting with fields.
+      await openPanel(page, 0);
 
       const schedulePanel = barRow.locator('.top-bar-lifetime-panel');
       await expect(schedulePanel).toBeVisible({ timeout: 15000 });
@@ -221,14 +226,16 @@ test.describe('single-bar', () => {
       await expect(fromInput).toBeVisible({ timeout: 15000 });
       await expect(toInput).toBeVisible({ timeout: 15000 });
       await fromInput.fill('2099-03-21T11:00');
-      const fromSave = waitForTopBarPut(page);
+      await expect(fromInput).toHaveValue('2099-03-21T11:00');
       await fromInput.blur();
-      await fromSave;
+      await waitForTopBarPutWhere(page, (body) => body.includes('"scheduled_from_datetime":"2099-03-21T11:00"'));
+      await openPanel(page, 0);
+      await expect(toInput).toBeVisible({ timeout: 15000 });
 
       await toInput.fill('2099-03-21T12:30');
-      const toSave = waitForTopBarPut(page);
+      await expect(toInput).toHaveValue('2099-03-21T12:30');
       await toInput.blur();
-      await toSave;
+      await waitForTopBarPutWhere(page, (body) => body.includes('"scheduled_to_datetime":"2099-03-21T12:30"'));
 
       await page.reload();
       await openPanel(page, 0);
@@ -253,6 +260,7 @@ test.describe('single-bar', () => {
       const barRow = page.locator('.top-bar-row.bg').nth(0);
 
       const scheduleToggle = barRow.locator('.top-bar-toggle-life-time');
+      const scheduleLabel = barRow.locator('.top-bar-life-time-checkbox');
 
       // Wide range around now to avoid timezone edge cases.
       const now = new Date();
@@ -263,12 +271,13 @@ test.describe('single-bar', () => {
 
       if (!(await scheduleToggle.isChecked().catch(() => false))) {
         await Promise.all([
-          waitForTopBarPut(page),
-          scheduleToggle.check({ force: true }),
+          waitForTopBarPutWhere(page, (body) => body.includes('"scheduled_enabled":true')),
+          scheduleLabel.click({ force: true }),
         ]);
       }
 
       await expect(scheduleToggle).toBeChecked({ timeout: 15000 });
+      await openPanel(page, 0);
 
       const schedulePanel = barRow.locator('.top-bar-lifetime-panel');
       await expect(schedulePanel).toBeVisible({ timeout: 15000 });
@@ -279,14 +288,16 @@ test.describe('single-bar', () => {
       await expect(fromInput).toBeVisible({ timeout: 15000 });
       await expect(toInput).toBeVisible({ timeout: 15000 });
       await fromInput.fill(fromValue);
-      const fromSave2 = waitForTopBarPut(page);
+      await expect(fromInput).toHaveValue(fromValue);
       await fromInput.blur();
-      await fromSave2;
+      await waitForTopBarPutWhere(page, (body) => body.includes(`"scheduled_from_datetime":"${fromValue}"`));
+      await openPanel(page, 0);
+      await expect(toInput).toBeVisible({ timeout: 15000 });
 
       await toInput.fill(toValue);
-      const toSave2 = waitForTopBarPut(page);
+      await expect(toInput).toHaveValue(toValue);
       await toInput.blur();
-      await toSave2;
+      await waitForTopBarPutWhere(page, (body) => body.includes(`"scheduled_to_datetime":"${toValue}"`));
 
       await page.reload();
       await openPanel(page, 0);
@@ -314,12 +325,19 @@ test.describe('single-bar', () => {
         has: page.locator('option[value="slider"]'),
       }).first();
 
+      // Selecting effect can trigger an autosave + re-render; keep the panel open.
+      await openPanel(page, 0);
       await Promise.all([waitForTopBarPut(page), effectSelect.selectOption('slider')]);
+      await openPanel(page, 0);
 
       const messageList = page.locator('.top-bar-message-list').first();
       const addTextButton = page.getByRole('button', { name: 'Add new text' }).first();
       const beforeCount = await messageList.locator('.top-bar-column-creator-grid').count();
 
+      // Panel can collapse; ensure the control is actionable before clicking.
+      await openPanel(page, 0);
+      await addTextButton.scrollIntoViewIfNeeded();
+      await addTextButton.waitFor({ state: 'visible', timeout: 15000 });
       await Promise.all([waitForTopBarPut(page), addTextButton.click()]);
 
       const afterCount = await messageList.locator('.top-bar-column-creator-grid').count();

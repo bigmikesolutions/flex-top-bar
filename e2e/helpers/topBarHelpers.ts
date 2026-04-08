@@ -25,13 +25,28 @@ function isTopBarBarPut(response: Response): boolean {
     return false;
   }
   const url = decodeURIComponent(response.url());
-  // Pretty: /wp-json/top-bar/v1/bars/{id} — Plain: ?rest_route=/top-bar/v1/bars/{id}
-  return /top-bar\/v1\/bars\/[a-z0-9_]+/i.test(url);
+  // Pretty: /wp-json/flex-top-bar/v1/bars/{id} — Plain: ?rest_route=/flex-top-bar/v1/bars/{id}
+  // Back-compat: accept older `top-bar/v1` namespace too.
+  return /(flex-top-bar|top-bar)\/v1\/bars\/[a-z0-9_]+/i.test(url);
 }
 
 /** Wait for the Vue admin to persist a bar via REST (PUT …/top-bar/v1/bars/:id). */
 export async function waitForTopBarPut(page: Page): Promise<void> {
   await page.waitForResponse(isTopBarBarPut, { timeout: 45000 });
+}
+
+export async function waitForTopBarPutWhere(
+  page: Page,
+  predicate: (requestBody: string) => boolean
+): Promise<void> {
+  await page.waitForResponse(
+    (response) => {
+      if (!isTopBarBarPut(response)) return false;
+      const body = response.request().postData() ?? '';
+      return predicate(body);
+    },
+    { timeout: 45000 }
+  );
 }
 
 /**
@@ -206,7 +221,7 @@ export async function resetToSingleBar(page: Page): Promise<void> {
   const root = process.cwd();
   const composeFile = `${root}/docker-compose.yml`;
   clearTopBarSeedOptions(composeFile);
-  const command = `docker compose -f "${composeFile}" exec -T wordpress php -r 'require_once "/var/www/html/wp-load.php"; $bars = [[ "id" => "bar_single", "name" => "Single bar", "visible" => true, "admin_visibile" => false, "scheduled_enabled" => false, "scheduled_from_datetime" => "", "scheduled_to_datetime" => "", "position" => "top", "effect" => "none", "messages" => ["Single bar for tests.", ""], "messages_mobile_visible" => true, "bg_color" => "#389339", "frame_color" => "", "frame_width" => 0, "hide_on_scroll" => false ]]; update_option("top_bars", $bars); /* Admin edits drafts; keep draft in sync with published for seeds. */ update_option("top_bars_draft", $bars);'`;
+  const command = `docker compose -f "${composeFile}" exec -T wordpress php -r 'require_once "/var/www/html/wp-load.php"; $bars = [[ "id" => "bar_single", "name" => "Single bar", "visible" => true, "admin_visibile" => true, "scheduled_enabled" => false, "scheduled_from_datetime" => "", "scheduled_to_datetime" => "", "position" => "top", "effect" => "none", "messages" => ["Single bar for tests.", ""], "messages_mobile_visible" => true, "bg_color" => "#389339", "frame_color" => "", "frame_width" => 0, "hide_on_scroll" => false ]]; update_option("top_bars", $bars); /* Admin edits drafts; keep draft in sync with published for seeds. */ update_option("top_bars_draft", $bars);'`;
 
   execSync(command, { stdio: 'pipe' });
   // After mutating DB state, always re-open settings through the login-aware helper.
