@@ -59,7 +59,7 @@ test.describe('top bar - publish changes', () => {
     const publishSave = page.waitForResponse((r) => {
       if (r.request().method() !== 'POST' || !r.ok()) return false;
       const url = decodeURIComponent(r.url());
-      return new RegExp(`/top-bar/v1/bars/${barId}/publish`, 'i').test(url);
+      return new RegExp(`/(flex-top-bar|top-bar)/v1/bars/${barId}/publish`, 'i').test(url);
     });
     await publishBtn.click();
     await publishSave;
@@ -100,7 +100,7 @@ test.describe('top bar - publish changes', () => {
     const publishSave0_init = page.waitForResponse((r) => {
       if (r.request().method() !== 'POST' || !r.ok()) return false;
       const url = decodeURIComponent(r.url());
-      return new RegExp(`/top-bar/v1/bars/${barId0}/publish`, 'i').test(url);
+      return new RegExp(`/(flex-top-bar|top-bar)/v1/bars/${barId0}/publish`, 'i').test(url);
     });
     await publishBtn0_init.click();
     await publishSave0_init;
@@ -115,7 +115,7 @@ test.describe('top bar - publish changes', () => {
     const publishSave1_init = page.waitForResponse((r) => {
       if (r.request().method() !== 'POST' || !r.ok()) return false;
       const url = decodeURIComponent(r.url());
-      return new RegExp(`/top-bar/v1/bars/${barId1}/publish`, 'i').test(url);
+      return new RegExp(`/(flex-top-bar|top-bar)/v1/bars/${barId1}/publish`, 'i').test(url);
     });
     await publishBtn1_init.click();
     await publishSave1_init;
@@ -139,7 +139,7 @@ test.describe('top bar - publish changes', () => {
     const publishSave0 = page.waitForResponse((r) => {
       if (r.request().method() !== 'POST' || !r.ok()) return false;
       const url = decodeURIComponent(r.url());
-      return new RegExp(`/top-bar/v1/bars/${barId0}/publish`, 'i').test(url);
+      return new RegExp(`/(flex-top-bar|top-bar)/v1/bars/${barId0}/publish`, 'i').test(url);
     });
     await publishBtn0.click();
     await publishSave0;
