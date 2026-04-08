@@ -38,7 +38,7 @@ async function setColumnMobileVisibilityAndPublish(
   const publishPromise = page.waitForResponse((r) => {
     if (r.request().method() !== 'POST' || !r.ok()) return false;
     const url = decodeURIComponent(r.url());
-    return new RegExp(`/top-bar/v1/bars/${id0}/publish`, 'i').test(url);
+    return new RegExp(`/(flex-top-bar|top-bar)/v1/bars/${id0}/publish`, 'i').test(url);
   });
   await barRow.locator('button.top-bar-icons.publish').click();
   await publishPromise;
