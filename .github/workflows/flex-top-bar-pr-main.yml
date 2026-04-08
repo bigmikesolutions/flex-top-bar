@@ -34,7 +34,7 @@ jobs:
         run: npm ci
 
       - name: Build Top Bar Vite assets
-        run: npm run build:top-bar
+        run: npm run build:flex-top-bar
 
       - name: Install Composer dependencies
         run: composer install --no-interaction --prefer-dist
@@ -89,7 +89,7 @@ jobs:
         run: npm ci
 
       - name: Build Top Bar Vite assets
-        run: npm run build:top-bar
+        run: npm run build:flex-top-bar
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
