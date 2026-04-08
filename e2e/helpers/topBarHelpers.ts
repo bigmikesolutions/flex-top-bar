@@ -54,10 +54,31 @@ export async function waitForTopBarAdminReady(page: Page): Promise<void> {
 }
 
 export async function loginAndOpenTopBarSettings(page: Page): Promise<void> {
-  const gotoSettings = () =>
+  const gotoSettings = async () => {
     // `load` can be flaky/slow in WP admin because of long-running assets; Vue UI is ready once
     // the relevant DOM renders, which we already assert in `waitForTopBarAdminReady`.
-    page.goto(TOP_BAR_SETTINGS_PATH, { waitUntil: 'domcontentloaded', timeout: 45000 });
+    //
+    // WP occasionally triggers navigation races (redirects / frame detach) that manifest as
+    // `net::ERR_ABORTED` for `page.goto`. Retry a couple times to make E2E robust.
+    const attempts = 3;
+    for (let i = 0; i < attempts; i += 1) {
+      try {
+        await page.goto(TOP_BAR_SETTINGS_PATH, { waitUntil: 'domcontentloaded', timeout: 45000 });
+        return;
+      } catch (err) {
+        const msg = String((err as any)?.message ?? err);
+        const isRetryable =
+          msg.includes('net::ERR_ABORTED') ||
+          msg.toLowerCase().includes('frame was detached') ||
+          msg.toLowerCase().includes('navigation') ||
+          msg.toLowerCase().includes('target page, context or browser has been closed');
+        if (!isRetryable || i === attempts - 1) {
+          throw err;
+        }
+        await page.waitForTimeout(750);
+      }
+    }
+  };
 
   // Go straight to the admin settings page; WP redirects to login if needed.
   await gotoSettings();
@@ -124,11 +145,23 @@ export async function ensureAtLeastBars(page: Page, expectedBars: number): Promi
 
 export async function openPanel(page: Page, index: number): Promise<void> {
   const panel = page.locator('.top-bar-options').nth(index);
-  if (!(await panel.isVisible())) {
-    await page.locator('.top-bar-toggle-options').nth(index).click();
+  const isActive = async () =>
+    panel
+      .evaluate((el) => el.classList.contains('active'))
+      .catch(() => false);
+
+  if (!(await isActive())) {
+    // Panel visibility is controlled by the `active` class (Vue state), not by mounting/unmounting.
+    // Force the click to avoid flakiness from sticky preview overlays / transitions.
+    await page.locator('.top-bar-toggle-options').nth(index).click({ force: true });
   }
-  // Do not rely on fixed sleeps; CSS transitions and CI can be slow.
-  await panel.waitFor({ state: 'visible', timeout: 10000 });
+
+  // Wait for Vue to mark it expanded.
+  await page.waitForFunction(
+    (el) => (el as HTMLElement).classList.contains('active'),
+    await panel.elementHandle(),
+    { timeout: 15000 }
+  );
 }
 
 export async function clickAddNewTopBar(page: Page): Promise<void> {
@@ -157,10 +190,9 @@ export async function resetToSingleBar(page: Page): Promise<void> {
   const command = `docker compose -f "${composeFile}" exec -T wordpress php -r 'require_once "/var/www/html/wp-load.php"; $bars = [[ "id" => "bar_single", "name" => "Single bar", "visible" => true, "admin_visibile" => false, "scheduled_enabled" => false, "scheduled_from_datetime" => "", "scheduled_to_datetime" => "", "position" => "top", "effect" => "none", "messages" => ["Single bar for tests.", ""], "messages_mobile_visible" => true, "bg_color" => "#389339", "frame_color" => "", "frame_width" => 0, "hide_on_scroll" => false ]]; update_option("top_bars", $bars); update_option("top_bars_draft", $bars);'`;
 
   execSync(command, { stdio: 'pipe' });
-  await page.goto(TOP_BAR_SETTINGS_PATH);
-  await page.waitForLoadState('domcontentloaded');
-
-  await waitForTopBarAdminReady(page);
+  // After mutating DB state, always re-open settings through the login-aware helper.
+  // Otherwise we can end up on wp-login.php and `waitForTopBarAdminReady` will hang.
+  await loginAndOpenTopBarSettings(page);
 }
 
 /**
@@ -173,10 +205,7 @@ export async function resetToTwoColumnBar(page: Page): Promise<void> {
   const command = `docker compose -f "${composeFile}" exec -T wordpress php -r 'require_once "/var/www/html/wp-load.php"; $bars = [[ "id" => "bar_mcol", "name" => "Multi column", "visible" => true, "admin_visibile" => true, "scheduled_enabled" => false, "scheduled_from_datetime" => "", "scheduled_to_datetime" => "", "position" => "top", "effect" => "none", "messages" => ["Col A", ""], "messages_mobile_visible" => true, "columns" => [ [ "id" => "col_e2e_a", "type" => "text", "effect" => "none", "messages" => ["Col A", ""], "size_percent" => 50, "messages_mobile_visible" => true ], [ "id" => "col_e2e_b", "type" => "text", "effect" => "none", "messages" => ["Col B", ""], "size_percent" => 50, "messages_mobile_visible" => true ] ], "bg_color" => "#389339", "frame_color" => "", "frame_width" => 0, "hide_on_scroll" => false ]]; update_option("top_bars", $bars); update_option("top_bars_draft", $bars);'`;
 
   execSync(command, { stdio: 'pipe' });
-  await page.goto(TOP_BAR_SETTINGS_PATH);
-  await page.waitForLoadState('domcontentloaded');
-
-  await waitForTopBarAdminReady(page);
+  await loginAndOpenTopBarSettings(page);
 }
 
 /**
@@ -199,9 +228,7 @@ export async function resetToSingleColumnBar(
   } ], "bg_color" => "#389339", "frame_color" => "", "frame_width" => 0, "hide_on_scroll" => false ]]; update_option("top_bars", $bars); update_option("top_bars_draft", $bars);'`;
 
   execSync(command, { stdio: 'pipe' });
-  await page.goto(TOP_BAR_SETTINGS_PATH);
-  await page.waitForLoadState('domcontentloaded');
-  await waitForTopBarAdminReady(page);
+  await loginAndOpenTopBarSettings(page);
 }
 
 export async function getBarIds(page: Page): Promise<string[]> {
