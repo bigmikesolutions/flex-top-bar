@@ -50,8 +50,18 @@ test.describe('icons - social media', () => {
     }
 
     async function setPillColors(bg: string, fg: string) {
-      const bgInput = page.locator(`#social_bg_${barId}_${columnId}`);
-      const iconInput = page.locator(`#social_icon_${barId}_${columnId}`);
+      // Avoid coupling to exact `id` formatting; locate by the visible fieldset legends.
+      const row = page.locator('.top-bar-row.bg').first();
+      const bgInput = row
+        .locator('fieldset')
+        .filter({ has: row.locator('legend', { hasText: 'Background color' }) })
+        .locator('input[type="color"]')
+        .first();
+      const iconInput = row
+        .locator('fieldset')
+        .filter({ has: row.locator('legend', { hasText: 'Color icon' }) })
+        .locator('input[type="color"]')
+        .first();
       await expect(bgInput).toBeVisible();
       await expect(iconInput).toBeVisible();
 
@@ -173,8 +183,18 @@ test.describe('icons - contact column', () => {
     }
 
     async function setPillColors(bg: string, fg: string) {
-      const bgInput = page.locator(`#contact_bg_${barId}_${columnId}`);
-      const iconInput = page.locator(`#contact_icon_${barId}_${columnId}`);
+      // Avoid coupling to exact `id` formatting; locate by the visible fieldset legends.
+      const row = page.locator('.top-bar-row.bg').first();
+      const bgInput = row
+        .locator('fieldset')
+        .filter({ has: row.locator('legend', { hasText: 'Background color' }) })
+        .locator('input[type="color"]')
+        .first();
+      const iconInput = row
+        .locator('fieldset')
+        .filter({ has: row.locator('legend', { hasText: 'Color icon' }) })
+        .locator('input[type="color"]')
+        .first();
       await expect(bgInput).toBeVisible();
       await expect(iconInput).toBeVisible();
 

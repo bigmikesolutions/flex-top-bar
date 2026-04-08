@@ -37,14 +37,20 @@ export async function waitForTopBarPut(page: Page): Promise<void> {
 /**
  * Wait until the Top Bar admin UI finished loading (not the Loading… notice).
  * Do not require "Add new Top Bar" — that control is omitted when already at max_bars.
- * Long timeout: CI can be slow; #top-bar is Vue-rendered after admin.js (see build in e2e workflow).
+ * Long timeout: CI can be slow; Vue mounts into #top-bar-app (see includes/class-admin.php).
  */
 export async function waitForTopBarAdminReady(page: Page): Promise<void> {
-  await page
-    .locator('#top-bar')
-    .locator('.top-bar-row.center.empty, .top-bar-row.bg, .notice-error')
+  const mount = page.locator('#top-bar-app');
+  await mount.waitFor({ state: 'visible', timeout: 60000 });
+
+  // Once Vue is mounted, we consider it "ready" when it shows either:
+  // - a bar row, or
+  // - the empty state row, or
+  // - an error notice.
+  await mount
+    .locator('.top-bar-row.bg, .top-bar-row.center.empty, .notice-error')
     .first()
-    .waitFor({ state: 'visible', timeout: 45000 });
+    .waitFor({ state: 'visible', timeout: 60000 });
 }
 
 export async function loginAndOpenTopBarSettings(page: Page): Promise<void> {
@@ -57,7 +63,7 @@ export async function loginAndOpenTopBarSettings(page: Page): Promise<void> {
   await gotoSettings();
 
   const loginInput = page.locator('input[name="log"]');
-  const topBarRoot = page.locator('#top-bar');
+  const topBarRoot = page.locator('#top-bar-app');
   const hasLogin = (await loginInput.count()) > 0;
   const hasTopBar = (await topBarRoot.count()) > 0;
 
@@ -120,8 +126,9 @@ export async function openPanel(page: Page, index: number): Promise<void> {
   const panel = page.locator('.top-bar-options').nth(index);
   if (!(await panel.isVisible())) {
     await page.locator('.top-bar-toggle-options').nth(index).click();
-    await page.waitForTimeout(300); // Wait for animation
   }
+  // Do not rely on fixed sleeps; CSS transitions and CI can be slow.
+  await panel.waitFor({ state: 'visible', timeout: 10000 });
 }
 
 export async function clickAddNewTopBar(page: Page): Promise<void> {

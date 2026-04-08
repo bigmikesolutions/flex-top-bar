@@ -8,13 +8,13 @@ Use the WordPress admin:
 
 1. Log in to the site (e.g. http://localhost:8080/wp-admin).
 2. In the left sidebar, open Settings.
-3. Click Top Bar (under Settings).
+3. Click Flex Top Bar (under Settings).
 4. Change what you need:
     Position – Top or Bottom
     Message – WYSIWYG (text, links, formatting, media)
     Background colour – colour picker
     Frame (border) colour – colour picker, or tick No border
-5. Click Save Changes.
+    All changes are auto-saved but you must click publish button to make them visible.
 
 ## Options
 

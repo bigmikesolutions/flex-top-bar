@@ -5,18 +5,18 @@ FLEX TOP BAR — COPY FOR WORDPRESS.ORG / FREEMIUS / PRODUCT PAGES
 
 ONE-LINE PITCH (plugin directory summary)
 -----------------------------------------
-Stop losing attention above the fold. Flex Top Bar gives you a modern, visual editor, real-time preview, and pro layouts so every promo, link, and CTA actually gets seen.
+Stop losing attention above the fold. Flex Top Bar gives you a modern visual editor, live preview, and pro layouts designed to help your promos, links, and CTAs get noticed.
 
 
 LONG DESCRIPTION (main listing body)
 ------------------------------------
 
 Your site only gets one first impression — and most visitors decide in seconds. 
-Flex Top Bar turns that tiny strip of screen into your highest-converting asset: announcements, sales, trust signals, social proof, and contact paths, 
-all in a polished bar that looks like it was custom-built for your brand.
+Flex Top Bar turns that tiny strip of screen into a high-visibility space for announcements, sales, trust signals, social proof, and contact paths,
+all in a polished bar that’s designed to match your brand.
 
-Forget clunky forms and “save” marathons. The admin is a fast, beautiful experience with live preview: you see exactly what visitors will see as you work. 
-Changes save automatically, so you stay in flow and ship updates the moment inspiration strikes.
+Forget clunky forms and “save” marathons. The admin is a fast, modern experience with live preview so you can iterate quickly while you work.
+Changes save automatically, helping you stay in flow and publish updates faster.
 
 BUILD BARS THAT WORK AS HARD AS YOU DO
 
@@ -33,7 +33,7 @@ WHO IT’S FOR
 
 Store owners, agencies, membership sites, and anyone who is tired of “good enough” announcement plugins. If your message matters, your bar should look and behave like a product — not an afterthought.
 
-Install Flex Top Bar. Claim the strip of screen your competitors ignore — and give every visitor a reason to stay, click, and convert.
+Install Flex Top Bar. Claim the strip of screen your competitors ignore — and make it easier for visitors to notice what matters most.
 
 
 BULLET LIST ONLY (quick feature grid)
