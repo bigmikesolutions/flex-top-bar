@@ -200,8 +200,6 @@ test.describe('single-bar', () => {
 
       // Scheduling is a plan feature flag (FF_SCHEDULE). Skip if disabled in this environment.
       const scheduleToggle = barRow.locator('.top-bar-toggle-life-time');
-      const toggleDisabled = await scheduleToggle.isDisabled().catch(() => false);
-      test.skip(toggleDisabled, 'Scheduling feature flag is disabled (FF_SCHEDULE=false).');
 
       // Enable scheduling (Vue auto-saves on change).
       if (!(await scheduleToggle.isChecked().catch(() => false))) {
@@ -255,8 +253,6 @@ test.describe('single-bar', () => {
       const barRow = page.locator('.top-bar-row.bg').nth(0);
 
       const scheduleToggle = barRow.locator('.top-bar-toggle-life-time');
-      const toggleDisabled = await scheduleToggle.isDisabled().catch(() => false);
-      test.skip(toggleDisabled, 'Scheduling feature flag is disabled (FF_SCHEDULE=false).');
 
       // Wide range around now to avoid timezone edge cases.
       const now = new Date();
@@ -317,15 +313,11 @@ test.describe('single-bar', () => {
       const effectSelect = page.locator('select').filter({
         has: page.locator('option[value="slider"]'),
       }).first();
-      const effectDisabled = await effectSelect.isDisabled().catch(() => false);
-      test.skip(effectDisabled, 'Multi-message is disabled by plan (FF_MAX_MESSAGES <= 1).');
 
       await Promise.all([waitForTopBarPut(page), effectSelect.selectOption('slider')]);
 
       const messageList = page.locator('.top-bar-message-list').first();
       const addTextButton = page.getByRole('button', { name: 'Add new text' }).first();
-      const canAdd = await addTextButton.isVisible().catch(() => false);
-      test.skip(!canAdd, 'Multi-message is disabled by plan (no "Add new text" control).');
       const beforeCount = await messageList.locator('.top-bar-column-creator-grid').count();
 
       await Promise.all([waitForTopBarPut(page), addTextButton.click()]);
@@ -344,8 +336,6 @@ test.describe('single-bar', () => {
       const effectSelect = page.locator('select').filter({
         has: page.locator('option[value="slider"]'),
       }).first();
-      const effectDisabled = await effectSelect.isDisabled().catch(() => false);
-      test.skip(effectDisabled, 'Multi-message is disabled by plan (FF_MAX_MESSAGES <= 1).');
 
       const effectSave = waitForTopBarPut(page);
       await effectSelect.selectOption('slider');
@@ -353,8 +343,6 @@ test.describe('single-bar', () => {
 
       const messageList = page.locator('.top-bar-message-list').first();
       const addTextButton = page.getByRole('button', { name: 'Add new text' }).first();
-      const canAdd = await addTextButton.isVisible().catch(() => false);
-      test.skip(!canAdd, 'Multi-message is disabled by plan (no "Add new text" control).');
 
       // Changing effect can re-render/collapse the options panel; re-open and ensure the control is actionable.
       await openPanel(page, 0);
