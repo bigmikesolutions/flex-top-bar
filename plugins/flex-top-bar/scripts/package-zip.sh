@@ -51,4 +51,12 @@ zip -r "$OUT" flex-top-bar \
   -x 'flex-top-bar/.git/*' \
   -x 'flex-top-bar/.git/**'
 
+# Ensure plugin docs are included (both `doc/` and `docs/`).
+if [[ -d "$TOP_BAR_DIR/doc" ]]; then
+  zip -r "$OUT" flex-top-bar/doc -i '*.md' >/dev/null
+fi
+if [[ -d "$TOP_BAR_DIR/docs" ]]; then
+  zip -r "$OUT" flex-top-bar/docs -i '*.md' >/dev/null
+fi
+
 echo "Packaged v${VERSION} -> $OUT"
