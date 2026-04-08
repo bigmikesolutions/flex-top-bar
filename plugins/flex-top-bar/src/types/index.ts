@@ -151,6 +151,6 @@ export interface TopBarConfig {
 // Global window interface
 declare global {
   interface Window {
-    topBarConfig: TopBarConfig
+    flexTopBarConfig: TopBarConfig
   }
 }

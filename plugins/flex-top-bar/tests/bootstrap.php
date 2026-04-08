@@ -184,14 +184,4 @@ if ( ! defined( 'FLEX_TOP_BAR_VERSION' ) ) {
 	define( 'FLEX_TOP_BAR_VERSION', 'test' );
 }
 
-if ( ! defined( 'TOP_BAR_PLUGIN_FILE' ) ) {
-	define( 'TOP_BAR_PLUGIN_FILE', FLEX_TOP_BAR_PLUGIN_FILE );
-}
-
-if ( ! defined( 'TOP_BAR_PLUGIN_DIR' ) ) {
-	define( 'TOP_BAR_PLUGIN_DIR', FLEX_TOP_BAR_PLUGIN_DIR );
-}
-
-if ( ! defined( 'TOP_BAR_VERSION' ) ) {
-	define( 'TOP_BAR_VERSION', FLEX_TOP_BAR_VERSION );
-}
+// Legacy TOP_BAR_* constants intentionally not defined to avoid collisions.

@@ -16,7 +16,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class API {
 
 	private const NAMESPACE_NEW = 'flex-top-bar/v1';
-	private const NAMESPACE_LEGACY = 'top-bar/v1';
 
 	public function __construct() {
 		add_action( 'rest_api_init', [ $this, 'register_routes' ] );
@@ -24,8 +23,6 @@ final class API {
 
 	public function register_routes(): void {
 		$this->register_routes_for_namespace( self::NAMESPACE_NEW );
-		// Backwards-compatible alias.
-		$this->register_routes_for_namespace( self::NAMESPACE_LEGACY );
 	}
 
 	private function register_routes_for_namespace( string $ns ): void {

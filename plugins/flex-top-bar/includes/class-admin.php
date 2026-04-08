@@ -59,7 +59,7 @@ final class Admin {
 			// Pass configuration to Vue
 			wp_localize_script(
 				'flex-top-bar-admin-vue',
-				'topBarConfig',
+				'flexTopBarConfig',
 				[
 					'apiRoot'         => esc_url_raw( rest_url( 'flex-top-bar/v1' ) ),
 					'nonce'           => wp_create_nonce( 'wp_rest' ),

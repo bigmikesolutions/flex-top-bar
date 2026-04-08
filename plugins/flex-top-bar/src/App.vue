@@ -103,7 +103,7 @@ import BarItem from '@/components/AdminBarView.vue'
 import type { Bar } from '@/types'
 
 const bmsFavicon = computed(() => {
-  const fromWp = (window.topBarConfig?.bmsFaviconUrl || '').trim()
+  const fromWp = (window.flexTopBarConfig?.bmsFaviconUrl || '').trim()
   if (fromWp) {
     return fromWp
   }
@@ -115,7 +115,7 @@ const flagsStore = useFeatureFlagsStore()
 
 const isAdding = ref(false)
 const showMaxBarsWarning = ref(false)
-const pluginVersion = (window.topBarConfig?.version || '').trim()
+const pluginVersion = (window.flexTopBarConfig?.version || '').trim()
 
 const bars = computed(() => barsStore.bars)
 const publishedBarsById = computed(() => {

@@ -23,9 +23,7 @@ final class Frontend {
 
 	private function should_show_bar(): bool {
 		$has_active = Options::get_active_bars() !== [];
-		// Prefer namespaced hook; keep legacy hook for compatibility.
-		$show = (bool) apply_filters( 'flex_top_bar_show', $has_active );
-		return (bool) apply_filters( 'top_bar_show', $show );
+		return (bool) apply_filters( 'flex_top_bar_show', $has_active );
 	}
 
 	public function maybe_render_bar(): void {

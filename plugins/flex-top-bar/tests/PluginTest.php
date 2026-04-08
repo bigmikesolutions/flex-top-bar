@@ -20,8 +20,8 @@ final class PluginTest extends TestCase {
 
 	public function test_plugin_file_contains_required_constants(): void {
 		$content = (string) file_get_contents( dirname( __DIR__ ) . '/flex-top-bar.php' );
-		$this->assertStringContainsString( 'TOP_BAR_VERSION', $content );
-		$this->assertStringContainsString( 'TOP_BAR_PLUGIN_DIR', $content );
+		$this->assertStringContainsString( 'FLEX_TOP_BAR_VERSION', $content );
+		$this->assertStringContainsString( 'FLEX_TOP_BAR_PLUGIN_DIR', $content );
 	}
 
 	public function test_plugin_headers_present(): void {

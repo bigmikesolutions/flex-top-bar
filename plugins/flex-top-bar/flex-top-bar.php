@@ -24,17 +24,6 @@ define( 'FLEX_TOP_BAR_VERSION', '0.1.0' );
 define( 'FLEX_TOP_BAR_PLUGIN_FILE', __FILE__ );
 define( 'FLEX_TOP_BAR_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 
-// Backwards-compat aliases (keep older internal references working).
-if ( ! defined( 'TOP_BAR_VERSION' ) ) {
-	define( 'TOP_BAR_VERSION', FLEX_TOP_BAR_VERSION );
-}
-if ( ! defined( 'TOP_BAR_PLUGIN_FILE' ) ) {
-	define( 'TOP_BAR_PLUGIN_FILE', FLEX_TOP_BAR_PLUGIN_FILE );
-}
-if ( ! defined( 'TOP_BAR_PLUGIN_DIR' ) ) {
-	define( 'TOP_BAR_PLUGIN_DIR', FLEX_TOP_BAR_PLUGIN_DIR );
-}
-
 // Freemius integration
 if ( ! function_exists( 'ftb_fs' ) ) {
     // Create a helper function for easy SDK access.
@@ -85,11 +74,11 @@ if ( ! function_exists( 'ftb_fs' ) ) {
     do_action( 'ftb_fs_loaded' );
 }
 
-require_once TOP_BAR_PLUGIN_DIR . 'includes/class-feature-flags.php';
-require_once TOP_BAR_PLUGIN_DIR . 'includes/class-options.php';
-require_once TOP_BAR_PLUGIN_DIR . 'includes/class-api.php';
-require_once TOP_BAR_PLUGIN_DIR . 'includes/class-admin.php';
-require_once TOP_BAR_PLUGIN_DIR . 'includes/class-frontend.php';
+require_once FLEX_TOP_BAR_PLUGIN_DIR . 'includes/class-feature-flags.php';
+require_once FLEX_TOP_BAR_PLUGIN_DIR . 'includes/class-options.php';
+require_once FLEX_TOP_BAR_PLUGIN_DIR . 'includes/class-api.php';
+require_once FLEX_TOP_BAR_PLUGIN_DIR . 'includes/class-admin.php';
+require_once FLEX_TOP_BAR_PLUGIN_DIR . 'includes/class-frontend.php';
 
 final class Plugin {
 

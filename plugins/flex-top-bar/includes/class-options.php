@@ -132,7 +132,7 @@ final class Options {
 	public static function publish_draft_to_published(): array {
 		self::ensure_draft_initialized();
 		$draft = self::get_bars();
-		self::update_option_with_legacy_mirror( self::OPTION_BARS, self::LEGACY_OPTION_BARS, $draft );
+		self::update_option( self::OPTION_BARS, $draft );
 		return self::get_published_bars();
 	}
 
@@ -158,7 +158,7 @@ final class Options {
 		if ( $filtered === [] ) {
 			return;
 		}
-		self::update_option_with_legacy_mirror( self::OPTION_BARS, self::LEGACY_OPTION_BARS, array_values( $filtered ) );
+		self::update_option( self::OPTION_BARS, array_values( $filtered ) );
 	}
 
 	/**
@@ -195,7 +195,7 @@ final class Options {
 		}
 
 		$published = array_values( array_slice( $published, 0, FeatureFlags::instance()->max_bars() ) );
-		self::update_option_with_legacy_mirror( self::OPTION_BARS, self::LEGACY_OPTION_BARS, $published );
+		self::update_option( self::OPTION_BARS, $published );
 
 		return self::normalize_bar( $draft_bar );
 	}
@@ -212,9 +212,9 @@ final class Options {
 		if ( ! is_array( $published ) || $published === [] ) {
 			// Seed a stable initial published state so ids stay consistent.
 			$published = [ self::default_bar() ];
-			self::update_option_with_legacy_mirror( self::OPTION_BARS, self::LEGACY_OPTION_BARS, $published );
+			self::update_option( self::OPTION_BARS, $published );
 		}
-		self::update_option_with_legacy_mirror( self::OPTION_BARS_DRAFT, self::LEGACY_OPTION_BARS_DRAFT, $published );
+		self::update_option( self::OPTION_BARS_DRAFT, $published );
 	}
 
 	/**
@@ -232,13 +232,12 @@ final class Options {
 	}
 
 	/**
-	 * Update namespaced option and mirror to legacy key for compatibility.
+	 * Update namespaced option only (no legacy mirroring).
 	 *
 	 * @param mixed $value
 	 */
-	private static function update_option_with_legacy_mirror( string $new_key, string $legacy_key, $value ): void {
+	private static function update_option( string $new_key, $value ): void {
 		update_option( $new_key, $value );
-		update_option( $legacy_key, $value );
 	}
 
 	/**

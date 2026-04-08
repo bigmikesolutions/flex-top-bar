@@ -4,9 +4,9 @@ import type { Bar, FeatureFlags } from '@/types'
 // Mock fetch
 global.fetch = vi.fn()
 
-// Mock window.topBarConfig before importing
+// Mock window.flexTopBarConfig before importing
 beforeAll(() => {
-  global.window.topBarConfig = {
+  global.window.flexTopBarConfig = {
     apiRoot: '/wp-json/flex-top-bar/v1',
     nonce: 'test-nonce-123',
   }
@@ -328,8 +328,8 @@ describe('ApiClient', () => {
   })
 
   describe('configuration', () => {
-    it('uses default values when topBarConfig is not set', async () => {
-      delete (global.window as any).topBarConfig
+    it('uses default values when flexTopBarConfig is not set', async () => {
+      delete (global.window as any).flexTopBarConfig
 
       vi.mocked(fetch).mockResolvedValueOnce({
         ok: true,
