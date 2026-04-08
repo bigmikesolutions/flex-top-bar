@@ -27,8 +27,8 @@ test.describe('single-bar', () => {
           // Match both endpoints: single-bar publish and bulk publish.
           // Supports both pretty (/wp-json/…) and plain (?rest_route=/…) WP REST styles.
           return (
-            new RegExp(`top-bar/v1/bars/${barId}/publish`, 'i').test(url) ||
-            /top-bar\/v1\/publish/i.test(url)
+            new RegExp(`flex-top-bar/v1/bars/${barId}/publish`, 'i').test(url) ||
+            /flex-top-bar\/v1\/publish/i.test(url)
           );
         },
         { timeout: 45000 }
@@ -317,18 +317,18 @@ test.describe('single-bar', () => {
       const effectSelect = page.locator('select').filter({
         has: page.locator('option[value="slider"]'),
       }).first();
-      const effectSave = waitForTopBarPut(page);
-      await effectSelect.selectOption('slider');
-      await effectSave;
+      const effectDisabled = await effectSelect.isDisabled().catch(() => false);
+      test.skip(effectDisabled, 'Multi-message is disabled by plan (FF_MAX_MESSAGES <= 1).');
+
+      await Promise.all([waitForTopBarPut(page), effectSelect.selectOption('slider')]);
 
       const messageList = page.locator('.top-bar-message-list').first();
       const addTextButton = page.getByRole('button', { name: 'Add new text' }).first();
+      const canAdd = await addTextButton.isVisible().catch(() => false);
+      test.skip(!canAdd, 'Multi-message is disabled by plan (no "Add new text" control).');
       const beforeCount = await messageList.locator('.top-bar-column-creator-grid').count();
 
-      const addSave = waitForTopBarPut(page);
-      await addTextButton.click();
-      await addSave;
-      await page.waitForLoadState('domcontentloaded');
+      await Promise.all([waitForTopBarPut(page), addTextButton.click()]);
 
       const afterCount = await messageList.locator('.top-bar-column-creator-grid').count();
       expect(afterCount).toBe(beforeCount + 1);

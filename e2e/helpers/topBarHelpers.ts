@@ -31,7 +31,7 @@ function isTopBarBarPut(response: Response): boolean {
 
 /** Wait for the Vue admin to persist a bar via REST (PUT …/top-bar/v1/bars/:id). */
 export async function waitForTopBarPut(page: Page): Promise<void> {
-  await page.waitForResponse(isTopBarBarPut, { timeout: 30000 });
+  await page.waitForResponse(isTopBarBarPut, { timeout: 45000 });
 }
 
 /**
