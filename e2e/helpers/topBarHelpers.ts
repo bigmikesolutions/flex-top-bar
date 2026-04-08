@@ -49,7 +49,9 @@ export async function waitForTopBarAdminReady(page: Page): Promise<void> {
 
 export async function loginAndOpenTopBarSettings(page: Page): Promise<void> {
   const gotoSettings = () =>
-    page.goto(TOP_BAR_SETTINGS_PATH, { waitUntil: 'load', timeout: 30000 });
+    // `load` can be flaky/slow in WP admin because of long-running assets; Vue UI is ready once
+    // the relevant DOM renders, which we already assert in `waitForTopBarAdminReady`.
+    page.goto(TOP_BAR_SETTINGS_PATH, { waitUntil: 'domcontentloaded', timeout: 45000 });
 
   // Go straight to the admin settings page; WP redirects to login if needed.
   await gotoSettings();
@@ -68,8 +70,13 @@ export async function loginAndOpenTopBarSettings(page: Page): Promise<void> {
   if (await loginInput.count()) {
     await loginInput.first().fill(ADMIN_USER);
     await page.locator('input[name="pwd"]').first().fill(ADMIN_PASS);
-    await page.locator('input[name="wp-submit"]').first().click();
-    await page.waitForURL(WP_ADMIN_URL_REGEX, { timeout: 30000 });
+    const submit = page.locator('input[name="wp-submit"]').first();
+    await Promise.all([
+      // `waitForURL` defaults to waiting for the full "load" event; WP admin often keeps the page
+      // "loading" longer than necessary. `domcontentloaded` is enough for our subsequent UI checks.
+      page.waitForURL(WP_ADMIN_URL_REGEX, { timeout: 45000, waitUntil: 'domcontentloaded' }),
+      submit.click(),
+    ]);
   }
 
   await gotoSettings();
@@ -77,8 +84,24 @@ export async function loginAndOpenTopBarSettings(page: Page): Promise<void> {
   try {
     await waitForTopBarAdminReady(page);
   } catch {
-    const url = page.url();
-    const title = await page.title();
+    // Avoid throwing a secondary error if the browser/page was already closed by a timeout.
+    const url = (() => {
+      try {
+        return page.url();
+      } catch {
+        return '(unavailable)';
+      }
+    })();
+
+    const title = await (async () => {
+      try {
+        if (page.isClosed()) return '(page closed)';
+        return await page.title();
+      } catch {
+        return '(unavailable)';
+      }
+    })();
+
     throw new Error(`Failed to open Top Bar settings. URL: ${url}, title: ${title}`);
   }
 }

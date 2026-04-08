@@ -26,6 +26,7 @@ test.describe('Feature Flag', () => {
   test.describe('max bars', () => {
 
     test('should enforce max_bars limit when adding bars', async ({ page }) => {
+      test.setTimeout(90000);
       await loginAndOpenTopBarSettings(page);
       await resetToSingleBar(page);
 
@@ -50,6 +51,7 @@ test.describe('Feature Flag', () => {
     });
 
     test('should show correct max bars limit in admin UI', async ({ page }) => {
+      test.setTimeout(90000);
       await loginAndOpenTopBarSettings(page);
       await resetToSingleBar(page);
 
@@ -64,6 +66,7 @@ test.describe('Feature Flag', () => {
     });
 
     test('should respect max_bars when displaying on frontend', async ({ page }) => {
+      test.setTimeout(90000);
       await loginAndOpenTopBarSettings(page);
       await resetToSingleBar(page);
 
