@@ -9,6 +9,30 @@
  * Text Domain: flex-top-bar
  *
  * @package FlexTopBar
+ *
+ * --------------------------------------------------------------------------------
+ * Flex Top Bar – End-User License Agreement (EULA) – Summary
+ *
+ * - Licensed under GNU General Public License v2 or later (GPL-2.0-or-later)
+ *   You may use, modify, and redistribute the plugin in accordance with the GPL.
+ *
+ * - Use at your own risk. Plugin is provided "AS IS" and "AS AVAILABLE".
+ *   No warranties expressed or implied, including merchantability, fitness for
+ *   a particular purpose, or non-infringement.
+ *
+ * - Author is not responsible for:
+ *   • data loss, downtime, or system issues,
+ *   • direct, indirect, or consequential damages,
+ *   • compatibility with WordPress versions, themes, plugins, or third-party services.
+ *
+ * - User is responsible for:
+ *   • verifying plugin in a staging environment,
+ *   • maintaining backups,
+ *   • security and compliance of their website.
+ *
+ * - User content (messages, links, graphics) remains user's responsibility.
+ *
+ * Full EULA is included in 'EULA.MD' inside this plugin folder and on the plugin page.
  */
 
 declare(strict_types=1);
@@ -23,6 +47,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 define( 'FLEX_TOP_BAR_VERSION', '0.1.0' );
 define( 'FLEX_TOP_BAR_PLUGIN_FILE', __FILE__ );
 define( 'FLEX_TOP_BAR_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
+
+// Backwards-compat aliases (keep older internal references working).
+if ( ! defined( 'TOP_BAR_VERSION' ) ) {
+	define( 'TOP_BAR_VERSION', FLEX_TOP_BAR_VERSION );
+}
+if ( ! defined( 'TOP_BAR_PLUGIN_FILE' ) ) {
+	define( 'TOP_BAR_PLUGIN_FILE', FLEX_TOP_BAR_PLUGIN_FILE );
+}
+if ( ! defined( 'TOP_BAR_PLUGIN_DIR' ) ) {
+	define( 'TOP_BAR_PLUGIN_DIR', FLEX_TOP_BAR_PLUGIN_DIR );
+}
 
 // Freemius integration
 if ( ! function_exists( 'ftb_fs' ) ) {
@@ -74,11 +109,11 @@ if ( ! function_exists( 'ftb_fs' ) ) {
     do_action( 'ftb_fs_loaded' );
 }
 
-require_once FLEX_TOP_BAR_PLUGIN_DIR . 'includes/class-feature-flags.php';
-require_once FLEX_TOP_BAR_PLUGIN_DIR . 'includes/class-options.php';
-require_once FLEX_TOP_BAR_PLUGIN_DIR . 'includes/class-api.php';
-require_once FLEX_TOP_BAR_PLUGIN_DIR . 'includes/class-admin.php';
-require_once FLEX_TOP_BAR_PLUGIN_DIR . 'includes/class-frontend.php';
+require_once TOP_BAR_PLUGIN_DIR . 'includes/class-feature-flags.php';
+require_once TOP_BAR_PLUGIN_DIR . 'includes/class-options.php';
+require_once TOP_BAR_PLUGIN_DIR . 'includes/class-api.php';
+require_once TOP_BAR_PLUGIN_DIR . 'includes/class-admin.php';
+require_once TOP_BAR_PLUGIN_DIR . 'includes/class-frontend.php';
 
 final class Plugin {
 
