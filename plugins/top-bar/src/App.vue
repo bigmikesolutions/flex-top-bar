@@ -204,35 +204,3 @@ async function handlePublish(id: string) {
   }
 }
 </script>
-
-<style scoped>
-.top-bar-admin-title {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-}
-
-.top-bar-admin-version {
-  font-size: 12px;
-  font-weight: 600;
-  opacity: 0.7;
-}
-
-.top-bar-powered-by {
-  margin-top: 28px;
-}
-
-.top-bar-powered-by__text {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0;
-  text-align: center;
-}
-
-.top-bar-powered-by__icon {
-  display: block;
-  flex-shrink: 0;
-  object-fit: contain;
-}
-</style>

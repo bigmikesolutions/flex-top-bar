@@ -36,7 +36,7 @@
           <div class="item-creator no">
             <p class="bold md">{{ index + 1 }}</p>
           </div>
-          <div class="item-creator grid-2">
+          <div class="item-creator">
             <textarea
               :value="messages[index]"
               :name="messages[index]"

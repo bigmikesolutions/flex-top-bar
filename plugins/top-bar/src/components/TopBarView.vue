@@ -345,6 +345,9 @@ function socialIconClass(platform: SocialPlatform | '', style: SocialBarColumn['
   if (platform === 'instagram') {
     return style === 'color' ? 'instagramColor' : 'instagramMono'
   }
+  if (platform === 'dribbble') {
+    return style === 'color' ? 'dribbbleColor' : 'dribbbleMono'
+  }
   return SOCIAL_ICONS_BY_PLATFORM[platform] ?? ''
 }
 
@@ -609,6 +612,7 @@ body.admin-bar .top-bar--top {
 
 .top-bar-text-column {
   width: 100%;
+  overflow: hidden;
 }
 
 /* Transitions for effects */
