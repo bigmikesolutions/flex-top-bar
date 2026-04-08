@@ -7,16 +7,16 @@
   },
   "autoload": {
     "psr-4": {
-      "TopBar\\": "plugins/top-bar/",
-      "TopBar\\Tests\\": "plugins/top-bar/tests/"
+      "FlexTopBar\\": "plugins/flex-top-bar/",
+      "FlexTopBar\\Tests\\": "plugins/flex-top-bar/tests/"
     },
     "classmap": [
-      "plugins/top-bar/"
+      "plugins/flex-top-bar/"
     ]
   },
   "autoload-dev": {
     "psr-4": {
-      "TopBar\\Tests\\": "plugins/top-bar/tests/"
+      "FlexTopBar\\Tests\\": "plugins/flex-top-bar/tests/"
     }
   },
   "require-dev": {
@@ -24,7 +24,7 @@
   },
   "scripts": {
     "test": "phpunit",
-    "test:top-bar": "phpunit plugins/top-bar/tests",
+    "test:flex-top-bar": "phpunit plugins/flex-top-bar/tests",
     "seed:top-bars": "bash scripts/seed-two-top-bars.sh"
   }
 }

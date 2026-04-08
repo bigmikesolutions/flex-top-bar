@@ -132,7 +132,7 @@ if ( ! function_exists( 'wp_json_encode' ) ) {
 
 if ( ! function_exists( 'plugin_dir_url' ) ) {
 	function plugin_dir_url( string $file ): string {
-		return 'http://example.test/plugins/top-bar/';
+		return 'http://example.test/plugins/flex-top-bar/';
 	}
 }
 

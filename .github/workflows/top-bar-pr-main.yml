@@ -117,7 +117,7 @@ jobs:
                 --admin_email="${WORDPRESS_ADMIN_EMAIL}" \
                 --skip-email
             fi
-            wp plugin activate top-bar --allow-root
+            wp plugin activate flex-top-bar --allow-root
           '
 
       - name: Wait for WordPress install to be ready

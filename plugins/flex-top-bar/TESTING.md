@@ -24,7 +24,7 @@ Located in: `tests/`
 **Run tests:**
 ```bash
 cd /Users/m-wrona/github/bigmikesolutions/wordpress
-php vendor/bin/phpunit --testdox plugins/top-bar/tests/
+php vendor/bin/phpunit --testdox plugins/flex-top-bar/tests/
 ```
 
 ### JavaScript Unit Tests (Vitest) ✅ **79 tests passing**
@@ -72,7 +72,7 @@ npm test              # Run once and exit
 npm run test:ui       # Run with Vitest UI
 
 # Or from plugin directory
-cd plugins/top-bar
+cd plugins/flex-top-bar
 npm test              # Run once and exit
 npm run test:watch    # Run in watch mode (auto-rerun on file changes)
 npm run test:ui       # Run with Vitest UI

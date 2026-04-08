@@ -10,5 +10,5 @@ alwaysApply: false
 - **Top Bar admin:** Prefer waiting for real readiness (e.g. `#top-bar`, “Add new Top Bar” button) over arbitrary `waitForTimeout` sleeps.
 - **REST persistence:** The Vue admin persists bars with **PUT** to `top-bar/v1/bars/:id`. Use `waitForTopBarPut` from `e2e/helpers/topBarHelpers.ts` after actions that save — match URLs with `top-bar/v1/bars/` (works with both pretty `/wp-json/` and `rest_route=` styles).
 - **Do not** assert `getByRole('button', { name: 'Save Changes' })` on the Top Bar Vue settings page; saves are automatic.
-- **Selectors:** Admin UI uses buttons (e.g. “Add new text”), not legacy form `name="top_bars[0][...]"` attributes. Align assertions with `plugins/top-bar/src/components/*.vue`.
+- **Selectors:** Admin UI uses buttons (e.g. “Add new text”), not legacy form `name="top_bars[0][...]"` attributes. Align assertions with `plugins/flex-top-bar/src/components/*.vue`.
 - **Frontend assertions:** Match `TopBarFrontend.vue` (e.g. mobile hidden → class `top-bar--messages-mobile-hidden`, not a `data-top-bar-mobile-visible` attribute unless the component defines it).
