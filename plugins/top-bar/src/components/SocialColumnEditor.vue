@@ -100,9 +100,6 @@
             <p class="bold md">{{ index + 1 }}</p>
           </div>
           <div class="item-creator vertical">
-            <!-- <label class="screen-reader-text" :for="`social_platform_${barId}_${columnId}_${index}`">
-              {{ __('Social network', 'top-bar') }}
-            </label> -->
             <select
               :id="`social_platform_${barId}_${columnId}_${index}`"
               :value="column.links[index]?.platform ?? ''"
@@ -113,9 +110,6 @@
                 {{ platformLabel(p) }}
               </option>
             </select>
-            <!-- <label class="screen-reader-text" :for="`social_url_${barId}_${columnId}_${index}`">
-              {{ __('Profile link', 'top-bar') }}
-            </label> -->
             <input
               :id="`social_url_${barId}_${columnId}_${index}`"
               type="url"
@@ -264,15 +258,4 @@ function removeLink(index: number) {
   margin-bottom: 6px;
 }
 
-/* .screen-reader-text {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-} */
 </style>
