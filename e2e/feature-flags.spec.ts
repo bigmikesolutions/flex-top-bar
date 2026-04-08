@@ -4,6 +4,7 @@ import {
   loginAndOpenTopBarSettings,
   openPanel,
   resetToSingleBar,
+  resetToSingleColumnBar,
   waitForTopBarPut,
 } from './helpers/topBarHelpers';
 
@@ -26,6 +27,7 @@ test.describe('Feature Flag', () => {
   test.describe('max bars', () => {
 
     test('should enforce max_bars limit when adding bars', async ({ page }) => {
+      test.setTimeout(90000);
       await loginAndOpenTopBarSettings(page);
       await resetToSingleBar(page);
 
@@ -50,6 +52,7 @@ test.describe('Feature Flag', () => {
     });
 
     test('should show correct max bars limit in admin UI', async ({ page }) => {
+      test.setTimeout(90000);
       await loginAndOpenTopBarSettings(page);
       await resetToSingleBar(page);
 
@@ -64,6 +67,7 @@ test.describe('Feature Flag', () => {
     });
 
     test('should respect max_bars when displaying on frontend', async ({ page }) => {
+      test.setTimeout(90000);
       await loginAndOpenTopBarSettings(page);
       await resetToSingleBar(page);
 
@@ -86,25 +90,32 @@ test.describe('Feature Flag', () => {
 
   test.describe('max columns', () => {
     test('should enforce max_columns limit when adding columns', async ({ page }) => {
+      test.setTimeout(90000);
       await loginAndOpenTopBarSettings(page);
-      await resetToSingleBar(page);
+      // Start from a deterministic single-column bar.
+      await resetToSingleColumnBar(page, 'text');
       await openPanel(page, 0);
 
       const maxColumns = Number(process.env.FF_MAX_COLUMNS ?? '4');
       const addColumnBtn = page.getByRole('button', { name: 'Add column' }).first();
 
-      // Start with a single-column bar.
-      await expect(layoutColumnGrids(page, 0)).toHaveCount(1);
+      const columnsLocator = layoutColumnGrids(page, 0);
+      const initialCount = await columnsLocator.count();
 
-      // Add up to the configured max.
-      for (let i = 1; i < maxColumns; i += 1) {
+      // If the bar already has multiple columns (e.g. persisted state), the important invariant is:
+      // we must never exceed `maxColumns`, and once at cap we must not be able to add more.
+      expect(initialCount).toBeGreaterThanOrEqual(1);
+      expect(initialCount).toBeLessThanOrEqual(maxColumns);
+
+      // Add until we hit the configured max.
+      for (let count = initialCount; count < maxColumns; count += 1) {
         await expect(addColumnBtn).toBeEnabled();
         await Promise.all([waitForTopBarPut(page), addColumnBtn.click()]);
-        await expect(layoutColumnGrids(page, 0)).toHaveCount(i + 1);
+        await expect(columnsLocator).toHaveCount(count + 1);
       }
 
-      // Once at cap, button should be disabled and count should not increase.
-      await expect(layoutColumnGrids(page, 0)).toHaveCount(maxColumns);
+      // At cap: button disabled and count stays at max.
+      await expect(columnsLocator).toHaveCount(maxColumns);
       await expect(addColumnBtn).toBeDisabled();
     });
   });

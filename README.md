@@ -39,14 +39,14 @@ WP plugins
 
 ### Custom plugins
 
-Custom plugins live in **`plugins/`** at the repo root and are mounted into the container as `wp-content/plugins`. Each plugin is in its own subdirectory (e.g. `plugins/top-bar/`). Activate them in **WP Admin → Plugins**.
+Custom plugins live in **`plugins/`** at the repo root and are mounted into the container as `wp-content/plugins`. Each plugin is in its own subdirectory (e.g. `plugins/flex-top-bar/`). Activate them in **WP Admin → Plugins**.
 
 **Unit tests** (PHPUnit) run from the project root:
 
 ```bash
 composer install
 composer test
-# or only Top Bar:  composer test:top-bar
+# or only Flex Top Bar:  composer test:flex-top-bar
 ```
 
 **Unit tests** (JS Unit) run from the project root:

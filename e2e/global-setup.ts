@@ -19,7 +19,7 @@ export default async function globalSetup(): Promise<void> {
     `else ` +
     `wp core install --allow-root --url="http://localhost:8080" --title="CI WordPress" --admin_user="${adminUser}" --admin_password="${adminPass}" --admin_email="${adminEmail}" --skip-email; ` +
     `fi; ` +
-    `wp plugin activate top-bar --allow-root'`;
+    `wp plugin activate flex-top-bar --allow-root'`;
 
   execSync(command, { stdio: 'inherit' });
 }

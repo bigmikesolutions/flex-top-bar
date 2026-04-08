@@ -7,6 +7,7 @@ import {
   resetToSingleColumnBar,
   getBarIdByIndex,
   waitForTopBarPut,
+  waitForTopBarPutWhere,
 } from './helpers/topBarHelpers';
 
 test.describe('icons - social media', () => {
@@ -30,10 +31,24 @@ test.describe('icons - social media', () => {
     const styleLabels = appearanceFieldset.locator('label');
     await expect(styleLabels).toHaveCount(5);
 
+    const styles: Array<'rounded' | 'square' | 'black' | 'white' | 'color'> = [
+      'rounded',
+      'square',
+      'black',
+      'white',
+      'color',
+    ];
+
     async function setStyleByIndex(index: number) {
-      const save = waitForTopBarPut(page);
-      await styleLabels.nth(index).click({ force: true });
-      await save;
+      const style = styles[index]!;
+      await openPanel(page, 0);
+      await styleLabels.nth(index).scrollIntoViewIfNeeded();
+      const radio = appearanceFieldset.locator('input[type="radio"]').nth(index);
+      await Promise.all([
+        waitForTopBarPutWhere(page, (body) => body.includes(`"icon_style":"${style}"`)),
+        // In some layouts the radio input is visually hidden; click it via DOM to ensure change fires.
+        radio.evaluate((el: HTMLInputElement) => el.click()),
+      ]);
     }
 
     async function publishThisBar() {
@@ -43,17 +58,26 @@ test.describe('icons - social media', () => {
       const publishSave = page.waitForResponse((r) => {
         if (r.request().method() !== 'POST' || !r.ok()) return false;
         const url = decodeURIComponent(r.url());
-        return new RegExp(`/top-bar/v1/bars/${barId}/publish`, 'i').test(url);
+        return new RegExp(`/(flex-top-bar|top-bar)/v1/bars/${barId}/publish`, 'i').test(url);
       });
       await publishBtn.click();
       await publishSave;
     }
 
     async function setPillColors(bg: string, fg: string) {
-      const bgInput = page.locator(`#social_bg_${barId}_${columnId}`);
-      const iconInput = page.locator(`#social_icon_${barId}_${columnId}`);
-      await expect(bgInput).toBeVisible();
-      await expect(iconInput).toBeVisible();
+      // Avoid coupling to exact `id` formatting; locate by the visible fieldset legends.
+      await openPanel(page, 0);
+      const row = page.locator('.top-bar-row.bg').first();
+      const panel = row.locator('.top-bar-options.active');
+      await expect(panel).toBeVisible({ timeout: 15000 });
+
+      // Column editors use stable input ids in Vue.
+      const bgInput = panel.locator(`#social_bg_${barId}_${columnId}`);
+      const iconInput = panel.locator(`#social_icon_${barId}_${columnId}`);
+      await expect(bgInput).toHaveCount(1, { timeout: 15000 });
+      await expect(iconInput).toHaveCount(1, { timeout: 15000 });
+      await expect(bgInput).toBeVisible({ timeout: 15000 });
+      await expect(iconInput).toBeVisible({ timeout: 15000 });
 
       await bgInput.fill(bg);
       const bgSave = waitForTopBarPut(page);
@@ -154,10 +178,16 @@ test.describe('icons - contact column', () => {
     // Contact editor hides "color" option (only 4 appearances available).
     await expect(styleLabels).toHaveCount(4);
 
+    const styles: Array<'rounded' | 'square' | 'black' | 'white'> = ['rounded', 'square', 'black', 'white'];
+
     async function setStyleByIndex(index: number) {
-      const save = waitForTopBarPut(page);
-      await styleLabels.nth(index).click({ force: true });
-      await save;
+      const style = styles[index]!;
+      await openPanel(page, 0);
+      await styleLabels.nth(index).scrollIntoViewIfNeeded();
+      await Promise.all([
+        waitForTopBarPutWhere(page, (body) => body.includes(`"icon_style":"${style}"`)),
+        styleLabels.nth(index).click({ force: true }),
+      ]);
     }
 
     async function publishThisBar() {
@@ -166,17 +196,25 @@ test.describe('icons - contact column', () => {
       const publishSave = page.waitForResponse((r) => {
         if (r.request().method() !== 'POST' || !r.ok()) return false;
         const url = decodeURIComponent(r.url());
-        return new RegExp(`/top-bar/v1/bars/${barId}/publish`, 'i').test(url);
+        return new RegExp(`/(flex-top-bar|top-bar)/v1/bars/${barId}/publish`, 'i').test(url);
       });
       await publishBtn.click();
       await publishSave;
     }
 
     async function setPillColors(bg: string, fg: string) {
-      const bgInput = page.locator(`#contact_bg_${barId}_${columnId}`);
-      const iconInput = page.locator(`#contact_icon_${barId}_${columnId}`);
-      await expect(bgInput).toBeVisible();
-      await expect(iconInput).toBeVisible();
+      // Avoid coupling to exact `id` formatting; locate by the visible fieldset legends.
+      await openPanel(page, 0);
+      const row = page.locator('.top-bar-row.bg').first();
+      const panel = row.locator('.top-bar-options.active');
+      await expect(panel).toBeVisible({ timeout: 15000 });
+
+      const bgInput = panel.locator(`#contact_bg_${barId}_${columnId}`);
+      const iconInput = panel.locator(`#contact_icon_${barId}_${columnId}`);
+      await expect(bgInput).toHaveCount(1, { timeout: 15000 });
+      await expect(iconInput).toHaveCount(1, { timeout: 15000 });
+      await expect(bgInput).toBeVisible({ timeout: 15000 });
+      await expect(iconInput).toBeVisible({ timeout: 15000 });
 
       await bgInput.fill(bg);
       const bgSave = waitForTopBarPut(page);

@@ -2,7 +2,7 @@
   "permissions": {
     "allow": [
       "Bash(composer test:*)",
-      "Bash(vendor/bin/phpunit plugins/top-bar/tests/)",
+      "Bash(vendor/bin/phpunit plugins/flex-top-bar/tests/)",
       "Bash(npm run:*)",
       "Bash(npx playwright:*)",
       "Bash(npm init:*)",

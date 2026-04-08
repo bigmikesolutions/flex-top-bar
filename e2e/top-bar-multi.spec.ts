@@ -18,7 +18,7 @@ test.describe('multi-bar', () => {
     const publishSave = page.waitForResponse((r: any) => {
       if (r.request().method() !== 'POST' || !r.ok()) return false;
       const url = decodeURIComponent(r.url());
-      return new RegExp(`/top-bar/v1/bars/${barId}/publish`, 'i').test(url);
+      return new RegExp(`/(flex-top-bar|top-bar)/v1/bars/${barId}/publish`, 'i').test(url);
     });
     await publishBtn.click();
     await publishSave;
@@ -73,7 +73,7 @@ test.describe('multi-bar', () => {
       if (r.request().method() !== 'DELETE') return false;
       if (![200, 204].includes(r.status())) return false;
       const url = decodeURIComponent(r.url());
-      return /top-bar\/v1\/bars\/[a-z0-9_]+/i.test(url);
+      return /(flex-top-bar|top-bar)\/v1\/bars\/[a-z0-9_]+/i.test(url);
     });
     await deleteButton.click();
     await deleteSave;

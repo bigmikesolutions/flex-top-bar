@@ -6,7 +6,7 @@ alwaysApply: true
 # WordPress plugins monorepo
 
 - **Runtime:** Docker Compose brings up WordPress (default http://localhost:8080). Custom plugins live under `plugins/` and mount into the container.
-- **Primary plugin:** `plugins/top-bar` — Vue 3 + Vite admin/frontend, PHP REST API, Pinia, PHPUnit + Vitest + Playwright.
+- **Primary plugin:** `plugins/flex-top-bar` — Vue 3 + Vite admin/frontend, PHP REST API, Pinia, PHPUnit + Vitest + Playwright.
 - **Tests:** Root `npm run test` runs the plugin workspace tests; `npm run test:e2e` runs Playwright from the repo root (`playwright.config.ts`, `e2e/`).
 - **Scope:** Change only what the task requires. Do not refactor unrelated code, add unsolicited docs, or edit markdown unless asked.
 - **Imports / style:** Match existing files in the same area (PHP namespaces, Vue SFC patterns, Playwright helpers).

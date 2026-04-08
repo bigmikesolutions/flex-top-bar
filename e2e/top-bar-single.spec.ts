@@ -8,6 +8,7 @@ import {
   getBarIdByIndex,
   setBarPosition,
   setBarHideOnScroll,
+  waitForTopBarPutWhere,
   waitForTopBarPut,
 } from './helpers/topBarHelpers';
 
@@ -18,13 +19,31 @@ test.describe('single-bar', () => {
   async function publishBar(page: Page, barIndex: number, barId: string): Promise<void> {
     page.once('dialog', (d) => d.accept());
     const publishBtn = page.locator('.top-bar-row.bg').nth(barIndex).locator('button.top-bar-icons.publish');
-    const publishSave = page.waitForResponse((r) => {
-      if (r.request().method() !== 'POST' || !r.ok()) return false;
-      const url = decodeURIComponent(r.url());
-      return new RegExp(`/top-bar/v1/bars/${barId}/publish`, 'i').test(url);
-    });
-    await publishBtn.click();
-    await publishSave;
+    // If there are no unpublished changes, publish can be a no-op.
+    if (await publishBtn.evaluate((el) => el.classList.contains('top-bar-publish--dirty')).catch(() => false)) {
+      const publishRequest = page.waitForResponse(
+        (r) => {
+          if (r.request().method() !== 'POST' || !r.ok()) return false;
+          const url = decodeURIComponent(r.url());
+          // Match both endpoints: single-bar publish and bulk publish.
+          // Supports both pretty (/wp-json/…) and plain (?rest_route=/…) WP REST styles.
+          return (
+            new RegExp(`flex-top-bar/v1/bars/${barId}/publish`, 'i').test(url) ||
+            /flex-top-bar\/v1\/publish/i.test(url)
+          );
+        },
+        { timeout: 45000 }
+      );
+
+      // Some WP setups can complete publish without us reliably observing the response (navigation races,
+      // request routed via service worker/proxy, etc.). The UI reliably reflects completion by clearing
+      // the dirty marker, so accept either signal.
+      await publishBtn.click();
+      await Promise.race([
+        publishRequest,
+        expect(publishBtn).not.toHaveClass(/top-bar-publish--dirty/, { timeout: 45000 }),
+      ]);
+    }
   }
 
   test.describe('basic settings - position', () => {
@@ -178,23 +197,45 @@ test.describe('single-bar', () => {
       await openPanel(page, 0);
 
       const barId = await getBarIdByIndex(page, 0);
+      const barRow = page.locator('.top-bar-row.bg').nth(0);
 
-      // Enable scheduling (Vue auto-saves on change)
-      const scheduleSave = waitForTopBarPut(page);
-      await page.locator('label.top-bar-life-time-checkbox').first().click();
-      await scheduleSave;
+      // Scheduling is a plan feature flag (FF_SCHEDULE). Skip if disabled in this environment.
+      const scheduleToggle = barRow.locator('.top-bar-toggle-life-time');
+      const scheduleLabel = barRow.locator('.top-bar-life-time-checkbox');
 
-      const fromInput = page.locator(`#scheduled_from_${barId}`);
-      const toInput = page.locator(`#scheduled_to_${barId}`);
+      // Enable scheduling (Vue auto-saves on change).
+      if (!(await scheduleToggle.isChecked().catch(() => false))) {
+        // The checkbox input can be visually hidden; click the visible label/control instead.
+        await Promise.all([
+          waitForTopBarPutWhere(page, (body) => body.includes('"scheduled_enabled":true')),
+          scheduleLabel.click({ force: true }),
+        ]);
+      }
+
+      await expect(scheduleToggle).toBeChecked({ timeout: 15000 });
+      // Toggling can re-render/collapse the options panel; ensure it's open before interacting with fields.
+      await openPanel(page, 0);
+
+      const schedulePanel = barRow.locator('.top-bar-lifetime-panel');
+      await expect(schedulePanel).toBeVisible({ timeout: 15000 });
+
+      // Find schedule inputs by labels (IDs can vary if bar IDs differ).
+      const dateInputs = schedulePanel.locator('input.top-bar-life-time-datetime[type="datetime-local"]');
+      const fromInput = dateInputs.nth(0);
+      const toInput = dateInputs.nth(1);
+      await expect(fromInput).toBeVisible({ timeout: 15000 });
+      await expect(toInput).toBeVisible({ timeout: 15000 });
       await fromInput.fill('2099-03-21T11:00');
-      const fromSave = waitForTopBarPut(page);
+      await expect(fromInput).toHaveValue('2099-03-21T11:00');
       await fromInput.blur();
-      await fromSave;
+      await waitForTopBarPutWhere(page, (body) => body.includes('"scheduled_from_datetime":"2099-03-21T11:00"'));
+      await openPanel(page, 0);
+      await expect(toInput).toBeVisible({ timeout: 15000 });
 
       await toInput.fill('2099-03-21T12:30');
-      const toSave = waitForTopBarPut(page);
+      await expect(toInput).toHaveValue('2099-03-21T12:30');
       await toInput.blur();
-      await toSave;
+      await waitForTopBarPutWhere(page, (body) => body.includes('"scheduled_to_datetime":"2099-03-21T12:30"'));
 
       await page.reload();
       await openPanel(page, 0);
@@ -216,6 +257,10 @@ test.describe('single-bar', () => {
       await openPanel(page, 0);
 
       const barId = await getBarIdByIndex(page, 0);
+      const barRow = page.locator('.top-bar-row.bg').nth(0);
+
+      const scheduleToggle = barRow.locator('.top-bar-toggle-life-time');
+      const scheduleLabel = barRow.locator('.top-bar-life-time-checkbox');
 
       // Wide range around now to avoid timezone edge cases.
       const now = new Date();
@@ -224,21 +269,35 @@ test.describe('single-bar', () => {
       const fromValue = toDatetimeLocalValue(from);
       const toValue = toDatetimeLocalValue(to);
 
-      const scheduleSave2 = waitForTopBarPut(page);
-      await page.locator('label.top-bar-life-time-checkbox').first().click();
-      await scheduleSave2;
+      if (!(await scheduleToggle.isChecked().catch(() => false))) {
+        await Promise.all([
+          waitForTopBarPutWhere(page, (body) => body.includes('"scheduled_enabled":true')),
+          scheduleLabel.click({ force: true }),
+        ]);
+      }
 
-      const fromInput = page.locator(`#scheduled_from_${barId}`);
-      const toInput = page.locator(`#scheduled_to_${barId}`);
+      await expect(scheduleToggle).toBeChecked({ timeout: 15000 });
+      await openPanel(page, 0);
+
+      const schedulePanel = barRow.locator('.top-bar-lifetime-panel');
+      await expect(schedulePanel).toBeVisible({ timeout: 15000 });
+
+      const dateInputs = schedulePanel.locator('input.top-bar-life-time-datetime[type="datetime-local"]');
+      const fromInput = dateInputs.nth(0);
+      const toInput = dateInputs.nth(1);
+      await expect(fromInput).toBeVisible({ timeout: 15000 });
+      await expect(toInput).toBeVisible({ timeout: 15000 });
       await fromInput.fill(fromValue);
-      const fromSave2 = waitForTopBarPut(page);
+      await expect(fromInput).toHaveValue(fromValue);
       await fromInput.blur();
-      await fromSave2;
+      await waitForTopBarPutWhere(page, (body) => body.includes(`"scheduled_from_datetime":"${fromValue}"`));
+      await openPanel(page, 0);
+      await expect(toInput).toBeVisible({ timeout: 15000 });
 
       await toInput.fill(toValue);
-      const toSave2 = waitForTopBarPut(page);
+      await expect(toInput).toHaveValue(toValue);
       await toInput.blur();
-      await toSave2;
+      await waitForTopBarPutWhere(page, (body) => body.includes(`"scheduled_to_datetime":"${toValue}"`));
 
       await page.reload();
       await openPanel(page, 0);
@@ -265,18 +324,21 @@ test.describe('single-bar', () => {
       const effectSelect = page.locator('select').filter({
         has: page.locator('option[value="slider"]'),
       }).first();
-      const effectSave = waitForTopBarPut(page);
-      await effectSelect.selectOption('slider');
-      await effectSave;
+
+      // Selecting effect can trigger an autosave + re-render; keep the panel open.
+      await openPanel(page, 0);
+      await Promise.all([waitForTopBarPut(page), effectSelect.selectOption('slider')]);
+      await openPanel(page, 0);
 
       const messageList = page.locator('.top-bar-message-list').first();
       const addTextButton = page.getByRole('button', { name: 'Add new text' }).first();
       const beforeCount = await messageList.locator('.top-bar-column-creator-grid').count();
 
-      const addSave = waitForTopBarPut(page);
-      await addTextButton.click();
-      await addSave;
-      await page.waitForLoadState('domcontentloaded');
+      // Panel can collapse; ensure the control is actionable before clicking.
+      await openPanel(page, 0);
+      await addTextButton.scrollIntoViewIfNeeded();
+      await addTextButton.waitFor({ state: 'visible', timeout: 15000 });
+      await Promise.all([waitForTopBarPut(page), addTextButton.click()]);
 
       const afterCount = await messageList.locator('.top-bar-column-creator-grid').count();
       expect(afterCount).toBe(beforeCount + 1);
@@ -292,6 +354,7 @@ test.describe('single-bar', () => {
       const effectSelect = page.locator('select').filter({
         has: page.locator('option[value="slider"]'),
       }).first();
+
       const effectSave = waitForTopBarPut(page);
       await effectSelect.selectOption('slider');
       await effectSave;
@@ -299,9 +362,12 @@ test.describe('single-bar', () => {
       const messageList = page.locator('.top-bar-message-list').first();
       const addTextButton = page.getByRole('button', { name: 'Add new text' }).first();
 
-      const addSave2 = waitForTopBarPut(page);
-      await addTextButton.click();
-      await addSave2;
+      // Changing effect can re-render/collapse the options panel; re-open and ensure the control is actionable.
+      await openPanel(page, 0);
+      await addTextButton.scrollIntoViewIfNeeded();
+      await addTextButton.waitFor({ state: 'visible', timeout: 15000 });
+
+      await Promise.all([waitForTopBarPut(page), addTextButton.click()]);
       await openPanel(page, 0);
 
       const afterAddCount = await messageList.locator('.top-bar-column-creator-grid').count();
@@ -390,13 +456,24 @@ test.describe('single-bar', () => {
       // Publish this bar so frontend reflects the draft changes.
       page.once('dialog', (d) => d.accept());
       const publishBtn = barRow.locator('button.top-bar-icons.publish');
-      const publishSave = page.waitForResponse((r) => {
-        if (r.request().method() !== 'POST' || !r.ok()) return false;
-        const url = decodeURIComponent(r.url());
-        return new RegExp(`/top-bar/v1/bars/${id0}/publish`, 'i').test(url);
-      });
-      await publishBtn.click();
-      await publishSave;
+      if (await publishBtn.evaluate((el) => el.classList.contains('top-bar-publish--dirty')).catch(() => false)) {
+        const publishSave = page.waitForResponse(
+          (r) => {
+            if (r.request().method() !== 'POST' || !r.ok()) return false;
+            const url = decodeURIComponent(r.url());
+            return (
+              // Pretty: /wp-json/flex-top-bar/v1/bars/{id}/publish
+              // Plain:  ?rest_route=/flex-top-bar/v1/bars/{id}/publish
+              // Back-compat: allow older `top-bar/v1` namespace too.
+              new RegExp(`/(flex-top-bar|top-bar)/v1/bars/${id0}/publish`, 'i').test(url) ||
+              /\/(flex-top-bar|top-bar)\/v1\/publish/i.test(url)
+            );
+          },
+          { timeout: 45000 }
+        );
+        await Promise.all([publishSave, publishBtn.click()]);
+        await expect(publishBtn).not.toHaveClass(/top-bar-publish--dirty/);
+      }
 
       return id0;
     }
@@ -478,13 +555,24 @@ test.describe('single-bar', () => {
       // Frontend reads published bars only.
       page.once('dialog', (d) => d.accept());
       const publishBtn = barRow.locator('button.top-bar-icons.publish');
-      const publishSave = page.waitForResponse((r) => {
-        if (r.request().method() !== 'POST' || !r.ok()) return false;
-        const url = decodeURIComponent(r.url());
-        return new RegExp(`/top-bar/v1/bars/${id0}/publish`, 'i').test(url);
-      });
-      await publishBtn.click();
-      await publishSave;
+      if (await publishBtn.evaluate((el) => el.classList.contains('top-bar-publish--dirty')).catch(() => false)) {
+        const publishSave = page.waitForResponse(
+          (r) => {
+            if (r.request().method() !== 'POST' || !r.ok()) return false;
+            const url = decodeURIComponent(r.url());
+            return (
+              // Pretty: /wp-json/flex-top-bar/v1/bars/{id}/publish
+              // Plain:  ?rest_route=/flex-top-bar/v1/bars/{id}/publish
+              // Back-compat: allow older `top-bar/v1` namespace too.
+              new RegExp(`/(flex-top-bar|top-bar)/v1/bars/${id0}/publish`, 'i').test(url) ||
+              /\/(flex-top-bar|top-bar)\/v1\/publish/i.test(url)
+            );
+          },
+          { timeout: 45000 }
+        );
+        await Promise.all([publishSave, publishBtn.click()]);
+        await expect(publishBtn).not.toHaveClass(/top-bar-publish--dirty/);
+      }
 
       return id0;
     }

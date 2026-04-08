@@ -79,9 +79,9 @@ services:
           echo 'WordPress installed.'
         fi
         mkdir -p /var/www/html/wp-content/uploads && chown -R www-data:www-data /var/www/html/wp-content
-        if [ -d /var/www/html/wp-content/plugins/top-bar ]; then
-          wp plugin activate top-bar --allow-root 2>/dev/null || true
-          echo 'Top Bar plugin activated.'
+        if [ -d /var/www/html/wp-content/plugins/flex-top-bar ]; then
+          wp plugin activate flex-top-bar --allow-root 2>/dev/null || true
+          echo 'Flex Top Bar plugin activated.'
         fi
     depends_on:
       wordpress:
