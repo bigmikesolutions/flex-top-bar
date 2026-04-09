@@ -213,7 +213,7 @@ export async function addBars(page: Page, count: number): Promise<void> {
 }
 
 function clearTopBarSeedOptions(composeFile: string): void {
-  const command = `docker compose -f "${composeFile}" exec -T wordpress php -r 'require_once "/var/www/html/wp-load.php"; delete_option("flex_top_bar_bars"); delete_option("flex_top_bar_bars_draft"); delete_option("top_bars"); delete_option("top_bars_draft");'`;
+  const command = `docker compose -f "${composeFile}" exec -T wordpress php -r 'require_once "/var/www/html/wp-load.php"; delete_option("flex_top_bars"); delete_option("flex_top_bars_draft");'`;
   execSync(command, { stdio: 'pipe' });
 }
 
@@ -221,7 +221,7 @@ export async function resetToSingleBar(page: Page): Promise<void> {
   const root = process.cwd();
   const composeFile = `${root}/docker-compose.yml`;
   clearTopBarSeedOptions(composeFile);
-  const command = `docker compose -f "${composeFile}" exec -T wordpress php -r 'require_once "/var/www/html/wp-load.php"; $bars = [[ "id" => "bar_single", "name" => "Single bar", "visible" => true, "admin_visibile" => true, "scheduled_enabled" => false, "scheduled_from_datetime" => "", "scheduled_to_datetime" => "", "position" => "top", "effect" => "none", "messages" => ["Single bar for tests.", ""], "messages_mobile_visible" => true, "bg_color" => "#389339", "frame_color" => "", "frame_width" => 0, "hide_on_scroll" => false ]]; update_option("top_bars", $bars); /* Admin edits drafts; keep draft in sync with published for seeds. */ update_option("top_bars_draft", $bars);'`;
+  const command = `docker compose -f "${composeFile}" exec -T wordpress php -r 'require_once "/var/www/html/wp-load.php"; $bars = [[ "id" => "bar_single", "name" => "Single bar", "visible" => true, "admin_visibile" => true, "scheduled_enabled" => false, "scheduled_from_datetime" => "", "scheduled_to_datetime" => "", "position" => "top", "effect" => "none", "messages" => ["Single bar for tests.", ""], "messages_mobile_visible" => true, "bg_color" => "#389339", "frame_color" => "", "frame_width" => 0, "hide_on_scroll" => false ]]; update_option("flex_top_bars", $bars); /* Admin edits drafts; keep draft in sync with published for seeds. */ update_option("flex_top_bars_draft", $bars);'`;
 
   execSync(command, { stdio: 'pipe' });
   // After mutating DB state, always re-open settings through the login-aware helper.
@@ -237,7 +237,7 @@ export async function resetToTwoColumnBar(page: Page): Promise<void> {
   const root = process.cwd();
   const composeFile = `${root}/docker-compose.yml`;
   clearTopBarSeedOptions(composeFile);
-  const command = `docker compose -f "${composeFile}" exec -T wordpress php -r 'require_once "/var/www/html/wp-load.php"; $bars = [[ "id" => "bar_mcol", "name" => "Multi column", "visible" => true, "admin_visibile" => true, "scheduled_enabled" => false, "scheduled_from_datetime" => "", "scheduled_to_datetime" => "", "position" => "top", "effect" => "none", "messages" => ["Col A", ""], "messages_mobile_visible" => true, "columns" => [ [ "id" => "col_e2e_a", "type" => "text", "effect" => "none", "messages" => ["Col A", ""], "size_percent" => 50, "messages_mobile_visible" => true ], [ "id" => "col_e2e_b", "type" => "text", "effect" => "none", "messages" => ["Col B", ""], "size_percent" => 50, "messages_mobile_visible" => true ] ], "bg_color" => "#389339", "frame_color" => "", "frame_width" => 0, "hide_on_scroll" => false ]]; update_option("top_bars", $bars); /* Admin edits drafts; keep draft in sync with published for seeds. */ update_option("top_bars_draft", $bars);'`;
+  const command = `docker compose -f "${composeFile}" exec -T wordpress php -r 'require_once "/var/www/html/wp-load.php"; $bars = [[ "id" => "bar_mcol", "name" => "Multi column", "visible" => true, "admin_visibile" => true, "scheduled_enabled" => false, "scheduled_from_datetime" => "", "scheduled_to_datetime" => "", "position" => "top", "effect" => "none", "messages" => ["Col A", ""], "messages_mobile_visible" => true, "columns" => [ [ "id" => "col_e2e_a", "type" => "text", "effect" => "none", "messages" => ["Col A", ""], "size_percent" => 50, "messages_mobile_visible" => true ], [ "id" => "col_e2e_b", "type" => "text", "effect" => "none", "messages" => ["Col B", ""], "size_percent" => 50, "messages_mobile_visible" => true ] ], "bg_color" => "#389339", "frame_color" => "", "frame_width" => 0, "hide_on_scroll" => false ]]; update_option("flex_top_bars", $bars); /* Admin edits drafts; keep draft in sync with published for seeds. */ update_option("flex_top_bars_draft", $bars);'`;
 
   execSync(command, { stdio: 'pipe' });
   await loginAndOpenTopBarSettings(page);

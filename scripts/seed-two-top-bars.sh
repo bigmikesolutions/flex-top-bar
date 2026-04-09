@@ -9,8 +9,6 @@ require_once "/var/www/html/wp-load.php";
 // Clean old plugin state so seeding is deterministic.
 delete_option("flex_top_bar_bars");
 delete_option("flex_top_bar_bars_draft");
-delete_option("top_bars");
-delete_option("top_bars_draft");
 
 $bars = [
 	[
@@ -180,9 +178,9 @@ $bars = [
 	],
 ];
 
-update_option("top_bars", $bars);
+update_option("flex_top_bars", $bars);
 // Admin edits drafts; keep draft in sync with published for seeds.
-update_option("top_bars_draft", $bars);
+update_option("flex_top_bars_draft", $bars);
 echo "Seeded options top_bars + top_bars_draft with 3 bars (top, bottom, scheduled)." . PHP_EOL;
 '
 
