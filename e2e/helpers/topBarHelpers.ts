@@ -279,7 +279,7 @@ export async function resetToSingleColumnBar(
       : type === 'social'
         ? `[ "id" => "col_front_social", "type" => "social", "icon_style" => "rounded", "background_color" => "#ffffff", "icon_color" => "#ff0000", "icon_border_width" => 0, "icon_border_color" => "#1d2327", "links" => [ [ "platform" => "youtube", "url" => "https://www.youtube.com/" ] ], "size_percent" => 100, "messages_mobile_visible" => true ]`
         : `[ "id" => "col_front_contact", "type" => "contact", "icon_style" => "rounded", "background_color" => "#ffffff", "icon_color" => "#1d2327", "icon_border_width" => 0, "icon_border_color" => "#1d2327", "contacts" => [ [ "kind" => "email", "value" => "hello@example.com" ] ], "size_percent" => 100, "messages_mobile_visible" => true ]`
-  } ], "bg_color" => "#389339", "frame_color" => "", "frame_width" => 0, "hide_on_scroll" => false ]]; update_option("top_bars", $bars); /* Admin edits drafts; keep draft in sync with published for seeds. */ update_option("top_bars_draft", $bars);'`;
+  } ], "bg_color" => "#389339", "frame_color" => "", "frame_width" => 0, "hide_on_scroll" => false ]]; update_option("flex_top_bar_bars", $bars); /* Admin edits drafts; keep draft in sync with published for seeds. */ update_option("flex_top_bar_bars_draft", $bars);'`;
 
   execSync(command, { stdio: 'pipe' });
   await loginAndOpenTopBarSettings(page);
