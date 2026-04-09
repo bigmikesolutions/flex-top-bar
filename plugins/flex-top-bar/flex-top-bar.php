@@ -1,9 +1,10 @@
 <?php
 /**
  * Plugin Name: Flex Top Bar
- * Description: Displays a simple info bar at the top or bottom of the menu.
+ * Description: Build and publish customizable notification bars (top or bottom) with scheduling, icons, message effects/animations, multi-bar support, modern admin UI and more.
  * Version:     0.1.0
  * Author:      Big Mike Solutions
+ * Plugin URI:  https://bigmikesolutions.pl/
  * License:     GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: flex-top-bar
@@ -89,14 +90,17 @@ if ( ! function_exists( 'ftb_fs' ) ) {
                 'slug'                => 'flex-top-bar',
                 'type'                => 'plugin',
                 'public_key'          => 'pk_f374ba95bc57af51c49e958c2717e',
-                'is_premium'          => false,
+                'is_premium'          => false, // free version is default
+                'has_premium_version' => true, // upgrade to premium version
                 'has_addons'          => false,
-                'has_paid_plans'      => false,
+                'has_paid_plans'      => true,
                 'is_org_compliant'    => true,
+                'wp_org_gatekeeper'   => 'OA7#BoRiBNqdf52FvzEf!!074aRLPs8fspif$7K1#4u4Csys1fQlCecVcUTOs2mcpeVHi#C2j9d09fOTvbC0HloPT7fFee5WdS3G',
                 'menu'                => array(
                     'account'        => false,
                     'support'        => false,
                 ),
+                'is_opt_in'        => false,
             ) );
         }
 

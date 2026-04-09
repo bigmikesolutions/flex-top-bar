@@ -30,7 +30,7 @@ final class FeatureFlagsTest extends TestCase {
 
 		$this->assertSame( 1, $flags->max_bars() );
 		$this->assertSame( 1, $flags->max_messages() );
-		$this->assertSame( 4, $flags->max_columns() );
+		$this->assertSame( 1, $flags->max_columns() );
 		$this->assertFalse( $flags->is_schedule_enabled() );
 	}
 
@@ -129,7 +129,7 @@ final class FeatureFlagsTest extends TestCase {
 		FeatureFlags::reset_for_tests();
 		$flags = FeatureFlags::instance();
 
-		$this->assertSame( 4, $flags->max_columns() );
+		$this->assertSame( 50, $flags->max_columns() );
 	}
 
 	/**
@@ -230,7 +230,7 @@ final class FeatureFlagsTest extends TestCase {
 		$flags = FeatureFlags::instance();
 
 		// Should fall back to default
-		$this->assertSame( 4, $flags->max_columns() );
+		$this->assertSame( 1, $flags->max_columns() );
 	}
 
 	/**

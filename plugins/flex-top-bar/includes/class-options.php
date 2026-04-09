@@ -17,19 +17,9 @@ final class Options {
 
 	/**
 	 * Namespaced option keys to avoid collisions with other plugins.
-	 * Legacy keys are still supported for backward compatibility.
 	 */
 	public const OPTION_BARS = 'flex_top_bar_bars';
 	public const OPTION_BARS_DRAFT = 'flex_top_bar_bars_draft';
-
-	private const LEGACY_OPTION_BARS = 'top_bars';
-	private const LEGACY_OPTION_BARS_DRAFT = 'top_bars_draft';
-
-	/** At least one bar configuration must exist. */
-	public const MIN_BARS = 1;
-
-	/** Maximum layout columns per bar (admin + frontend). */
-	public const MAX_COLUMNS = 4;
 
 	public static function new_bar_id(): string {
 		return 'bar_' . wp_generate_password( 8, false, false );
@@ -82,8 +72,8 @@ final class Options {
 	public static function get_bars(): array {
 		// Admin edits drafts; published bars are served to the frontend separately.
 		self::ensure_draft_initialized();
-		$stored = self::get_option_with_legacy_fallback( self::OPTION_BARS, self::LEGACY_OPTION_BARS, [] );
-		$draft  = self::get_option_with_legacy_fallback( self::OPTION_BARS_DRAFT, self::LEGACY_OPTION_BARS_DRAFT, null );
+		$stored = self::get_option( self::OPTION_BARS, [] );
+		$draft  = self::get_option( self::OPTION_BARS_DRAFT, null );
 		$stored = $draft ?? $stored;
 		if ( ! is_array( $stored ) || $stored === [] ) {
 			return [ self::default_bar() ];
@@ -107,9 +97,9 @@ final class Options {
 	 * @return list<array<string, mixed>>
 	 */
 	public static function get_published_bars(): array {
-		$stored = self::get_option_with_legacy_fallback( self::OPTION_BARS, self::LEGACY_OPTION_BARS, [] );
+		$stored = self::get_option( self::OPTION_BARS, [] );
 		if ( ! is_array( $stored ) || $stored === [] ) {
-			return [ self::default_bar() ];
+			return [];
 		}
 		$out = [];
 		foreach ( $stored as $row ) {
@@ -118,7 +108,7 @@ final class Options {
 			}
 		}
 		if ( $out === [] ) {
-			return [ self::default_bar() ];
+			return [];
 		}
 		$out = array_slice( $out, 0, FeatureFlags::instance()->max_bars() );
 		return $out;
@@ -141,7 +131,7 @@ final class Options {
 	 * Keeps the live site in sync without a separate publish step.
 	 */
 	public static function remove_bar_from_published( string $bar_id ): void {
-		$published = self::get_option_with_legacy_fallback( self::OPTION_BARS, self::LEGACY_OPTION_BARS, [] );
+		$published = self::get_option( self::OPTION_BARS, [] );
 		if ( ! is_array( $published ) || $published === [] ) {
 			return;
 		}
@@ -204,31 +194,27 @@ final class Options {
 	 * If draft bars don't exist yet, seed them from published bars.
 	 */
 	private static function ensure_draft_initialized(): void {
-		$draft = self::get_option_with_legacy_fallback( self::OPTION_BARS_DRAFT, self::LEGACY_OPTION_BARS_DRAFT, null );
+		$draft = self::get_option( self::OPTION_BARS_DRAFT, null );
 		if ( is_array( $draft ) ) {
 			return;
 		}
-		$published = self::get_option_with_legacy_fallback( self::OPTION_BARS, self::LEGACY_OPTION_BARS, null );
+		$published = self::get_option( self::OPTION_BARS, null );
 		if ( ! is_array( $published ) || $published === [] ) {
-			// Seed a stable initial published state so ids stay consistent.
-			$published = [ self::default_bar() ];
-			self::update_option( self::OPTION_BARS, $published );
+			// On a fresh install we seed only the draft bar so nothing is live until "Publish".
+			self::update_option( self::OPTION_BARS_DRAFT, [ self::default_bar() ] );
+			return;
 		}
 		self::update_option( self::OPTION_BARS_DRAFT, $published );
 	}
 
 	/**
-	 * Read a namespaced option, falling back to a legacy key.
+	 * Read a namespaced option.
 	 *
 	 * @param mixed $default
 	 * @return mixed
 	 */
-	private static function get_option_with_legacy_fallback( string $new_key, string $legacy_key, $default ) {
-		$value = get_option( $new_key, null );
-		if ( $value !== null ) {
-			return $value;
-		}
-		return get_option( $legacy_key, $default );
+	private static function get_option( string $key, $default ) {
+		return get_option( $key, $default );
 	}
 
 	/**

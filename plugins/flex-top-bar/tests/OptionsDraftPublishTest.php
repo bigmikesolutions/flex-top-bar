@@ -23,7 +23,7 @@ final class OptionsDraftPublishTest extends TestCase {
 		FeatureFlags::reset_for_tests();
 	}
 
-	public function test_get_bars_initializes_draft_from_published_and_seeds_published_if_missing(): void {
+	public function test_get_bars_initializes_draft_without_seeding_published_on_fresh_install(): void {
 		// No options set.
 		$draft = Options::get_bars();
 
@@ -32,10 +32,7 @@ final class OptionsDraftPublishTest extends TestCase {
 
 		$published = Options::get_published_bars();
 		$this->assertIsArray( $published );
-		$this->assertNotEmpty( $published );
-
-		// Draft should equal published immediately after init.
-		$this->assertSame( $published, $draft );
+		$this->assertEmpty( $published );
 	}
 
 	public function test_publish_draft_to_published_copies_values(): void {
@@ -85,10 +82,9 @@ final class OptionsDraftPublishTest extends TestCase {
 		$draft[0]['visible'] = false;
 		update_option( Options::OPTION_BARS_DRAFT, $draft );
 
-		// Published still visible by default.
+		// Nothing should be live until explicitly published.
 		$active = Options::get_active_bars();
-		$this->assertNotEmpty( $active );
-		$this->assertTrue( (bool) ( $active[0]['visible'] ?? false ) );
+		$this->assertEmpty( $active );
 	}
 }
 

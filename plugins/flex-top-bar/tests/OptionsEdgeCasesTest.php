@@ -380,6 +380,9 @@ final class OptionsEdgeCasesTest extends TestCase {
 		if ( ! defined( 'FF_MAX_MESSAGES' ) ) {
 			define( 'FF_MAX_MESSAGES', 10 );
 		}
+		if ( ! defined( 'FF_MAX_COLUMNS' ) ) {
+			define( 'FF_MAX_COLUMNS', 4 );
+		}
 		FeatureFlags::reset_for_tests();
 
 		$bar = Options::normalize_bar(
@@ -425,6 +428,9 @@ final class OptionsEdgeCasesTest extends TestCase {
 		}
 		if ( ! defined( 'FF_MAX_MESSAGES' ) ) {
 			define( 'FF_MAX_MESSAGES', 10 );
+		}
+		if ( ! defined( 'FF_MAX_COLUMNS' ) ) {
+			define( 'FF_MAX_COLUMNS', 4 );
 		}
 		FeatureFlags::reset_for_tests();
 
@@ -475,6 +481,9 @@ final class OptionsEdgeCasesTest extends TestCase {
 		}
 		if ( ! defined( 'FF_MAX_MESSAGES' ) ) {
 			define( 'FF_MAX_MESSAGES', 10 );
+		}
+		if ( ! defined( 'FF_MAX_COLUMNS' ) ) {
+			define( 'FF_MAX_COLUMNS', 4 );
 		}
 		FeatureFlags::reset_for_tests();
 

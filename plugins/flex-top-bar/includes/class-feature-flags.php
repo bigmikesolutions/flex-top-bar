@@ -17,14 +17,9 @@ final class FeatureFlags {
 
 	private static ?self $instance = null;
 
-	/** Minimum bars required (always at least 1). */
-	private const MIN_BARS = 1;
-	/** Minimum columns required (always at least 1). */
-	private const MIN_COLUMNS = 1;
-
 	private int $max_bars = 1;
 	private int $max_messages = 1;
-	private int $max_columns = Options::MAX_COLUMNS;
+	private int $max_columns = 1;
 	private bool $schedule_enabled = false;
 
 	/**
@@ -49,7 +44,7 @@ final class FeatureFlags {
 		if ( defined( 'FF_MAX_BARS' ) ) {
 			$raw = constant( 'FF_MAX_BARS' );
 			if ( is_numeric( $raw ) ) {
-				$this->max_bars = max( self::MIN_BARS, (int) $raw );
+				$this->max_bars = max( 1, (int) $raw );
 			}
 		}
 
@@ -63,7 +58,7 @@ final class FeatureFlags {
 		if ( defined( 'FF_MAX_COLUMNS' ) ) {
 			$raw = constant( 'FF_MAX_COLUMNS' );
 			if ( is_numeric( $raw ) ) {
-				$this->max_columns = max( self::MIN_COLUMNS, min( Options::MAX_COLUMNS, (int) $raw ) );
+				$this->max_columns = max( 1, min( 50, (int) $raw ) );
 			}
 		}
 
