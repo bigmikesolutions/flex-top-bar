@@ -90,8 +90,8 @@ if ( ! function_exists( 'ftb_fs' ) ) {
                 'slug'                => 'flex-top-bar',
                 'type'                => 'plugin',
                 'public_key'          => 'pk_f374ba95bc57af51c49e958c2717e',
-                'is_premium'          => true,
-                'has_premium_version' => true, // If your plugin is a serviceware, set this option to false.
+                'is_premium'          => false, // free version is default
+                'has_premium_version' => true, // upgrade to premium version
                 'has_addons'          => false,
                 'has_paid_plans'      => true,
                 'is_org_compliant'    => true,
@@ -103,22 +103,29 @@ if ( ! function_exists( 'ftb_fs' ) ) {
                 'is_opt_in'        => false,
             ) );
 
-            // // Remove the default Freemius opt-in marketing copy ("Never miss an important update...").
-            // // We still keep the SDK active for licensing, but we don't show promotional messaging.
-            // if ( $ftb_fs ) {
-            //     $ftb_fs->add_filter( 'connect_header', static function () {
-            //         return '';
-            //     } );
-            //     $ftb_fs->add_filter( 'connect_message', static function () {
-            //         return '';
-            //     } );
-            //     $ftb_fs->add_filter( 'connect_header_on_update', static function () {
-            //         return '';
-            //     } );
-            //     $ftb_fs->add_filter( 'connect_message_on_update', static function () {
-            //         return '';
-            //     } );
-            // }
+            // Make the Freemius opt-in message readable (and non-promotional).
+            // Note: in this SDK version, the "connect message" is provided via slug-scoped WP filters.
+            add_filter( 'fs_connect_message_flex-top-bar', static function () {
+                return '<p style="max-width: 60ch; font-size: 14px; line-height: 1.5; margin: 0;">' .
+                    esc_html__( 'License activation is used only to validate your license and deliver updates.', 'flex-top-bar' ) .
+                    '</p>';
+            } );
+            add_filter( 'fs_connect_message_on_update_flex-top-bar', static function () {
+                return '<p style="max-width: 60ch; font-size: 14px; line-height: 1.5; margin: 0;">' .
+                    esc_html__( 'License activation is used only to validate your license and deliver updates.', 'flex-top-bar' ) .
+                    '</p>';
+            } );
+
+            // Freemius connect/permissions UI can render too narrow in some admin themes.
+            // Scope styles to the Freemius connect page only (it uses `#fs_connect` wrapper).
+            add_action( 'admin_head', static function (): void {
+                echo '<style>
+                    #fs_connect .fs-box-container{max-width:960px;width:100%;margin-left:auto;margin-right:auto;}
+                    #fs_connect .fs-content{max-width:none;}
+                    #fs_connect .fs-permissions{max-width:none;}
+                    #fs_connect .fs-permissions .fs-trigger{display:inline-block;line-height:1.4;}
+                </style>';
+            } );
         }
 
         return $ftb_fs;
