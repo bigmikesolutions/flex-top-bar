@@ -25,12 +25,6 @@ final class Options {
 	private const LEGACY_OPTION_BARS = 'top_bars';
 	private const LEGACY_OPTION_BARS_DRAFT = 'top_bars_draft';
 
-	/** At least one bar configuration must exist. */
-	public const MIN_BARS = 1;
-
-	/** Maximum layout columns per bar (admin + frontend). */
-	public const MAX_COLUMNS = 4;
-
 	public static function new_bar_id(): string {
 		return 'bar_' . wp_generate_password( 8, false, false );
 	}

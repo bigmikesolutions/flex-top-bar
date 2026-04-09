@@ -77,3 +77,12 @@ Creates `top_bars` in DB with exactly two entries (one `top`, one `bottom`):
 ```bash
 composer seed:top-bars
 ```
+
+### Testing in staging & manual plugin installation
+
+```bash
+npm run package:flex-top-bar
+docker compose -f staging/docker-compose.yml up -d
+```
+
+And then on `localhost:8082/wp-admin` install package from `release` directory manually. 

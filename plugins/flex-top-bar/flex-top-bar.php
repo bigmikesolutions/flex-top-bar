@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: Flex Top Bar
- * Description: Displays a simple info bar at the top or bottom of the menu.
+ * Description: Build and publish customizable notification bars (top or bottom) with scheduling, icons, message effects/animations, multi-bar support, modern admin UI and more.
  * Version:     0.1.0
  * Author:      Big Mike Solutions
  * License:     GPL-2.0-or-later
@@ -91,13 +91,31 @@ if ( ! function_exists( 'ftb_fs' ) ) {
                 'public_key'          => 'pk_f374ba95bc57af51c49e958c2717e',
                 'is_premium'          => false,
                 'has_addons'          => false,
-                'has_paid_plans'      => false,
+                'has_paid_plans'      => true,
                 'is_org_compliant'    => true,
                 'menu'                => array(
                     'account'        => false,
                     'support'        => false,
                 ),
+                'is_opt_in'        => false,
             ) );
+
+            // Remove the default Freemius opt-in marketing copy ("Never miss an important update...").
+            // We still keep the SDK active for licensing, but we don't show promotional messaging.
+            if ( $ftb_fs ) {
+                $ftb_fs->add_filter( 'connect_header', static function () {
+                    return '';
+                } );
+                $ftb_fs->add_filter( 'connect_message', static function () {
+                    return '';
+                } );
+                $ftb_fs->add_filter( 'connect_header_on_update', static function () {
+                    return '';
+                } );
+                $ftb_fs->add_filter( 'connect_message_on_update', static function () {
+                    return '';
+                } );
+            }
         }
 
         return $ftb_fs;
