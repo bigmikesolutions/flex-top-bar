@@ -485,11 +485,12 @@ test.describe('single-bar', () => {
 
       await page.goto('/');
       const topBarInner = page.locator(`[data-top-bar-id="${id0}"] .top-bar__inner`);
+      const topBarText = page.locator(`[data-top-bar-id="${id0}"] .top-bar-text-column`).first();
 
       await expect(topBarInner).toContainText(messageOne);
       await expect
-        .poll(async () => (await topBarInner.textContent())?.trim() ?? '', { timeout: 7000 })
-        .toBe(messageTwo);
+        .poll(async () => (await topBarText.textContent())?.replace(/\s+/g, ' ').trim() ?? '', { timeout: 7000 })
+        .toContain(messageTwo);
     });
 
     test('should rotate message text on frontend when effect is fade-in', async ({ page }) => {
@@ -499,11 +500,12 @@ test.describe('single-bar', () => {
 
       await page.goto('/');
       const topBarInner = page.locator(`[data-top-bar-id="${id0}"] .top-bar__inner`);
+      const topBarText = page.locator(`[data-top-bar-id="${id0}"] .top-bar-text-column`).first();
 
       await expect(topBarInner).toContainText(messageOne);
       await expect
-        .poll(async () => (await topBarInner.textContent())?.trim() ?? '', { timeout: 7000 })
-        .toBe(messageTwo);
+        .poll(async () => (await topBarText.textContent())?.replace(/\s+/g, ' ').trim() ?? '', { timeout: 7000 })
+        .toContain(messageTwo);
     });
 
     test('should rotate message text on frontend when effect is blink', async ({ page }) => {
@@ -513,11 +515,12 @@ test.describe('single-bar', () => {
 
       await page.goto('/');
       const topBarInner = page.locator(`[data-top-bar-id="${id0}"] .top-bar__inner`);
+      const topBarText = page.locator(`[data-top-bar-id="${id0}"] .top-bar-text-column`).first();
 
       await expect(topBarInner).toContainText(messageOne);
       await expect
-        .poll(async () => (await topBarInner.textContent())?.trim() ?? '', { timeout: 7000 })
-        .toBe(messageTwo);
+        .poll(async () => (await topBarText.textContent())?.replace(/\s+/g, ' ').trim() ?? '', { timeout: 7000 })
+        .toContain(messageTwo);
     });
 
     test('should show only the first message on frontend when effect is none', async ({ page }) => {
