@@ -4,7 +4,7 @@
  * Description: Build and publish customizable notification bars (top or bottom) with scheduling, icons, message effects/animations, multi-bar support, modern admin UI and more.
  * Version:     0.1.0
  * Author:      Big Mike Solutions
- * Plugin URI:  https://bigmikesolutions.com/
+ * Plugin URI:  https://bigmikesolutions.pl/
  * License:     GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: flex-top-bar
@@ -102,30 +102,6 @@ if ( ! function_exists( 'ftb_fs' ) ) {
                 ),
                 'is_opt_in'        => false,
             ) );
-
-            // Make the Freemius opt-in message readable (and non-promotional).
-            // Note: in this SDK version, the "connect message" is provided via slug-scoped WP filters.
-            add_filter( 'fs_connect_message_flex-top-bar', static function () {
-                return '<p style="max-width: 60ch; font-size: 14px; line-height: 1.5; margin: 0;">' .
-                    esc_html__( 'License activation is used only to validate your license and deliver updates.', 'flex-top-bar' ) .
-                    '</p>';
-            } );
-            add_filter( 'fs_connect_message_on_update_flex-top-bar', static function () {
-                return '<p style="max-width: 60ch; font-size: 14px; line-height: 1.5; margin: 0;">' .
-                    esc_html__( 'License activation is used only to validate your license and deliver updates.', 'flex-top-bar' ) .
-                    '</p>';
-            } );
-
-            // Freemius connect/permissions UI can render too narrow in some admin themes.
-            // Scope styles to the Freemius connect page only (it uses `#fs_connect` wrapper).
-            add_action( 'admin_head', static function (): void {
-                echo '<style>
-                    #fs_connect .fs-box-container{max-width:960px;width:100%;margin-left:auto;margin-right:auto;}
-                    #fs_connect .fs-content{max-width:none;}
-                    #fs_connect .fs-permissions{max-width:none;}
-                    #fs_connect .fs-permissions .fs-trigger{display:inline-block;line-height:1.4;}
-                </style>';
-            } );
         }
 
         return $ftb_fs;
