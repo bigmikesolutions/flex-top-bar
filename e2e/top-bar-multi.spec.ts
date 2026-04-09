@@ -7,6 +7,7 @@ import {
   MAX_BARS,
   setBarPosition,
   resetToSingleBar,
+  waitForTopBarAdminReady,
   waitForTopBarPut,
 } from './helpers/topBarHelpers';
 
@@ -68,16 +69,15 @@ test.describe('multi-bar', () => {
     const deleteButton = firstBar.locator('button.delete').first();
 
     // Handle confirmation dialog
-    page.on('dialog', dialog => dialog.accept());
-    const deleteSave = page.waitForResponse((r) => {
-      if (r.request().method() !== 'DELETE') return false;
-      if (![200, 204].includes(r.status())) return false;
-      const url = decodeURIComponent(r.url());
-      return /(flex-top-bar|top-bar)\/v1\/bars\/[a-z0-9_]+/i.test(url);
-    });
+    const beforeCount = await page.locator('.top-bar-row.bg').count();
+    page.once('dialog', dialog => dialog.accept());
     await deleteButton.click();
-    await deleteSave;
-    await page.waitForTimeout(500); // Wait for Vue to remove bar
+    // More robust than waiting for a specific network shape; UI state is what matters.
+    // Delete can briefly trigger loading/refresh-like states; wait for admin UI to be ready again.
+    await waitForTopBarAdminReady(page);
+    await expect
+      .poll(async () => await page.locator('.top-bar-row.bg').count(), { timeout: 20000 })
+      .toBeLessThan(beforeCount);
 
     // Verify on frontend
     await page.goto('/');
