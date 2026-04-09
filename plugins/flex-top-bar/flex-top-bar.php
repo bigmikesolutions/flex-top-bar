@@ -4,6 +4,7 @@
  * Description: Build and publish customizable notification bars (top or bottom) with scheduling, icons, message effects/animations, multi-bar support, modern admin UI and more.
  * Version:     0.1.0
  * Author:      Big Mike Solutions
+ * Plugin URI:  https://bigmikesolutions.com/
  * License:     GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: flex-top-bar
@@ -89,10 +90,12 @@ if ( ! function_exists( 'ftb_fs' ) ) {
                 'slug'                => 'flex-top-bar',
                 'type'                => 'plugin',
                 'public_key'          => 'pk_f374ba95bc57af51c49e958c2717e',
-                'is_premium'          => false,
+                'is_premium'          => true,
+                'has_premium_version' => true, // If your plugin is a serviceware, set this option to false.
                 'has_addons'          => false,
                 'has_paid_plans'      => true,
                 'is_org_compliant'    => true,
+                'wp_org_gatekeeper'   => 'OA7#BoRiBNqdf52FvzEf!!074aRLPs8fspif$7K1#4u4Csys1fQlCecVcUTOs2mcpeVHi#C2j9d09fOTvbC0HloPT7fFee5WdS3G',
                 'menu'                => array(
                     'account'        => false,
                     'support'        => false,
@@ -100,22 +103,22 @@ if ( ! function_exists( 'ftb_fs' ) ) {
                 'is_opt_in'        => false,
             ) );
 
-            // Remove the default Freemius opt-in marketing copy ("Never miss an important update...").
-            // We still keep the SDK active for licensing, but we don't show promotional messaging.
-            if ( $ftb_fs ) {
-                $ftb_fs->add_filter( 'connect_header', static function () {
-                    return '';
-                } );
-                $ftb_fs->add_filter( 'connect_message', static function () {
-                    return '';
-                } );
-                $ftb_fs->add_filter( 'connect_header_on_update', static function () {
-                    return '';
-                } );
-                $ftb_fs->add_filter( 'connect_message_on_update', static function () {
-                    return '';
-                } );
-            }
+            // // Remove the default Freemius opt-in marketing copy ("Never miss an important update...").
+            // // We still keep the SDK active for licensing, but we don't show promotional messaging.
+            // if ( $ftb_fs ) {
+            //     $ftb_fs->add_filter( 'connect_header', static function () {
+            //         return '';
+            //     } );
+            //     $ftb_fs->add_filter( 'connect_message', static function () {
+            //         return '';
+            //     } );
+            //     $ftb_fs->add_filter( 'connect_header_on_update', static function () {
+            //         return '';
+            //     } );
+            //     $ftb_fs->add_filter( 'connect_message_on_update', static function () {
+            //         return '';
+            //     } );
+            // }
         }
 
         return $ftb_fs;
