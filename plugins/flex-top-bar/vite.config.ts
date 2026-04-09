@@ -3,11 +3,16 @@ import vue from '@vitejs/plugin-vue'
 import path from 'path'
 
 export default defineConfig({
+  root: __dirname,
   plugins: [vue()],
   build: {
     cssCodeSplit: false,
-    outDir: 'assets/dist',
+    outDir: process.env.FLEX_TOP_BAR_BUILD === 'dist' ? 'assets/dist-dev' : 'assets/dist',
     emptyOutDir: true,
+    // For the "dist" (debuggable) build we explicitly disable minification.
+    // For the package build we keep Vite's default minifier/toolchain to avoid
+    // requiring an explicit `esbuild` dependency.
+    minify: process.env.FLEX_TOP_BAR_BUILD === 'dist' ? false : undefined,
     rollupOptions: {
       input: {
         admin: path.resolve(__dirname, 'src/main.ts'),

@@ -2,7 +2,7 @@
 /**
  * REST API endpoints for Top Bar.
  *
- * @package TopBar
+ * @package FlexTopBar
  */
 
 declare(strict_types=1);

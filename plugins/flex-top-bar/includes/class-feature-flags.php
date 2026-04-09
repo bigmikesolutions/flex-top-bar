@@ -2,7 +2,7 @@
 /**
  * Centralized feature flag management via Freemius.
  *
- * @package TopBar
+ * @package FlexTopBar
  */
 
 declare(strict_types=1);

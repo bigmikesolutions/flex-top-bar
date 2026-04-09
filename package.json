@@ -23,8 +23,8 @@
     "test:e2e:publish": "playwright test --workers=1 e2e/top-bar-publish.spec.ts",
     "test:e2e:headed": "playwright test --workers=1 --headed",
     "test:e2e:ui": "playwright test --workers=1 --ui",
-    "build:flex-top-bar": "npm run build -w plugins/flex-top-bar",
     "watch:styles": "npm run build -w plugins/flex-top-bar -- --watch",
+    "build:flex-top-bar": "npm run build -w plugins/flex-top-bar",
     "package:flex-top-bar": "npm run package:zip -w plugins/flex-top-bar"
   },
   "workspaces": [

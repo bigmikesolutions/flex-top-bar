@@ -29,34 +29,37 @@ fi
 OUT="$RELEASE_DIR/flex-top-bar.zip"
 cd "$PLUGINS_DIR"
 rm -f "$OUT"
+rm -f "$RELEASE_DIR/flex-top-bar-dist.zip"
 
-zip -r "$OUT" flex-top-bar \
-  -x 'flex-top-bar/node_modules/*' \
-  -x 'flex-top-bar/node_modules/**' \
-  -x 'flex-top-bar/tests/*' \
-  -x 'flex-top-bar/tests/**' \
-  -x 'flex-top-bar/src/*' \
-  -x 'flex-top-bar/src/**' \
-  -x 'flex-top-bar/scripts/*' \
-  -x 'flex-top-bar/scripts/**' \
-  -x 'flex-top-bar/release/*' \
-  -x 'flex-top-bar/release/**' \
-  -x 'flex-top-bar/package.json' \
-  -x 'flex-top-bar/package-lock.json' \
-  -x 'flex-top-bar/vite.config.ts' \
-  -x 'flex-top-bar/vitest.config.ts' \
-  -x 'flex-top-bar/tsconfig.json' \
-  -x 'flex-top-bar/tsconfig.node.json' \
-  -x 'flex-top-bar/Makefile' \
-  -x 'flex-top-bar/.git/*' \
-  -x 'flex-top-bar/.git/**'
+# Stage only allowlisted files/dirs, then zip the staged plugin.
+TMP_DIR="$(mktemp -d "${RELEASE_DIR%/}/flex-top-bar-zip.XXXXXX")"
+trap 'rm -rf "$TMP_DIR"' EXIT
+
+STAGED_PLUGIN_DIR="$TMP_DIR/flex-top-bar"
+mkdir -p "$STAGED_PLUGIN_DIR/assets"
+
+cp "$TOP_BAR_DIR/flex-top-bar.php" "$STAGED_PLUGIN_DIR/"
+cp -R "$TOP_BAR_DIR/includes" "$STAGED_PLUGIN_DIR/"
+cp -R "$TOP_BAR_DIR/freemius" "$STAGED_PLUGIN_DIR/"
+cp -R "$TOP_BAR_DIR/assets/doc" "$STAGED_PLUGIN_DIR/assets/"
+
+mkdir -p "$STAGED_PLUGIN_DIR/assets/dist"
+cp -R "$TOP_BAR_DIR/assets/dist/"* "$STAGED_PLUGIN_DIR/assets/dist/"
+
+# Also include an unminified build alongside the packaged minified build.
+if [[ -d "$TOP_BAR_DIR/assets/dist-dev" ]]; then
+  cp -R "$TOP_BAR_DIR/assets/dist-dev" "$STAGED_PLUGIN_DIR/assets/"
+fi
 
 # Ensure plugin docs are included (both `doc/` and `docs/`).
 if [[ -d "$TOP_BAR_DIR/doc" ]]; then
-  zip -r "$OUT" flex-top-bar/doc -i '*.md' >/dev/null
+  cp -R "$TOP_BAR_DIR/doc" "$STAGED_PLUGIN_DIR/"
 fi
 if [[ -d "$TOP_BAR_DIR/docs" ]]; then
-  zip -r "$OUT" flex-top-bar/docs -i '*.md' >/dev/null
+  cp -R "$TOP_BAR_DIR/docs" "$STAGED_PLUGIN_DIR/"
 fi
+
+cd "$TMP_DIR"
+zip -r "$OUT" flex-top-bar
 
 echo "Packaged v${VERSION} -> $OUT"

@@ -53,6 +53,7 @@ wp-config.php
 # uncomment the next line
 #/wp-content/plugins
 plugins/flex-top-bar/assets/dist/** 
+plugins/flex-top-bar/assets/dist-dev/** 
 
 # All themes
 #

@@ -2,7 +2,7 @@
 /**
  * Top Bar options: ordered array of bars in DB (serialized by WordPress).
  *
- * @package TopBar
+ * @package FlexTopBar
  */
 
 declare(strict_types=1);

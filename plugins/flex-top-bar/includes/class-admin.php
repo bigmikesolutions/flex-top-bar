@@ -2,7 +2,7 @@
 /**
  * Top Bar admin settings page and option registration.
  *
- * @package TopBar
+ * @package FlexTopBar
  */
 
 declare(strict_types=1);

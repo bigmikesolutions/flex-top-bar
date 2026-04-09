@@ -2,7 +2,7 @@
 /**
  * Top Bar frontend: bar output, assets, hide-on-scroll.
  *
- * @package TopBar
+ * @package FlexTopBar
  */
 
 declare(strict_types=1);
