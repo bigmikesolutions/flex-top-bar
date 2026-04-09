@@ -78,11 +78,25 @@ Creates `top_bars` in DB with exactly two entries (one `top`, one `bottom`):
 composer seed:top-bars
 ```
 
-### Testing in staging & manual plugin installation
+## Testing in staging & manual plugin installation
+
+1) Build package
 
 ```bash
 npm run package:flex-top-bar
+```
+
+2) Start staging env
+
+```bash
 docker compose -f staging/docker-compose.yml up -d
 ```
 
-And then on `localhost:8082/wp-admin` install package from `release` directory manually. 
+3) And then on `localhost:8082/wp-admin` install package from `release` directory manually. 
+
+4) Stopping and cleaning
+
+```bash
+npm run package:flex-top-bar
+docker compose -f staging/docker-compose.yml down -v 
+```
