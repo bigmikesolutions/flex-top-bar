@@ -1,10 +1,12 @@
-name: Top Bar PR & main checks
+name: Flex Top Bar PR & main checks
 
 on:
-  # pull_request:
+  workflow_dispatch:
   push:
     branches:
       - main
+    tags:
+      - "*"
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
@@ -63,6 +65,7 @@ jobs:
         run: npm test
 
   e2e:
+    if: ${{ false }} # disabled for now (taking too long in free plan tier)
     needs: [php-unit-tests, npm-unit-tests]
     runs-on: ubuntu-latest
     timeout-minutes: 10
