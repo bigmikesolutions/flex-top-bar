@@ -9,8 +9,8 @@
   },
   "scripts": {
     "dev": "vite",
-    "build:dist": "FLEX_TOP_BAR_BUILD=dist vite build",
-    "build:package": "FLEX_TOP_BAR_BUILD=package vite build",
+    "build:dist": "vite build --mode dist",
+    "build:package": "vite build --mode package",
     "build": "npm run build:dist && npm run build:package",
     "package:zip": "npm run build && bash scripts/package-zip.sh",
     "package:top-bar": "npm run package:zip",

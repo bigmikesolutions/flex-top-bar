@@ -58,12 +58,19 @@ export async function waitForTopBarAdminReady(page: Page): Promise<void> {
   const mount = page.locator('#top-bar-app');
   await mount.waitFor({ state: 'visible', timeout: 60000 });
 
-  // Once Vue is mounted, we consider it "ready" when it shows either:
+  // Wait until Vue is done loading (the Loading… notice can be slow/flaky in CI).
+  await mount
+    .locator('.notice.notice-info')
+    .filter({ hasText: 'Loading' })
+    .first()
+    .waitFor({ state: 'hidden', timeout: 60000 });
+
+  // Once loading is done, we consider it "ready" when it shows either:
   // - a bar row, or
   // - the empty state row, or
   // - an error notice.
   await mount
-    .locator('.top-bar-row.bg, .top-bar-row.center.empty, .notice-error')
+    .locator('.top-bar-row.bg, .top-bar-row.center.empty, .notice.notice-error, .notice-error')
     .first()
     .waitFor({ state: 'visible', timeout: 60000 });
 }
