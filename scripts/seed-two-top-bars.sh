@@ -178,9 +178,9 @@ $bars = [
 	],
 ];
 
-update_option("flex_top_bars", $bars);
+update_option("flex_top_bar_bars", $bars);
 // Admin edits drafts; keep draft in sync with published for seeds.
-update_option("flex_top_bars_draft", $bars);
-echo "Seeded options top_bars + top_bars_draft with 3 bars (top, bottom, scheduled)." . PHP_EOL;
+update_option("flex_top_bar_bars_draft", $bars);
+echo "Seeded options flex_top_bar_bars + flex_top_bar_bars_draft with 3 bars (top, bottom, scheduled)." . PHP_EOL;
 '
 
