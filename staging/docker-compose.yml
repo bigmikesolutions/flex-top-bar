@@ -19,6 +19,8 @@ services:
         exec apache2-foreground
     ports:
       - "8082:80"
+    env_file:
+      - ../.env
     environment:
       WORDPRESS_DB_HOST: db
       WORDPRESS_DB_USER: ${MYSQL_USER:-wordpress}
