@@ -14,18 +14,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+// Keep Freemius parsing isolated in one class, and load it here so no other
+// plugin files need to manage include order.
+if ( ! class_exists( __NAMESPACE__ . '\\FreemiusFlags' ) ) {
+	if ( defined( 'TOP_BAR_PLUGIN_DIR' ) ) {
+		require_once TOP_BAR_PLUGIN_DIR . 'includes/class-freemius-flags.php';
+	} else {
+		require_once __DIR__ . '/class-freemius-flags.php';
+	}
+}
+
 final class FeatureFlags {
 
 	private static ?self $instance = null;
-
-	private const PLAN_FREE = 'free';
-	private const PLAN_PRO  = 'pro';
-
-	// Freemius "feature slugs/IDs" (stable identifiers; don't rename in Freemius).
-	private const FEATURE_MAX_BARS     = 'max_bars';
-	private const FEATURE_MAX_MESSAGES = 'max_messages';
-	private const FEATURE_MAX_COLUMNS  = 'max_columns';
-	private const FEATURE_SCHEDULE     = 'schedule_enabled';
 
 	// Env var overrides (local dev/CI) — evaluated last.
 	// Note: in this repo's Docker dev setup these are provided via `.env`.
@@ -33,8 +34,6 @@ final class FeatureFlags {
 	private const ENV_MAX_MESSAGES = 'FF_MAX_MESSAGES';
 	private const ENV_MAX_COLUMNS  = 'FF_MAX_COLUMNS';
 	private const ENV_SCHEDULE     = 'FF_SCHEDULE';
-
-	private string $plan = self::PLAN_FREE;
 
 	private int $max_bars = 1;
 	private int $max_messages = 1;
@@ -49,42 +48,7 @@ final class FeatureFlags {
 	}
 
 	private function __construct() {
-		$this->plan = $this->resolve_plan_from_freemius();
 		$this->load_from_freemius();
-	}
-
-	private function resolve_plan_from_freemius(): string {
-		if ( ! function_exists( __NAMESPACE__ . '\\ftb_fs' ) ) {
-			return self::PLAN_FREE;
-		}
-
-		$fs = ftb_fs();
-		if ( ! is_object( $fs ) ) {
-			return self::PLAN_FREE;
-		}
-
-		// Prefer premium_only variant so logic can be stripped from free builds.
-		if ( method_exists( $fs, 'is_plan__premium_only' ) ) {
-			if ( (bool) $fs->is_plan__premium_only( self::PLAN_PRO, true ) ) {
-				return self::PLAN_PRO;
-			}
-			return self::PLAN_FREE;
-		}
-
-		if ( method_exists( $fs, 'is_plan' ) ) {
-			if ( (bool) $fs->is_plan( self::PLAN_PRO, true ) ) {
-				return self::PLAN_PRO;
-			}
-			return self::PLAN_FREE;
-		}
-
-		// Fallback for SDKs without is_plan().
-		if ( method_exists( $fs, 'is_free_plan' ) && ! (bool) $fs->is_free_plan() ) {
-			// If SDK can tell it's NOT free, assume PRO-like.
-			return self::PLAN_PRO;
-		}
-
-		return self::PLAN_FREE;
 	}
 
 	private function load_from_freemius(): void {
@@ -95,12 +59,26 @@ final class FeatureFlags {
 		$this->schedule_enabled = false;
 
 		// 1) Prefer Freemius plan features (so changing values in Freemius doesn't require a plugin release).
-		if ( function_exists( __NAMESPACE__ . '\\ftb_fs' ) ) {
-			$fs = ftb_fs();
-			if ( is_object( $fs ) && method_exists( $fs, 'get_plan' ) ) {
-				$plan = $fs->get_plan();
-				$this->apply_plan_features( $plan );
-			}
+		$ff = FreemiusFlags::current();
+
+		$max_bars = $ff->max_bars();
+		if ( $max_bars !== null ) {
+			$this->max_bars = self::clamp_int( $max_bars, 1, null );
+		}
+
+		$max_messages = $ff->max_messages();
+		if ( $max_messages !== null ) {
+			$this->max_messages = self::clamp_int( $max_messages, 1, 50 );
+		}
+
+		$max_columns = $ff->max_columns();
+		if ( $max_columns !== null ) {
+			$this->max_columns = self::clamp_int( $max_columns, 1, 50 );
+		}
+
+		$schedule_enabled = $ff->schedule_enabled();
+		if ( $schedule_enabled !== null ) {
+			$this->schedule_enabled = $schedule_enabled;
 		}
 
 		// 2) Env overrides (local dev/CI) last.
@@ -110,91 +88,7 @@ final class FeatureFlags {
 		$this->schedule_enabled = self::override_bool_env( self::ENV_SCHEDULE, $this->schedule_enabled );
 	}
 
-	private function apply_plan_features( $plan ): void {
-		if ( ! is_object( $plan ) || ! isset( $plan->features ) || ! is_array( $plan->features ) ) {
-			return;
-		}
-
-		$max_bars = self::read_plan_feature_int( $plan->features, self::FEATURE_MAX_BARS );
-		if ( $max_bars !== null ) {
-			$this->max_bars = self::clamp_int( $max_bars, 1, null );
-		}
-
-		$max_messages = self::read_plan_feature_int( $plan->features, self::FEATURE_MAX_MESSAGES );
-		if ( $max_messages !== null ) {
-			$this->max_messages = self::clamp_int( $max_messages, 1, 50 );
-		}
-
-		$max_columns = self::read_plan_feature_int( $plan->features, self::FEATURE_MAX_COLUMNS );
-		if ( $max_columns !== null ) {
-			$this->max_columns = self::clamp_int( $max_columns, 1, 50 );
-		}
-
-		$schedule_enabled = self::read_plan_feature_bool( $plan->features, self::FEATURE_SCHEDULE );
-		if ( $schedule_enabled !== null ) {
-			$this->schedule_enabled = $schedule_enabled;
-		}
-	}
-
-	/**
-	 * @param array<int, mixed> $features
-	 */
-	private static function read_plan_feature_int( array $features, string $feature_id ): ?int {
-		$feature = self::find_plan_feature( $features, $feature_id );
-		if ( ! is_object( $feature ) ) {
-			return null;
-		}
-		$raw = $feature->value ?? null;
-		if ( $raw === null || $raw === '' ) {
-			return null;
-		}
-		if ( ! is_numeric( $raw ) ) {
-			return null;
-		}
-		return (int) $raw;
-	}
-
-	/**
-	 * @param array<int, mixed> $features
-	 */
-	private static function read_plan_feature_bool( array $features, string $feature_id ): ?bool {
-		$feature = self::find_plan_feature( $features, $feature_id );
-		if ( ! is_object( $feature ) ) {
-			return null;
-		}
-		$raw = $feature->value ?? null;
-		if ( $raw === null || $raw === '' ) {
-			// In Freemius UI, boolean-like features often have empty value when enabled.
-			return true;
-		}
-		if ( is_bool( $raw ) ) {
-			return $raw;
-		}
-		$normalized = strtolower( trim( (string) $raw ) );
-		if ( in_array( $normalized, [ '1', 'true', 'yes', 'on' ], true ) ) {
-			return true;
-		}
-		if ( in_array( $normalized, [ '0', 'false', 'no', 'off' ], true ) ) {
-			return false;
-		}
-		return null;
-	}
-
-	/**
-	 * @param array<int, mixed> $features
-	 * @return object|null
-	 */
-	private static function find_plan_feature( array $features, string $feature_id ) {
-		foreach ( $features as $feature ) {
-			if ( ! is_object( $feature ) ) {
-				continue;
-			}
-			if ( isset( $feature->id ) && (string) $feature->id === $feature_id ) {
-				return $feature;
-			}
-		}
-		return null;
-	}
+	// Freemius feature parsing lives in FreemiusFlags.
 
 	private static function override_int_env( string $env_var, int $fallback, int $min, ?int $max ): int {
 		$raw = getenv( $env_var );
@@ -247,13 +141,6 @@ final class FeatureFlags {
 			return $max;
 		}
 		return $value;
-	}
-
-	/**
-	 * Plan (for debugging or admin UI).
-	 */
-	public function plan(): string {
-		return $this->plan;
 	}
 
 	public function max_bars(): int {
