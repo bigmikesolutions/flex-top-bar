@@ -66,3 +66,20 @@ Data wejścia w życie: [wstaw datę]
 7.2. W sprawach nieuregulowanych zastosowanie mają postanowienia GPL oraz bezwzględnie obowiązujące przepisy prawa właściwego.
 
 7.3. Wszelkie spory wynikające z niniejszego dokumentu będą rozstrzygane zgodnie z prawem obowiązującym w Polsce, z zastrzeżeniem przepisów bezwzględnie obowiązujących oraz ewentualnych uprawnień konsumenckich, jeżeli mają zastosowanie.
+
+⸻
+
+8. Prywatność i RODO
+
+8.1. Plugin „Flex Top Bar” nie jest zaprojektowany jako narzędzie do zbierania danych osobowych użytkowników końcowych witryny i nie przetwarza ani nie przesyła samodzielnie danych osobowych do autora.
+
+8.2. Plugin może wykorzystywać zewnętrzną usługę Freemius (SDK) w celu obsługi licencji, aktywacji, aktualizacji, płatności, wsparcia technicznego oraz zapobiegania nadużyciom. W związku z tym Freemius może przetwarzać dane dotyczące użytkownika/licencji oraz instalacji, w tym w szczególności:
+	•	dane kontaktowe podane przy zakupie (np. adres e-mail),
+	•	identyfikatory licencji,
+	•	dane techniczne środowiska WordPress (np. wersje oprogramowania, lista aktywnych wtyczek),
+	•	domenę/URL instalacji,
+	•	adres IP oraz dane diagnostyczne.
+
+8.3. Freemius działa jako niezależny administrator danych w zakresie przetwarzania danych opisanych powyżej. Szczegółowe informacje znajdują się w polityce prywatności Freemius: https://freemius.com/privacy/
+
+8.4. Użytkownik odpowiada za zapewnienie zgodności swojej witryny, konfiguracji WordPress oraz wykorzystywanych usług stron trzecich z obowiązującymi przepisami prawa, w tym RODO, w szczególności za spełnienie obowiązków informacyjnych wobec osób, których dane dotyczą.

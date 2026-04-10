@@ -66,3 +66,20 @@ Effective date: [insert date]
 7.2. Where this document is silent, the GPL and any mandatory provisions of applicable law apply.
 
 7.3. Any disputes arising from this document will be governed by the laws applicable in Poland, subject to mandatory law and any consumer rights that may apply.
+
+⸻
+
+8. Privacy & GDPR
+
+8.1. The “Flex Top Bar” plugin is not designed as a tool to collect personal data of your site’s end users, and it does not, on its own, process or transmit personal data to the author.
+
+8.2. The plugin may use the external Freemius service (SDK) to handle licensing, activation, updates, payments, technical support, and abuse prevention. In connection with this, Freemius may process data related to the user/license and the installation, including in particular:
+	•	contact details provided at purchase (e.g., email address),
+	•	license identifiers,
+	•	technical data about the WordPress environment (e.g., software versions, list of active plugins),
+	•	the installation domain/URL,
+	•	IP address and diagnostic data.
+
+8.3. Freemius acts as an independent data controller with respect to the processing described above. For details, see the Freemius privacy policy: https://freemius.com/privacy/
+
+8.4. You are responsible for ensuring that your site, WordPress configuration, and any third‑party services you use comply with applicable law, including GDPR, in particular for meeting any information obligations towards data subjects.
