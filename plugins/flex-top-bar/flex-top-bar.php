@@ -91,16 +91,19 @@ if ( ! function_exists( 'ftb_fs' ) ) {
                 'type'                => 'plugin',
                 'public_key'          => 'pk_f374ba95bc57af51c49e958c2717e',
                 'is_premium'          => false, // free version is default
-                'has_premium_version' => true, // upgrade to premium version
+                'has_premium_version' => true,  // upgrade to premium version
                 'has_addons'          => false,
                 'has_paid_plans'      => true,
                 'is_org_compliant'    => true,
                 'wp_org_gatekeeper'   => 'OA7#BoRiBNqdf52FvzEf!!074aRLPs8fspif$7K1#4u4Csys1fQlCecVcUTOs2mcpeVHi#C2j9d09fOTvbC0HloPT7fFee5WdS3G',
+                'trial'               => array(
+                    'days'               => 14,
+                    'is_require_payment' => false,
+                ),
                 'menu'                => array(
-                    'account'        => false,
+                    'slug'           => 'flex-top-bar',
                     'support'        => false,
                 ),
-                'is_opt_in'        => false,
             ) );
         }
 
