@@ -34,16 +34,31 @@ final class Admin {
 			return;
 		}
 
-		// Enqueue Vue app
-		$admin_js  = FLEX_TOP_BAR_PLUGIN_DIR . 'assets/dist/js/admin.js';
-		$admin_css = FLEX_TOP_BAR_PLUGIN_DIR . 'assets/dist/css/style.css';
+		// Enqueue Vue app.
+		// Prefer dist-dev when present so `vite build --watch` output is reflected in WP immediately.
+		$admin_js_dist_dev  = FLEX_TOP_BAR_PLUGIN_DIR . 'assets/dist-dev/js/admin.js';
+		$admin_css_dist_dev = FLEX_TOP_BAR_PLUGIN_DIR . 'assets/dist-dev/css/style.css';
+		$admin_js_dist      = FLEX_TOP_BAR_PLUGIN_DIR . 'assets/dist/js/admin.js';
+		$admin_css_dist     = FLEX_TOP_BAR_PLUGIN_DIR . 'assets/dist/css/style.css';
+
+		$use_dist_dev = file_exists( $admin_js_dist_dev ) && file_exists( $admin_css_dist_dev );
+		$admin_js     = $use_dist_dev ? $admin_js_dist_dev : $admin_js_dist;
+		$admin_css    = $use_dist_dev ? $admin_css_dist_dev : $admin_css_dist;
+
 		if ( file_exists( $admin_js ) ) {
 			$ver_js  = (string) filemtime( $admin_js );
 			$ver_css = file_exists( $admin_css ) ? (string) filemtime( $admin_css ) : FLEX_TOP_BAR_VERSION;
 
+			$admin_js_url  = $use_dist_dev
+				? plugins_url( 'assets/dist-dev/js/admin.js', FLEX_TOP_BAR_PLUGIN_FILE )
+				: plugins_url( 'assets/dist/js/admin.js', FLEX_TOP_BAR_PLUGIN_FILE );
+			$admin_css_url = $use_dist_dev
+				? plugins_url( 'assets/dist-dev/css/style.css', FLEX_TOP_BAR_PLUGIN_FILE )
+				: plugins_url( 'assets/dist/css/style.css', FLEX_TOP_BAR_PLUGIN_FILE );
+
 			wp_enqueue_script(
 				'flex-top-bar-admin-vue',
-				plugins_url( 'assets/dist/js/admin.js', FLEX_TOP_BAR_PLUGIN_FILE ),
+				$admin_js_url,
 				[],
 				$ver_js,
 				true
@@ -51,7 +66,7 @@ final class Admin {
 
 			wp_enqueue_style(
 				'flex-top-bar-admin-vue',
-				plugins_url( 'assets/dist/css/style.css', FLEX_TOP_BAR_PLUGIN_FILE ),
+				$admin_css_url,
 				[],
 				$ver_css
 			);

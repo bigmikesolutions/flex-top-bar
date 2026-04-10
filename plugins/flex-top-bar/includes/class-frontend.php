@@ -61,15 +61,26 @@ final class Frontend {
 			return;
 		}
 
-		// Enqueue Vue frontend app
-		$frontend_js = FLEX_TOP_BAR_PLUGIN_DIR . 'assets/dist/js/frontend.js';
-		$frontend_css = FLEX_TOP_BAR_PLUGIN_DIR . 'assets/dist/css/style.css';
+		// Enqueue Vue frontend app.
+		// Prefer dist-dev when present so `vite build --watch` output is reflected in WP immediately.
+		$frontend_js_dist_dev  = FLEX_TOP_BAR_PLUGIN_DIR . 'assets/dist-dev/js/frontend.js';
+		$frontend_css_dist_dev = FLEX_TOP_BAR_PLUGIN_DIR . 'assets/dist-dev/css/style.css';
+		$frontend_js_dist      = FLEX_TOP_BAR_PLUGIN_DIR . 'assets/dist/js/frontend.js';
+		$frontend_css_dist     = FLEX_TOP_BAR_PLUGIN_DIR . 'assets/dist/css/style.css';
+
+		$use_dist_dev = file_exists( $frontend_js_dist_dev ) && file_exists( $frontend_css_dist_dev );
+		$frontend_js  = $use_dist_dev ? $frontend_js_dist_dev : $frontend_js_dist;
+		$frontend_css = $use_dist_dev ? $frontend_css_dist_dev : $frontend_css_dist;
 
 		if ( file_exists( $frontend_js ) ) {
 			$ver_js = (string) filemtime( $frontend_js );
+			$frontend_js_url = $use_dist_dev
+				? plugins_url( 'assets/dist-dev/js/frontend.js', FLEX_TOP_BAR_PLUGIN_FILE )
+				: plugins_url( 'assets/dist/js/frontend.js', FLEX_TOP_BAR_PLUGIN_FILE );
+
 			wp_enqueue_script(
 				'flex-top-bar-frontend',
-				plugins_url( 'assets/dist/js/frontend.js', FLEX_TOP_BAR_PLUGIN_FILE ),
+				$frontend_js_url,
 				[],
 				$ver_js,
 				true
@@ -83,9 +94,13 @@ final class Frontend {
 
 		if ( file_exists( $frontend_css ) ) {
 			$ver_css = (string) filemtime( $frontend_css );
+			$frontend_css_url = $use_dist_dev
+				? plugins_url( 'assets/dist-dev/css/style.css', FLEX_TOP_BAR_PLUGIN_FILE )
+				: plugins_url( 'assets/dist/css/style.css', FLEX_TOP_BAR_PLUGIN_FILE );
+
 			wp_enqueue_style(
 				'flex-top-bar-frontend',
-				plugins_url( 'assets/dist/css/style.css', FLEX_TOP_BAR_PLUGIN_FILE ),
+				$frontend_css_url,
 				[],
 				$ver_css
 			);
