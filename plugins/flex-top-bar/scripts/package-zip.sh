@@ -42,6 +42,7 @@ cp "$TOP_BAR_DIR/flex-top-bar.php" "$STAGED_PLUGIN_DIR/"
 cp -R "$TOP_BAR_DIR/includes" "$STAGED_PLUGIN_DIR/"
 cp -R "$TOP_BAR_DIR/freemius" "$STAGED_PLUGIN_DIR/"
 cp -R "$TOP_BAR_DIR/assets/doc" "$STAGED_PLUGIN_DIR/assets/"
+cp -R "$TOP_BAR_DIR/assets/img" "$STAGED_PLUGIN_DIR/assets/img"
 
 mkdir -p "$STAGED_PLUGIN_DIR/assets/dist"
 cp -R "$TOP_BAR_DIR/assets/dist/"* "$STAGED_PLUGIN_DIR/assets/dist/"
