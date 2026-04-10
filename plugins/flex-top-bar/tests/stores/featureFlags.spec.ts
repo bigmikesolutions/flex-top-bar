@@ -20,6 +20,7 @@ describe('useFeatureFlagsStore', () => {
     it('has default feature flags', () => {
       const store = useFeatureFlagsStore()
       expect(store.flags).toEqual({
+        plan_name: 'n/a',
         max_bars: 1,
         max_messages: 1,
         max_columns: 4,
@@ -41,6 +42,7 @@ describe('useFeatureFlagsStore', () => {
   describe('fetchFlags', () => {
     it('fetches feature flags successfully', async () => {
       const mockFlags: FeatureFlags = {
+        plan_name: 'PRO',
         max_bars: 5,
         max_messages: 10,
         max_columns: 4,
@@ -64,6 +66,7 @@ describe('useFeatureFlagsStore', () => {
             setTimeout(
               () =>
                 resolve({
+                  plan_name: 'n/a',
                   max_bars: 1,
                   max_messages: 1,
                   max_columns: 4,
@@ -98,6 +101,7 @@ describe('useFeatureFlagsStore', () => {
 
     it('clears previous error on successful fetch', async () => {
       const mockFlags: FeatureFlags = {
+        plan_name: 'PRO',
         max_bars: 3,
         max_messages: 5,
         max_columns: 4,

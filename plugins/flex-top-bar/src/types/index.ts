@@ -123,6 +123,7 @@ export interface Bar {
 }
 
 export interface FeatureFlags {
+  plan_name: string
   max_bars: number
   max_messages: number
   max_columns: number

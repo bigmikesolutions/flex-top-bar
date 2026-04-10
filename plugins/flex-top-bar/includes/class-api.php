@@ -258,6 +258,7 @@ final class API {
 		$flags = FeatureFlags::instance();
 		return new \WP_REST_Response(
 			[
+				'plan_name'        => $flags->plan_name(),
 				'max_bars'         => $flags->max_bars(),
 				'max_messages'     => $flags->max_messages(),
 				'max_columns'      => $flags->max_columns(),

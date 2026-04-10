@@ -3,6 +3,9 @@
     <h1 class="top-bar-admin-title">
       {{ __('Flex Top Bar', 'flex-top-bar') }}
       <span v-if="pluginVersion" class="top-bar-admin-version">v{{ pluginVersion }}</span>
+      <span v-if="featureFlags.plan_name" class="top-bar-admin-version">
+        ({{ __('plan', 'flex-top-bar') }}: {{ featureFlags.plan_name }})
+      </span>
     </h1>
 
     <!-- Loading state -->
