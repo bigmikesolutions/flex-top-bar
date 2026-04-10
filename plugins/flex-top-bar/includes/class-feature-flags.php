@@ -91,43 +91,21 @@ final class FeatureFlags {
 	// Freemius feature parsing lives in FreemiusFlags.
 
 	private static function override_int_env( string $env_var, int $fallback, int $min, ?int $max ): int {
-		$raw = getenv( $env_var );
-		if ( $raw === false || $raw === '' ) {
-			// Support test/dev overrides via PHP constants too (e.g. define('FF_MAX_BARS', 5)).
-			if ( defined( $env_var ) ) {
-				$const = constant( $env_var );
-				if ( is_numeric( $const ) ) {
-					return self::clamp_int( (int) $const, $min, $max );
-				}
+		// Override only via PHP constants (e.g. define('FF_MAX_BARS', 5)).
+		if ( defined( $env_var ) ) {
+			$const = constant( $env_var );
+			if ( is_numeric( $const ) ) {
+				return self::clamp_int( (int) $const, $min, $max );
 			}
-
-			return self::clamp_int( $fallback, $min, $max );
 		}
 
-		if ( ! is_numeric( $raw ) ) {
-			return self::clamp_int( $fallback, $min, $max );
-		}
-
-		return self::clamp_int( (int) $raw, $min, $max );
+		return self::clamp_int( $fallback, $min, $max );
 	}
 
 	private static function override_bool_env( string $env_var, bool $fallback ): bool {
-		$raw = getenv( $env_var );
-		if ( $raw === false || $raw === '' ) {
-			// Support test/dev overrides via PHP constants too.
-			if ( defined( $env_var ) ) {
-				return (bool) constant( $env_var );
-			}
-
-			return $fallback;
-		}
-
-		$normalized = strtolower( trim( (string) $raw ) );
-		if ( in_array( $normalized, [ '1', 'true', 'yes', 'on' ], true ) ) {
-			return true;
-		}
-		if ( in_array( $normalized, [ '0', 'false', 'no', 'off' ], true ) ) {
-			return false;
+		// Override only via PHP constants (e.g. define('FF_SCHEDULE', 1)).
+		if ( defined( $env_var ) ) {
+			return (bool) constant( $env_var );
 		}
 
 		return $fallback;

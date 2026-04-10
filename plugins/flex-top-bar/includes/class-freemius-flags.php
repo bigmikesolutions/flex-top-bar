@@ -22,10 +22,10 @@ final class FreemiusFlags {
 	 *
 	 * Note: In Freemius UI, these are the "Feature ID"/slug values (not the title).
 	 */
-	public const FEATURE_NOTIFICATION_BARS   = 'notification bars';
-	public const FEATURE_SCHEDULING          = 'scheduling';
-	public const FEATURE_MAX_MESSAGES        = 'max messages';
-	public const FEATURE_MAX_COLUMNS_PER_BAR = 'max columns per bar';
+	private const FEATURE_NOTIFICATION_BARS   = 'notification bars';
+	private const FEATURE_SCHEDULING          = 'scheduling';
+	private const FEATURE_MAX_MESSAGES        = 'max messages';
+	private const FEATURE_MAX_COLUMNS_PER_BAR = 'max columns per bar';
 
 	/**
 	 * @var array<int, mixed>
