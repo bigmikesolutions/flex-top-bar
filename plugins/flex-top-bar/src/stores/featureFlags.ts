@@ -6,6 +6,7 @@ import { api } from '@/api/client'
 export const useFeatureFlagsStore = defineStore('featureFlags', () => {
   // State
   const flags = ref<FeatureFlags>({
+    plan_name: 'n/a',
     max_bars: 1,
     max_messages: 1,
     max_columns: 4,

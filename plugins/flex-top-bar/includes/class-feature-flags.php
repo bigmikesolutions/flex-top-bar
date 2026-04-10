@@ -39,6 +39,7 @@ final class FeatureFlags {
 	private int $max_messages = 1;
 	private int $max_columns = 1;
 	private bool $schedule_enabled = false;
+	private string $plan_name = 'n/a';
 
 	public static function instance(): self {
 		if ( self::$instance === null ) {
@@ -57,6 +58,7 @@ final class FeatureFlags {
 		$this->max_messages     = 1;
 		$this->max_columns      = 1;
 		$this->schedule_enabled = false;
+		$this->plan_name        = 'n/a';
 
 		// 1) Prefer Freemius plan features (so changing values in Freemius doesn't require a plugin release).
 		$ff = FreemiusFlags::current();
@@ -79,6 +81,11 @@ final class FeatureFlags {
 		$schedule_enabled = $ff->schedule_enabled();
 		if ( $schedule_enabled !== null ) {
 			$this->schedule_enabled = $schedule_enabled;
+		}
+
+		$plan_name = $ff->plan_name();
+		if ( is_string( $plan_name ) && $plan_name !== '' ) {
+			$this->plan_name = $plan_name;
 		}
 
 		// 2) Env overrides (local dev/CI) last.
@@ -135,6 +142,10 @@ final class FeatureFlags {
 
 	public function is_schedule_enabled(): bool {
 		return $this->schedule_enabled;
+	}
+
+	public function plan_name(): string {
+		return $this->plan_name;
 	}
 
 	/**

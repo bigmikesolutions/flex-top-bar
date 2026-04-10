@@ -31,6 +31,7 @@ final class FreemiusFlags {
 	 * @var array<int, mixed>
 	 */
 	private array $features = [];
+	private ?string $plan_name = null;
  
 	/**
 	 * @param object|null $fs Freemius SDK instance.
@@ -38,6 +39,19 @@ final class FreemiusFlags {
 	public function __construct( $fs ) {
 		if ( is_object( $fs ) && method_exists( $fs, 'get_plan' ) ) {
 			$plan = $fs->get_plan();
+			if ( is_object( $plan ) ) {
+				$title = $plan->title ?? null;
+				$name  = $plan->name ?? null;
+				$id    = $plan->id ?? null;
+
+				if ( is_string( $title ) && $title !== '' ) {
+					$this->plan_name = $title;
+				} elseif ( is_string( $name ) && $name !== '' ) {
+					$this->plan_name = $name;
+				} elseif ( ( is_string( $id ) && $id !== '' ) || is_numeric( $id ) ) {
+					$this->plan_name = (string) $id;
+				}
+			}
 			if ( is_object( $plan ) && isset( $plan->features ) && is_array( $plan->features ) ) {
 				$this->features = $plan->features;
 			}
@@ -108,6 +122,10 @@ final class FreemiusFlags {
 
 	public function max_columns(): ?int {
 		return $this->int( self::FEATURE_MAX_COLUMNS_PER_BAR );
+	}
+
+	public function plan_name(): ?string {
+		return $this->plan_name;
 	}
  
 	/**
