@@ -1,116 +1,133 @@
 <?php
-/**
- * Centralized feature flag management via Freemius.
- *
- * @package FlexTopBar
- */
 
 declare(strict_types=1);
 
-namespace FlexTopBar;
+final class FeatureLimits
+{
+	private const PLAN_FREE = 'free';
+	private const PLAN_PRO  = 'pro';
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+	// Local dev overrides (defined only in dev env)
+	private const FF_MAX_BARS     = 'FF_MAX_BARS';
+	private const FF_MAX_MESSAGES = 'FF_MAX_MESSAGES';
+	private const FF_MAX_COLUMNS  = 'FF_MAX_COLUMNS';
+	private const FF_SCHEDULE     = 'FF_SCHEDULE';
 
-final class FeatureFlags {
+	/**
+	 * Plan configuration (single source of truth)
+	 */
+	private const PLAN_CONFIG = [
+		self::PLAN_FREE => [
+			'max_bars'         => 1,
+			'max_messages'     => 1,
+			'max_columns'      => 1,
+			'schedule_enabled' => false,
+		],
+		self::PLAN_PRO => [
+			'max_bars'         => 5,
+			'max_messages'     => 5,
+			'max_columns'      => 4,
+			'schedule_enabled' => true,
+		],
+	];
 
-	private static ?self $instance = null;
+	private string $plan;
 
-	private string $plan = 'free';
+	private int $max_bars;
+	private int $max_messages;
+	private int $max_columns;
+	private bool $schedule_enabled;
 
-	private int $max_bars = 1;
-	private int $max_messages = 1;
-	private int $max_columns = 1;
-	private bool $schedule_enabled = false;
+	public function __construct(string $plan)
+	{
+		$this->plan = $plan;
 
-	public static function instance(): self {
-		if ( self::$instance === null ) {
-			self::$instance = new self();
-		}
-		return self::$instance;
-	}
+		// defaults (safe fallback)
+		$this->max_bars         = 1;
+		$this->max_messages     = 1;
+		$this->max_columns      = 1;
+		$this->schedule_enabled = false;
 
-	private function __construct() {
-		$this->resolve_plan();
 		$this->load_from_freemius();
 	}
 
-	/**
-	 * Get active Freemius plan.
-	 */
-	private function resolve_plan(): void {
-		if ( function_exists( __NAMESPACE__ . '\\ftb_fs' ) ) {
-			$fs = ftb_fs();
+	private function load_from_freemius(): void
+	{
+		// 1. Apply plan-based config
+		$config = self::PLAN_CONFIG[$this->plan]
+			?? self::PLAN_CONFIG[self::PLAN_FREE];
 
-			if ( is_object( $fs ) && method_exists( $fs, 'get_plan' ) ) {
-				$plan = $fs->get_plan();
+		$this->apply_config($config);
 
-				if ( is_object( $plan ) && isset( $plan->id ) ) {
-					$this->plan = (string) $plan->id;
-					return;
-				}
-			}
+		// 2. Apply local dev overrides (if defined)
+		$this->apply_overrides();
+	}
+
+	private function apply_config(array $config): void
+	{
+		$this->max_bars         = (int) $config['max_bars'];
+		$this->max_messages     = (int) $config['max_messages'];
+		$this->max_columns      = (int) $config['max_columns'];
+		$this->schedule_enabled = (bool) $config['schedule_enabled'];
+	}
+
+	private function apply_overrides(): void
+	{
+		if (defined(self::FF_MAX_BARS)) {
+			$this->max_bars = $this->clamp_int(constant(self::FF_MAX_BARS), 1, null, $this->max_bars);
+		}
+
+		if (defined(self::FF_MAX_MESSAGES)) {
+			$this->max_messages = $this->clamp_int(constant(self::FF_MAX_MESSAGES), 1, 50, $this->max_messages);
+		}
+
+		if (defined(self::FF_MAX_COLUMNS)) {
+			$this->max_columns = $this->clamp_int(constant(self::FF_MAX_COLUMNS), 1, 50, $this->max_columns);
+		}
+
+		if (defined(self::FF_SCHEDULE)) {
+			$this->schedule_enabled = (bool) constant(self::FF_SCHEDULE);
 		}
 	}
 
-	/**
-	 * Load feature flags based on plan constants.
-	 */
-	private function load_from_freemius(): void {
-
-		// Defaults already set in properties (free plan)
-
-		if ( defined( 'FF_MAX_BARS' ) && $this->plan === 'pro' ) {
-			$raw = constant( 'FF_MAX_BARS' );
-			if ( is_numeric( $raw ) ) {
-				$this->max_bars = max( 1, (int) $raw );
-			}
+	private function clamp_int(mixed $value, int $min, ?int $max, int $fallback): int
+	{
+		if (!is_numeric($value)) {
+			return $fallback;
 		}
 
-		if ( defined( 'FF_MAX_MESSAGES' ) && $this->plan === 'pro' ) {
-			$raw = constant( 'FF_MAX_MESSAGES' );
-			if ( is_numeric( $raw ) ) {
-				$this->max_messages = max( 1, min( 50, (int) $raw ) );
-			}
+		$val = (int) $value;
+
+		if ($val < $min) {
+			return $min;
 		}
 
-		if ( defined( 'FF_MAX_COLUMNS' ) && $this->plan === 'pro' ) {
-			$raw = constant( 'FF_MAX_COLUMNS' );
-			if ( is_numeric( $raw ) ) {
-				$this->max_columns = max( 1, min( 50, (int) $raw ) );
-			}
+		if ($max !== null && $val > $max) {
+			return $max;
 		}
 
-		if ( defined( 'FF_SCHEDULE' ) && $this->plan === 'pro' ) {
-			$this->schedule_enabled = (bool) constant( 'FF_SCHEDULE' );
-		}
+		return $val;
 	}
 
-	/**
-	 * Plan (for debugging or admin UI).
-	 */
-	public function plan(): string {
-		return $this->plan;
-	}
+	// getters
 
-	public function max_bars(): int {
+	public function maxBars(): int
+	{
 		return $this->max_bars;
 	}
 
-	public function max_messages(): int {
+	public function maxMessages(): int
+	{
 		return $this->max_messages;
 	}
 
-	public function max_columns(): int {
+	public function maxColumns(): int
+	{
 		return $this->max_columns;
 	}
 
-	public function is_schedule_enabled(): bool {
+	public function isScheduleEnabled(): bool
+	{
 		return $this->schedule_enabled;
-	}
-
-	public static function reset_for_tests(): void {
-		self::$instance = null;
 	}
 }
