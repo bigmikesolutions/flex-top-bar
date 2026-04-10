@@ -25,7 +25,6 @@ services:
         ini_set('opcache.enable', '0');
         define('WP_FS__DEV_MODE', true);
         define('WP_FS__SKIP_EMAIL_ACTIVATION', true);
-        define('FF_MAX_BARS', (int) getenv('FF_MAX_BARS'));
         define('FF_MAX_MESSAGES', (int) getenv('FF_MAX_MESSAGES'));
         define('FF_MAX_COLUMNS', (int) getenv('FF_MAX_COLUMNS'));
         define('FF_SCHEDULE', (bool) getenv('FF_SCHEDULE'));
