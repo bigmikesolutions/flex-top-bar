@@ -20,7 +20,7 @@ final class FreemiusFlags {
 
 	private const PLAN_PRO = 'pro';
 
-	private ?string $plan_name = null;
+	private string $plan_name = 'free';
  
 	/**
 	 * @param object|null $fs Freemius SDK instance.
@@ -60,7 +60,7 @@ final class FreemiusFlags {
 		return new self( $fs );
 	}
  
-	public function max_bars(): ?int {
+	public function max_bars(): int {
 		switch ( $this->plan_name_normalized() ) {
 			case self::PLAN_PRO:
 				return 5;
@@ -69,7 +69,7 @@ final class FreemiusFlags {
 		}
 	}
 
-	public function schedule_enabled(): ?bool {
+	public function schedule_enabled(): bool {
 		switch ( $this->plan_name_normalized() ) {
 			case self::PLAN_PRO:
 				return true;
@@ -78,7 +78,7 @@ final class FreemiusFlags {
 		}
 	}
 
-	public function max_messages(): ?int {
+	public function max_messages(): int {
 		switch ( $this->plan_name_normalized() ) {
 			case self::PLAN_PRO:
 				return 5;
@@ -87,7 +87,7 @@ final class FreemiusFlags {
 		}
 	}
 
-	public function max_columns(): ?int {
+	public function max_columns(): int {
 		switch ( $this->plan_name_normalized() ) {
 			case self::PLAN_PRO:
 				return 4;
@@ -96,12 +96,12 @@ final class FreemiusFlags {
 		}
 	}
 
-	public function plan_name(): ?string {
+	public function plan_name(): string {
 		return $this->plan_name;
 	}
 
 	private function plan_name_normalized(): string {
-		return strtolower( trim( (string) $this->plan_name ) );
+		return strtolower( trim( $this->plan_name ) );
 	}
 }
 

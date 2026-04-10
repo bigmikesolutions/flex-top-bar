@@ -63,30 +63,11 @@ final class FeatureFlags {
 		// 1) Prefer Freemius plan features (so changing values in Freemius doesn't require a plugin release).
 		$ff = FreemiusFlags::current();
 
-		$max_bars = $ff->max_bars();
-		if ( $max_bars !== null ) {
-			$this->max_bars = self::clamp_int( $max_bars, 1, null );
-		}
-
-		$max_messages = $ff->max_messages();
-		if ( $max_messages !== null ) {
-			$this->max_messages = self::clamp_int( $max_messages, 1, 50 );
-		}
-
-		$max_columns = $ff->max_columns();
-		if ( $max_columns !== null ) {
-			$this->max_columns = self::clamp_int( $max_columns, 1, 50 );
-		}
-
-		$schedule_enabled = $ff->schedule_enabled();
-		if ( $schedule_enabled !== null ) {
-			$this->schedule_enabled = $schedule_enabled;
-		}
-
-		$plan_name = $ff->plan_name();
-		if ( is_string( $plan_name ) && $plan_name !== '' ) {
-			$this->plan_name = $plan_name;
-		}
+		$this->max_bars         = self::clamp_int( $ff->max_bars(), 1, null );
+		$this->max_messages     = self::clamp_int( $ff->max_messages(), 1, 50 );
+		$this->max_columns      = self::clamp_int( $ff->max_columns(), 1, 50 );
+		$this->schedule_enabled = $ff->schedule_enabled();
+		$this->plan_name        = $ff->plan_name();
 
 		// 2) Env overrides (local dev/CI) last.
 		$this->max_bars     = self::override_int_env( self::ENV_MAX_BARS, $this->max_bars, 1, null );
