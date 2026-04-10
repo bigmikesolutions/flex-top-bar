@@ -21,29 +21,18 @@ final class FeatureFlags {
 	private const PLAN_FREE = 'free';
 	private const PLAN_PRO  = 'pro';
 
-	// Env var overrides (local dev/CI).
+	// Freemius "feature slugs/IDs" (stable identifiers; don't rename in Freemius).
+	private const FEATURE_MAX_BARS     = 'max_bars';
+	private const FEATURE_MAX_MESSAGES = 'max_messages';
+	private const FEATURE_MAX_COLUMNS  = 'max_columns';
+	private const FEATURE_SCHEDULE     = 'schedule_enabled';
+
+	// Env var overrides (local dev/CI) — evaluated last.
+	// Note: in this repo's Docker dev setup these are provided via `.env`.
 	private const ENV_MAX_BARS     = 'FF_MAX_BARS';
 	private const ENV_MAX_MESSAGES = 'FF_MAX_MESSAGES';
 	private const ENV_MAX_COLUMNS  = 'FF_MAX_COLUMNS';
 	private const ENV_SCHEDULE     = 'FF_SCHEDULE';
-
-	/**
-	 * Plan -> defaults. Freemius decides the active plan.
-	 */
-	private const PLAN_CONFIG = [
-		self::PLAN_FREE => [
-			'max_bars'         => 1,
-			'max_messages'     => 1,
-			'max_columns'      => 1,
-			'schedule_enabled' => false,
-		],
-		self::PLAN_PRO  => [
-			'max_bars'         => 5,
-			'max_messages'     => 5,
-			'max_columns'      => 4,
-			'schedule_enabled' => true,
-		],
-	];
 
 	private string $plan = self::PLAN_FREE;
 
@@ -61,7 +50,7 @@ final class FeatureFlags {
 
 	private function __construct() {
 		$this->plan = $this->resolve_plan_from_freemius();
-		$this->load_config();
+		$this->load_from_freemius();
 	}
 
 	private function resolve_plan_from_freemius(): string {
@@ -98,27 +87,126 @@ final class FeatureFlags {
 		return self::PLAN_FREE;
 	}
 
-	private function load_config(): void {
-		$config = self::PLAN_CONFIG[ $this->plan ] ?? self::PLAN_CONFIG[ self::PLAN_FREE ];
+	private function load_from_freemius(): void {
+		// Safe defaults when Freemius isn't available or has no feature values.
+		$this->max_bars         = 1;
+		$this->max_messages     = 1;
+		$this->max_columns      = 1;
+		$this->schedule_enabled = false;
 
-		$this->max_bars         = (int) ( $config['max_bars'] ?? 1 );
-		$this->max_messages     = (int) ( $config['max_messages'] ?? 1 );
-		$this->max_columns      = (int) ( $config['max_columns'] ?? 1 );
-		$this->schedule_enabled = (bool) ( $config['schedule_enabled'] ?? false );
+		// 1) Prefer Freemius plan features (so changing values in Freemius doesn't require a plugin release).
+		if ( function_exists( __NAMESPACE__ . '\\ftb_fs' ) ) {
+			$fs = ftb_fs();
+			if ( is_object( $fs ) && method_exists( $fs, 'get_plan' ) ) {
+				$plan = $fs->get_plan();
+				$this->apply_plan_features( $plan );
+			}
+		}
 
-		$this->apply_env_overrides();
-	}
-
-	private function apply_env_overrides(): void {
+		// 2) Env overrides (local dev/CI) last.
 		$this->max_bars     = self::override_int_env( self::ENV_MAX_BARS, $this->max_bars, 1, null );
 		$this->max_messages = self::override_int_env( self::ENV_MAX_MESSAGES, $this->max_messages, 1, 50 );
 		$this->max_columns  = self::override_int_env( self::ENV_MAX_COLUMNS, $this->max_columns, 1, 50 );
 		$this->schedule_enabled = self::override_bool_env( self::ENV_SCHEDULE, $this->schedule_enabled );
 	}
 
+	private function apply_plan_features( $plan ): void {
+		if ( ! is_object( $plan ) || ! isset( $plan->features ) || ! is_array( $plan->features ) ) {
+			return;
+		}
+
+		$max_bars = self::read_plan_feature_int( $plan->features, self::FEATURE_MAX_BARS );
+		if ( $max_bars !== null ) {
+			$this->max_bars = self::clamp_int( $max_bars, 1, null );
+		}
+
+		$max_messages = self::read_plan_feature_int( $plan->features, self::FEATURE_MAX_MESSAGES );
+		if ( $max_messages !== null ) {
+			$this->max_messages = self::clamp_int( $max_messages, 1, 50 );
+		}
+
+		$max_columns = self::read_plan_feature_int( $plan->features, self::FEATURE_MAX_COLUMNS );
+		if ( $max_columns !== null ) {
+			$this->max_columns = self::clamp_int( $max_columns, 1, 50 );
+		}
+
+		$schedule_enabled = self::read_plan_feature_bool( $plan->features, self::FEATURE_SCHEDULE );
+		if ( $schedule_enabled !== null ) {
+			$this->schedule_enabled = $schedule_enabled;
+		}
+	}
+
+	/**
+	 * @param array<int, mixed> $features
+	 */
+	private static function read_plan_feature_int( array $features, string $feature_id ): ?int {
+		$feature = self::find_plan_feature( $features, $feature_id );
+		if ( ! is_object( $feature ) ) {
+			return null;
+		}
+		$raw = $feature->value ?? null;
+		if ( $raw === null || $raw === '' ) {
+			return null;
+		}
+		if ( ! is_numeric( $raw ) ) {
+			return null;
+		}
+		return (int) $raw;
+	}
+
+	/**
+	 * @param array<int, mixed> $features
+	 */
+	private static function read_plan_feature_bool( array $features, string $feature_id ): ?bool {
+		$feature = self::find_plan_feature( $features, $feature_id );
+		if ( ! is_object( $feature ) ) {
+			return null;
+		}
+		$raw = $feature->value ?? null;
+		if ( $raw === null || $raw === '' ) {
+			// In Freemius UI, boolean-like features often have empty value when enabled.
+			return true;
+		}
+		if ( is_bool( $raw ) ) {
+			return $raw;
+		}
+		$normalized = strtolower( trim( (string) $raw ) );
+		if ( in_array( $normalized, [ '1', 'true', 'yes', 'on' ], true ) ) {
+			return true;
+		}
+		if ( in_array( $normalized, [ '0', 'false', 'no', 'off' ], true ) ) {
+			return false;
+		}
+		return null;
+	}
+
+	/**
+	 * @param array<int, mixed> $features
+	 * @return object|null
+	 */
+	private static function find_plan_feature( array $features, string $feature_id ) {
+		foreach ( $features as $feature ) {
+			if ( ! is_object( $feature ) ) {
+				continue;
+			}
+			if ( isset( $feature->id ) && (string) $feature->id === $feature_id ) {
+				return $feature;
+			}
+		}
+		return null;
+	}
+
 	private static function override_int_env( string $env_var, int $fallback, int $min, ?int $max ): int {
 		$raw = getenv( $env_var );
 		if ( $raw === false || $raw === '' ) {
+			// Support test/dev overrides via PHP constants too (e.g. define('FF_MAX_BARS', 5)).
+			if ( defined( $env_var ) ) {
+				$const = constant( $env_var );
+				if ( is_numeric( $const ) ) {
+					return self::clamp_int( (int) $const, $min, $max );
+				}
+			}
+
 			return self::clamp_int( $fallback, $min, $max );
 		}
 
@@ -132,6 +220,11 @@ final class FeatureFlags {
 	private static function override_bool_env( string $env_var, bool $fallback ): bool {
 		$raw = getenv( $env_var );
 		if ( $raw === false || $raw === '' ) {
+			// Support test/dev overrides via PHP constants too.
+			if ( defined( $env_var ) ) {
+				return (bool) constant( $env_var );
+			}
+
 			return $fallback;
 		}
 
