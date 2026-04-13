@@ -89,9 +89,7 @@
 
       <!-- Messages section title + add column. Inline flex avoids #top-bar .top-bar-grid { grid } collapsing the 2nd column to 0 width. -->
       <div
-        class="top-bar-grid title title-with-action"
-        style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 16px; width: 100%; box-sizing: border-box;"
-      >
+        class="top-bar-grid title title-with-action">
         <div class="item" style="flex: 1 1 220px; min-width: 0;">
           <p class="bold lg">{{ __('Create a design', 'flex-top-bar') }}</p>
           <p class="xs">
@@ -102,9 +100,7 @@
           </p>
         </div>
         <div
-          class="item title-with-action__btn right"
-          style="flex: 0 0 auto; min-width: min(100%, 11rem); border-left: none !important; padding-left: 0 !important;"
-        >
+          class="item title-with-action__btn right">
           <button
             type="button"
             class="top-bar-btn mint sm"
