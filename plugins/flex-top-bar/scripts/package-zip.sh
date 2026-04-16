@@ -39,10 +39,12 @@ STAGED_PLUGIN_DIR="$TMP_DIR/flex-top-bar"
 mkdir -p "$STAGED_PLUGIN_DIR/assets"
 
 cp "$TOP_BAR_DIR/flex-top-bar.php" "$STAGED_PLUGIN_DIR/"
+cp -R "$TOP_BAR_DIR/readme.md" "$STAGED_PLUGIN_DIR/"
 cp -R "$TOP_BAR_DIR/includes" "$STAGED_PLUGIN_DIR/"
 cp -R "$TOP_BAR_DIR/freemius" "$STAGED_PLUGIN_DIR/"
 cp -R "$TOP_BAR_DIR/assets/doc" "$STAGED_PLUGIN_DIR/assets/"
 cp -R "$TOP_BAR_DIR/assets/img" "$STAGED_PLUGIN_DIR/assets/img"
+cp -R "$TOP_BAR_DIR/assets/screenshots" "$STAGED_PLUGIN_DIR/assets/screenshots"
 
 mkdir -p "$STAGED_PLUGIN_DIR/assets/dist"
 cp -R "$TOP_BAR_DIR/assets/dist/"* "$STAGED_PLUGIN_DIR/assets/dist/"
