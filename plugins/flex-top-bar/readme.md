@@ -52,6 +52,22 @@ No. The front-end output is only what you configure in the message editor.
 4. Social media/icons configuration.
 5. Example bars displayed on the front-end.
 
+== Privacy ==
+
+Flex Top Bar is not designed to collect personal data from your site visitors, and it does not, on its own, transmit visitor personal data to the plugin author.
+
+The plugin uses the Freemius SDK (in the free or Pro version) for licensing, payments, updates, support, and abuse prevention. Freemius may display an opt-in consent notice in the WordPress admin (where applicable). If enabled/consented, Freemius may process data related to the license/installation (for example: license identifiers, the site domain/URL, IP address, and technical details about the WordPress environment such as versions and active plugins).
+
+Freemius provides details in their privacy policy: https://freemius.com/privacy/
+
+== License & Disclaimer ==
+
+This plugin is licensed under the GNU General Public License, version 2 or later (GPLv2 or later). If anything in this section could be interpreted as limiting rights granted under the GPL, the GPL takes precedence.
+
+The plugin is provided “AS IS” and “AS AVAILABLE” without warranties of any kind. You are responsible for testing in a staging environment, keeping backups, and ensuring your site’s security and compliance. The plugin author is not responsible for data loss, downtime, or incompatibilities with WordPress versions, themes, other plugins, or third-party services. 
+
+More detailed EULA and disclaimer texts are included in the plugin package under `assets/doc/`.
+
 == Changelog ==
 
 = 0.1.0 =
