@@ -64,9 +64,9 @@ if ( ! defined( 'TOP_BAR_PLUGIN_DIR' ) ) {
 if ( ! function_exists( 'ftb_fs' ) ) {
     // Create a helper function for easy SDK access.
     function ftb_fs() {
-        global $ftb_fs;
+        static $ftb_fs_instance = null;
 
-        if ( ! isset( $ftb_fs ) ) {
+        if ( $ftb_fs_instance === null ) {
             // Include Freemius SDK.
             $sdk_paths = [
                 dirname( __FILE__ ) . '/freemius/start.php',
@@ -85,7 +85,7 @@ if ( ! function_exists( 'ftb_fs' ) ) {
                 return null;
             }
 
-            $ftb_fs = fs_dynamic_init( array(
+            $ftb_fs_instance = fs_dynamic_init( array(
                 'id'                  => '26477',
                 'slug'                => 'flex-top-bar',
                 'type'                => 'plugin',
@@ -107,13 +107,13 @@ if ( ! function_exists( 'ftb_fs' ) ) {
             ) );
         }
 
-        return $ftb_fs;
+        return $ftb_fs_instance;
     }
 
     // Init Freemius.
     ftb_fs();
     // Signal that SDK was initiated.
-    do_action( 'ftb_fs_loaded' );
+    do_action( 'flex_top_bar_fs_loaded' );
 }
 
 require_once TOP_BAR_PLUGIN_DIR . 'includes/features/class-feature-flags.php';
