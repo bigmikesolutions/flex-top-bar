@@ -44,6 +44,10 @@ Pro details: https://example.com/upgrade
 
 No. The front-end output is only what you configure in the message editor.
 
+= Can I use external icon libraries or load media from external URLs? =
+
+No. For security and performance reasons, the plugin only supports **pre-defined icons/media** bundled with the plugin, and does not load third-party icon libraries.
+
 == Screenshots ==
 
 1. Settings overview screen.
@@ -56,7 +60,7 @@ No. The front-end output is only what you configure in the message editor.
 
 Flex Top Bar is not designed to collect personal data from your site visitors, and it does not, on its own, transmit visitor personal data to the plugin author.
 
-The plugin uses the Freemius SDK (in the free or Pro version) for licensing, payments, updates, support, and abuse prevention. Freemius may display an opt-in consent notice in the WordPress admin (where applicable). If enabled/consented, Freemius may process data related to the license/installation (for example: license identifiers, the site domain/URL, IP address, and technical details about the WordPress environment such as versions and active plugins).
+The Freemius SDK is bundled with the plugin and active (in the free or Pro version) for licensing, payments, updates, support, and abuse prevention. Freemius may display an opt-in consent notice in the WordPress admin (where applicable). If enabled/consented, Freemius may process data related to the license/installation (for example: license identifiers, the site domain/URL, IP address, and technical details about the WordPress environment such as versions and active plugins).
 
 Freemius provides details in their privacy policy: https://freemius.com/privacy/
 
