@@ -6,15 +6,14 @@
  *
  * @package FlexTopBar
  */
- 
 declare(strict_types=1);
- 
+
 namespace FlexTopBar;
- 
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
- 
+
 if ( ! interface_exists( __NAMESPACE__ . '\\PlanNameProvider' ) ) {
 	require_once __DIR__ . '/interface-plan-name-provider.php';
 }
@@ -22,7 +21,7 @@ if ( ! interface_exists( __NAMESPACE__ . '\\PlanNameProvider' ) ) {
 final class FreemiusFlags implements PlanNameProvider {
 
 	private string $plan_name = 'free';
- 
+
 	/**
 	 * @param object|null $fs Freemius SDK instance.
 	 */
@@ -41,7 +40,6 @@ final class FreemiusFlags implements PlanNameProvider {
 				} elseif ( ( is_string( $id ) && $id !== '' ) || is_numeric( $id ) ) {
 					$this->plan_name = (string) $id;
 				}
-
 			}
 		}
 	}
@@ -60,7 +58,7 @@ final class FreemiusFlags implements PlanNameProvider {
 
 		return new self( $fs );
 	}
- 
+
 	public function get_plan_name(): string {
 		return $this->plan_name;
 	}

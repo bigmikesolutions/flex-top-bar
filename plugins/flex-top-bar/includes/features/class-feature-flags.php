@@ -5,7 +5,6 @@
  *
  * @package FlexTopBar
  */
-
 declare(strict_types=1);
 
 namespace FlexTopBar;
@@ -18,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 // plugin files need to manage include order.
 if ( ! class_exists( __NAMESPACE__ . '\\FreemiusFlags' ) ) {
 	if ( defined( 'TOP_BAR_PLUGIN_DIR' ) ) {
-		require_once TOP_BAR_PLUGIN_DIR . 'includes/class-freemius-flags.php';
+		require_once TOP_BAR_PLUGIN_DIR . 'includes/features/class-freemius-flags.php';
 	} else {
 		require_once __DIR__ . '/class-freemius-flags.php';
 	}
@@ -125,3 +124,4 @@ final class FeatureFlags implements FeaturePlan {
 		self::$instance = null;
 	}
 }
+
