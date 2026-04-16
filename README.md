@@ -100,3 +100,20 @@ docker compose -f staging/docker-compose.yml up -d
 npm run package:flex-top-bar
 docker compose -f staging/docker-compose.yml down -v 
 ```
+
+**WP checks**
+
+Use WP plugin check before release:
+
+```bash
+docker compose run --rm wp-cli plugin check flex-top-bar --allow-root \
+  --exclude-directories=freemius,assets/dist,assets/dist-dev
+docker compose -f staging/docker-compose.yml run --rm wp-cli plugin check flex-top-bar --allow-root \
+   --exclude-directories=freemius
+```
+
+or just 
+
+```bash
+wordpress-check.sh
+```

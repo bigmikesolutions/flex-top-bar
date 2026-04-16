@@ -8,6 +8,14 @@ services:
       - -lc
       - |
         set -e
+        # Allow uploading larger plugin/theme zips in staging.
+        # (Useful for manual uploads when testing release packages.)
+        printf '%s\n' \
+          'upload_max_filesize=64M' \
+          'post_max_size=64M' \
+          'memory_limit=256M' \
+          'max_execution_time=120' \
+          > /usr/local/etc/php/conf.d/zz-staging-uploads.ini
         # Ensure WP core exists on the named volume.
         if [ ! -e /var/www/html/index.php ]; then
           cp -a /usr/src/wordpress/. /var/www/html/
@@ -48,7 +56,7 @@ services:
       - wp-staging-network
 
   # One-off: runs WP-CLI core install so you skip the browser setup wizard.
-  # Intentionally does NOT install/activate any plugins.
+  # Staging helper: installs Plugin Check to validate WP.org compliance.
   wp-install:
     image: wordpress:cli
     container_name: wp-staging-install
@@ -92,6 +100,8 @@ services:
         mkdir -p /var/www/html/wp-content/uploads /var/www/html/wp-content/upgrade \
           && (chown -R 33:33 /var/www/html/wp-content/uploads /var/www/html/wp-content/upgrade || true) \
           && chmod -R a+rwX /var/www/html/wp-content/uploads /var/www/html/wp-content/upgrade
+        wp plugin install plugin-check --activate --allow-root 2>/dev/null || true
+        echo 'Plugin Check plugin installed.'
     depends_on:
       wordpress:
         condition: service_started
@@ -99,6 +109,31 @@ services:
         condition: service_healthy
     networks:
       - wp-staging-network
+    restart: "no"
+
+  # Staging helper: run arbitrary WP-CLI commands against the staging volume.
+  # Example: docker compose -f staging/docker-compose.yml run --rm wp-cli plugin check flex-top-bar --allow-root
+  wp-cli:
+    image: wordpress:cli
+    container_name: wp-staging-cli
+    user: "0:0"
+    volumes:
+      - wordpress_data_staging:/var/www/html
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: ${MYSQL_USER:-wordpress}
+      WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD:-wordpress}
+      WORDPRESS_DB_NAME: ${MYSQL_DATABASE:-wordpress}
+      WORDPRESS_URL: ${WORDPRESS_URL:-http://localhost:8082}
+    depends_on:
+      wordpress:
+        condition: service_started
+      db:
+        condition: service_healthy
+    networks:
+      - wp-staging-network
+    working_dir: /var/www/html
+    entrypoint: ["wp"]
     restart: "no"
 
   db:
