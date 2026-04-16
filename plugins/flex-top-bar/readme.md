@@ -48,6 +48,22 @@ No. The front-end output is only what you configure in the message editor.
 
 No. For security and performance reasons, the plugin only supports **pre-defined icons/media** bundled with the plugin, and does not load third-party icon libraries.
 
+= Where does the bar display? Does it depend on my theme? =
+
+The bar is intended to display on the front-end of your site based on your settings. If your theme significantly customizes or replaces standard WordPress hooks/templates, you may need theme-specific adjustments.
+
+= How do I disable or remove the bar? =
+
+You can remove the message or unpublish from **Settings → Flex Top Bar**, or deactivate the plugin from the **Plugins** screen.
+
+= Does it work with caching plugins/CDNs? =
+
+In general, yes. If your cache is serving an old version of the page, clear/purge your cache after publishing changes.
+
+= What happens on uninstall? Does it delete settings? =
+
+By default, WordPress deactivation does not remove saved settings. If you need a full cleanup, remove the plugin and then delete the plugin’s options from the database.
+
 == Screenshots ==
 
 1. Settings overview screen.
