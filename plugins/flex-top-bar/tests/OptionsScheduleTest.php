@@ -16,10 +16,10 @@ use FlexTopBar\Options;
 final class OptionsScheduleTest extends TestCase {
 
 	private function enableScheduleFeature(): void {
-		if ( ! defined( 'FF_SCHEDULE' ) ) {
-			define( 'FF_SCHEDULE', true );
+		if ( ! defined( 'FF_PLAN' ) ) {
+			define( 'FF_PLAN', 'pro' );
 		}
-		// Reset FeatureFlags to pick up the constant
+		// Reset FeatureFlags to pick up the constant.
 		FeatureFlags::reset_for_tests();
 	}
 
@@ -71,12 +71,12 @@ final class OptionsScheduleTest extends TestCase {
 	}
 
 	public function test_max_messages_uses_feature_flag_when_defined(): void {
-		if ( ! defined( 'FF_MAX_MESSAGES' ) ) {
-			define( 'FF_MAX_MESSAGES', 2 );
+		if ( ! defined( 'FF_PLAN' ) ) {
+			define( 'FF_PLAN', 'pro' );
 		}
-		// Reset FeatureFlags to pick up the constant
+		// Reset FeatureFlags to pick up the constant.
 		FeatureFlags::reset_for_tests();
-		$this->assertSame( 2, FeatureFlags::instance()->max_messages() );
+		$this->assertSame( 5, FeatureFlags::instance()->max_messages() );
 	}
 
 	/**
@@ -115,13 +115,10 @@ final class OptionsScheduleTest extends TestCase {
 	 * @preserveGlobalState disabled
 	 */
 	public function test_get_active_bars_respects_max_bars_feature_flag(): void {
-		if ( ! defined( 'FF_MAX_BARS' ) ) {
-			define( 'FF_MAX_BARS', 1 );
+		if ( ! defined( 'FF_PLAN' ) ) {
+			define( 'FF_PLAN', 'free' );
 		}
-		if ( ! defined( 'FF_SCHEDULE' ) ) {
-			define( 'FF_SCHEDULE', false );
-		}
-		// Reset FeatureFlags to pick up the constant
+		// Reset FeatureFlags to pick up the constant.
 		FeatureFlags::reset_for_tests();
 		$GLOBALS['wp_test_options'] = [];
 

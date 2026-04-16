@@ -41,8 +41,8 @@ final class OptionsEdgeCasesTest extends TestCase {
 	 * @preserveGlobalState disabled
 	 */
 	public function test_get_bars_filters_non_array_items(): void {
-		if ( ! defined( 'FF_MAX_BARS' ) ) {
-			define( 'FF_MAX_BARS', 10 );
+		if ( ! defined( 'FF_PLAN' ) ) {
+			define( 'FF_PLAN', 'pro' );
 		}
 		FeatureFlags::reset_for_tests();
 
@@ -69,8 +69,8 @@ final class OptionsEdgeCasesTest extends TestCase {
 	 * @preserveGlobalState disabled
 	 */
 	public function test_get_bars_respects_max_bars_limit(): void {
-		if ( ! defined( 'FF_MAX_BARS' ) ) {
-			define( 'FF_MAX_BARS', 2 );
+		if ( ! defined( 'FF_PLAN' ) ) {
+			define( 'FF_PLAN', 'free' );
 		}
 		FeatureFlags::reset_for_tests();
 
@@ -86,9 +86,8 @@ final class OptionsEdgeCasesTest extends TestCase {
 
 		$bars = Options::get_bars();
 
-		$this->assertCount( 2, $bars );
+		$this->assertCount( 1, $bars );
 		$this->assertSame( 'bar1', $bars[0]['id'] );
-		$this->assertSame( 'bar2', $bars[1]['id'] );
 	}
 
 	public function test_normalize_bar_handles_missing_id(): void {
@@ -197,8 +196,8 @@ final class OptionsEdgeCasesTest extends TestCase {
 	 * @preserveGlobalState disabled
 	 */
 	public function test_normalize_bar_respects_max_messages_limit(): void {
-		if ( ! defined( 'FF_MAX_MESSAGES' ) ) {
-			define( 'FF_MAX_MESSAGES', 3 );
+		if ( ! defined( 'FF_PLAN' ) ) {
+			define( 'FF_PLAN', 'free' );
 		}
 		FeatureFlags::reset_for_tests();
 
@@ -208,7 +207,7 @@ final class OptionsEdgeCasesTest extends TestCase {
 			]
 		);
 
-		$this->assertCount( 3, $bar['messages'] );
+		$this->assertCount( 1, $bar['messages'] );
 	}
 
 	public function test_normalize_bar_handles_frame_width(): void {
@@ -374,14 +373,8 @@ final class OptionsEdgeCasesTest extends TestCase {
 	 * @preserveGlobalState disabled
 	 */
 	public function test_normalize_bar_preserves_two_text_columns(): void {
-		if ( ! defined( 'FF_MAX_BARS' ) ) {
-			define( 'FF_MAX_BARS', 10 );
-		}
-		if ( ! defined( 'FF_MAX_MESSAGES' ) ) {
-			define( 'FF_MAX_MESSAGES', 10 );
-		}
-		if ( ! defined( 'FF_MAX_COLUMNS' ) ) {
-			define( 'FF_MAX_COLUMNS', 4 );
+		if ( ! defined( 'FF_PLAN' ) ) {
+			define( 'FF_PLAN', 'pro' );
 		}
 		FeatureFlags::reset_for_tests();
 
@@ -423,14 +416,8 @@ final class OptionsEdgeCasesTest extends TestCase {
 	 * @preserveGlobalState disabled
 	 */
 	public function test_get_bars_returns_two_columns_for_seeded_style_bar(): void {
-		if ( ! defined( 'FF_MAX_BARS' ) ) {
-			define( 'FF_MAX_BARS', 10 );
-		}
-		if ( ! defined( 'FF_MAX_MESSAGES' ) ) {
-			define( 'FF_MAX_MESSAGES', 10 );
-		}
-		if ( ! defined( 'FF_MAX_COLUMNS' ) ) {
-			define( 'FF_MAX_COLUMNS', 4 );
+		if ( ! defined( 'FF_PLAN' ) ) {
+			define( 'FF_PLAN', 'pro' );
 		}
 		FeatureFlags::reset_for_tests();
 
@@ -476,14 +463,8 @@ final class OptionsEdgeCasesTest extends TestCase {
 	 * @preserveGlobalState disabled
 	 */
 	public function test_normalize_bar_preserves_social_and_contact_column_payloads(): void {
-		if ( ! defined( 'FF_MAX_BARS' ) ) {
-			define( 'FF_MAX_BARS', 10 );
-		}
-		if ( ! defined( 'FF_MAX_MESSAGES' ) ) {
-			define( 'FF_MAX_MESSAGES', 10 );
-		}
-		if ( ! defined( 'FF_MAX_COLUMNS' ) ) {
-			define( 'FF_MAX_COLUMNS', 4 );
+		if ( ! defined( 'FF_PLAN' ) ) {
+			define( 'FF_PLAN', 'pro' );
 		}
 		FeatureFlags::reset_for_tests();
 
