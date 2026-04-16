@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	define( 'ABSPATH', __DIR__ );
 }
 
-require_once dirname( __DIR__ ) . '/includes/class-feature-flags.php';
+require_once dirname( __DIR__ ) . '/includes/features/class-feature-flags.php';
 require_once dirname( __DIR__ ) . '/includes/class-options.php';
 require_once dirname( __DIR__ ) . '/includes/class-frontend.php';
 

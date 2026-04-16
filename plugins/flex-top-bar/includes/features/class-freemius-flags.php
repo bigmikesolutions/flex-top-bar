@@ -2,26 +2,26 @@
 /**
  * Freemius plan feature reader.
  *
- * Reads numeric/boolean limits from the active plan's features so that changing
- * values in Freemius doesn't require a plugin release.
+ * Reads the active plan name from Freemius.
  *
  * @package FlexTopBar
  */
- 
 declare(strict_types=1);
- 
+
 namespace FlexTopBar;
- 
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
- 
-final class FreemiusFlags {
 
-	private const PLAN_PRO = 'pro';
+if ( ! interface_exists( __NAMESPACE__ . '\\PlanNameProvider' ) ) {
+	require_once __DIR__ . '/interface-plan-name-provider.php';
+}
+
+final class FreemiusFlags implements PlanNameProvider {
 
 	private string $plan_name = 'free';
- 
+
 	/**
 	 * @param object|null $fs Freemius SDK instance.
 	 */
@@ -40,7 +40,6 @@ final class FreemiusFlags {
 				} elseif ( ( is_string( $id ) && $id !== '' ) || is_numeric( $id ) ) {
 					$this->plan_name = (string) $id;
 				}
-
 			}
 		}
 	}
@@ -59,49 +58,9 @@ final class FreemiusFlags {
 
 		return new self( $fs );
 	}
- 
-	public function max_bars(): int {
-		switch ( $this->plan_name_normalized() ) {
-			case self::PLAN_PRO:
-				return 5;
-			default:
-				return 1;
-		}
-	}
 
-	public function schedule_enabled(): bool {
-		switch ( $this->plan_name_normalized() ) {
-			case self::PLAN_PRO:
-				return true;
-			default:
-				return false;
-		}
-	}
-
-	public function max_messages(): int {
-		switch ( $this->plan_name_normalized() ) {
-			case self::PLAN_PRO:
-				return 5;
-			default:
-				return 1;
-		}
-	}
-
-	public function max_columns(): int {
-		switch ( $this->plan_name_normalized() ) {
-			case self::PLAN_PRO:
-				return 4;
-			default:
-				return 1;
-		}
-	}
-
-	public function plan_name(): string {
+	public function get_plan_name(): string {
 		return $this->plan_name;
-	}
-
-	private function plan_name_normalized(): string {
-		return strtolower( trim( $this->plan_name ) );
 	}
 }
 

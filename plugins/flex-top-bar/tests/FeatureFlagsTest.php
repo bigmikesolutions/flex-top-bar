@@ -11,6 +11,9 @@ namespace FlexTopBar\Tests;
 
 use PHPUnit\Framework\TestCase;
 use FlexTopBar\FeatureFlags;
+use FlexTopBar\FreePlan;
+use FlexTopBar\PlanNameProvider;
+use FlexTopBar\ProPlan;
 
 final class FeatureFlagsTest extends TestCase {
 
@@ -27,236 +30,97 @@ final class FeatureFlagsTest extends TestCase {
 	public function test_defaults_when_no_constants_defined(): void {
 		FeatureFlags::reset_for_tests();
 		$flags = FeatureFlags::instance();
+		$free  = new FreePlan();
 
-		$this->assertSame( 1, $flags->max_bars() );
-		$this->assertSame( 1, $flags->max_messages() );
-		$this->assertSame( 1, $flags->max_columns() );
-		$this->assertFalse( $flags->is_schedule_enabled() );
+		$this->assertSame( $free->max_bars(), $flags->max_bars() );
+		$this->assertSame( $free->max_messages(), $flags->max_messages() );
+		$this->assertSame( $free->max_columns(), $flags->max_columns() );
+		$this->assertSame( $free->schedule_enabled(), $flags->schedule_enabled() );
+		$this->assertSame( $free->plan_name(), $flags->plan_name() );
 	}
 
 	/**
 	 * @runInSeparateProcess
 	 * @preserveGlobalState disabled
 	 */
-	public function test_loads_max_bars_from_constant(): void {
-		if ( ! defined( 'FF_MAX_BARS' ) ) {
-			define( 'FF_MAX_BARS', 5 );
+	public function test_uses_ff_plan_when_defined_and_not_empty(): void {
+		if ( ! defined( 'FF_PLAN' ) ) {
+			define( 'FF_PLAN', 'pro' );
 		}
 		FeatureFlags::reset_for_tests();
 		$flags = FeatureFlags::instance();
+		$pro   = new ProPlan();
 
-		$this->assertSame( 5, $flags->max_bars() );
+		$this->assertSame( $pro->max_bars(), $flags->max_bars() );
+		$this->assertSame( $pro->max_messages(), $flags->max_messages() );
+		$this->assertSame( $pro->max_columns(), $flags->max_columns() );
+		$this->assertSame( $pro->schedule_enabled(), $flags->schedule_enabled() );
+		$this->assertSame( $pro->plan_name(), $flags->plan_name() );
 	}
 
 	/**
 	 * @runInSeparateProcess
 	 * @preserveGlobalState disabled
 	 */
-	public function test_enforces_minimum_bars_of_one(): void {
-		if ( ! defined( 'FF_MAX_BARS' ) ) {
-			define( 'FF_MAX_BARS', 0 );
+	public function test_ignores_empty_ff_plan(): void {
+		if ( ! defined( 'FF_PLAN' ) ) {
+			define( 'FF_PLAN', '   ' );
 		}
 		FeatureFlags::reset_for_tests();
 		$flags = FeatureFlags::instance();
 
-		$this->assertSame( 1, $flags->max_bars() );
+		$this->assertSame( 'free', $flags->plan_name() );
 	}
 
 	/**
 	 * @runInSeparateProcess
 	 * @preserveGlobalState disabled
 	 */
-	public function test_enforces_minimum_bars_with_negative_value(): void {
-		if ( ! defined( 'FF_MAX_BARS' ) ) {
-			define( 'FF_MAX_BARS', -10 );
+	public function test_ff_plan_is_case_insensitive_and_trimmed(): void {
+		if ( ! defined( 'FF_PLAN' ) ) {
+			define( 'FF_PLAN', '  PRO  ' );
 		}
 		FeatureFlags::reset_for_tests();
 		$flags = FeatureFlags::instance();
 
-		$this->assertSame( 1, $flags->max_bars() );
+		$this->assertSame( 'pro', $flags->plan_name() );
+		$this->assertTrue( $flags->schedule_enabled() );
 	}
 
 	/**
 	 * @runInSeparateProcess
 	 * @preserveGlobalState disabled
 	 */
-	public function test_loads_max_messages_from_constant(): void {
-		if ( ! defined( 'FF_MAX_MESSAGES' ) ) {
-			define( 'FF_MAX_MESSAGES', 10 );
+	public function test_unknown_ff_plan_defaults_to_free(): void {
+		if ( ! defined( 'FF_PLAN' ) ) {
+			define( 'FF_PLAN', 'enterprise' );
 		}
 		FeatureFlags::reset_for_tests();
 		$flags = FeatureFlags::instance();
 
-		$this->assertSame( 10, $flags->max_messages() );
+		$this->assertSame( 'free', $flags->plan_name() );
+		$this->assertFalse( $flags->schedule_enabled() );
 	}
 
 	/**
 	 * @runInSeparateProcess
 	 * @preserveGlobalState disabled
 	 */
-	public function test_loads_max_columns_from_constant(): void {
-		if ( ! defined( 'FF_MAX_COLUMNS' ) ) {
-			define( 'FF_MAX_COLUMNS', 3 );
+	public function test_non_string_ff_plan_is_ignored_and_provider_is_used(): void {
+		if ( ! defined( 'FF_PLAN' ) ) {
+			define( 'FF_PLAN', 123 );
 		}
-		FeatureFlags::reset_for_tests();
-		$flags = FeatureFlags::instance();
 
-		$this->assertSame( 3, $flags->max_columns() );
-	}
+		$provider = new class() implements PlanNameProvider {
+			public function get_plan_name(): string {
+				return 'pro';
+			}
+		};
 
-	/**
-	 * @runInSeparateProcess
-	 * @preserveGlobalState disabled
-	 */
-	public function test_enforces_minimum_columns_of_one(): void {
-		if ( ! defined( 'FF_MAX_COLUMNS' ) ) {
-			define( 'FF_MAX_COLUMNS', 0 );
-		}
-		FeatureFlags::reset_for_tests();
-		$flags = FeatureFlags::instance();
+		$flags = new FeatureFlags( $provider );
 
-		$this->assertSame( 1, $flags->max_columns() );
-	}
-
-	/**
-	 * @runInSeparateProcess
-	 * @preserveGlobalState disabled
-	 */
-	public function test_enforces_maximum_columns_cap(): void {
-		if ( ! defined( 'FF_MAX_COLUMNS' ) ) {
-			define( 'FF_MAX_COLUMNS', 999 );
-		}
-		FeatureFlags::reset_for_tests();
-		$flags = FeatureFlags::instance();
-
-		$this->assertSame( 50, $flags->max_columns() );
-	}
-
-	/**
-	 * @runInSeparateProcess
-	 * @preserveGlobalState disabled
-	 */
-	public function test_enforces_minimum_messages_of_one(): void {
-		if ( ! defined( 'FF_MAX_MESSAGES' ) ) {
-			define( 'FF_MAX_MESSAGES', 0 );
-		}
-		FeatureFlags::reset_for_tests();
-		$flags = FeatureFlags::instance();
-
-		$this->assertSame( 1, $flags->max_messages() );
-	}
-
-	/**
-	 * @runInSeparateProcess
-	 * @preserveGlobalState disabled
-	 */
-	public function test_enforces_maximum_messages_of_fifty(): void {
-		if ( ! defined( 'FF_MAX_MESSAGES' ) ) {
-			define( 'FF_MAX_MESSAGES', 100 );
-		}
-		FeatureFlags::reset_for_tests();
-		$flags = FeatureFlags::instance();
-
-		$this->assertSame( 50, $flags->max_messages() );
-	}
-
-	/**
-	 * @runInSeparateProcess
-	 * @preserveGlobalState disabled
-	 */
-	public function test_loads_schedule_enabled_true_from_constant(): void {
-		if ( ! defined( 'FF_SCHEDULE' ) ) {
-			define( 'FF_SCHEDULE', true );
-		}
-		FeatureFlags::reset_for_tests();
-		$flags = FeatureFlags::instance();
-
-		$this->assertTrue( $flags->is_schedule_enabled() );
-	}
-
-	/**
-	 * @runInSeparateProcess
-	 * @preserveGlobalState disabled
-	 */
-	public function test_loads_schedule_enabled_false_from_constant(): void {
-		if ( ! defined( 'FF_SCHEDULE' ) ) {
-			define( 'FF_SCHEDULE', false );
-		}
-		FeatureFlags::reset_for_tests();
-		$flags = FeatureFlags::instance();
-
-		$this->assertFalse( $flags->is_schedule_enabled() );
-	}
-
-	/**
-	 * @runInSeparateProcess
-	 * @preserveGlobalState disabled
-	 */
-	public function test_handles_non_numeric_max_bars_constant(): void {
-		if ( ! defined( 'FF_MAX_BARS' ) ) {
-			define( 'FF_MAX_BARS', 'invalid' );
-		}
-		FeatureFlags::reset_for_tests();
-		$flags = FeatureFlags::instance();
-
-		// Should fall back to default
-		$this->assertSame( 1, $flags->max_bars() );
-	}
-
-	/**
-	 * @runInSeparateProcess
-	 * @preserveGlobalState disabled
-	 */
-	public function test_handles_non_numeric_max_messages_constant(): void {
-		if ( ! defined( 'FF_MAX_MESSAGES' ) ) {
-			define( 'FF_MAX_MESSAGES', 'invalid' );
-		}
-		FeatureFlags::reset_for_tests();
-		$flags = FeatureFlags::instance();
-
-		// Should fall back to default
-		$this->assertSame( 1, $flags->max_messages() );
-	}
-
-	/**
-	 * @runInSeparateProcess
-	 * @preserveGlobalState disabled
-	 */
-	public function test_handles_non_numeric_max_columns_constant(): void {
-		if ( ! defined( 'FF_MAX_COLUMNS' ) ) {
-			define( 'FF_MAX_COLUMNS', 'invalid' );
-		}
-		FeatureFlags::reset_for_tests();
-		$flags = FeatureFlags::instance();
-
-		// Should fall back to default
-		$this->assertSame( 1, $flags->max_columns() );
-	}
-
-	/**
-	 * @runInSeparateProcess
-	 * @preserveGlobalState disabled
-	 */
-	public function test_loads_all_constants_together(): void {
-		if ( ! defined( 'FF_MAX_BARS' ) ) {
-			define( 'FF_MAX_BARS', 20 );
-		}
-		if ( ! defined( 'FF_MAX_MESSAGES' ) ) {
-			define( 'FF_MAX_MESSAGES', 30 );
-		}
-		if ( ! defined( 'FF_MAX_COLUMNS' ) ) {
-			define( 'FF_MAX_COLUMNS', 2 );
-		}
-		if ( ! defined( 'FF_SCHEDULE' ) ) {
-			define( 'FF_SCHEDULE', true );
-		}
-		FeatureFlags::reset_for_tests();
-		$flags = FeatureFlags::instance();
-
-		$this->assertSame( 20, $flags->max_bars() );
-		$this->assertSame( 30, $flags->max_messages() );
-		$this->assertSame( 2, $flags->max_columns() );
-		$this->assertTrue( $flags->is_schedule_enabled() );
+		$this->assertSame( 'pro', $flags->plan_name() );
+		$this->assertTrue( $flags->schedule_enabled() );
 	}
 
 	public function test_singleton_returns_same_instance(): void {

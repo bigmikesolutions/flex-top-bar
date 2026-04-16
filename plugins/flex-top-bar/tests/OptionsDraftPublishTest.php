@@ -17,8 +17,8 @@ final class OptionsDraftPublishTest extends TestCase {
 	protected function setUp(): void {
 		parent::setUp();
 		$GLOBALS['wp_test_options'] = [];
-		if ( ! defined( 'FF_MAX_BARS' ) ) {
-			define( 'FF_MAX_BARS', 5 );
+		if ( ! defined( 'FF_PLAN' ) ) {
+			define( 'FF_PLAN', 'pro' );
 		}
 		FeatureFlags::reset_for_tests();
 	}
