@@ -25,7 +25,8 @@
     "test:e2e:ui": "playwright test --workers=1 --ui",
     "watch:styles": "npm run build:dist -w plugins/flex-top-bar -- --watch",
     "build:flex-top-bar": "npm run build -w plugins/flex-top-bar",
-    "package:flex-top-bar": "npm run package:zip -w plugins/flex-top-bar"
+    "package:flex-top-bar": "npm run package:zip -w plugins/flex-top-bar",
+    "package:flex-top-bar:freemius": "RELEASE_TARGET=freemius npm run package:zip -w plugins/flex-top-bar"
   },
   "workspaces": [
     "plugins/flex-top-bar"
