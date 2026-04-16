@@ -25,7 +25,7 @@
 		$fs->get_update( false, false ) :
 		null;
 
-	if ( is_object($update) ) {
+	if ( is_object($update) && class_exists( 'FS_Plugin_Updater' ) ) {
 		/**
 		 * This logic is particularly required for multisite environment.
          * If a module is site activated (not network) and not on the main site,

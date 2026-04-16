@@ -82,8 +82,16 @@ composer seed:top-bars
 
 1) Build package
 
+For WP page:
+
 ```bash
 npm run package:flex-top-bar
+```
+
+or for Freemius with uplader inside:
+
+```bash
+package:flex-top-bar:freemius
 ```
 
 2) Start staging env

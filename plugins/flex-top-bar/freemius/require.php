@@ -50,7 +50,11 @@
 	require_once WP_FS__DIR_INCLUDES . '/entities/class-fs-plugin-license.php';
 	require_once WP_FS__DIR_INCLUDES . '/entities/class-fs-subscription.php';
 	require_once WP_FS__DIR_INCLUDES . '/class-fs-api.php';
-	require_once WP_FS__DIR_INCLUDES . '/class-fs-plugin-updater.php';
+	// WP.org compliance: some builds may intentionally omit the Freemius updater.
+	$fs_updater_path = WP_FS__DIR_INCLUDES . '/class-fs-plugin-updater.php';
+	if ( file_exists( $fs_updater_path ) ) {
+		require_once $fs_updater_path;
+	}
 	require_once WP_FS__DIR_INCLUDES . '/class-fs-security.php';
 	require_once WP_FS__DIR_INCLUDES . '/managers/class-fs-debug-manager.php';
     require_once WP_FS__DIR_INCLUDES . '/class-fs-options.php';

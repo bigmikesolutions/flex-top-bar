@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Build a WordPress-ready zip of the top-bar plugin (for WP.org / Freemius).
 # Run from repo: npm run package:zip -w plugins/flex-top-bar
-# Optional: ./scripts/package-zip.sh 1.0.6   (override version read from flex-top-bar.php, for logging only)
+# Optional: ./scripts/package-zip.sh 1.0.6                 (override version read from flex-top-bar.php, for logging only)
+# Optional: RELEASE_TARGET=freemius ./scripts/package-zip.sh (include Freemius updater)
 
 set -euo pipefail
 
@@ -25,6 +26,11 @@ if [[ -z "$VERSION" ]]; then
   exit 1
 fi
 
+# Default to WP.org-safe build.
+# - wporg: omit custom updaters (WP.org distributes updates)
+# - freemius: include Freemius updater (Freemius distributes updates)
+RELEASE_TARGET="${RELEASE_TARGET:-wporg}"
+
 # Fixed distribution name (version is only in plugin header / constant inside the zip).
 OUT="$RELEASE_DIR/flex-top-bar.zip"
 cd "$PLUGINS_DIR"
@@ -45,6 +51,11 @@ cp -R "$TOP_BAR_DIR/freemius" "$STAGED_PLUGIN_DIR/"
 cp -R "$TOP_BAR_DIR/assets/doc" "$STAGED_PLUGIN_DIR/assets/"
 cp -R "$TOP_BAR_DIR/assets/img" "$STAGED_PLUGIN_DIR/assets/img"
 cp -R "$TOP_BAR_DIR/assets/screenshots" "$STAGED_PLUGIN_DIR/assets/screenshots"
+
+# WP.org compliance: do not ship a custom plugin updater.
+if [[ "$RELEASE_TARGET" == "wporg" ]]; then
+  rm -f "$STAGED_PLUGIN_DIR/freemius/includes/class-fs-plugin-updater.php"
+fi
 
 mkdir -p "$STAGED_PLUGIN_DIR/assets/dist"
 cp -R "$TOP_BAR_DIR/assets/dist/"* "$STAGED_PLUGIN_DIR/assets/dist/"

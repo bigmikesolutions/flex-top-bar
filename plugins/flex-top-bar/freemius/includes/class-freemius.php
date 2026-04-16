@@ -2688,7 +2688,9 @@
              */
             if ( $this->is_theme() ) {
                 if ( $this->is_premium() && ! $this->has_active_valid_license() ) {
-                    FS_Plugin_Updater::instance( $this )->delete_update_data();
+                    if ( class_exists( 'FS_Plugin_Updater' ) ) {
+                        FS_Plugin_Updater::instance( $this )->delete_update_data();
+                    }
                 }
 
                 $this->_uninstall_plugin_event( false );
@@ -2817,7 +2819,9 @@
          * @since 2.0.2
          */
         function _delete_theme_update_data_action() {
-            FS_Plugin_Updater::instance( $this )->delete_update_data();
+            if ( class_exists( 'FS_Plugin_Updater' ) ) {
+                FS_Plugin_Updater::instance( $this )->delete_update_data();
+            }
         }
 
         #endregion
@@ -4688,7 +4692,9 @@
                 $this->has_release_on_freemius() &&
                 ( ! $this->is_unresolved_clone( true ) )
             ) {
-                FS_Plugin_Updater::instance( $this );
+                if ( class_exists( 'FS_Plugin_Updater' ) ) {
+                    FS_Plugin_Updater::instance( $this );
+                }
             }
 
             $this->do_action( 'initiated' );
@@ -8233,7 +8239,9 @@
 
             if ( $this->is_registered() ) {
                 if ( $this->is_premium() && ! $this->has_active_valid_license() ) {
-                    FS_Plugin_Updater::instance( $this )->delete_update_data();
+                    if ( class_exists( 'FS_Plugin_Updater' ) ) {
+                        FS_Plugin_Updater::instance( $this )->delete_update_data();
+                    }
                 }
 
                 if ( $is_network_deactivation ) {
@@ -22372,10 +22380,14 @@
             $newer_than = ( $this->is_premium() ? $this->get_plugin_version() : false );
 
             // Check if there's a newer version for download.
+            $cache_expiration = ( class_exists( 'FS_Plugin_Updater' ) )
+                ? FS_Plugin_Updater::UPDATES_CHECK_CACHE_EXPIRATION
+                : 0;
+
             $new_version = $this->_fetch_newer_version(
                 $plugin_id,
                 $flush,
-                FS_Plugin_Updater::UPDATES_CHECK_CACHE_EXPIRATION,
+                $cache_expiration,
                 $newer_than,
                 ( false !== $newer_than )
             );
