@@ -34,6 +34,12 @@ Flex Top Bar lets you add a configurable notification/announcement bar to the to
 
 In WordPress admin, go to **Settings → Flex Top Bar**.
 
+= Is Flex Top Bar free? Is there a Pro version? =
+
+The plugin works as a **free** plugin by default with core features. There is also an **optional Pro** upgrade available via an in-plugin checkout to unlock additional features. The free version remains usable without purchasing anything.
+
+Pro details: https://example.com/upgrade
+
 = Does this plugin add external links or credits to my site? =
 
 No. The front-end output is only what you configure in the message editor.
