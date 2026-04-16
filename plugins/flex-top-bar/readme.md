@@ -1,45 +1,60 @@
-# Top Bar
+=== Flex Top Bar ===
+Contributors: bigmikesolutions
+Tags: notification bar, announcement bar, site banner, site message, admin settings
+Requires at least: 6.0
+Tested up to: 6.0
+Requires PHP: 8.1
+Stable tag: 0.1.0
+License: GPLv2 or later
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Displays a simple info bar at the top or bottom of the menu.
+Build and publish customizable notification bars (top or bottom) with a modern admin UI.
 
-## WP admin 
+== Description ==
 
-Use the WordPress admin:
+Flex Top Bar lets you add a configurable notification/announcement bar to the top or bottom of your site.
 
-1. Log in to the site (e.g. http://localhost:8080/wp-admin).
-2. In the left sidebar, open Settings.
-3. Click Flex Top Bar (under Settings).
-4. Change what you need:
-    Position – Top or Bottom
-    Message – WYSIWYG (text, links, formatting, media)
-    Background colour – colour picker
-    Frame (border) colour – colour picker, or tick No border
-    All changes are auto-saved but you must click publish button to make them visible.
+**Key features**
 
-## Options
+- Display a bar at the **top or bottom** of the site.
+- Edit the message with a **WYSIWYG editor** (text, links, formatting, media).
+- Build the bar layout using **columns**, each containing **text or an icon**.
+- Customize **background color** and optional **border/frame color**.
+- Changes are saved from the settings screen and you can **publish** when ready.
 
-- **Position**: `top_bar_position` option — `top` (default) or `bottom`.
-- **Message**: `top_bar_message` option — text to display (default: "Welcome!").
+== Installation ==
 
-## Development
+1. Upload the plugin folder to your `/wp-content/plugins/` directory, or install the plugin through the WordPress Plugins screen.
+2. Activate the plugin through the **Plugins** screen in WordPress.
+3. Go to **Settings → Flex Top Bar** to configure the bar.
 
-Run unit tests from the project root:
+== Frequently Asked Questions ==
 
-```bash
-composer test
-# or
-./vendor/bin/phpunit
-```
+= Where do I configure the bar? =
 
-## Local development
+In WordPress admin, go to **Settings → Flex Top Bar**.
 
-1) Check top plugins data:
+= Does this plugin add external links or credits to my site? =
 
-```sh
-docker compose exec wordpress php -r 'require "/var/www/html/wp-load.php"; $v=get_option("top_bars"); echo json_encode($v, JSON_PRETTY_PRINT), PHP_EOL;'
-```
+No. The front-end output is only what you configure in the message editor.
 
-## Buying on sandbox via Freemius
+== Screenshots ==
 
-- [Testing credit cards & PayPal accounts](https://freemius.com/help/documentation/checkout/integration/testing/#testing-credit-cards)
+1. Settings overview screen.
+2. Basic settings (position and colors).
+3. Message editor (WYSIWYG).
+4. Social media/icons configuration.
+5. Example bars displayed on the front-end.
+
+== Changelog ==
+
+= 0.1.0 =
+
+Initial release.
+
+== Upgrade Notice ==
+
+= 0.1.0 =
+
+Initial release.
 
