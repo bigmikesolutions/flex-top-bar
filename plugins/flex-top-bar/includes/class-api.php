@@ -262,7 +262,7 @@ final class API {
 				'max_bars'         => $flags->max_bars(),
 				'max_messages'     => $flags->max_messages(),
 				'max_columns'      => $flags->max_columns(),
-				'schedule_enabled' => $flags->is_schedule_enabled(),
+				'schedule_enabled' => $flags->schedule_enabled(),
 			],
 			200
 		);

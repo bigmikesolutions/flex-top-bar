@@ -112,10 +112,6 @@ final class FeatureFlags implements FeaturePlan {
 		return $this->plan->schedule_enabled();
 	}
 
-	public function is_schedule_enabled(): bool {
-		return $this->schedule_enabled();
-	}
-
 	public function plan_name(): string {
 		return $this->plan->plan_name();
 	}

@@ -31,7 +31,7 @@ final class FeatureFlagsTest extends TestCase {
 		$this->assertSame( 1, $flags->max_bars() );
 		$this->assertSame( 1, $flags->max_messages() );
 		$this->assertSame( 1, $flags->max_columns() );
-		$this->assertFalse( $flags->is_schedule_enabled() );
+		$this->assertFalse( $flags->schedule_enabled() );
 		$this->assertSame( 'free', $flags->plan_name() );
 	}
 
@@ -49,7 +49,7 @@ final class FeatureFlagsTest extends TestCase {
 		$this->assertSame( 5, $flags->max_bars() );
 		$this->assertSame( 5, $flags->max_messages() );
 		$this->assertSame( 4, $flags->max_columns() );
-		$this->assertTrue( $flags->is_schedule_enabled() );
+		$this->assertTrue( $flags->schedule_enabled() );
 		$this->assertSame( 'pro', $flags->plan_name() );
 	}
 
