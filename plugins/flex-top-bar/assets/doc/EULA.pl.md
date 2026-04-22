@@ -1,6 +1,8 @@
 Flex Top Bar – Warunki korzystania / EULA
 
-Data wejścia w życie: [wstaw datę]
+Niniejsze Warunki/EULA dotyczą darmowej wersji wtyczki dystrybuowanej poza Freemius. W przypadku zakupu wtyczki za pośrednictwem Freemius, warunki zakupu i rozliczeń reguluje EULA Freemius.
+
+Data wejścia w życie: March 25, 2026
 
 ⸻
 

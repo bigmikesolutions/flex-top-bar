@@ -1,6 +1,8 @@
 Flex Top Bar – End User License Agreement (EULA)
 
-Effective date: [insert date]
+This EULA applies to the free version of the plugin distributed outside Freemius. If you purchase the plugin via Freemius, the Freemius EULA governs the purchase and billing terms.
+
+Effective date: March 25, 2026
 
 ⸻
 

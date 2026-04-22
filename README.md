@@ -125,3 +125,7 @@ or just
 ```bash
 wordpress-check.sh
 ```
+
+## Docs 
+
+- [EULA from Freemius](https://freemius.com/product/26477/flex-top-bar/legal/eula/)
