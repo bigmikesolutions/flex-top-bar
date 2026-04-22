@@ -91,6 +91,7 @@ if ( ! function_exists( 'ftb_fs' ) ) {
                 'type'                => 'plugin',
                 'public_key'          => 'pk_f374ba95bc57af51c49e958c2717e',
                 'is_premium'          => false, // free version is default
+                'premium_suffix'      => 'Premium',
                 'has_premium_version' => true,  // upgrade to premium version
                 'has_addons'          => false,
                 'has_paid_plans'      => true,

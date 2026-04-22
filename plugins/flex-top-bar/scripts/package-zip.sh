@@ -45,7 +45,23 @@ STAGED_PLUGIN_DIR="$TMP_DIR/flex-top-bar"
 mkdir -p "$STAGED_PLUGIN_DIR/assets"
 
 cp "$TOP_BAR_DIR/flex-top-bar.php" "$STAGED_PLUGIN_DIR/"
-cp -R "$TOP_BAR_DIR/readme.md" "$STAGED_PLUGIN_DIR/"
+
+# Freemius requires `readme.txt` in the plugin root. Prefer a real `readme.txt`
+# if present, otherwise derive it from our `readme.md`.
+if [[ -f "$TOP_BAR_DIR/readme.txt" ]]; then
+  cp "$TOP_BAR_DIR/readme.txt" "$STAGED_PLUGIN_DIR/readme.txt"
+elif [[ -f "$TOP_BAR_DIR/readme.md" ]]; then
+  cp "$TOP_BAR_DIR/readme.md" "$STAGED_PLUGIN_DIR/readme.txt"
+else
+  echo "Missing readme (expected readme.txt or readme.md in $TOP_BAR_DIR)." >&2
+  exit 1
+fi
+
+# Keep markdown copy for GitHub/manual distribution.
+if [[ -f "$TOP_BAR_DIR/readme.md" ]]; then
+  cp "$TOP_BAR_DIR/readme.md" "$STAGED_PLUGIN_DIR/readme.md"
+fi
+
 cp -R "$TOP_BAR_DIR/includes" "$STAGED_PLUGIN_DIR/"
 cp -R "$TOP_BAR_DIR/freemius" "$STAGED_PLUGIN_DIR/"
 cp -R "$TOP_BAR_DIR/assets/doc" "$STAGED_PLUGIN_DIR/assets/"
