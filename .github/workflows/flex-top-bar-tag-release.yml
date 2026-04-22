@@ -29,10 +29,42 @@ jobs:
       - name: Install npm dependencies
         run: npm ci
 
-      - name: Build and package Top Bar zip
-        run: npm run package:flex-top-bar
+      - name: Package Top Bar zip (Freemius updater included)
+        run: |
+          npm run package:flex-top-bar:freemius
+          mv release/flex-top-bar.zip release/flex-top-bar-freemius.zip
+
+      - name: Package Top Bar zip (WP.org-safe)
+        run: |
+          npm run package:flex-top-bar
 
       - name: Create GitHub release and upload zip
         uses: softprops/action-gh-release@v2
         with:
-          files: release/flex-top-bar.zip
+          files: |
+            release/flex-top-bar.zip
+            release/flex-top-bar-freemius.zip
+
+      - name: Derive release version from tag
+        id: version
+        shell: bash
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+
+      - name: Copy release zip to repo root (Freemius requirement)
+        run: cp release/flex-top-bar-freemius.zip flex-top-bar.zip
+
+      - name: Deploy to Freemius
+        uses: buttonizer/freemius-deploy@v0.1.3
+        with:
+          file_name: flex-top-bar.zip
+          release_mode: beta
+          version: ${{ steps.version.outputs.version }}
+          sandbox: false
+        env:
+          PUBLIC_KEY: ${{ secrets.FREEMIUS_PUBLIC_KEY }}
+          DEV_ID: ${{ secrets.FREEMIUS_DEV_ID }}
+          SECRET_KEY: ${{ secrets.FREEMIUS_SECRET_KEY }}
+          PLUGIN_SLUG: ${{ secrets.FREEMIUS_PLUGIN_SLUG }}
+          PLUGIN_ID: ${{ secrets.FREEMIUS_PLUGIN_ID }}
