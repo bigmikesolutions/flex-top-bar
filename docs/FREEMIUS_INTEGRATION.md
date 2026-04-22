@@ -105,3 +105,7 @@ if ( isset( $_GET['top_bar_add'] ) ) {
 - Documentation: https://freemius.com/help/documentation/
 - WordPress SDK: https://github.com/Freemius/wordpress-sdk
 - Selling Guide: https://freemius.com/selling-wordpress-plugins-guide/
+
+
+
+- [Deployment](https://freemius.com/help/documentation/release-management/deployment/#stripping-paid-only-php-logic)
