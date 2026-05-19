@@ -37,7 +37,7 @@
               type="datetime-local"
               class="top-bar-life-time-datetime"
               @click="openPicker"
-              @blur="emit('save')"
+              @blur="onScheduleBlur"
             />
           </label>
         </fieldset>
@@ -52,9 +52,22 @@
               type="datetime-local"
               class="top-bar-life-time-datetime"
               @click="openPicker"
-              @blur="emit('save')"
+              @blur="onScheduleBlur"
             />
           </label>
+        </fieldset>
+      </div>
+      <div class="item">
+        <fieldset class="clear">
+          <legend class="bold">{{ __('Timezone', 'flex-top-bar') }}</legend>
+          <label :for="`scheduled_timezone_${model.id}`">
+            <TimezoneSelect
+              :select-id="`scheduled_timezone_${model.id}`"
+              v-model="model.scheduled_timezone"
+              @change="onScheduleBlur"
+            />
+          </label>
+          <p class="xs">{{ __('Schedule times use the selected timezone.', 'flex-top-bar') }}</p>
         </fieldset>
       </div>
     </div>
@@ -81,8 +94,11 @@
 </template>
 
 <script setup lang="ts">
+import { watch } from 'vue'
 import type { Bar } from '@/types'
 import { __ } from '@wordpress/i18n'
+import TimezoneSelect from '@/components/TimezoneSelect.vue'
+import { fromDatetimeLocalValue, getDefaultScheduleTimezone } from '@/utils/scheduleDateTime'
 
 withDefaults(
   defineProps<{
@@ -99,12 +115,36 @@ const emit = defineEmits<{
   save: []
 }>()
 
+watch(
+  () => model.value.scheduled_enabled,
+  (enabled) => {
+    if (enabled) {
+      model.value.scheduled_timezone = getDefaultScheduleTimezone(model.value.scheduled_timezone)
+    }
+  },
+  { immediate: true },
+)
+
+function applyScheduleFields() {
+  model.value.scheduled_from_datetime = fromDatetimeLocalValue(model.value.scheduled_from_datetime)
+  model.value.scheduled_to_datetime = fromDatetimeLocalValue(model.value.scheduled_to_datetime)
+  model.value.scheduled_timezone = getDefaultScheduleTimezone(model.value.scheduled_timezone)
+}
+
+function onScheduleBlur() {
+  applyScheduleFields()
+  emit('save')
+}
+
 function onScheduledToggle() {
   // When disabling scheduling, clear any dates before saving. Otherwise the backend
   // normalization will re-enable scheduling if dates are still present.
   if (!model.value.scheduled_enabled) {
     model.value.scheduled_from_datetime = ''
     model.value.scheduled_to_datetime = ''
+    model.value.scheduled_timezone = ''
+  } else {
+    applyScheduleFields()
   }
   emit('save')
 }

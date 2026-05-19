@@ -50,6 +50,8 @@ describe('ApiClient', () => {
           scheduled_enabled: false,
           scheduled_from_datetime: '',
           scheduled_to_datetime: '',
+        scheduled_timezone: '',
+          scheduled_timezone: '',
         },
       ]
 
@@ -197,6 +199,7 @@ describe('ApiClient', () => {
         scheduled_enabled: false,
         scheduled_from_datetime: '',
         scheduled_to_datetime: '',
+        scheduled_timezone: '',
       }
 
       vi.mocked(fetch).mockResolvedValueOnce({
@@ -254,6 +257,7 @@ describe('ApiClient', () => {
         scheduled_enabled: false,
         scheduled_from_datetime: '',
         scheduled_to_datetime: '',
+        scheduled_timezone: '',
       }
 
       vi.mocked(fetch).mockResolvedValueOnce({

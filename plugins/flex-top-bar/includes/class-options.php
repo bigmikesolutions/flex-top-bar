@@ -52,6 +52,7 @@ final class Options {
 			'scheduled_enabled'       => false,
 			'scheduled_from_datetime' => '',
 			'scheduled_to_datetime'   => '',
+			'scheduled_timezone'      => '',
 			'position'                => 'top',
 			'effect'                  => $column['effect'],
 			'messages'                => $column['messages'],
@@ -247,6 +248,9 @@ final class Options {
 		$scheduled_to_datetime = isset( $bar['scheduled_to_datetime'] )
 			? self::sanitize_iso_datetime( sanitize_text_field( (string) $bar['scheduled_to_datetime'] ) )
 			: '';
+		$scheduled_timezone = isset( $bar['scheduled_timezone'] )
+			? self::sanitize_timezone( sanitize_text_field( (string) $bar['scheduled_timezone'] ) )
+			: '';
 
 		if ( $scheduled_from_datetime !== '' || $scheduled_to_datetime !== '' ) {
 			$scheduled_enabled = true;
@@ -255,6 +259,7 @@ final class Options {
 		if ( ! $scheduled_enabled ) {
 			$scheduled_from_datetime = '';
 			$scheduled_to_datetime   = '';
+			$scheduled_timezone      = '';
 		}
 
 		$effect = isset( $bar['effect'] ) ? sanitize_key( (string) $bar['effect'] ) : 'none';
@@ -322,6 +327,7 @@ final class Options {
 			'scheduled_enabled'       => $scheduled_enabled,
 			'scheduled_from_datetime' => $scheduled_from_datetime,
 			'scheduled_to_datetime'   => $scheduled_to_datetime,
+			'scheduled_timezone'      => $scheduled_timezone,
 			'position'                => $pos,
 			'effect'                  => $effect,
 			'messages'                => $messages,
@@ -673,6 +679,17 @@ final class Options {
 		);
 	}
 
+	/**
+	 * WordPress site timezone identifier (IANA name or UTC offset).
+	 */
+	public static function site_timezone(): string {
+		if ( function_exists( 'wp_timezone' ) ) {
+			return wp_timezone()->getName();
+		}
+
+		return 'UTC';
+	}
+
 	public static function sanitize_hex_color( string $color ): string {
 		$color = ltrim( $color, '#' );
 		if ( preg_match( '/^([A-Fa-f0-9]{3}){1,2}$/', $color ) ) {
@@ -686,6 +703,10 @@ final class Options {
 	 */
 	private static function sanitize_iso_datetime( string $value ): string {
 		$value = trim( $value );
+		// Strip timezone suffix; wall-clock time is stored separately with scheduled_timezone.
+		if ( preg_match( '/^(.+?)(?:Z|[+-]\d{2}:\d{2})$/', $value, $tz_match ) === 1 ) {
+			$value = $tz_match[1];
+		}
 		if ( preg_match( '/^(\d{4}-\d{2}-\d{2})T((?:[01]\d|2[0-3]):[0-5]\d)$/', $value, $m ) === 1 ) {
 			return $m[1] . 'T' . $m[2];
 		}
@@ -694,5 +715,19 @@ final class Options {
 			return $m[1] . 'T' . $m[2];
 		}
 		return '';
+	}
+
+	private static function sanitize_timezone( string $value ): string {
+		$value = trim( $value );
+		if ( $value === '' ) {
+			return '';
+		}
+
+		try {
+			new \DateTimeZone( $value );
+			return $value;
+		} catch ( \Exception $e ) {
+			return '';
+		}
 	}
 }

@@ -52,6 +52,22 @@
       </div>
     </div>
 
+    <div class="top-bar-grid">
+      <div class="item">
+        <label :for="`scheduled_timezone_${barId}`">
+          <p class="bold">{{ __('Timezone', 'flex-top-bar') }}</p>
+          <p class="xs">{{ __('Schedule times use the selected timezone', 'flex-top-bar') }}</p>
+        </label>
+      </div>
+      <div class="item">
+        <TimezoneSelect
+          :select-id="`scheduled_timezone_${barId}`"
+          v-model="localTimezone"
+          @change="handleUpdate"
+        />
+      </div>
+    </div>
+
     <div v-if="validationError" class="top-bar-grid">
       <div class="item"></div>
       <div class="item">
@@ -66,11 +82,20 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { __ } from '@wordpress/i18n'
+import TimezoneSelect from '@/components/TimezoneSelect.vue'
+import {
+  fromDatetimeLocalValue,
+  getDefaultScheduleTimezone,
+  resolveScheduleTimezone,
+  toDatetimeLocalValue,
+  wallClockToTimestamp,
+} from '@/utils/scheduleDateTime'
 
 const props = defineProps<{
   enabled: boolean
   from: string
   to: string
+  timezone: string
   barId: string
 }>()
 
@@ -78,23 +103,29 @@ const emit = defineEmits<{
   'update:enabled': [value: boolean]
   'update:from': [value: string]
   'update:to': [value: string]
+  'update:timezone': [value: string]
   update: []
 }>()
 
 const localEnabled = ref(props.enabled)
-const localFrom = ref(convertToDatetimeLocal(props.from))
-const localTo = ref(convertToDatetimeLocal(props.to))
+const localFrom = ref(toDatetimeLocalValue(props.from))
+const localTo = ref(toDatetimeLocalValue(props.to))
+const localTimezone = ref(getDefaultScheduleTimezone(props.timezone))
 
 watch(() => props.enabled, (newVal) => {
   localEnabled.value = newVal
 })
 
 watch(() => props.from, (newVal) => {
-  localFrom.value = convertToDatetimeLocal(newVal)
+  localFrom.value = toDatetimeLocalValue(newVal)
 })
 
 watch(() => props.to, (newVal) => {
-  localTo.value = convertToDatetimeLocal(newVal)
+  localTo.value = toDatetimeLocalValue(newVal)
+})
+
+watch(() => props.timezone, (newVal) => {
+  localTimezone.value = getDefaultScheduleTimezone(newVal)
 })
 
 const validationError = computed(() => {
@@ -104,8 +135,9 @@ const validationError = computed(() => {
     return __('Both start and end dates are required', 'flex-top-bar')
   }
 
-  const from = new Date(localFrom.value)
-  const to = new Date(localTo.value)
+  const timeZone = resolveScheduleTimezone(localTimezone.value)
+  const from = wallClockToTimestamp(fromDatetimeLocalValue(localFrom.value), timeZone)
+  const to = wallClockToTimestamp(fromDatetimeLocalValue(localTo.value), timeZone)
 
   if (to <= from) {
     return __('End date must be after start date', 'flex-top-bar')
@@ -114,26 +146,12 @@ const validationError = computed(() => {
   return ''
 })
 
-function convertToDatetimeLocal(isoString: string): string {
-  if (!isoString) return ''
-
-  // Convert from ISO 8601 format (YYYY-MM-DDTHH:mm) to datetime-local format
-  // ISO format from backend: "2026-03-25T10:30"
-  // datetime-local format: "2026-03-25T10:30"
-  // They're the same, but let's ensure it's properly formatted
-  return isoString.slice(0, 16)
-}
-
-function convertFromDatetimeLocal(datetimeLocal: string): string {
-  if (!datetimeLocal) return ''
-
-  // Convert to ISO 8601 format for backend
-  // datetime-local format: "2026-03-25T10:30"
-  // Backend expects: "2026-03-25T10:30"
-  return datetimeLocal.slice(0, 16)
-}
-
 function handleEnabledChange() {
+  if (!localEnabled.value) {
+    emit('update:timezone', '')
+  } else {
+    emit('update:timezone', getDefaultScheduleTimezone(localTimezone.value))
+  }
   emit('update:enabled', localEnabled.value)
   emit('update')
 }
@@ -143,8 +161,9 @@ function handleUpdate() {
     return
   }
 
-  emit('update:from', convertFromDatetimeLocal(localFrom.value))
-  emit('update:to', convertFromDatetimeLocal(localTo.value))
+  emit('update:from', fromDatetimeLocalValue(localFrom.value))
+  emit('update:to', fromDatetimeLocalValue(localTo.value))
+  emit('update:timezone', resolveScheduleTimezone(localTimezone.value))
   emit('update')
 }
 </script>

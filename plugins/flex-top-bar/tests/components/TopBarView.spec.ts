@@ -39,6 +39,7 @@ describe('TopBarView', () => {
       scheduled_enabled: false,
       scheduled_from_datetime: '',
       scheduled_to_datetime: '',
+      scheduled_timezone: '',
     },
   ]
 
@@ -165,6 +166,7 @@ describe('TopBarView', () => {
       scheduled_enabled: true,
       scheduled_from_datetime: '2099-01-01T00:00',
       scheduled_to_datetime: '2099-12-31T23:59',
+      scheduled_timezone: 'UTC',
     }
 
     vi.mocked(fetch).mockResolvedValueOnce({
@@ -186,6 +188,7 @@ describe('TopBarView', () => {
       scheduled_enabled: false, // Scheduling disabled - should always show
       scheduled_from_datetime: '2099-01-01T00:00',
       scheduled_to_datetime: '2099-12-31T23:59',
+      scheduled_timezone: 'UTC',
     }
 
     vi.mocked(fetch).mockResolvedValueOnce({

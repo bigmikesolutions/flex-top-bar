@@ -108,6 +108,8 @@ export interface Bar {
   scheduled_enabled: boolean
   scheduled_from_datetime: string
   scheduled_to_datetime: string
+  /** IANA timezone or UTC offset used for scheduled_from/to wall-clock values. */
+  scheduled_timezone: string
   position: 'top' | 'bottom'
   /** Mirrored from the first column for backward compatibility. */
   effect: 'none' | 'slider' | 'fadein' | 'blink'
@@ -145,6 +147,8 @@ export interface TopBarConfig {
   nonce: string
   i18n: Record<string, string>
   version?: string
+  /** WordPress site timezone (IANA name or UTC offset). */
+  siteTimezone?: string
   /** Absolute URL to BMS favicon (WordPress `plugins_url`); used for admin footer branding. */
   bmsFaviconUrl?: string
 }
