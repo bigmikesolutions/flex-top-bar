@@ -4,11 +4,16 @@ import type { Bar, FeatureFlags } from '@/types'
 // Mock fetch
 global.fetch = vi.fn()
 
+function mockResponse(overrides: Partial<Response>): Response {
+  return overrides as unknown as Response
+}
+
 // Mock window.flexTopBarConfig before importing
 beforeAll(() => {
   global.window.flexTopBarConfig = {
     apiRoot: '/wp-json/flex-top-bar/v1',
     nonce: 'test-nonce-123',
+    i18n: {},
   }
 })
 
@@ -50,13 +55,16 @@ describe('ApiClient', () => {
           scheduled_enabled: false,
           scheduled_from_datetime: '',
           scheduled_to_datetime: '',
+          scheduled_timezone: '',
         },
       ]
 
-      vi.mocked(fetch).mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockBars,
-      } as Response)
+      vi.mocked(fetch).mockResolvedValueOnce(
+        mockResponse({
+          ok: true,
+          json: async () => mockBars,
+        }),
+      )
 
       const result = await api.getBars()
 
@@ -72,23 +80,27 @@ describe('ApiClient', () => {
     })
 
     it('throws error when API returns error', async () => {
-      vi.mocked(fetch).mockResolvedValueOnce({
-        ok: false,
-        status: 500,
-        json: async () => ({ error: 'Server error' }),
-      } as Response)
+      vi.mocked(fetch).mockResolvedValueOnce(
+        mockResponse({
+          ok: false,
+          status: 500,
+          json: async () => ({ error: 'Server error' }),
+        }),
+      )
 
       await expect(api.getBars()).rejects.toThrow('Server error')
     })
 
     it('throws generic error when error response has no body', async () => {
-      vi.mocked(fetch).mockResolvedValueOnce({
-        ok: false,
-        status: 500,
-        json: async () => {
-          throw new Error('Invalid JSON')
-        },
-      } as Response)
+      vi.mocked(fetch).mockResolvedValueOnce(
+        mockResponse({
+          ok: false,
+          status: 500,
+          json: async () => {
+            throw new Error('Invalid JSON')
+          },
+        }),
+      )
 
       await expect(api.getBars()).rejects.toThrow('HTTP Error 500')
     })
@@ -97,10 +109,12 @@ describe('ApiClient', () => {
   describe('getPublishedBars', () => {
     it('fetches published bars from API', async () => {
       const mockBars: Bar[] = []
-      vi.mocked(fetch).mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockBars,
-      } as Response)
+      vi.mocked(fetch).mockResolvedValueOnce(
+        mockResponse({
+          ok: true,
+          json: async () => mockBars,
+        }),
+      )
 
       const result = await api.getPublishedBars()
 
@@ -119,10 +133,12 @@ describe('ApiClient', () => {
   describe('publish', () => {
     it('posts publish request', async () => {
       const published: Bar[] = []
-      vi.mocked(fetch).mockResolvedValueOnce({
-        ok: true,
-        json: async () => published,
-      } as Response)
+      vi.mocked(fetch).mockResolvedValueOnce(
+        mockResponse({
+          ok: true,
+          json: async () => published,
+        }),
+      )
 
       const result = await api.publish()
 
@@ -142,10 +158,12 @@ describe('ApiClient', () => {
   describe('publishBar', () => {
     it('posts publishBar request', async () => {
       const publishedBar = { id: 'bar_1' } as Bar
-      vi.mocked(fetch).mockResolvedValueOnce({
-        ok: true,
-        json: async () => publishedBar,
-      } as Response)
+      vi.mocked(fetch).mockResolvedValueOnce(
+        mockResponse({
+          ok: true,
+          json: async () => publishedBar,
+        }),
+      )
 
       const result = await api.publishBar('bar_1')
 
@@ -197,12 +215,15 @@ describe('ApiClient', () => {
         scheduled_enabled: false,
         scheduled_from_datetime: '',
         scheduled_to_datetime: '',
+        scheduled_timezone: '',
       }
 
-      vi.mocked(fetch).mockResolvedValueOnce({
-        ok: true,
-        json: async () => createdBar,
-      } as Response)
+      vi.mocked(fetch).mockResolvedValueOnce(
+        mockResponse({
+          ok: true,
+          json: async () => createdBar,
+        }),
+      )
 
       const result = await api.createBar(newBar)
 
@@ -254,12 +275,15 @@ describe('ApiClient', () => {
         scheduled_enabled: false,
         scheduled_from_datetime: '',
         scheduled_to_datetime: '',
+        scheduled_timezone: '',
       }
 
-      vi.mocked(fetch).mockResolvedValueOnce({
-        ok: true,
-        json: async () => updatedBar,
-      } as Response)
+      vi.mocked(fetch).mockResolvedValueOnce(
+        mockResponse({
+          ok: true,
+          json: async () => updatedBar,
+        }),
+      )
 
       const result = await api.updateBar('bar_1', updates)
 
@@ -279,10 +303,12 @@ describe('ApiClient', () => {
 
   describe('deleteBar', () => {
     it('deletes a bar', async () => {
-      vi.mocked(fetch).mockResolvedValueOnce({
-        ok: true,
-        status: 204,
-      } as Response)
+      vi.mocked(fetch).mockResolvedValueOnce(
+        mockResponse({
+          ok: true,
+          status: 204,
+        }),
+      )
 
       const result = await api.deleteBar('bar_1')
 
@@ -302,16 +328,19 @@ describe('ApiClient', () => {
   describe('getFeatureFlags', () => {
     it('fetches feature flags from API', async () => {
       const mockFlags: FeatureFlags = {
+        plan_name: 'pro',
         max_bars: 3,
         max_messages: 5,
         max_columns: 4,
         schedule_enabled: true,
       }
 
-      vi.mocked(fetch).mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockFlags,
-      } as Response)
+      vi.mocked(fetch).mockResolvedValueOnce(
+        mockResponse({
+          ok: true,
+          json: async () => mockFlags,
+        }),
+      )
 
       const result = await api.getFeatureFlags()
 
@@ -331,10 +360,12 @@ describe('ApiClient', () => {
     it('uses default values when flexTopBarConfig is not set', async () => {
       delete (global.window as any).flexTopBarConfig
 
-      vi.mocked(fetch).mockResolvedValueOnce({
-        ok: true,
-        json: async () => [],
-      } as Response)
+      vi.mocked(fetch).mockResolvedValueOnce(
+        mockResponse({
+          ok: true,
+          json: async () => [],
+        }),
+      )
 
       // Create new instance to test constructor
       const { api: newApi } = await import('@/api/client')

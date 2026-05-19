@@ -288,7 +288,7 @@ final class OptionsEdgeCasesTest extends TestCase {
 
 		$requiredFields = [
 			'id', 'name', 'visible', 'admin_visibile', 'scheduled_enabled',
-			'scheduled_from_datetime', 'scheduled_to_datetime', 'position',
+			'scheduled_from_datetime', 'scheduled_to_datetime', 'scheduled_timezone', 'position',
 			'effect', 'messages', 'messages_mobile_visible', 'columns', 'bg_color',
 			'frame_color', 'frame_width', 'hide_on_scroll'
 		];

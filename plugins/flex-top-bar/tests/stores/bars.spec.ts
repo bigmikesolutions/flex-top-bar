@@ -48,7 +48,8 @@ describe('useBarsStore', () => {
     admin_visibile: true,
     scheduled_enabled: false,
     scheduled_from_datetime: '',
-    scheduled_to_datetime: '',
+      scheduled_to_datetime: '',
+      scheduled_timezone: '',
   }
 
   describe('initial state', () => {

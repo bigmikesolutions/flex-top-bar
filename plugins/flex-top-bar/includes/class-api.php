@@ -157,6 +157,7 @@ final class API {
 				'scheduled_enabled'        => $bar['scheduled_enabled'] ?? false,
 				'scheduled_from_datetime'  => $bar['scheduled_from_datetime'] ?? '',
 				'scheduled_to_datetime'    => $bar['scheduled_to_datetime'] ?? '',
+				'scheduled_timezone'       => $bar['scheduled_timezone'] ?? '',
 			];
 		}, $bars );
 
@@ -295,6 +296,10 @@ final class API {
 				'required' => false,
 			],
 			'scheduled_to_datetime'   => [
+				'type'     => 'string',
+				'required' => false,
+			],
+			'scheduled_timezone'      => [
 				'type'     => 'string',
 				'required' => false,
 			],

@@ -32,12 +32,27 @@ final class OptionsScheduleTest extends TestCase {
 				'scheduled_enabled' => '1',
 				'scheduled_from_datetime' => '2026-03-21T11:00',
 				'scheduled_to_datetime' => '2026-03-21T12:30',
+				'scheduled_timezone' => 'Europe/Warsaw',
 			]
 		);
 
 		$this->assertTrue( (bool) $bar['scheduled_enabled'] );
 		$this->assertSame( '2026-03-21T11:00', $bar['scheduled_from_datetime'] );
 		$this->assertSame( '2026-03-21T12:30', $bar['scheduled_to_datetime'] );
+		$this->assertSame( 'Europe/Warsaw', $bar['scheduled_timezone'] );
+	}
+
+	public function test_normalize_bar_keeps_timezone_empty_when_not_provided(): void {
+		$this->enableScheduleFeature();
+		$bar = Options::normalize_bar(
+			[
+				'scheduled_enabled' => true,
+				'scheduled_from_datetime' => '2026-03-21T11:00',
+				'scheduled_to_datetime' => '2026-03-21T12:30',
+			]
+		);
+
+		$this->assertSame( '', $bar['scheduled_timezone'] );
 	}
 
 

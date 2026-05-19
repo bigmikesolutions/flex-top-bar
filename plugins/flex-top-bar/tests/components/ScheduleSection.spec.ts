@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import ScheduleSection from '@/components/ScheduleSection.vue'
 import type { Bar, BarColumn } from '@/types'
+import { getBrowserTimezone } from '@/utils/scheduleDateTime'
 
 vi.mock('@wordpress/i18n', () => ({
   __: (text: string) => text,
@@ -35,10 +36,16 @@ describe('ScheduleSection', () => {
     scheduled_enabled: false,
     scheduled_from_datetime: '',
     scheduled_to_datetime: '',
+    scheduled_timezone: '',
   }
 
   beforeEach(() => {
     vi.clearAllMocks()
+    window.flexTopBarConfig = {
+      apiRoot: '/wp-json/flex-top-bar/v1',
+      nonce: 'test',
+      i18n: {},
+    }
   })
 
   it('renders disabled scheduling row when scheduleEnabled is false', () => {
@@ -80,6 +87,7 @@ describe('ScheduleSection', () => {
           scheduled_enabled: true,
           scheduled_from_datetime: '2026-03-25T10:00',
           scheduled_to_datetime: '2026-03-25T18:00',
+          scheduled_timezone: 'Europe/Warsaw',
         },
         scheduleEnabled: true,
       },
@@ -93,6 +101,7 @@ describe('ScheduleSection', () => {
     // v-model mutates modelValue; verify it was cleared before save.
     expect((wrapper.props('modelValue') as Bar).scheduled_from_datetime).toBe('')
     expect((wrapper.props('modelValue') as Bar).scheduled_to_datetime).toBe('')
+    expect((wrapper.props('modelValue') as Bar).scheduled_timezone).toBe('')
   })
 
   it('shows datetime inputs when scheduled_enabled is true', () => {
@@ -117,5 +126,35 @@ describe('ScheduleSection', () => {
     await fromInput.setValue('2026-03-25T10:00')
     await fromInput.trigger('blur')
     expect(wrapper.emitted('save')).toBeTruthy()
+    expect((wrapper.props('modelValue') as Bar).scheduled_timezone).toBe(getBrowserTimezone())
+  })
+
+  it('shows timezone select when scheduling is enabled', () => {
+    const wrapper = mount(ScheduleSection, {
+      props: {
+        modelValue: {
+          ...mockBar,
+          scheduled_enabled: true,
+          scheduled_timezone: 'Europe/Warsaw',
+        },
+        scheduleEnabled: true,
+      },
+    })
+
+    expect(wrapper.text()).toContain('Timezone')
+    const select = wrapper.find('#scheduled_timezone_bar_1')
+    expect(select.exists()).toBe(true)
+    expect((select.element as HTMLSelectElement).value).toBe('Europe/Warsaw')
+  })
+
+  it('defaults timezone to browser timezone when scheduling is enabled', () => {
+    const wrapper = mount(ScheduleSection, {
+      props: {
+        modelValue: { ...mockBar, scheduled_enabled: true },
+        scheduleEnabled: true,
+      },
+    })
+
+    expect((wrapper.props('modelValue') as Bar).scheduled_timezone).toBe(getBrowserTimezone())
   })
 })

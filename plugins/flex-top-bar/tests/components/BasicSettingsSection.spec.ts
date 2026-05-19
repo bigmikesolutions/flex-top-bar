@@ -35,6 +35,7 @@ describe('BasicSettingsSection', () => {
     scheduled_enabled: false,
     scheduled_from_datetime: '',
     scheduled_to_datetime: '',
+    scheduled_timezone: '',
   }
 
   beforeEach(() => {
