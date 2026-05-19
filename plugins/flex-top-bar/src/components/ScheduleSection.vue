@@ -67,7 +67,7 @@
               @change="onScheduleBlur"
             />
           </label>
-          <p class="xs">{{ __('Schedule times use the selected timezone.', 'flex-top-bar') }}</p>
+          <p class="xs">{{ __('Schedule times use the selected timezone. On the site, the top bar is shown to each visitor according to their browser timezone.', 'flex-top-bar') }}</p>
         </fieldset>
       </div>
     </div>

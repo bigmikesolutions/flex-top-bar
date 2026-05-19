@@ -333,7 +333,8 @@ export async function setSchedule(
   barIndex: number,
   enabled: boolean,
   from?: string,
-  to?: string
+  to?: string,
+  timezone?: string
 ): Promise<void> {
   await openPanel(page, barIndex);
 
@@ -356,6 +357,75 @@ export async function setSchedule(
     await fromInput.fill(from);
     await toInput.fill(to);
     await page.waitForTimeout(500); // Wait for API save
+  }
+
+  if (enabled && timezone) {
+    await setScheduleTimezone(page, barIndex, timezone);
+  }
+}
+
+export async function enableSchedule(page: Page, barIndex: number): Promise<void> {
+  await openPanel(page, barIndex);
+
+  const barRow = page.locator('.top-bar-row.bg').nth(barIndex);
+  const scheduleToggle = barRow.locator('.top-bar-toggle-life-time');
+  const scheduleLabel = barRow.locator('.top-bar-life-time-checkbox');
+
+  if (!(await scheduleToggle.isChecked().catch(() => false))) {
+    await Promise.all([
+      waitForTopBarPutWhere(page, (body) => body.includes('"scheduled_enabled":true')),
+      scheduleLabel.click({ force: true }),
+    ]);
+  }
+
+  await expect(scheduleToggle).toBeChecked({ timeout: 15000 });
+}
+
+export function schedulePanelLocator(page: Page, barIndex: number) {
+  return page.locator('.top-bar-row.bg').nth(barIndex).locator('.top-bar-lifetime-panel');
+}
+
+export async function setScheduleTimezone(
+  page: Page,
+  barIndex: number,
+  timeZone: string
+): Promise<void> {
+  const barId = await getBarIdByIndex(page, barIndex);
+  const tzSelect = page.locator(`#scheduled_timezone_${barId}`);
+
+  await tzSelect.waitFor({ state: 'visible', timeout: 15000 });
+  await Promise.all([
+    waitForTopBarPutWhere(page, (body) => body.includes(`"scheduled_timezone":"${timeZone}"`)),
+    tzSelect.selectOption(timeZone),
+  ]);
+}
+
+export async function getScheduleTimezoneValue(page: Page, barIndex: number): Promise<string> {
+  const barId = await getBarIdByIndex(page, barIndex);
+  return page.locator(`#scheduled_timezone_${barId}`).inputValue();
+}
+
+export async function publishBar(page: Page, barIndex: number, barId: string): Promise<void> {
+  page.once('dialog', (d) => d.accept());
+  const publishBtn = page.locator('.top-bar-row.bg').nth(barIndex).locator('button.top-bar-icons.publish');
+  if (await publishBtn.evaluate((el) => el.classList.contains('top-bar-publish--dirty')).catch(() => false)) {
+    const publishRequest = page.waitForResponse(
+      (r) => {
+        if (r.request().method() !== 'POST' || !r.ok()) return false;
+        const url = decodeURIComponent(r.url());
+        return (
+          new RegExp(`flex-top-bar/v1/bars/${barId}/publish`, 'i').test(url) ||
+          /flex-top-bar\/v1\/publish/i.test(url)
+        );
+      },
+      { timeout: 45000 }
+    );
+
+    await publishBtn.click();
+    await Promise.race([
+      publishRequest,
+      expect(publishBtn).not.toHaveClass(/top-bar-publish--dirty/, { timeout: 45000 }),
+    ]);
   }
 }
 

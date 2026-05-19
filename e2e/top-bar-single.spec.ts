@@ -4,47 +4,16 @@ import {
   loginAndOpenTopBarSettings,
   openPanel,
   resetToSingleBar,
-  toDatetimeLocalValue,
   getBarIdByIndex,
   setBarPosition,
   setBarHideOnScroll,
-  waitForTopBarPutWhere,
   waitForTopBarPut,
+  publishBar,
 } from './helpers/topBarHelpers';
 
 declare const process: { env: Record<string, string | undefined> };
 
 test.describe('single-bar', () => {
-
-  async function publishBar(page: Page, barIndex: number, barId: string): Promise<void> {
-    page.once('dialog', (d) => d.accept());
-    const publishBtn = page.locator('.top-bar-row.bg').nth(barIndex).locator('button.top-bar-icons.publish');
-    // If there are no unpublished changes, publish can be a no-op.
-    if (await publishBtn.evaluate((el) => el.classList.contains('top-bar-publish--dirty')).catch(() => false)) {
-      const publishRequest = page.waitForResponse(
-        (r) => {
-          if (r.request().method() !== 'POST' || !r.ok()) return false;
-          const url = decodeURIComponent(r.url());
-          // Match both endpoints: single-bar publish and bulk publish.
-          // Supports both pretty (/wp-json/…) and plain (?rest_route=/…) WP REST styles.
-          return (
-            new RegExp(`flex-top-bar/v1/bars/${barId}/publish`, 'i').test(url) ||
-            /flex-top-bar\/v1\/publish/i.test(url)
-          );
-        },
-        { timeout: 45000 }
-      );
-
-      // Some WP setups can complete publish without us reliably observing the response (navigation races,
-      // request routed via service worker/proxy, etc.). The UI reliably reflects completion by clearing
-      // the dirty marker, so accept either signal.
-      await publishBtn.click();
-      await Promise.race([
-        publishRequest,
-        expect(publishBtn).not.toHaveClass(/top-bar-publish--dirty/, { timeout: 45000 }),
-      ]);
-    }
-  }
 
   test.describe('basic settings - position', () => {
     test('should save bar as top and render it at top', async ({ page }) => {
@@ -186,130 +155,6 @@ test.describe('single-bar', () => {
       await page.evaluate(() => window.scrollTo(0, 200));
       await expect(bottomBar).toBeVisible();
       await expect(bottomBar).not.toHaveCSS('display', 'none');
-    });
-  });
-
-  test.describe('scheduled', () => {
-    test('should set future schedule and make top-bar hidden on frontend', async ({ page }) => {
-      await loginAndOpenTopBarSettings(page);
-      await resetToSingleBar(page);
-      await ensureAtLeastBars(page, 2);
-      await openPanel(page, 0);
-
-      const barId = await getBarIdByIndex(page, 0);
-      const barRow = page.locator('.top-bar-row.bg').nth(0);
-
-      // Scheduling is a plan feature flag (FF_SCHEDULE). Skip if disabled in this environment.
-      const scheduleToggle = barRow.locator('.top-bar-toggle-life-time');
-      const scheduleLabel = barRow.locator('.top-bar-life-time-checkbox');
-
-      // Enable scheduling (Vue auto-saves on change).
-      if (!(await scheduleToggle.isChecked().catch(() => false))) {
-        // The checkbox input can be visually hidden; click the visible label/control instead.
-        await Promise.all([
-          waitForTopBarPutWhere(page, (body) => body.includes('"scheduled_enabled":true')),
-          scheduleLabel.click({ force: true }),
-        ]);
-      }
-
-      await expect(scheduleToggle).toBeChecked({ timeout: 15000 });
-      // Toggling can re-render/collapse the options panel; ensure it's open before interacting with fields.
-      await openPanel(page, 0);
-
-      const schedulePanel = barRow.locator('.top-bar-lifetime-panel');
-      await expect(schedulePanel).toBeVisible({ timeout: 15000 });
-
-      // Find schedule inputs by labels (IDs can vary if bar IDs differ).
-      const dateInputs = schedulePanel.locator('input.top-bar-life-time-datetime[type="datetime-local"]');
-      const fromInput = dateInputs.nth(0);
-      const toInput = dateInputs.nth(1);
-      await expect(fromInput).toBeVisible({ timeout: 15000 });
-      await expect(toInput).toBeVisible({ timeout: 15000 });
-      await fromInput.fill('2099-03-21T11:00');
-      await expect(fromInput).toHaveValue('2099-03-21T11:00');
-      await fromInput.blur();
-      await waitForTopBarPutWhere(page, (body) => body.includes('"scheduled_from_datetime":"2099-03-21T11:00"'));
-      await openPanel(page, 0);
-      await expect(toInput).toBeVisible({ timeout: 15000 });
-
-      await toInput.fill('2099-03-21T12:30');
-      await expect(toInput).toHaveValue('2099-03-21T12:30');
-      await toInput.blur();
-      await waitForTopBarPutWhere(page, (body) => body.includes('"scheduled_to_datetime":"2099-03-21T12:30"'));
-
-      await page.reload();
-      await openPanel(page, 0);
-
-      // Verify schedule is set
-      const scheduled = page.locator('.top-bar-toggle-life-time').nth(0);
-      await expect(scheduled).toBeChecked();
-      await expect(fromInput).toHaveValue('2099-03-21T11:00');
-      await expect(toInput).toHaveValue('2099-03-21T12:30');
-
-      await page.goto('/');
-      await expect(page.locator(`[data-top-bar-id="${barId}"]`)).toHaveCount(0);
-    });
-
-    test('should set schedule covering now and make top-bar visible on frontend', async ({ page }) => {
-      await loginAndOpenTopBarSettings(page);
-      await resetToSingleBar(page);
-      await ensureAtLeastBars(page, 2);
-      await openPanel(page, 0);
-
-      const barId = await getBarIdByIndex(page, 0);
-      const barRow = page.locator('.top-bar-row.bg').nth(0);
-
-      const scheduleToggle = barRow.locator('.top-bar-toggle-life-time');
-      const scheduleLabel = barRow.locator('.top-bar-life-time-checkbox');
-
-      // Wide range around now to avoid timezone edge cases.
-      const now = new Date();
-      const from = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-      const to = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-      const fromValue = toDatetimeLocalValue(from);
-      const toValue = toDatetimeLocalValue(to);
-
-      if (!(await scheduleToggle.isChecked().catch(() => false))) {
-        await Promise.all([
-          waitForTopBarPutWhere(page, (body) => body.includes('"scheduled_enabled":true')),
-          scheduleLabel.click({ force: true }),
-        ]);
-      }
-
-      await expect(scheduleToggle).toBeChecked({ timeout: 15000 });
-      await openPanel(page, 0);
-
-      const schedulePanel = barRow.locator('.top-bar-lifetime-panel');
-      await expect(schedulePanel).toBeVisible({ timeout: 15000 });
-
-      const dateInputs = schedulePanel.locator('input.top-bar-life-time-datetime[type="datetime-local"]');
-      const fromInput = dateInputs.nth(0);
-      const toInput = dateInputs.nth(1);
-      await expect(fromInput).toBeVisible({ timeout: 15000 });
-      await expect(toInput).toBeVisible({ timeout: 15000 });
-      await fromInput.fill(fromValue);
-      await expect(fromInput).toHaveValue(fromValue);
-      await fromInput.blur();
-      await waitForTopBarPutWhere(page, (body) => body.includes(`"scheduled_from_datetime":"${fromValue}"`));
-      await openPanel(page, 0);
-      await expect(toInput).toBeVisible({ timeout: 15000 });
-
-      await toInput.fill(toValue);
-      await expect(toInput).toHaveValue(toValue);
-      await toInput.blur();
-      await waitForTopBarPutWhere(page, (body) => body.includes(`"scheduled_to_datetime":"${toValue}"`));
-
-      await page.reload();
-      await openPanel(page, 0);
-
-      // Verify schedule is set
-      const scheduled = page.locator('.top-bar-toggle-life-time').nth(0);
-      await expect(scheduled).toBeChecked();
-      await expect(fromInput).toHaveValue(fromValue);
-      await expect(toInput).toHaveValue(toValue);
-
-      await page.goto('/');
-      await expect(page.locator(`[data-top-bar-id="${barId}"]`)).toHaveCount(1);
     });
   });
 

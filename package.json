@@ -15,6 +15,7 @@
     "test:ui": "npm run test:ui -w plugins/flex-top-bar",
     "test:e2e": "playwright test --workers=1 --timeout=60000",
     "test:e2e:single-bar": "playwright test --workers=1 e2e/top-bar-single.spec.ts",
+    "test:e2e:scheduled": "playwright test --workers=1 e2e/top-bar-scheduled.spec.ts",
     "test:e2e:multi-bar": "playwright test --workers=1 e2e/top-bar-multi.spec.ts",
     "test:e2e:multi-column": "playwright test --workers=1 e2e/top-bar-multi-column.spec.ts",
     "test:e2e:multi-column-mobile": "playwright test --workers=1 e2e/top-bar-multi-column-mobile.spec.ts",
