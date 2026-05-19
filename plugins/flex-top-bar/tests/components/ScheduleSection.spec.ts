@@ -45,7 +45,6 @@ describe('ScheduleSection', () => {
       apiRoot: '/wp-json/flex-top-bar/v1',
       nonce: 'test',
       i18n: {},
-      siteTimezone: 'Europe/Warsaw',
     }
   })
 

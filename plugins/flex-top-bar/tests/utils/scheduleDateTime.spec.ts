@@ -5,7 +5,6 @@ import {
   fromDatetimeLocalValue,
   getBrowserTimezone,
   getDefaultScheduleTimezone,
-  getSiteTimezone,
   getVisitorScheduleTimezone,
   isWithinScheduleWindow,
   isWithinScheduleWindowForVisitor,
@@ -26,7 +25,7 @@ describe('scheduleDateTime', () => {
     delete window.flexTopBarConfig
   })
 
-  it('reads browser timezone as fallback for site timezone config', () => {
+  it('reads browser timezone', () => {
     expect(getBrowserTimezone()).toBeTruthy()
   })
 
@@ -36,17 +35,6 @@ describe('scheduleDateTime', () => {
     expect(warsaw).toBeTruthy()
     expect(warsaw?.label).toContain('Europe/Warsaw')
     expect(options[0]?.value).toBe(getBrowserTimezone())
-  })
-
-  it('reads site timezone from admin config', () => {
-    window.flexTopBarConfig = {
-      apiRoot: '/wp-json/flex-top-bar/v1',
-      nonce: 'test',
-      i18n: {},
-      siteTimezone: 'Europe/Warsaw',
-    }
-
-    expect(getSiteTimezone()).toBe('Europe/Warsaw')
   })
 
   it('converts datetime-local values to wall-clock strings', () => {
@@ -63,13 +51,6 @@ describe('scheduleDateTime', () => {
   it('replaces UTC-equivalent stored values with browser timezone', () => {
     vi.setSystemTime(new Date('2026-05-19T10:00:00Z'))
 
-    window.flexTopBarConfig = {
-      apiRoot: '/wp-json/flex-top-bar/v1',
-      nonce: 'test',
-      i18n: {},
-      siteTimezone: 'Europe/Warsaw',
-    }
-
     vi.spyOn(Intl.DateTimeFormat.prototype, 'resolvedOptions').mockReturnValue({
       locale: 'en-US',
       calendar: 'gregory',
@@ -82,15 +63,8 @@ describe('scheduleDateTime', () => {
     expect(getDefaultScheduleTimezone('+00:00')).toBe('Europe/Warsaw')
   })
 
-  it('infers site timezone when Intl reports UTC but local offset differs', () => {
+  it('infers browser timezone when Intl reports UTC but local offset differs', () => {
     vi.setSystemTime(new Date('2026-05-19T10:00:00Z'))
-
-    window.flexTopBarConfig = {
-      apiRoot: '/wp-json/flex-top-bar/v1',
-      nonce: 'test',
-      i18n: {},
-      siteTimezone: 'Europe/Warsaw',
-    }
 
     vi.spyOn(Intl.DateTimeFormat.prototype, 'resolvedOptions').mockReturnValue({
       locale: 'en-US',

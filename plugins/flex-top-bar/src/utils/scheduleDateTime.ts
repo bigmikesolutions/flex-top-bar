@@ -149,12 +149,6 @@ function findTimezoneForOffset(offsetMinutes: number, date = new Date()): string
   }
 
   const candidates: string[] = []
-  const siteTimezone =
-    typeof window !== 'undefined' ? window.flexTopBarConfig?.siteTimezone ?? '' : ''
-
-  if (siteTimezone) {
-    candidates.push(siteTimezone)
-  }
   candidates.push(...PREFERRED_TIMEZONES)
   candidates.push(...getTimezoneOptionValues())
 
@@ -208,14 +202,6 @@ export function getDefaultScheduleTimezone(storedTimezone = ''): string {
   }
 
   return normalizedStored
-}
-
-export function getSiteTimezone(): string {
-  if (typeof window !== 'undefined' && window.flexTopBarConfig?.siteTimezone) {
-    return window.flexTopBarConfig.siteTimezone
-  }
-
-  return getBrowserTimezone()
 }
 
 const FALLBACK_TIMEZONES = [

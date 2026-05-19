@@ -679,17 +679,6 @@ final class Options {
 		);
 	}
 
-	/**
-	 * WordPress site timezone identifier (IANA name or UTC offset).
-	 */
-	public static function site_timezone(): string {
-		if ( function_exists( 'wp_timezone' ) ) {
-			return wp_timezone()->getName();
-		}
-
-		return 'UTC';
-	}
-
 	public static function sanitize_hex_color( string $color ): string {
 		$color = ltrim( $color, '#' );
 		if ( preg_match( '/^([A-Fa-f0-9]{3}){1,2}$/', $color ) ) {

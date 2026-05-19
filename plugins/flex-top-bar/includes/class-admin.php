@@ -79,7 +79,6 @@ final class Admin {
 					'apiRoot'         => esc_url_raw( rest_url( 'flex-top-bar/v1' ) ),
 					'nonce'           => wp_create_nonce( 'wp_rest' ),
 					'version'         => (string) FLEX_TOP_BAR_VERSION,
-					'siteTimezone'    => Options::site_timezone(),
 					'bmsFaviconUrl'   => esc_url_raw( plugins_url( 'assets/img/bms-favicon.png', FLEX_TOP_BAR_PLUGIN_FILE ) ),
 					'i18n'    => [
 						'welcome'     => __( 'Welcome to Top Bar plugin', 'flex-top-bar' ),
