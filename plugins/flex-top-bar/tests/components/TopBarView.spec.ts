@@ -2,9 +2,21 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import TopBarView from '@/components/TopBarView.vue'
 import type { Bar } from '@/types'
+import * as scheduleDateTime from '@/utils/scheduleDateTime'
 
 // Mock fetch
 global.fetch = vi.fn()
+
+vi.mock('@/utils/scheduleDateTime', async (importOriginal) => {
+  const actual = await importOriginal<typeof scheduleDateTime>()
+  return {
+    ...actual,
+    getVisitorScheduleTimezone: vi.fn(() => 'UTC'),
+    isWithinScheduleWindowForVisitor: vi.fn((from: string, to: string, storedTimezone = '', nowMs?: number) =>
+      actual.isWithinScheduleWindowForVisitor(from, to, storedTimezone, nowMs),
+    ),
+  }
+})
 
 describe('TopBarView', () => {
   beforeEach(() => {
@@ -160,7 +172,37 @@ describe('TopBarView', () => {
     expect(wrapper.find('.top-bar').exists()).toBe(false)
   })
 
+  it('shows bars inside visitor schedule window', async () => {
+    vi.mocked(scheduleDateTime.isWithinScheduleWindowForVisitor).mockReturnValue(true)
+
+    const scheduledBar = {
+      ...mockBars[0],
+      scheduled_enabled: true,
+      scheduled_from_datetime: '2026-03-25T10:00',
+      scheduled_to_datetime: '2026-03-25T18:00',
+      scheduled_timezone: 'Europe/Warsaw',
+    }
+
+    vi.mocked(fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => [scheduledBar],
+    } as Response)
+
+    const wrapper = mount(TopBarView)
+    await new Promise(resolve => setTimeout(resolve, 50))
+    await wrapper.vm.$nextTick()
+
+    expect(scheduleDateTime.isWithinScheduleWindowForVisitor).toHaveBeenCalledWith(
+      '2026-03-25T10:00',
+      '2026-03-25T18:00',
+      'Europe/Warsaw',
+    )
+    expect(wrapper.find('.top-bar').exists()).toBe(true)
+  })
+
   it('filters out bars outside schedule window', async () => {
+    vi.mocked(scheduleDateTime.isWithinScheduleWindowForVisitor).mockReturnValue(false)
+
     const scheduledBar = {
       ...mockBars[0],
       scheduled_enabled: true,

@@ -99,6 +99,10 @@ function isUtcEquivalent(timeZone: string, date = new Date()): boolean {
 }
 
 export function normalizeTimezoneId(timeZone: string): string {
+  if (typeof timeZone !== 'string') {
+    return ''
+  }
+
   const trimmed = timeZone.trim()
   if (!trimmed) {
     return ''
@@ -309,17 +313,58 @@ export function wallClockToTimestamp(value: string, timeZone: string): number {
     return Number.isNaN(parsed) ? 0 : parsed
   }
 
-  let candidate = Date.UTC(target.year, target.month - 1, target.day, target.hour, target.minute)
-
-  for (let i = 0; i < 48; i += 1) {
-    const cmp = compareWallClockParts(readFormatterParts(new Date(candidate), timeZone), target)
-    if (cmp === 0) {
-      return candidate
-    }
-    candidate -= cmp * 60_000
+  const normalizedTimeZone = normalizeTimezoneId(timeZone)
+  if (!normalizedTimeZone) {
+    return 0
   }
 
-  return candidate
+  if (normalizedTimeZone === 'UTC' || normalizedTimeZone === 'Etc/UTC' || normalizedTimeZone === 'Etc/GMT') {
+    return Date.UTC(target.year, target.month - 1, target.day, target.hour, target.minute)
+  }
+
+  let loMin = Math.floor(
+    Date.UTC(target.year, target.month - 1, target.day, target.hour - 14, target.minute) / 60_000,
+  )
+  let hiMin = Math.ceil(
+    Date.UTC(target.year, target.month - 1, target.day, target.hour + 14, target.minute) / 60_000,
+  )
+
+  while (loMin < hiMin) {
+    const midMin = Math.floor((loMin + hiMin) / 2)
+    const cmp = compareWallClockParts(
+      readFormatterParts(new Date(midMin * 60_000), normalizedTimeZone),
+      target,
+    )
+    if (cmp < 0) {
+      loMin = midMin + 1
+    } else {
+      hiMin = midMin
+    }
+  }
+
+  return loMin * 60_000
+}
+
+export function resolvePublicScheduleTimezone(storedTimezone = ''): string {
+  const normalized = normalizeTimezoneId(storedTimezone)
+  if (normalized) {
+    return normalized
+  }
+
+  return getBrowserTimezone()
+}
+
+export function getVisitorScheduleTimezone(): string {
+  return getBrowserTimezone()
+}
+
+export function isWithinScheduleWindowForVisitor(
+  from: string,
+  to: string,
+  storedTimezone = '',
+  nowMs: number = Date.now(),
+): boolean {
+  return isWithinScheduleWindow(from, to, resolvePublicScheduleTimezone(storedTimezone), nowMs)
 }
 
 export function isWithinScheduleWindow(
@@ -331,7 +376,7 @@ export function isWithinScheduleWindow(
   const fromMs = wallClockToTimestamp(from, timeZone)
   const toMs = wallClockToTimestamp(to, timeZone)
 
-  if (!fromMs || !toMs) {
+  if (fromMs === 0 || toMs === 0 || fromMs > toMs) {
     return false
   }
 

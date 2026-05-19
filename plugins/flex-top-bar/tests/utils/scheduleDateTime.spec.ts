@@ -6,7 +6,10 @@ import {
   getBrowserTimezone,
   getDefaultScheduleTimezone,
   getSiteTimezone,
+  getVisitorScheduleTimezone,
   isWithinScheduleWindow,
+  isWithinScheduleWindowForVisitor,
+  resolvePublicScheduleTimezone,
   toDatetimeLocalValue,
   wallClockToTimestamp,
 } from '@/utils/scheduleDateTime'
@@ -101,6 +104,27 @@ describe('scheduleDateTime', () => {
     expect(getDefaultScheduleTimezone('UTC')).toBe('Europe/Warsaw')
   })
 
+  it('evaluates visitor schedule window in browser timezone', () => {
+    vi.spyOn(Intl.DateTimeFormat.prototype, 'resolvedOptions').mockReturnValue({
+      locale: 'en-US',
+      calendar: 'gregory',
+      numberingSystem: 'latn',
+      timeZone: 'Europe/Warsaw',
+    })
+    vi.spyOn(Date.prototype, 'getTimezoneOffset').mockReturnValue(-60)
+
+    const from = '2026-03-25T10:00'
+    const to = '2026-03-25T18:00'
+
+    expect(getVisitorScheduleTimezone()).toBe('Europe/Warsaw')
+    expect(
+      isWithinScheduleWindowForVisitor(from, to, '', Date.parse('2026-03-25T08:00:00Z')),
+    ).toBe(false)
+    expect(
+      isWithinScheduleWindowForVisitor(from, to, '', Date.parse('2026-03-25T10:30:00Z')),
+    ).toBe(true)
+  })
+
   it('evaluates schedule window in the configured timezone', () => {
     const from = '2026-03-25T10:00'
     const to = '2026-03-25T18:00'
@@ -113,5 +137,24 @@ describe('scheduleDateTime', () => {
   it('maps wall-clock time to UTC timestamp for a timezone', () => {
     const ts = wallClockToTimestamp('2026-03-25T10:00', 'UTC')
     expect(new Date(ts).toISOString()).toBe('2026-03-25T10:00:00.000Z')
+  })
+
+  it('maps Europe/Warsaw wall-clock time to the correct UTC instant', () => {
+    vi.setSystemTime(new Date('2026-05-19T10:30:00Z'))
+
+    const fromMs = wallClockToTimestamp('2026-05-19T10:00', 'Europe/Warsaw')
+    const toMs = wallClockToTimestamp('2026-05-19T18:00', 'Europe/Warsaw')
+
+    expect(new Date(fromMs).toISOString()).toBe('2026-05-19T08:00:00.000Z')
+    expect(new Date(toMs).toISOString()).toBe('2026-05-19T16:00:00.000Z')
+    expect(
+      isWithinScheduleWindowForVisitor(
+        '2026-05-19T10:00',
+        '2026-05-19T18:00',
+        'Europe/Warsaw',
+        Date.parse('2026-05-19T10:30:00Z'),
+      ),
+    ).toBe(true)
+    expect(resolvePublicScheduleTimezone('Europe/Warsaw')).toBe('Europe/Warsaw')
   })
 })

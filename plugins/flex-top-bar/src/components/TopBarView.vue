@@ -121,7 +121,7 @@ import {
   ICONS,
   SOCIAL_ICONS_BY_PLATFORM,
 } from '@/constants/icons'
-import { isWithinScheduleWindow } from '@/utils/scheduleDateTime'
+import { isWithinScheduleWindowForVisitor } from '@/utils/scheduleDateTime'
 
 const props = defineProps<{
   barsOverride?: Bar[]
@@ -241,9 +241,9 @@ const visibleBars = computed(() => {
     // Check if visible
     if (!bar.visible) return false
 
-    // Check scheduling
+    // Public site: evaluate schedule in the visitor's browser timezone.
     if (bar.scheduled_enabled && bar.scheduled_from_datetime && bar.scheduled_to_datetime) {
-      if (!isWithinScheduleWindow(
+      if (!isWithinScheduleWindowForVisitor(
         bar.scheduled_from_datetime,
         bar.scheduled_to_datetime,
         bar.scheduled_timezone,
