@@ -4,7 +4,7 @@
  * Description: Build and publish customizable notification bars (top or bottom) with scheduling, icons, message effects/animations, multi-bar support, modern admin UI and more.
  * Version:     0.1.0
  * Author:      Big Mike Solutions
- * Plugin URI:  https://bigmikesolutions.pl/
+ * Plugin URI:  https://github.com/bigmikesolutions/flex-top-bar
  * License:     GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: flex-top-bar
