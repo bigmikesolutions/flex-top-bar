@@ -15,10 +15,6 @@
           @change="setCounterStyle(opt.value)"
         />
         <span>{{ opt.label }}</span>
-        <CountdownDisplay
-          :column="{ ...column, counter_style: opt.value }"
-          :preview-parts="previewParts"
-        />
       </label>
     </fieldset>
 
@@ -49,32 +45,14 @@
     <div class="top-bar-grid bg bg-amber top-bar-lifetime-panel options">
       <div class="item">
         <fieldset class="clear">
-          <legend class="bold">{{ __('Count up from (start)', 'flex-top-bar') }}</legend>
+          <legend class="bold">{{ directionDatetimeLegend }}</legend>
           <label>
             <input
-              :id="`countup_from_${barId}_${columnId}`"
+              :id="directionDatetimeId"
               type="datetime-local"
               class="top-bar-life-time-datetime"
-              :value="column.countup_from_datetime"
-              :disabled="column.count_direction !== 'up'"
-              @input="onCountupFromInput"
-              @click="openPicker"
-              @blur="emit('commit')"
-            />
-          </label>
-        </fieldset>
-      </div>
-      <div class="item">
-        <fieldset class="clear">
-          <legend class="bold">{{ __('Count down until (end)', 'flex-top-bar') }}</legend>
-          <label>
-            <input
-              :id="`countdown_to_${barId}_${columnId}`"
-              type="datetime-local"
-              class="top-bar-life-time-datetime"
-              :value="column.countdown_to_datetime"
-              :disabled="column.count_direction !== 'down'"
-              @input="onCountdownToInput"
+              :value="directionDatetimeValue"
+              @input="onDirectionDatetimeInput"
               @click="openPicker"
               @blur="emit('commit')"
             />
@@ -183,7 +161,6 @@
 <script setup lang="ts">
 import { computed, onMounted } from 'vue'
 import { __ } from '@wordpress/i18n'
-import CountdownDisplay from '@/components/CountdownDisplay.vue'
 import TimezoneSelect from '@/components/TimezoneSelect.vue'
 import type { CountdownBarColumn, CountdownDirection, CountdownStyle, CountdownTextPosition } from '@/types'
 import { fromDatetimeLocalValue, getDefaultScheduleTimezone } from '@/utils/scheduleDateTime'
@@ -205,6 +182,24 @@ const styleOptions: { value: CountdownStyle; label: string }[] = [
   { value: 'plain', label: __('Plain text', 'flex-top-bar') },
   { value: 'boxed', label: __('Digits with background', 'flex-top-bar') },
 ]
+
+const directionDatetimeLegend = computed(() =>
+  props.column.count_direction === 'down'
+    ? __('Count down until (end)', 'flex-top-bar')
+    : __('Count up from (start)', 'flex-top-bar'),
+)
+
+const directionDatetimeId = computed(() =>
+  props.column.count_direction === 'down'
+    ? `countdown_to_${props.barId}_${props.columnId}`
+    : `countup_from_${props.barId}_${props.columnId}`,
+)
+
+const directionDatetimeValue = computed(() =>
+  props.column.count_direction === 'down'
+    ? props.column.countdown_to_datetime
+    : props.column.countup_from_datetime,
+)
 
 const timezoneModel = computed({
   get: () => props.column.countdown_timezone,
@@ -238,12 +233,13 @@ function setTextPosition(position: CountdownTextPosition) {
   emit('commit')
 }
 
-function onCountupFromInput(e: Event) {
-  patch({ countup_from_datetime: fromDatetimeLocalValue((e.target as HTMLInputElement).value) })
-}
-
-function onCountdownToInput(e: Event) {
-  patch({ countdown_to_datetime: fromDatetimeLocalValue((e.target as HTMLInputElement).value) })
+function onDirectionDatetimeInput(e: Event) {
+  const value = fromDatetimeLocalValue((e.target as HTMLInputElement).value)
+  if (props.column.count_direction === 'down') {
+    patch({ countdown_to_datetime: value })
+    return
+  }
+  patch({ countup_from_datetime: value })
 }
 
 function onTextInput(e: Event) {

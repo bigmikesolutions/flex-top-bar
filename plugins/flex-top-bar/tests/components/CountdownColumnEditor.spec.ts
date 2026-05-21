@@ -44,7 +44,8 @@ describe('CountdownColumnEditor', () => {
     expect(wrapper.text()).toContain('Digits with background')
     expect(wrapper.text()).toContain('Count down until promotion ends')
     expect(wrapper.text()).toContain('Count up from promotion start')
-    expect(wrapper.findAll('input[type="datetime-local"]').length).toBe(2)
+    expect(wrapper.findAll('input[type="datetime-local"]').length).toBe(1)
+    expect(wrapper.text()).toContain('Count down until (end)')
     expect(wrapper.find('input[type="text"]').exists()).toBe(true)
     expect(wrapper.findAll('input[type="color"]').length).toBe(3)
   })
@@ -59,6 +60,19 @@ describe('CountdownColumnEditor', () => {
     })
 
     expect(wrapper.findAll('input[type="color"]').length).toBe(2)
+  })
+
+  it('shows start datetime label when counting up', async () => {
+    const wrapper = mount(CountdownColumnEditor, {
+      props: {
+        barId: 'bar_1',
+        columnId: 'col_1',
+        column: { ...column, count_direction: 'up', countup_from_datetime: '2026-05-01T10:00' },
+      },
+    })
+
+    expect(wrapper.text()).toContain('Count up from (start)')
+    expect(wrapper.find('input[type="datetime-local"]').element).toHaveProperty('value', '2026-05-01T10:00')
   })
 
   it('emits patch when text changes', async () => {
