@@ -2,9 +2,10 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import AdminBarView from '@/components/AdminBarView.vue'
 import ColumnTypeSelector from '@/components/ColumnTypeSelector.vue'
+import CountdownColumnEditor from '@/components/CountdownColumnEditor.vue'
 import IconColumnEditor from '@/components/IconColumnEditor.vue'
 import TextColumnEditor from '@/components/TextColumnEditor.vue'
-import type { Bar, BarColumn, IconBarColumn, TextBarColumn } from '@/types'
+import type { Bar, BarColumn, CountdownBarColumn, IconBarColumn, TextBarColumn } from '@/types'
 
 // Mock @wordpress/i18n
 vi.mock('@wordpress/i18n', () => ({
@@ -404,6 +405,53 @@ describe('AdminBarView', () => {
       expect(col.icon_attachment_id).toBe(0)
       expect(col.icon_url).toBe('')
       expect(col.icon_position).toBe('before')
+    })
+
+    it('renders CountdownColumnEditor for countdown columns', () => {
+      const countdownColumn: CountdownBarColumn = {
+        id: 'col_countdown',
+        type: 'countdown',
+        counter_style: 'boxed',
+        count_direction: 'down',
+        countdown_to_datetime: '2026-12-01T10:00',
+        countup_from_datetime: '',
+        countdown_timezone: 'UTC',
+        text: 'Sale',
+        text_position: 'before',
+        background_color: '#1d2327',
+        counter_color: '#ffffff',
+        text_color: '#1d2327',
+        size_percent: 100,
+        content_position: 'center',
+        messages_mobile_visible: true,
+      }
+      const wrapper = mount(AdminBarView, {
+        props: {
+          ...defaultProps,
+          bar: { ...mockBar, columns: [countdownColumn] },
+        },
+      })
+
+      expect(wrapper.findComponent(CountdownColumnEditor).exists()).toBe(true)
+      expect(wrapper.findComponent(TextColumnEditor).exists()).toBe(false)
+    })
+
+    it('resets to default countdown column when type changes to countdown', async () => {
+      const wrapper = mount(AdminBarView, { props: defaultProps })
+      const selector = wrapper.findComponent(ColumnTypeSelector)
+
+      await selector.vm.$emit('update:columnType', 'countdown')
+
+      const updates = wrapper.emitted('update')
+      expect(updates).toBeTruthy()
+      const last = updates?.[updates.length - 1]?.[1] as Partial<Bar>
+      const col = (last.columns?.[0] ?? {}) as CountdownBarColumn
+      expect(col.type).toBe('countdown')
+      expect(col.counter_style).toBe('boxed')
+      expect(col.count_direction).toBe('down')
+      expect(col.countdown_to_datetime).toBe('')
+      expect(col.countup_from_datetime).toBe('')
+      expect(col.text_position).toBe('before')
     })
   })
 

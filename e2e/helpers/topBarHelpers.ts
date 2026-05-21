@@ -1,4 +1,9 @@
 import { expect, type Page, type Response } from '@playwright/test';
+import {
+  COUNTDOWN_E2E_TOLERANCE_MS,
+  expectedCountdownRemainingMs,
+  parsePlainCountdownLabel,
+} from './countdownExpectations';
 
 declare const process: { env: Record<string, string | undefined>; cwd: () => string };
 declare const require: (name: string) => any;
@@ -17,6 +22,12 @@ export const MAX_BARS = 5;
 export function toDatetimeLocalValue(date: Date): string {
   const pad = (n: number) => String(n).padStart(2, '0');
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+/** datetime-local string using UTC wall-clock fields (for stored timezone UTC). */
+export function toDatetimeLocalUtc(date: Date): string {
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())}T${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())}`;
 }
 
 /** True when response is a successful PUT updating a single bar (matches pretty and plain permalink REST URLs). */
@@ -278,9 +289,20 @@ function seedSingleIconColumnBar(composeFile: string, root: string): void {
   });
 }
 
+function seedSingleCountdownColumnBar(composeFile: string, root: string): void {
+  const seedPhp = `${root}/e2e/scripts/seed-single-countdown-column.php`;
+  execSync(`docker compose -f "${composeFile}" cp "${seedPhp}" wordpress:/tmp/seed-single-countdown-column.php`, {
+    stdio: 'pipe',
+  });
+  execSync(
+    `docker compose -f "${composeFile}" exec -T wordpress php /tmp/seed-single-countdown-column.php`,
+    { stdio: 'pipe' }
+  );
+}
+
 export async function resetToSingleColumnBar(
   page: Page,
-  type: 'text' | 'social' | 'contact' | 'icon'
+  type: 'text' | 'social' | 'contact' | 'icon' | 'countdown'
 ): Promise<void> {
   const root = process.cwd();
   const composeFile = `${root}/docker-compose.yml`;
@@ -288,6 +310,8 @@ export async function resetToSingleColumnBar(
 
   if (type === 'icon') {
     seedSingleIconColumnBar(composeFile, root);
+  } else if (type === 'countdown') {
+    seedSingleCountdownColumnBar(composeFile, root);
   } else {
     // Keep bar-level legacy fields consistent with the first column (for backward compat).
     const command = `docker compose -f "${composeFile}" exec -T wordpress php -r 'require_once "/var/www/html/wp-load.php"; $bars = [[ "id" => "bar_single_col", "name" => "Single column", "visible" => true, "admin_visibile" => true, "scheduled_enabled" => false, "scheduled_from_datetime" => "", "scheduled_to_datetime" => "", "position" => "top", "effect" => "none", "messages" => ["", ""], "messages_mobile_visible" => true, "columns" => [ ${
@@ -413,15 +437,103 @@ export async function setScheduleTimezone(
   const tzSelect = page.locator(`#scheduled_timezone_${barId}`);
 
   await tzSelect.waitFor({ state: 'visible', timeout: 15000 });
-  await Promise.all([
-    waitForTopBarPutWhere(page, (body) => body.includes(`"scheduled_timezone":"${timeZone}"`)),
-    tzSelect.selectOption(timeZone),
-  ]);
+  await tzSelect.selectOption({ value: timeZone });
+  await expect(tzSelect).toHaveValue(timeZone);
+  await waitForTopBarPutWhere(page, (body) => body.includes(`"scheduled_timezone":"${timeZone}"`));
 }
 
 export async function getScheduleTimezoneValue(page: Page, barIndex: number): Promise<string> {
   const barId = await getBarIdByIndex(page, barIndex);
   return page.locator(`#scheduled_timezone_${barId}`).inputValue();
+}
+
+export async function setCountdownTimezone(
+  page: Page,
+  barIndex: number,
+  columnId: string,
+  timeZone: string
+): Promise<void> {
+  const barId = await getBarIdByIndex(page, barIndex);
+  const tzSelect = page.locator(`#countdown_timezone_${barId}_${columnId}`);
+
+  await tzSelect.waitFor({ state: 'visible', timeout: 15000 });
+  await tzSelect.selectOption({ value: timeZone });
+  await expect(tzSelect).toHaveValue(timeZone);
+  await waitForTopBarPutWhere(page, (body) => body.includes(`"countdown_timezone":"${timeZone}"`));
+}
+
+export async function getCountdownTimezoneValue(
+  page: Page,
+  barIndex: number,
+  columnId: string
+): Promise<string> {
+  const barId = await getBarIdByIndex(page, barIndex);
+  return page.locator(`#countdown_timezone_${barId}_${columnId}`).inputValue();
+}
+
+export async function setCountdownCounterStyle(
+  page: Page,
+  barIndex: number,
+  columnId: string,
+  style: 'plain' | 'boxed'
+): Promise<void> {
+  const barId = await getBarIdByIndex(page, barIndex);
+  await openPanel(page, barIndex);
+  const row = page.locator('.top-bar-row.bg').nth(barIndex);
+  const panel = row.locator('.top-bar-options.active');
+  await expect(panel).toBeVisible({ timeout: 15000 });
+
+  const radio = panel.locator(
+    `input[type="radio"][name="countdown_style_${barId}_${columnId}"][value="${style}"]`
+  );
+  await expect(radio).toHaveCount(1, { timeout: 15000 });
+  const isChecked = await radio.isChecked();
+  if (isChecked) {
+    return;
+  }
+
+  await Promise.all([
+    waitForTopBarPutWhere(page, (body) => body.includes(`"counter_style":"${style}"`)),
+    radio.evaluate((el: HTMLInputElement) => el.click()),
+  ]);
+}
+
+export async function setCountdownEndDatetime(
+  page: Page,
+  barIndex: number,
+  columnId: string,
+  value: string
+): Promise<void> {
+  const barId = await getBarIdByIndex(page, barIndex);
+  await openPanel(page, barIndex);
+  const datetimeInput = page.locator(`#countdown_to_${barId}_${columnId}`);
+  await expect(datetimeInput).toBeVisible({ timeout: 15000 });
+  await datetimeInput.fill(value);
+  await datetimeInput.blur();
+  await waitForTopBarPutWhere(page, (body) => body.includes(`"countdown_to_datetime":"${value}"`));
+}
+
+export async function assertFrontendPlainCountdown(
+  page: Page,
+  barId: string,
+  timezone: string,
+  fixedNow: Date
+): Promise<void> {
+  const expectedMs = expectedCountdownRemainingMs(timezone, fixedNow.getTime());
+  await page.clock.install({ time: fixedNow });
+  await page.goto('/');
+  const plain = page.locator(`[data-top-bar-id="${barId}"] .top-bar-countdown-column__plain`);
+  await expect(plain).toBeVisible({ timeout: 15000 });
+  await expect
+    .poll(
+      async () => {
+        const text = (await plain.textContent())?.trim() ?? '';
+        const actualMs = parsePlainCountdownLabel(text);
+        return Math.abs(actualMs - expectedMs) <= COUNTDOWN_E2E_TOLERANCE_MS;
+      },
+      { timeout: 5000 }
+    )
+    .toBe(true);
 }
 
 export async function publishBar(page: Page, barIndex: number, barId: string): Promise<void> {

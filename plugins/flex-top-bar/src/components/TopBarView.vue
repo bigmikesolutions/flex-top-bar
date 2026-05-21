@@ -79,6 +79,11 @@
                 <span v-if="column.text" class="top-bar-icon-text-column__text">{{ column.text }}</span>
               </div>
             </template>
+            <template v-else-if="column.type === 'countdown'">
+              <div :style="getFlexAlignStyle(column)">
+                <CountdownDisplay :column="column" />
+              </div>
+            </template>
             <template v-else-if="column.type === 'contact'">
               <div
                 class="top-bar-contact-column"
@@ -124,6 +129,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import CountdownDisplay from '@/components/CountdownDisplay.vue'
 import type {
   Bar,
   BarColumn,

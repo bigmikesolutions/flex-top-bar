@@ -361,6 +361,70 @@ describe('TopBarView', () => {
       .toContain('top-bar-icon-text-column--icon-after')
   })
 
+  const countdownColumnBar: Bar = {
+    ...mockBars[0],
+    effect: 'none',
+    messages: ['', ''],
+    columns: [
+      {
+        id: 'col_countdown',
+        type: 'countdown',
+        counter_style: 'boxed',
+        count_direction: 'down',
+        countdown_to_datetime: '2099-01-01T00:00',
+        countup_from_datetime: '',
+        countdown_timezone: 'UTC',
+        text: 'Ends in',
+        text_position: 'before',
+        background_color: '#000000',
+        counter_color: '#ffffff',
+        text_color: '#ffffff',
+        size_percent: 100,
+        content_position: 'center',
+        messages_mobile_visible: true,
+      },
+    ],
+  }
+
+  it('renders countdown column with label and boxed timer', async () => {
+    const wrapper = mount(TopBarView, {
+      props: {
+        barsOverride: [countdownColumnBar],
+        preview: true,
+      },
+    })
+    await wrapper.vm.$nextTick()
+
+    const col = wrapper.find('.top-bar-countdown-column')
+    expect(col.exists()).toBe(true)
+    expect(col.classes()).toContain('top-bar-countdown-column--boxed')
+    expect(col.find('.top-bar-countdown-column__text').text()).toBe('Ends in')
+    expect(col.findAll('.top-bar-countdown-column__unit').length).toBeGreaterThan(0)
+  })
+
+  it('renders plain countdown column in preview mode', async () => {
+    const wrapper = mount(TopBarView, {
+      props: {
+        barsOverride: [
+          {
+            ...countdownColumnBar,
+            columns: [
+              {
+                ...(countdownColumnBar.columns[0] as typeof countdownColumnBar.columns[0]),
+                counter_style: 'plain',
+              },
+            ],
+          },
+        ],
+        preview: true,
+      },
+    })
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.find('.top-bar-countdown-column--plain').exists()).toBe(true)
+    expect(wrapper.find('.top-bar-countdown-column__plain').exists()).toBe(true)
+  })
+
   it('renders icon column in preview mode via barsOverride', async () => {
     const wrapper = mount(TopBarView, {
       props: {

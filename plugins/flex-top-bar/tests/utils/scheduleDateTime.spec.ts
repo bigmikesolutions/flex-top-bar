@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import {
   buildTimezoneOptions,
+  getTimezoneOptionValues,
   formatTimezoneLabel,
   fromDatetimeLocalValue,
   getBrowserTimezone,
@@ -262,18 +263,20 @@ describe('scheduleDateTime', () => {
       expect(getDefaultScheduleTimezone('America/New_York')).toBe('America/New_York')
     })
 
-    it('replaces UTC-equivalent stored values with browser timezone', () => {
+    it('keeps explicit UTC stored timezone', () => {
       vi.setSystemTime(new Date('2026-05-19T10:00:00Z'))
       mockWarsawBrowser(120)
 
-      expect(getDefaultScheduleTimezone('UTC')).toBe('Europe/Warsaw')
-      expect(getDefaultScheduleTimezone('+00:00')).toBe('Europe/Warsaw')
+      expect(getDefaultScheduleTimezone('UTC')).toBe('UTC')
+      expect(getDefaultScheduleTimezone('+00:00')).toBe('UTC')
     })
   })
 
   describe('resolveScheduleTimezone', () => {
-    it('delegates to getDefaultScheduleTimezone', () => {
+    it('keeps explicit timezone including UTC', () => {
+      mockWarsawBrowser(120)
       expect(resolveScheduleTimezone('Europe/Berlin')).toBe('Europe/Berlin')
+      expect(resolveScheduleTimezone('UTC')).toBe('UTC')
     })
   })
 
@@ -287,6 +290,12 @@ describe('scheduleDateTime', () => {
     it('returns empty string for invalid timezone', () => {
       expect(formatTimezoneLabel('')).toBe('')
       expect(formatTimezoneLabel('Invalid/Zone')).toBe('')
+    })
+  })
+
+  describe('getTimezoneOptionValues', () => {
+    it('always includes UTC even when omitted from Intl.supportedValuesOf', () => {
+      expect(getTimezoneOptionValues()).toContain('UTC')
     })
   })
 

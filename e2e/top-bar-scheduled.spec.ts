@@ -11,6 +11,7 @@ import {
   schedulePanelLocator,
   setScheduleTimezone,
   toDatetimeLocalValue,
+  toDatetimeLocalUtc,
   waitForTopBarPutWhere,
 } from './helpers/topBarHelpers';
 
@@ -164,6 +165,26 @@ test.describe('scheduled', () => {
       await expect(timezoneSelect).toHaveValue('America/New_York');
     });
 
+    test('should save UTC timezone and persist after reload', async ({ page }) => {
+      await loginAndOpenTopBarSettings(page);
+      await resetToSingleBar(page);
+      await ensureAtLeastBars(page, 2);
+      await openPanel(page, 0);
+
+      const barId = await getBarIdByIndex(page, 0);
+
+      await enableSchedule(page, 0);
+      await openPanel(page, 0);
+      await setScheduleTimezone(page, 0, 'UTC');
+
+      const timezoneSelect = page.locator(`#scheduled_timezone_${barId}`);
+      await expect(timezoneSelect).toHaveValue('UTC');
+
+      await page.reload();
+      await openPanel(page, 0);
+      await expect(timezoneSelect).toHaveValue('UTC');
+    });
+
     test('should show bar when active window uses Europe/Warsaw timezone', async ({ page }) => {
       await loginAndOpenTopBarSettings(page);
       await resetToSingleBar(page);
@@ -200,6 +221,40 @@ test.describe('scheduled', () => {
       await expect(page.locator(`[data-top-bar-id="${barId}"]`)).toHaveCount(1);
     });
 
+    test('should show bar when active window uses UTC timezone', async ({ page }) => {
+      await loginAndOpenTopBarSettings(page);
+      await resetToSingleBar(page);
+      await ensureAtLeastBars(page, 2);
+      await openPanel(page, 0);
+
+      const barId = await getBarIdByIndex(page, 0);
+      const now = new Date();
+      const fromValue = toDatetimeLocalUtc(new Date(now.getTime() - 2 * 60 * 60 * 1000));
+      const toValue = toDatetimeLocalUtc(new Date(now.getTime() + 2 * 60 * 60 * 1000));
+
+      await enableSchedule(page, 0);
+      await openPanel(page, 0);
+      await setScheduleTimezone(page, 0, 'UTC');
+
+      const schedulePanel = schedulePanelLocator(page, 0);
+      const dateInputs = schedulePanel.locator('input.top-bar-life-time-datetime[type="datetime-local"]');
+      const fromInput = dateInputs.nth(0);
+      const toInput = dateInputs.nth(1);
+
+      await fromInput.fill(fromValue);
+      await fromInput.blur();
+      await waitForTopBarPutWhere(page, (body) => body.includes(`"scheduled_from_datetime":"${fromValue}"`));
+      await openPanel(page, 0);
+
+      await toInput.fill(toValue);
+      await toInput.blur();
+      await waitForTopBarPutWhere(page, (body) => body.includes('"scheduled_timezone":"UTC"'));
+
+      await publishBar(page, 0, barId);
+      await page.goto('/');
+      await expect(page.locator(`[data-top-bar-id="${barId}"]`)).toHaveCount(1);
+    });
+
     test('should hide bar when schedule window is in the future for Europe/Warsaw timezone', async ({ page }) => {
       await loginAndOpenTopBarSettings(page);
       await resetToSingleBar(page);
@@ -225,6 +280,37 @@ test.describe('scheduled', () => {
       await toInput.fill('2099-03-21T12:30');
       await toInput.blur();
       await waitForTopBarPutWhere(page, (body) => body.includes('"scheduled_timezone":"Europe/Warsaw"'));
+
+      await publishBar(page, 0, barId);
+      await page.goto('/');
+      await expect(page.locator(`[data-top-bar-id="${barId}"]`)).toHaveCount(0);
+    });
+
+    test('should hide bar when schedule window is in the future for UTC timezone', async ({ page }) => {
+      await loginAndOpenTopBarSettings(page);
+      await resetToSingleBar(page);
+      await ensureAtLeastBars(page, 2);
+      await openPanel(page, 0);
+
+      const barId = await getBarIdByIndex(page, 0);
+
+      await enableSchedule(page, 0);
+      await openPanel(page, 0);
+      await setScheduleTimezone(page, 0, 'UTC');
+
+      const schedulePanel = schedulePanelLocator(page, 0);
+      const dateInputs = schedulePanel.locator('input.top-bar-life-time-datetime[type="datetime-local"]');
+      const fromInput = dateInputs.nth(0);
+      const toInput = dateInputs.nth(1);
+
+      await fromInput.fill('2099-03-21T11:00');
+      await fromInput.blur();
+      await waitForTopBarPutWhere(page, (body) => body.includes('"scheduled_from_datetime":"2099-03-21T11:00"'));
+      await openPanel(page, 0);
+
+      await toInput.fill('2099-03-21T12:30');
+      await toInput.blur();
+      await waitForTopBarPutWhere(page, (body) => body.includes('"scheduled_timezone":"UTC"'));
 
       await publishBar(page, 0, barId);
       await page.goto('/');

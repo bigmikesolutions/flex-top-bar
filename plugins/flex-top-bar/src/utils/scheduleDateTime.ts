@@ -85,19 +85,6 @@ function formatOffsetDisplay(offsetMinutes: number): string {
   return `GMT${sign}${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
 }
 
-function isUtcEquivalent(timeZone: string, date = new Date()): boolean {
-  const normalized = normalizeTimezoneId(timeZone)
-  if (!normalized) {
-    return true
-  }
-
-  if (normalized === 'UTC' || normalized === 'Etc/UTC' || normalized === 'Etc/GMT') {
-    return true
-  }
-
-  return getTimezoneOffsetMinutes(normalized, date) === 0
-}
-
 export function normalizeTimezoneId(timeZone: string): string {
   if (typeof timeZone !== 'string') {
     return ''
@@ -190,15 +177,10 @@ export function getBrowserTimezone(): string {
 }
 
 export function getDefaultScheduleTimezone(storedTimezone = ''): string {
-  const browserTimezone = getBrowserTimezone()
   const normalizedStored = normalizeTimezoneId(storedTimezone)
 
   if (!normalizedStored) {
-    return browserTimezone
-  }
-
-  if (isUtcEquivalent(normalizedStored) && !isUtcEquivalent(browserTimezone)) {
-    return browserTimezone
+    return getBrowserTimezone()
   }
 
   return normalizedStored
@@ -219,12 +201,22 @@ const FALLBACK_TIMEZONES = [
   'Australia/Sydney',
 ]
 
+/** Valid IANA zones omitted from some ICU `supportedValuesOf('timeZone')` lists. */
+const ALWAYS_INCLUDE_TIMEZONES = ['UTC']
+
 export function getTimezoneOptionValues(): string[] {
-  if (typeof Intl.supportedValuesOf === 'function') {
-    return Intl.supportedValuesOf('timeZone').slice().sort((a, b) => a.localeCompare(b))
+  const values =
+    typeof Intl.supportedValuesOf === 'function'
+      ? Intl.supportedValuesOf('timeZone').slice()
+      : FALLBACK_TIMEZONES.slice()
+
+  for (const timeZone of ALWAYS_INCLUDE_TIMEZONES) {
+    if (!values.includes(timeZone)) {
+      values.push(timeZone)
+    }
   }
 
-  return FALLBACK_TIMEZONES.slice()
+  return values.sort((a, b) => a.localeCompare(b))
 }
 
 export function buildTimezoneOptions(selectedValue = ''): Array<{ value: string; label: string }> {

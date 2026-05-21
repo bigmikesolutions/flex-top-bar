@@ -35,6 +35,7 @@ const options: { value: ColumnType; label: string }[] = [
   { value: 'icon', label: __('Icon + text', 'flex-top-bar') },
   { value: 'social', label: __('Social media', 'flex-top-bar') },
   { value: 'contact', label: __('Contact data', 'flex-top-bar') },
+  { value: 'countdown', label: __('Countdown timer', 'flex-top-bar') },
 ]
 
 function onSelect(value: ColumnType) {

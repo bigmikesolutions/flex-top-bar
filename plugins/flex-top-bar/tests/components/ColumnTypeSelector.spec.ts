@@ -20,6 +20,7 @@ describe('ColumnTypeSelector', () => {
     expect(wrapper.text()).toContain('Icon + text')
     expect(wrapper.text()).toContain('Social media')
     expect(wrapper.text()).toContain('Contact data')
+    expect(wrapper.text()).toContain('Countdown timer')
     expect(wrapper.find('input[type="radio"]').exists()).toBe(true)
   })
 
@@ -36,6 +37,15 @@ describe('ColumnTypeSelector', () => {
     await radios[1].setValue('icon')
 
     expect(wrapper.emitted('update:columnType')?.[0]).toEqual(['icon'])
+  })
+
+  it('emits update:columnType when countdown is selected', async () => {
+    const wrapper = mount(ColumnTypeSelector, { props: defaultProps })
+    const radios = wrapper.findAll('input[type="radio"]')
+
+    await radios[4].setValue('countdown')
+
+    expect(wrapper.emitted('update:columnType')?.[0]).toEqual(['countdown'])
   })
 
   it('emits update:columnType when a different type is selected', async () => {

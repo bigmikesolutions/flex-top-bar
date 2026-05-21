@@ -1,4 +1,13 @@
-export type ColumnType = 'text' | 'social' | 'contact' | 'icon'
+export type ColumnType = 'text' | 'social' | 'contact' | 'icon' | 'countdown'
+
+export const COUNTDOWN_STYLES = ['plain', 'boxed'] as const
+export type CountdownStyle = (typeof COUNTDOWN_STYLES)[number]
+
+export const COUNTDOWN_DIRECTIONS = ['up', 'down'] as const
+export type CountdownDirection = (typeof COUNTDOWN_DIRECTIONS)[number]
+
+export const COUNTDOWN_TEXT_POSITIONS = ['before', 'after'] as const
+export type CountdownTextPosition = (typeof COUNTDOWN_TEXT_POSITIONS)[number]
 
 export const ICON_POSITIONS = ['before', 'after'] as const
 export type IconPosition = (typeof ICON_POSITIONS)[number]
@@ -115,7 +124,33 @@ export interface IconBarColumn {
   messages_mobile_visible: boolean
 }
 
-export type BarColumn = TextBarColumn | SocialBarColumn | ContactBarColumn | IconBarColumn
+export interface CountdownBarColumn {
+  id: string
+  type: 'countdown'
+  counter_style: CountdownStyle
+  count_direction: CountdownDirection
+  /** Wall-clock end time for count-down mode (`YYYY-MM-DDTHH:MM`). */
+  countdown_to_datetime: string
+  /** Wall-clock start time for count-up mode (`YYYY-MM-DDTHH:MM`). */
+  countup_from_datetime: string
+  /** IANA timezone for countdown wall-clock values. */
+  countdown_timezone: string
+  text: string
+  text_position: CountdownTextPosition
+  background_color: string
+  counter_color: string
+  text_color: string
+  size_percent: number
+  content_position: ContentPosition
+  messages_mobile_visible: boolean
+}
+
+export type BarColumn =
+  | TextBarColumn
+  | SocialBarColumn
+  | ContactBarColumn
+  | IconBarColumn
+  | CountdownBarColumn
 
 export interface Bar {
   id: string

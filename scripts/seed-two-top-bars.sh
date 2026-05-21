@@ -74,6 +74,11 @@ function seed_upload_bms_icon( string $path ): array {
 
 $seed_icon = seed_upload_bms_icon( "/tmp/bms.png" );
 
+$warsaw_tz       = new DateTimeZone( "Europe/Warsaw" );
+$now_warsaw      = new DateTime( "now", $warsaw_tz );
+$countdown_end   = ( clone $now_warsaw )->modify( "+7 days" )->format( "Y-m-d\TH:i" );
+$countdown_start = ( clone $now_warsaw )->modify( "-1 day" )->format( "Y-m-d\TH:i" );
+
 // Clean old plugin state so seeding is deterministic.
 delete_option("flex_top_bar_bars");
 delete_option("flex_top_bar_bars_draft");
@@ -120,10 +125,18 @@ $bars = [
 				"messages_mobile_visible" => true,
 			],
 			[
-				"id" => "text_2",
-				"type" => "text",
-				"effect" => "blink",
-				"messages" => ["2nd column.", "2nd column effect is working."],
+				"id" => "countdown_1",
+				"type" => "countdown",
+				"counter_style" => "boxed",
+				"count_direction" => "down",
+				"countdown_to_datetime" => $countdown_end,
+				"countup_from_datetime" => $countdown_start,
+				"countdown_timezone" => "Europe/Warsaw",
+				"text" => "Countdown ends in",
+				"text_position" => "before",
+				"background_color" => "#FEDC56",
+				"counter_color" => "#ffffff",
+				"text_color" => "black",
 				"size_percent" => 25,
 				"content_position" => "center",
 				"messages_mobile_visible" => true,
