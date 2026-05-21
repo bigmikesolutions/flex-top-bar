@@ -1,10 +1,19 @@
 import { expect, test } from '@playwright/test';
 import {
+  COUNTDOWN_E2E_FIXED_NOW,
+  COUNTDOWN_E2E_TARGET_END,
+  expectedPlainCountdownForTimezone,
+} from './helpers/countdownExpectations';
+import {
+  assertFrontendPlainCountdown,
   getBarIdByIndex,
   getCountdownTimezoneValue,
   loginAndOpenTopBarSettings,
   openPanel,
+  publishBar,
   resetToSingleColumnBar,
+  setCountdownCounterStyle,
+  setCountdownEndDatetime,
   setCountdownTimezone,
   toDatetimeLocalValue,
   waitForTopBarPut,
@@ -273,8 +282,12 @@ test.describe('countdown timer - settings and frontend', () => {
     test.use({ timezoneId: 'Europe/Warsaw' });
 
     const columnId = 'col_front_countdown';
+    const warsawLabel = expectedPlainCountdownForTimezone('Europe/Warsaw');
+    const utcLabel = expectedPlainCountdownForTimezone('UTC');
 
     test('should save Europe/Warsaw countdown timezone and persist after reload', async ({ page }) => {
+      expect(warsawLabel).not.toBe(utcLabel);
+
       await loginAndOpenTopBarSettings(page);
       await resetToSingleColumnBar(page, 'countdown');
       await openPanel(page, 0);
@@ -282,17 +295,27 @@ test.describe('countdown timer - settings and frontend', () => {
       const barId = await getBarIdByIndex(page, 0);
       const timezoneSelect = page.locator(`#countdown_timezone_${barId}_${columnId}`);
 
+      await setCountdownCounterStyle(page, 0, columnId, 'plain');
+      await setCountdownEndDatetime(page, 0, columnId, COUNTDOWN_E2E_TARGET_END);
       await expect(timezoneSelect).toBeVisible({ timeout: 15000 });
       await setCountdownTimezone(page, 0, columnId, 'Europe/Warsaw');
       await expect(timezoneSelect).toHaveValue('Europe/Warsaw');
 
-      await page.reload();
+      await publishBar(page, 0, barId);
+      await assertFrontendPlainCountdown(page, barId, 'Europe/Warsaw', COUNTDOWN_E2E_FIXED_NOW);
+
+      await loginAndOpenTopBarSettings(page);
       await openPanel(page, 0);
       await expect(timezoneSelect).toHaveValue('Europe/Warsaw');
       await expect(await getCountdownTimezoneValue(page, 0, columnId)).toBe('Europe/Warsaw');
+
+      await publishBar(page, 0, barId);
+      await assertFrontendPlainCountdown(page, barId, 'Europe/Warsaw', COUNTDOWN_E2E_FIXED_NOW);
     });
 
     test('should save UTC countdown timezone and persist after reload', async ({ page }) => {
+      expect(warsawLabel).not.toBe(utcLabel);
+
       await loginAndOpenTopBarSettings(page);
       await resetToSingleColumnBar(page, 'countdown');
       await openPanel(page, 0);
@@ -300,16 +323,24 @@ test.describe('countdown timer - settings and frontend', () => {
       const barId = await getBarIdByIndex(page, 0);
       const timezoneSelect = page.locator(`#countdown_timezone_${barId}_${columnId}`);
 
+      await setCountdownCounterStyle(page, 0, columnId, 'plain');
+      await setCountdownEndDatetime(page, 0, columnId, COUNTDOWN_E2E_TARGET_END);
       await expect(timezoneSelect).toBeVisible({ timeout: 15000 });
       // Seed uses UTC; switch away first so selecting UTC triggers a save.
       await setCountdownTimezone(page, 0, columnId, 'Europe/Warsaw');
       await setCountdownTimezone(page, 0, columnId, 'UTC');
       await expect(timezoneSelect).toHaveValue('UTC');
 
-      await page.reload();
+      await publishBar(page, 0, barId);
+      await assertFrontendPlainCountdown(page, barId, 'UTC', COUNTDOWN_E2E_FIXED_NOW);
+
+      await loginAndOpenTopBarSettings(page);
       await openPanel(page, 0);
       await expect(timezoneSelect).toHaveValue('UTC');
       await expect(await getCountdownTimezoneValue(page, 0, columnId)).toBe('UTC');
+
+      await publishBar(page, 0, barId);
+      await assertFrontendPlainCountdown(page, barId, 'UTC', COUNTDOWN_E2E_FIXED_NOW);
     });
   });
 });

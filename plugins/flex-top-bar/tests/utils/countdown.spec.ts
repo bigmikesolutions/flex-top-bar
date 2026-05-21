@@ -7,6 +7,7 @@ import {
   pad2,
   splitCountdownMs,
 } from '@/utils/countdown'
+import { wallClockToTimestamp } from '@/utils/scheduleDateTime'
 
 describe('countdown utils', () => {
   afterEach(() => {
@@ -35,6 +36,25 @@ describe('countdown utils', () => {
     )
 
     expect(remaining).toBe(2 * 60 * 60 * 1000)
+  })
+
+  it('interprets the same wall-clock end differently for UTC and Europe/Warsaw', () => {
+    const nowMs = Date.parse('2026-05-21T10:00:00Z')
+    const target = '2026-06-15T14:00'
+
+    const utcTargetMs = wallClockToTimestamp(target, 'UTC')
+    const warsawTargetMs = wallClockToTimestamp(target, 'Europe/Warsaw')
+
+    expect(warsawTargetMs).not.toBe(utcTargetMs)
+    expect(
+      formatPlainCountdown(
+        splitCountdownMs(getCountdownRemainingMs('down', target, '', 'UTC', nowMs)),
+      ),
+    ).not.toBe(
+      formatPlainCountdown(
+        splitCountdownMs(getCountdownRemainingMs('down', target, '', 'Europe/Warsaw', nowMs)),
+      ),
+    )
   })
 
   it('counts up elapsed time since start in UTC', () => {

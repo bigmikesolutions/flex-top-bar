@@ -1,4 +1,9 @@
 import { expect, type Page, type Response } from '@playwright/test';
+import {
+  COUNTDOWN_E2E_TOLERANCE_MS,
+  expectedCountdownRemainingMs,
+  parsePlainCountdownLabel,
+} from './countdownExpectations';
 
 declare const process: { env: Record<string, string | undefined>; cwd: () => string };
 declare const require: (name: string) => any;
@@ -458,6 +463,71 @@ export async function getCountdownTimezoneValue(
 ): Promise<string> {
   const barId = await getBarIdByIndex(page, barIndex);
   return page.locator(`#countdown_timezone_${barId}_${columnId}`).inputValue();
+}
+
+export async function setCountdownCounterStyle(
+  page: Page,
+  barIndex: number,
+  columnId: string,
+  style: 'plain' | 'boxed'
+): Promise<void> {
+  const barId = await getBarIdByIndex(page, barIndex);
+  await openPanel(page, barIndex);
+  const row = page.locator('.top-bar-row.bg').nth(barIndex);
+  const panel = row.locator('.top-bar-options.active');
+  await expect(panel).toBeVisible({ timeout: 15000 });
+
+  const radio = panel.locator(
+    `input[type="radio"][name="countdown_style_${barId}_${columnId}"][value="${style}"]`
+  );
+  await expect(radio).toHaveCount(1, { timeout: 15000 });
+  const isChecked = await radio.isChecked();
+  if (isChecked) {
+    return;
+  }
+
+  await Promise.all([
+    waitForTopBarPutWhere(page, (body) => body.includes(`"counter_style":"${style}"`)),
+    radio.evaluate((el: HTMLInputElement) => el.click()),
+  ]);
+}
+
+export async function setCountdownEndDatetime(
+  page: Page,
+  barIndex: number,
+  columnId: string,
+  value: string
+): Promise<void> {
+  const barId = await getBarIdByIndex(page, barIndex);
+  await openPanel(page, barIndex);
+  const datetimeInput = page.locator(`#countdown_to_${barId}_${columnId}`);
+  await expect(datetimeInput).toBeVisible({ timeout: 15000 });
+  await datetimeInput.fill(value);
+  await datetimeInput.blur();
+  await waitForTopBarPutWhere(page, (body) => body.includes(`"countdown_to_datetime":"${value}"`));
+}
+
+export async function assertFrontendPlainCountdown(
+  page: Page,
+  barId: string,
+  timezone: string,
+  fixedNow: Date
+): Promise<void> {
+  const expectedMs = expectedCountdownRemainingMs(timezone, fixedNow.getTime());
+  await page.clock.install({ time: fixedNow });
+  await page.goto('/');
+  const plain = page.locator(`[data-top-bar-id="${barId}"] .top-bar-countdown-column__plain`);
+  await expect(plain).toBeVisible({ timeout: 15000 });
+  await expect
+    .poll(
+      async () => {
+        const text = (await plain.textContent())?.trim() ?? '';
+        const actualMs = parsePlainCountdownLabel(text);
+        return Math.abs(actualMs - expectedMs) <= COUNTDOWN_E2E_TOLERANCE_MS;
+      },
+      { timeout: 5000 }
+    )
+    .toBe(true);
 }
 
 export async function publishBar(page: Page, barIndex: number, barId: string): Promise<void> {
