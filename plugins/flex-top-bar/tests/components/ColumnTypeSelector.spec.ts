@@ -39,6 +39,15 @@ describe('ColumnTypeSelector', () => {
     expect(wrapper.emitted('update:columnType')?.[0]).toEqual(['icon'])
   })
 
+  it('emits update:columnType when countdown is selected', async () => {
+    const wrapper = mount(ColumnTypeSelector, { props: defaultProps })
+    const radios = wrapper.findAll('input[type="radio"]')
+
+    await radios[4].setValue('countdown')
+
+    expect(wrapper.emitted('update:columnType')?.[0]).toEqual(['countdown'])
+  })
+
   it('emits update:columnType when a different type is selected', async () => {
     const wrapper = mount(ColumnTypeSelector, { props: defaultProps })
     const radios = wrapper.findAll('input[type="radio"]')

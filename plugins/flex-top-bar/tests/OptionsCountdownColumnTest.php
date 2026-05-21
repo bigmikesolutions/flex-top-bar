@@ -85,4 +85,81 @@ final class OptionsCountdownColumnTest extends TestCase {
 		$this->assertSame( '#ffffff', $col['counter_color'] );
 		$this->assertSame( '#1d2327', $col['text_color'] );
 	}
+
+	public function test_normalize_countdown_column_strips_seconds_from_datetime(): void {
+		$bar = Options::normalize_bar(
+			[
+				'columns' => [
+					[
+						'type'                  => 'countdown',
+						'countdown_to_datetime' => '2026-06-15T14:30:45',
+						'countup_from_datetime' => '2026-01-10T08:15:00',
+					],
+				],
+			]
+		);
+
+		$col = $bar['columns'][0];
+		$this->assertSame( '2026-06-15T14:30', $col['countdown_to_datetime'] );
+		$this->assertSame( '2026-01-10T08:15', $col['countup_from_datetime'] );
+	}
+
+	public function test_normalize_countdown_column_rejects_invalid_timezone(): void {
+		$bar = Options::normalize_bar(
+			[
+				'columns' => [
+					[
+						'type'               => 'countdown',
+						'countdown_timezone' => 'Not/A/Timezone',
+					],
+				],
+			]
+		);
+
+		$this->assertSame( '', $bar['columns'][0]['countdown_timezone'] );
+	}
+
+	public function test_normalize_countdown_column_defaults_countup_from_to_empty(): void {
+		$bar = Options::normalize_bar(
+			[
+				'columns' => [
+					[
+						'type' => 'countdown',
+					],
+				],
+			]
+		);
+
+		$col = $bar['columns'][0];
+		$this->assertSame( '', $col['countup_from_datetime'] );
+		$this->assertSame( '', $col['countdown_to_datetime'] );
+		$this->assertSame( 'boxed', $col['counter_style'] );
+		$this->assertSame( 'down', $col['count_direction'] );
+	}
+
+	public function test_normalize_bar_preserves_countdown_column_in_multi_column_bar(): void {
+		$bar = Options::normalize_bar(
+			[
+				'columns' => [
+					[
+						'type'     => 'text',
+						'messages' => [ 'Hello' ],
+					],
+					[
+						'type'                  => 'countdown',
+						'counter_style'         => 'boxed',
+						'count_direction'       => 'down',
+						'countdown_to_datetime' => '2026-08-01T12:00',
+						'text'                  => 'Ends in',
+						'text_position'         => 'before',
+					],
+				],
+			]
+		);
+
+		$this->assertSame( 'text', $bar['columns'][0]['type'] );
+		$this->assertSame( 'countdown', $bar['columns'][1]['type'] );
+		$this->assertSame( '2026-08-01T12:00', $bar['columns'][1]['countdown_to_datetime'] );
+		$this->assertSame( 'Ends in', $bar['columns'][1]['text'] );
+	}
 }

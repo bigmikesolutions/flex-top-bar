@@ -1,8 +1,10 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import {
+  digitChars,
   formatPlainCountdown,
   getCountdownRemainingMs,
   getCountdownTargetDatetime,
+  pad2,
   splitCountdownMs,
 } from '@/utils/countdown'
 
@@ -63,5 +65,45 @@ describe('countdown utils', () => {
       minutes: 1,
       seconds: 1,
     })
+  })
+
+  it('clamps negative milliseconds to zero parts', () => {
+    expect(splitCountdownMs(-5000)).toEqual({
+      days: 0,
+      hours: 0,
+      minutes: 0,
+      seconds: 0,
+    })
+  })
+
+  it('returns zero remaining when target datetime is empty', () => {
+    expect(getCountdownRemainingMs('down', '', '', 'UTC', Date.UTC(2026, 4, 21, 12))).toBe(0)
+    expect(getCountdownRemainingMs('up', '', '', 'UTC', Date.UTC(2026, 4, 21, 12))).toBe(0)
+  })
+
+  it('returns zero when count down target is in the past', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-05-21T20:00:00Z'))
+
+    expect(
+      getCountdownRemainingMs('down', '2026-05-21T18:00', '', 'UTC', Date.now()),
+    ).toBe(0)
+  })
+
+  it('returns zero when target datetime is invalid', () => {
+    expect(
+      getCountdownRemainingMs('down', 'invalid', '', 'UTC', Date.UTC(2026, 4, 21, 12)),
+    ).toBe(0)
+  })
+
+  it('pads single-digit values for plain format', () => {
+    expect(pad2(3)).toBe('03')
+    expect(pad2(12)).toBe('12')
+  })
+
+  it('splits values into digit characters with minimum width', () => {
+    expect(digitChars(7, 2)).toEqual(['0', '7'])
+    expect(digitChars(123, 2)).toEqual(['1', '2', '3'])
+    expect(digitChars(-5, 2)).toEqual(['0', '0'])
   })
 })
