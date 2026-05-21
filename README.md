@@ -1,7 +1,11 @@
-# wordpress
-WP plugins
+# flex-top-bar
+
+[WP plugin](https://wordpress.org/plugins/flex-top-bar) for building and publishing customizable notification bars (top or bottom) with scheduling, icons, message effects/animations, multi-bar support, modern admin UI and more.
 
 ## Local development with Docker
+
+Custom plugins live in **`plugins/`** at the repo root and are mounted into the container as `wp-content/plugins`. 
+Each plugin is in its own subdirectory (e.g. `plugins/flex-top-bar/`). Activate them in **WP Admin → Plugins**.
 
 ### Prerequisites
 - [Docker](https://docs.docker.com/get-docker/) and Docker Compose
@@ -30,16 +34,14 @@ WP plugins
 
    Default admin login (override via `.env`): **admin** / **admin**   
 
-### Useful commands
+### Other useful commands
 
 - Stop: `docker compose down`
 - Stop and remove volumes (fresh DB): `docker compose down -v`
 - View logs: `docker compose logs -f`
 - Shell into WordPress container: `docker compose exec wordpress bash`
 
-### Custom plugins
-
-Custom plugins live in **`plugins/`** at the repo root and are mounted into the container as `wp-content/plugins`. Each plugin is in its own subdirectory (e.g. `plugins/flex-top-bar/`). Activate them in **WP Admin → Plugins**.
+### Unit tests
 
 **Unit tests** (PHPUnit) run from the project root:
 
@@ -55,6 +57,8 @@ composer test
 npm install
 npm run test:e2e
 ```
+
+### E2E tests
 
 **E2E tests** (Playwright):
 
@@ -109,7 +113,7 @@ npm run package:flex-top-bar
 docker compose -f staging/docker-compose.yml down -v 
 ```
 
-**WP checks**
+## WP checks before publishing
 
 Use WP plugin check before release:
 
@@ -129,3 +133,4 @@ wordpress-check.sh
 ## Docs 
 
 - [EULA from Freemius](https://freemius.com/product/26477/flex-top-bar/legal/eula/)
+- more useful docs can be found in `docs` and `plugins/flex-top-bar/assets/doc` directories
