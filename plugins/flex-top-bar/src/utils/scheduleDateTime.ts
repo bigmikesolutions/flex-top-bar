@@ -85,19 +85,6 @@ function formatOffsetDisplay(offsetMinutes: number): string {
   return `GMT${sign}${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
 }
 
-function isUtcEquivalent(timeZone: string, date = new Date()): boolean {
-  const normalized = normalizeTimezoneId(timeZone)
-  if (!normalized) {
-    return true
-  }
-
-  if (normalized === 'UTC' || normalized === 'Etc/UTC' || normalized === 'Etc/GMT') {
-    return true
-  }
-
-  return getTimezoneOffsetMinutes(normalized, date) === 0
-}
-
 export function normalizeTimezoneId(timeZone: string): string {
   if (typeof timeZone !== 'string') {
     return ''
@@ -190,15 +177,10 @@ export function getBrowserTimezone(): string {
 }
 
 export function getDefaultScheduleTimezone(storedTimezone = ''): string {
-  const browserTimezone = getBrowserTimezone()
   const normalizedStored = normalizeTimezoneId(storedTimezone)
 
   if (!normalizedStored) {
-    return browserTimezone
-  }
-
-  if (isUtcEquivalent(normalizedStored) && !isUtcEquivalent(browserTimezone)) {
-    return browserTimezone
+    return getBrowserTimezone()
   }
 
   return normalizedStored

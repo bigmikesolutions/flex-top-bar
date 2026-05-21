@@ -262,18 +262,20 @@ describe('scheduleDateTime', () => {
       expect(getDefaultScheduleTimezone('America/New_York')).toBe('America/New_York')
     })
 
-    it('replaces UTC-equivalent stored values with browser timezone', () => {
+    it('keeps explicit UTC stored timezone', () => {
       vi.setSystemTime(new Date('2026-05-19T10:00:00Z'))
       mockWarsawBrowser(120)
 
-      expect(getDefaultScheduleTimezone('UTC')).toBe('Europe/Warsaw')
-      expect(getDefaultScheduleTimezone('+00:00')).toBe('Europe/Warsaw')
+      expect(getDefaultScheduleTimezone('UTC')).toBe('UTC')
+      expect(getDefaultScheduleTimezone('+00:00')).toBe('UTC')
     })
   })
 
   describe('resolveScheduleTimezone', () => {
-    it('delegates to getDefaultScheduleTimezone', () => {
+    it('keeps explicit timezone including UTC', () => {
+      mockWarsawBrowser(120)
       expect(resolveScheduleTimezone('Europe/Berlin')).toBe('Europe/Berlin')
+      expect(resolveScheduleTimezone('UTC')).toBe('UTC')
     })
   })
 
