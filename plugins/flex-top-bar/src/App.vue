@@ -80,19 +80,6 @@
         </div>
       </template>
 
-      <div class="top-bar-row center top-bar-powered-by">
-        <p class="description top-bar-powered-by__text">
-          <img
-            :src="bmsFavicon"
-            alt=""
-            width="18"
-            height="18"
-            class="top-bar-powered-by__icon"
-            aria-hidden="true"
-          />
-          {{ poweredByFooterText }}
-        </p>
-      </div>
     </template>
   </div>
 </template>
@@ -149,13 +136,6 @@ const addBarTooltip = computed(() => {
   )
   return `${lead} ${tail}`
 })
-
-const poweredByFooterText = computed(() =>
-  sprintf(
-    __('Powered by BigMikeSolutions. All rights reserved. %d', 'flex-top-bar'),
-    new Date().getFullYear(),
-  ),
-)
 
 onMounted(async () => {
   await Promise.all([
