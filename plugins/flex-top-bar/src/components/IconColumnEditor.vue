@@ -1,5 +1,5 @@
 <template>
-  <div class="item-creator top-bar-icon-column-editor">
+  <div class="item-creator grid-3 top-bar-icon-column-editor">
     <fieldset class="line">
       <legend class="bold">{{ __('Icon position', 'flex-top-bar') }}</legend>
       <label class="radio">
@@ -125,17 +125,35 @@ function onTextInput(e: Event) {
 </script>
 
 <style scoped>
+/* Match admin column row proportions (type | editor grid-3 | settings | remove). */
 .top-bar-icon-column-editor__row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  align-items: flex-start;
+  display: grid;
+  grid-template-columns: minmax(150px, 32%) minmax(0, 1fr);
+  gap: 0;
+  width: 100%;
+  align-items: stretch;
 }
 
 .top-bar-icon-column-editor__icon,
 .top-bar-icon-column-editor__text {
-  flex: 1 1 200px;
   min-width: 0;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.top-bar-icon-column-editor__icon {
+  border-right: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+@media (max-width: 1024px) {
+  .top-bar-icon-column-editor__row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .top-bar-icon-column-editor__icon {
+    border-right: 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  }
 }
 
 .top-bar-icon-column-editor__hint {
