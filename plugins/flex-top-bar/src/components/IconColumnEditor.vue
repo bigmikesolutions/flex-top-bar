@@ -8,7 +8,7 @@
           :name="`icon_position_${barId}_${columnId}`"
           value="before"
           :checked="column.icon_position === 'before'"
-          @change="patch({ icon_position: 'before' })"
+          @change="setIconPosition('before')"
         />
         <span>{{ __('Before text', 'flex-top-bar') }}</span>
       </label>
@@ -18,7 +18,7 @@
           :name="`icon_position_${barId}_${columnId}`"
           value="after"
           :checked="column.icon_position === 'after'"
-          @change="patch({ icon_position: 'after' })"
+          @change="setIconPosition('after')"
         />
         <span>{{ __('After text', 'flex-top-bar') }}</span>
       </label>
@@ -80,7 +80,7 @@
 
 <script setup lang="ts">
 import { __, sprintf } from '@wordpress/i18n'
-import type { IconBarColumn } from '@/types'
+import type { IconBarColumn, IconPosition } from '@/types'
 import { useWpMedia } from '@/composables/useWpMedia'
 
 const props = defineProps<{
@@ -98,6 +98,11 @@ const { limits, openIconPicker } = useWpMedia()
 
 function patch(partial: Partial<IconBarColumn>) {
   emit('patch', partial)
+}
+
+function setIconPosition(position: IconPosition) {
+  patch({ icon_position: position })
+  emit('commit')
 }
 
 function selectIcon() {

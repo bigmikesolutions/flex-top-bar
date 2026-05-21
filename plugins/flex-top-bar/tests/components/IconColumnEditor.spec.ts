@@ -67,6 +67,21 @@ describe('IconColumnEditor', () => {
     expect(wrapper.emitted('patch')?.[0]).toEqual([{ text: 'Hello' }])
   })
 
+  it('emits patch and commit when icon position changes', async () => {
+    const wrapper = mount(IconColumnEditor, {
+      props: { barId: 'bar_1', columnId: 'col_1', column },
+    })
+
+    const afterRadio = wrapper.findAll('input[type="radio"]').find(
+      (r) => (r.element as HTMLInputElement).value === 'after',
+    )
+    expect(afterRadio).toBeDefined()
+    await afterRadio!.setValue(true)
+
+    expect(wrapper.emitted('patch')?.at(-1)).toEqual([{ icon_position: 'after' }])
+    expect(wrapper.emitted('commit')).toBeTruthy()
+  })
+
   it('opens media picker on select icon click', async () => {
     const wrapper = mount(IconColumnEditor, {
       props: { barId: 'bar_1', columnId: 'col_1', column },

@@ -555,6 +555,31 @@ final class OptionsEdgeCasesTest extends TestCase {
 	 * @runInSeparateProcess
 	 * @preserveGlobalState disabled
 	 */
+	public function test_normalize_icon_column_preserves_after_position(): void {
+		if ( ! defined( 'FF_PLAN' ) ) {
+			define( 'FF_PLAN', 'pro' );
+		}
+		FeatureFlags::reset_for_tests();
+
+		$bar = Options::normalize_bar(
+			[
+				'columns' => [
+					[
+						'type'          => 'icon',
+						'icon_position' => 'after',
+						'text'          => 'Sale',
+					],
+				],
+			]
+		);
+
+		$this->assertSame( 'after', $bar['columns'][0]['icon_position'] );
+	}
+
+	/**
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
+	 */
 	public function test_normalize_icon_column_rejects_invalid_position(): void {
 		if ( ! defined( 'FF_PLAN' ) ) {
 			define( 'FF_PLAN', 'pro' );
