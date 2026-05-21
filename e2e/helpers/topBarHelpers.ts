@@ -426,10 +426,9 @@ export async function setScheduleTimezone(
   const tzSelect = page.locator(`#scheduled_timezone_${barId}`);
 
   await tzSelect.waitFor({ state: 'visible', timeout: 15000 });
-  await Promise.all([
-    waitForTopBarPutWhere(page, (body) => body.includes(`"scheduled_timezone":"${timeZone}"`)),
-    tzSelect.selectOption(timeZone),
-  ]);
+  await tzSelect.selectOption({ value: timeZone });
+  await expect(tzSelect).toHaveValue(timeZone);
+  await waitForTopBarPutWhere(page, (body) => body.includes(`"scheduled_timezone":"${timeZone}"`));
 }
 
 export async function getScheduleTimezoneValue(page: Page, barIndex: number): Promise<string> {

@@ -164,6 +164,26 @@ test.describe('scheduled', () => {
       await expect(timezoneSelect).toHaveValue('America/New_York');
     });
 
+    test('should save UTC timezone and persist after reload', async ({ page }) => {
+      await loginAndOpenTopBarSettings(page);
+      await resetToSingleBar(page);
+      await ensureAtLeastBars(page, 2);
+      await openPanel(page, 0);
+
+      const barId = await getBarIdByIndex(page, 0);
+
+      await enableSchedule(page, 0);
+      await openPanel(page, 0);
+      await setScheduleTimezone(page, 0, 'UTC');
+
+      const timezoneSelect = page.locator(`#scheduled_timezone_${barId}`);
+      await expect(timezoneSelect).toHaveValue('UTC');
+
+      await page.reload();
+      await openPanel(page, 0);
+      await expect(timezoneSelect).toHaveValue('UTC');
+    });
+
     test('should show bar when active window uses Europe/Warsaw timezone', async ({ page }) => {
       await loginAndOpenTopBarSettings(page);
       await resetToSingleBar(page);

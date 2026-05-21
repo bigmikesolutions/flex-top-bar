@@ -201,12 +201,22 @@ const FALLBACK_TIMEZONES = [
   'Australia/Sydney',
 ]
 
+/** Valid IANA zones omitted from some ICU `supportedValuesOf('timeZone')` lists. */
+const ALWAYS_INCLUDE_TIMEZONES = ['UTC']
+
 export function getTimezoneOptionValues(): string[] {
-  if (typeof Intl.supportedValuesOf === 'function') {
-    return Intl.supportedValuesOf('timeZone').slice().sort((a, b) => a.localeCompare(b))
+  const values =
+    typeof Intl.supportedValuesOf === 'function'
+      ? Intl.supportedValuesOf('timeZone').slice()
+      : FALLBACK_TIMEZONES.slice()
+
+  for (const timeZone of ALWAYS_INCLUDE_TIMEZONES) {
+    if (!values.includes(timeZone)) {
+      values.push(timeZone)
+    }
   }
 
-  return FALLBACK_TIMEZONES.slice()
+  return values.sort((a, b) => a.localeCompare(b))
 }
 
 export function buildTimezoneOptions(selectedValue = ''): Array<{ value: string; label: string }> {

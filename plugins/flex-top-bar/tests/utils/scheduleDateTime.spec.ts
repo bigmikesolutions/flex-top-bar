@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import {
   buildTimezoneOptions,
+  getTimezoneOptionValues,
   formatTimezoneLabel,
   fromDatetimeLocalValue,
   getBrowserTimezone,
@@ -289,6 +290,12 @@ describe('scheduleDateTime', () => {
     it('returns empty string for invalid timezone', () => {
       expect(formatTimezoneLabel('')).toBe('')
       expect(formatTimezoneLabel('Invalid/Zone')).toBe('')
+    })
+  })
+
+  describe('getTimezoneOptionValues', () => {
+    it('always includes UTC even when omitted from Intl.supportedValuesOf', () => {
+      expect(getTimezoneOptionValues()).toContain('UTC')
     })
   })
 

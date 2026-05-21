@@ -13,7 +13,7 @@
 
 <script setup lang="ts">
 import { computed, watch } from 'vue'
-import { buildTimezoneOptions, getDefaultScheduleTimezone } from '@/utils/scheduleDateTime'
+import { buildTimezoneOptions, getBrowserTimezone, normalizeTimezoneId } from '@/utils/scheduleDateTime'
 
 const props = withDefaults(
   defineProps<{
@@ -35,7 +35,8 @@ const timezoneOptions = computed(() => buildTimezoneOptions(model.value))
 watch(
   () => model.value,
   (value) => {
-    const resolved = getDefaultScheduleTimezone(value)
+    const normalized = normalizeTimezoneId(value)
+    const resolved = normalized || getBrowserTimezone()
     if (resolved !== value) {
       model.value = resolved
       emit('change')
