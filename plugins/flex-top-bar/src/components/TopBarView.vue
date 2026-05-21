@@ -62,6 +62,23 @@
                 </a>
               </div>
             </template>
+            <template v-else-if="column.type === 'icon'">
+              <div
+                class="top-bar-icon-text-column"
+                :class="`top-bar-icon-text-column--icon-${column.icon_position}`"
+                :style="getFlexAlignStyle(column)"
+              >
+                <img
+                  v-if="column.icon_url"
+                  :src="column.icon_url"
+                  alt=""
+                  class="top-bar-icon-text-column__img"
+                  width="24"
+                  height="24"
+                />
+                <span v-if="column.text" class="top-bar-icon-text-column__text">{{ column.text }}</span>
+              </div>
+            </template>
             <template v-else-if="column.type === 'contact'">
               <div
                 class="top-bar-contact-column"
@@ -796,5 +813,27 @@ body.admin-bar .top-bar--top {
   width: 18px;
   height: 18px;
   flex-basis: 18px;
+}
+
+.top-bar-icon-text-column {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 8px;
+}
+
+.top-bar-icon-text-column--icon-after {
+  flex-direction: row-reverse;
+}
+
+.top-bar-icon-text-column__img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.top-bar-icon-text-column__text {
+  line-height: 1.3;
 }
 </style>

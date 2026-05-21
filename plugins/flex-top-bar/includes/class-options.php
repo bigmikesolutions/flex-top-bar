@@ -21,6 +21,12 @@ final class Options {
 	public const OPTION_BARS = 'flex_top_bar_bars';
 	public const OPTION_BARS_DRAFT = 'flex_top_bar_bars_draft';
 
+	/** Max upload width/height (px) for custom icon column images. */
+	public const ICON_COLUMN_MAX_WIDTH = 64;
+	public const ICON_COLUMN_MAX_HEIGHT = 64;
+	/** Max file size (bytes) for icon column uploads — 512 KB. */
+	public const ICON_COLUMN_MAX_FILE_BYTES = 524288;
+
 	public static function new_bar_id(): string {
 		return 'bar_' . wp_generate_password( 8, false, false );
 	}
@@ -362,7 +368,7 @@ final class Options {
 		}
 
 		$type = isset( $col['type'] ) ? sanitize_key( (string) $col['type'] ) : 'text';
-		if ( ! in_array( $type, [ 'text', 'social', 'contact' ], true ) ) {
+		if ( ! in_array( $type, [ 'text', 'social', 'contact', 'icon' ], true ) ) {
 			$type = 'text';
 		}
 
@@ -371,6 +377,9 @@ final class Options {
 		}
 		if ( $type === 'contact' ) {
 			return self::normalize_contact_column( $col, $id, $size_percent, $content_position, $mmv, $max_messages );
+		}
+		if ( $type === 'icon' ) {
+			return self::normalize_icon_column( $col, $id, $size_percent, $content_position, $mmv );
 		}
 
 		return self::normalize_text_column( $col, $id, $default_message, $max_messages, $size_percent, $content_position, $mmv );
@@ -640,6 +649,136 @@ final class Options {
 			'icon_border_width'       => $icon_border_width,
 			'icon_border_color'       => $icon_border_color,
 			'contacts'                => $contacts,
+			'size_percent'            => $size_percent,
+			'content_position'        => $content_position,
+			'messages_mobile_visible' => $mmv,
+		];
+	}
+
+	/**
+	 * @return list<string>
+	 */
+	public static function allowed_icon_column_mime_types(): array {
+		return [
+			'image/jpeg',
+			'image/png',
+			'image/gif',
+			'image/webp',
+			'image/svg+xml',
+		];
+	}
+
+	/**
+	 * Limits exposed to the Vue admin (keep in sync with src/constants/iconColumn.ts).
+	 *
+	 * @return array<string, mixed>
+	 */
+	public static function icon_column_media_limits(): array {
+		return [
+			'maxWidth'         => self::ICON_COLUMN_MAX_WIDTH,
+			'maxHeight'        => self::ICON_COLUMN_MAX_HEIGHT,
+			'maxFileBytes'     => self::ICON_COLUMN_MAX_FILE_BYTES,
+			'allowedMimeTypes' => self::allowed_icon_column_mime_types(),
+			'displaySizePx'    => 24,
+		];
+	}
+
+	/**
+	 * @return array{attachment_id: int, url: string}
+	 */
+	private static function resolve_icon_attachment( int $attachment_id ): array {
+		if ( $attachment_id <= 0 ) {
+			return [
+				'attachment_id' => 0,
+				'url'           => '',
+			];
+		}
+
+		$post = get_post( $attachment_id );
+		if ( ! $post instanceof \WP_Post || $post->post_type !== 'attachment' ) {
+			return [
+				'attachment_id' => 0,
+				'url'           => '',
+			];
+		}
+
+		$mime = (string) get_post_mime_type( $post );
+		if ( ! in_array( $mime, self::allowed_icon_column_mime_types(), true ) ) {
+			return [
+				'attachment_id' => 0,
+				'url'           => '',
+			];
+		}
+
+		$file = get_attached_file( $attachment_id );
+		if ( is_string( $file ) && $file !== '' && file_exists( $file ) ) {
+			$bytes = filesize( $file );
+			if ( is_int( $bytes ) && $bytes > self::ICON_COLUMN_MAX_FILE_BYTES ) {
+				return [
+					'attachment_id' => 0,
+					'url'           => '',
+				];
+			}
+		}
+
+		if ( $mime !== 'image/svg+xml' ) {
+			$meta = wp_get_attachment_metadata( $attachment_id );
+			if ( is_array( $meta ) ) {
+				$width  = isset( $meta['width'] ) ? (int) $meta['width'] : 0;
+				$height = isset( $meta['height'] ) ? (int) $meta['height'] : 0;
+				if (
+					$width > self::ICON_COLUMN_MAX_WIDTH
+					|| $height > self::ICON_COLUMN_MAX_HEIGHT
+				) {
+					return [
+						'attachment_id' => 0,
+						'url'           => '',
+					];
+				}
+			}
+		}
+
+		$url = wp_get_attachment_url( $attachment_id );
+		if ( ! is_string( $url ) || $url === '' ) {
+			return [
+				'attachment_id' => 0,
+				'url'           => '',
+			];
+		}
+
+		return [
+			'attachment_id' => $attachment_id,
+			'url'           => esc_url_raw( $url ),
+		];
+	}
+
+	/**
+	 * @return array<string, mixed>
+	 */
+	private static function normalize_icon_column(
+		array $col,
+		string $id,
+		int $size_percent,
+		string $content_position,
+		bool $mmv
+	): array {
+		$icon_position = isset( $col['icon_position'] ) ? sanitize_key( (string) $col['icon_position'] ) : 'before';
+		if ( ! in_array( $icon_position, [ 'before', 'after' ], true ) ) {
+			$icon_position = 'before';
+		}
+
+		$text = isset( $col['text'] ) ? sanitize_text_field( (string) $col['text'] ) : '';
+
+		$attachment_id = isset( $col['icon_attachment_id'] ) ? (int) $col['icon_attachment_id'] : 0;
+		$resolved      = self::resolve_icon_attachment( $attachment_id );
+
+		return [
+			'id'                      => $id,
+			'type'                    => 'icon',
+			'icon_attachment_id'      => $resolved['attachment_id'],
+			'icon_url'                => $resolved['url'],
+			'text'                    => $text,
+			'icon_position'           => $icon_position,
 			'size_percent'            => $size_percent,
 			'content_position'        => $content_position,
 			'messages_mobile_visible' => $mmv,

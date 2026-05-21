@@ -71,6 +71,8 @@ final class Admin {
 				$ver_css
 			);
 
+			wp_enqueue_media();
+
 			// Pass configuration to Vue
 			wp_localize_script(
 				'flex-top-bar-admin-vue',
@@ -80,6 +82,7 @@ final class Admin {
 					'nonce'           => wp_create_nonce( 'wp_rest' ),
 					'version'         => (string) FLEX_TOP_BAR_VERSION,
 					'bmsFaviconUrl'   => esc_url_raw( plugins_url( 'assets/img/bms-favicon.png', FLEX_TOP_BAR_PLUGIN_FILE ) ),
+					'iconColumnMedia' => Options::icon_column_media_limits(),
 					'i18n'    => [
 						'welcome'     => __( 'Welcome to Top Bar plugin', 'flex-top-bar' ),
 						'addNew'      => __( 'Add new Top Bar', 'flex-top-bar' ),

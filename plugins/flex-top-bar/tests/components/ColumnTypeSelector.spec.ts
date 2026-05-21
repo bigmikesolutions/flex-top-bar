@@ -17,6 +17,7 @@ describe('ColumnTypeSelector', () => {
 
     expect(wrapper.find('legend').text()).toBe('Type')
     expect(wrapper.text()).toContain('Text Editor')
+    expect(wrapper.text()).toContain('Icon + text')
     expect(wrapper.text()).toContain('Social media')
     expect(wrapper.text()).toContain('Contact data')
     expect(wrapper.find('input[type="radio"]').exists()).toBe(true)
@@ -32,7 +33,7 @@ describe('ColumnTypeSelector', () => {
     const wrapper = mount(ColumnTypeSelector, { props: defaultProps })
     const radios = wrapper.findAll('input[type="radio"]')
 
-    await radios[1].setValue('social')
+    await radios[2].setValue('social')
 
     expect(wrapper.emitted('update:columnType')).toBeTruthy()
     expect(wrapper.emitted('update:columnType')?.[0]).toEqual(['social'])
