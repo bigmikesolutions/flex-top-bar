@@ -74,6 +74,9 @@ function seed_upload_bms_icon( string $path ): array {
 
 $seed_icon = seed_upload_bms_icon( "/tmp/bms.png" );
 
+$countdown_end   = gmdate( "Y-m-d\TH:i", time() + 7 * DAY_IN_SECONDS );
+$countdown_start = gmdate( "Y-m-d\TH:i", time() - DAY_IN_SECONDS );
+
 // Clean old plugin state so seeding is deterministic.
 delete_option("flex_top_bar_bars");
 delete_option("flex_top_bar_bars_draft");
@@ -120,10 +123,18 @@ $bars = [
 				"messages_mobile_visible" => true,
 			],
 			[
-				"id" => "text_2",
-				"type" => "text",
-				"effect" => "blink",
-				"messages" => ["2nd column.", "2nd column effect is working."],
+				"id" => "countdown_1",
+				"type" => "countdown",
+				"counter_style" => "boxed",
+				"count_direction" => "down",
+				"countdown_to_datetime" => $countdown_end,
+				"countup_from_datetime" => $countdown_start,
+				"countdown_timezone" => "UTC",
+				"text" => "Countdown ends in",
+				"text_position" => "before",
+				"background_color" => "#1d2327",
+				"counter_color" => "#ffffff",
+				"text_color" => "#ffffff",
 				"size_percent" => 25,
 				"content_position" => "center",
 				"messages_mobile_visible" => true,
