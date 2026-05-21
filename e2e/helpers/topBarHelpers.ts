@@ -278,9 +278,20 @@ function seedSingleIconColumnBar(composeFile: string, root: string): void {
   });
 }
 
+function seedSingleCountdownColumnBar(composeFile: string, root: string): void {
+  const seedPhp = `${root}/e2e/scripts/seed-single-countdown-column.php`;
+  execSync(`docker compose -f "${composeFile}" cp "${seedPhp}" wordpress:/tmp/seed-single-countdown-column.php`, {
+    stdio: 'pipe',
+  });
+  execSync(
+    `docker compose -f "${composeFile}" exec -T wordpress php /tmp/seed-single-countdown-column.php`,
+    { stdio: 'pipe' }
+  );
+}
+
 export async function resetToSingleColumnBar(
   page: Page,
-  type: 'text' | 'social' | 'contact' | 'icon'
+  type: 'text' | 'social' | 'contact' | 'icon' | 'countdown'
 ): Promise<void> {
   const root = process.cwd();
   const composeFile = `${root}/docker-compose.yml`;
@@ -288,6 +299,8 @@ export async function resetToSingleColumnBar(
 
   if (type === 'icon') {
     seedSingleIconColumnBar(composeFile, root);
+  } else if (type === 'countdown') {
+    seedSingleCountdownColumnBar(composeFile, root);
   } else {
     // Keep bar-level legacy fields consistent with the first column (for backward compat).
     const command = `docker compose -f "${composeFile}" exec -T wordpress php -r 'require_once "/var/www/html/wp-load.php"; $bars = [[ "id" => "bar_single_col", "name" => "Single column", "visible" => true, "admin_visibile" => true, "scheduled_enabled" => false, "scheduled_from_datetime" => "", "scheduled_to_datetime" => "", "position" => "top", "effect" => "none", "messages" => ["", ""], "messages_mobile_visible" => true, "columns" => [ ${
