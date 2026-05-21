@@ -1,4 +1,7 @@
-export type ColumnType = 'text' | 'social' | 'contact'
+export type ColumnType = 'text' | 'social' | 'contact' | 'icon'
+
+export const ICON_POSITIONS = ['before', 'after'] as const
+export type IconPosition = (typeof ICON_POSITIONS)[number]
 
 export type IconStyle = 'rounded' | 'square' | 'black' | 'white' | 'color'
 
@@ -98,7 +101,21 @@ export interface ContactBarColumn {
   messages_mobile_visible: boolean
 }
 
-export type BarColumn = TextBarColumn | SocialBarColumn | ContactBarColumn
+export interface IconBarColumn {
+  id: string
+  type: 'icon'
+  /** WordPress attachment ID; 0 when unset or invalid. */
+  icon_attachment_id: number
+  /** Resolved attachment URL for frontend render. */
+  icon_url: string
+  text: string
+  icon_position: IconPosition
+  size_percent: number
+  content_position: ContentPosition
+  messages_mobile_visible: boolean
+}
+
+export type BarColumn = TextBarColumn | SocialBarColumn | ContactBarColumn | IconBarColumn
 
 export interface Bar {
   id: string
@@ -142,6 +159,14 @@ export interface ApiResponse<T> {
   error?: ApiError
 }
 
+export interface IconColumnMediaLimits {
+  maxWidth: number
+  maxHeight: number
+  maxFileBytes: number
+  allowedMimeTypes: string[]
+  displaySizePx: number
+}
+
 export interface TopBarConfig {
   apiRoot: string
   nonce: string
@@ -149,6 +174,7 @@ export interface TopBarConfig {
   version?: string
   /** Absolute URL to BMS favicon (WordPress `plugins_url`); used for admin footer branding. */
   bmsFaviconUrl?: string
+  iconColumnMedia?: IconColumnMediaLimits
 }
 
 // Global window interface

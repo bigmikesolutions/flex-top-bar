@@ -180,6 +180,15 @@
                   @commit="saveChanges"
                 />
 
+                <IconColumnEditor
+                  v-else-if="column.type === 'icon'"
+                  :bar-id="bar.id"
+                  :column-id="column.id"
+                  :column="column"
+                  @patch="onIconColumnPatch(columnIndex, $event)"
+                  @commit="saveChanges"
+                />
+
                 <div class="item item-creator">
                   <fieldset>
                     <legend class="bold">{{ __('Size column', 'flex-top-bar') }}</legend>
@@ -245,12 +254,14 @@ import type {
   ColumnType,
   ContactBarColumn,
   ContentPosition,
+  IconBarColumn,
   SocialBarColumn,
 } from '@/types'
 import { __, sprintf } from '@wordpress/i18n'
 import BasicSettingsSection from './BasicSettingsSection.vue'
 import ColumnTypeSelector from './ColumnTypeSelector.vue'
 import ContactColumnEditor from './ContactColumnEditor.vue'
+import IconColumnEditor from './IconColumnEditor.vue'
 import ScheduleSection from './ScheduleSection.vue'
 import SocialColumnEditor from './SocialColumnEditor.vue'
 import TextColumnEditor from './TextColumnEditor.vue'
@@ -311,6 +322,19 @@ function defaultColumnForType(
       icon_border_width: 0,
       icon_border_color: '#1d2327',
       links: [{ platform: '', url: '' }],
+      size_percent: sizePercent,
+      content_position: 'center',
+      messages_mobile_visible: messagesMobileVisible,
+    }
+  }
+  if (type === 'icon') {
+    return {
+      id,
+      type: 'icon',
+      icon_attachment_id: 0,
+      icon_url: '',
+      text: '',
+      icon_position: 'before',
       size_percent: sizePercent,
       content_position: 'center',
       messages_mobile_visible: messagesMobileVisible,
@@ -600,6 +624,16 @@ function onContactColumnPatch(columnIndex: number, partial: Partial<ContactBarCo
   const cols = [...localBar.value.columns]
   const cur = cols[columnIndex]
   if (cur.type !== 'contact') {
+    return
+  }
+  cols[columnIndex] = { ...cur, ...partial }
+  localBar.value = { ...localBar.value, columns: cols }
+}
+
+function onIconColumnPatch(columnIndex: number, partial: Partial<IconBarColumn>) {
+  const cols = [...localBar.value.columns]
+  const cur = cols[columnIndex]
+  if (cur.type !== 'icon') {
     return
   }
   cols[columnIndex] = { ...cur, ...partial }

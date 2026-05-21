@@ -3,6 +3,13 @@ services:
     image: wordpress:latest
     container_name: wp-wordpress
     restart: unless-stopped
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        mkdir -p /var/www/html/wp-content/uploads
+        chown -R www-data:www-data /var/www/html/wp-content/uploads 2>/dev/null || chmod -R a+rwx /var/www/html/wp-content/uploads
+        exec docker-entrypoint.sh apache2-foreground
     ports:
       - "8080:80"
     environment:
@@ -32,6 +39,8 @@ services:
       - wordpress_data:/var/www/html
       # Custom plugins (develop locally; container plugins dir is replaced)
       - ./plugins:/var/www/html/wp-content/plugins
+      # Writable uploads (avoids wrong UID on wordpress_data volume + bind-mounted plugins)
+      - ./wp-content/uploads:/var/www/html/wp-content/uploads
     depends_on:
       - db
     networks:
@@ -45,6 +54,7 @@ services:
     volumes:
       - wordpress_data:/var/www/html
       - ./plugins:/var/www/html/wp-content/plugins
+      - ./wp-content/uploads:/var/www/html/wp-content/uploads
     environment:
       WORDPRESS_DB_HOST: db
       WORDPRESS_DB_USER: ${MYSQL_USER:-wordpress}
@@ -72,7 +82,8 @@ services:
           wp core install --allow-root --url="$$WORDPRESS_URL" --title="$$WORDPRESS_TITLE" --admin_user="$$WORDPRESS_ADMIN_USER" --admin_password="$$WORDPRESS_ADMIN_PASSWORD" --admin_email="$$WORDPRESS_ADMIN_EMAIL" --locale="$$WORDPRESS_LOCALE" --skip-email
           echo 'WordPress installed.'
         fi
-        mkdir -p /var/www/html/wp-content/uploads && chown -R www-data:www-data /var/www/html/wp-content
+        mkdir -p /var/www/html/wp-content/uploads
+        chown -R www-data:www-data /var/www/html/wp-content/uploads 2>/dev/null || chmod -R a+rwx /var/www/html/wp-content/uploads
         if [ -d /var/www/html/wp-content/plugins/flex-top-bar ]; then
           wp plugin activate flex-top-bar --allow-root 2>/dev/null || true
           echo 'Flex Top Bar plugin activated.'

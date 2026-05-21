@@ -135,6 +135,7 @@ final class Plugin {
 	}
 
 	private function __construct() {
+		add_action( 'after_setup_theme', [ Options::class, 'register_icon_image_size' ] );
 		new API();
 		new Admin();
 		new Frontend();

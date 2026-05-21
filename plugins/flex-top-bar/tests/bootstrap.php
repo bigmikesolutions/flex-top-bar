@@ -172,6 +172,98 @@ if ( ! function_exists( 'is_admin' ) ) {
 	}
 }
 
+if ( ! function_exists( 'add_image_size' ) ) {
+	function add_image_size( string $name, int $width = 0, int $height = 0, $crop = false ): void {
+		$GLOBALS['wp_test_image_sizes'][] = compact( 'name', 'width', 'height', 'crop' );
+	}
+}
+
+if ( ! class_exists( 'WP_Post', false ) ) {
+	class WP_Post {
+		public int $ID = 0;
+		public string $post_type = '';
+	}
+}
+
+if ( ! function_exists( 'get_post' ) ) {
+	/**
+	 * @param int|object $post
+	 * @return object|null
+	 */
+	function get_post( $post = null ) {
+		$id = is_object( $post ) ? (int) $post->ID : (int) $post;
+		return $GLOBALS['wp_test_posts'][ $id ] ?? null;
+	}
+}
+
+if ( ! function_exists( 'get_post_mime_type' ) ) {
+	function get_post_mime_type( $post ): string {
+		$id   = is_object( $post ) ? (int) $post->ID : (int) $post;
+		$data = $GLOBALS['wp_test_attachments'][ $id ] ?? [];
+		return (string) ( $data['mime'] ?? '' );
+	}
+}
+
+if ( ! function_exists( 'get_attached_file' ) ) {
+	function get_attached_file( int $attachment_id ): string {
+		return (string) ( $GLOBALS['wp_test_attachments'][ $attachment_id ]['file'] ?? '' );
+	}
+}
+
+if ( ! function_exists( 'wp_get_attachment_url' ) ) {
+	function wp_get_attachment_url( int $attachment_id ): string {
+		return (string) ( $GLOBALS['wp_test_attachments'][ $attachment_id ]['full_url'] ?? '' );
+	}
+}
+
+if ( ! function_exists( 'wp_get_attachment_image_url' ) ) {
+	function wp_get_attachment_image_url( int $attachment_id, $size = 'thumbnail' ): string {
+		$data = $GLOBALS['wp_test_attachments'][ $attachment_id ] ?? [];
+		if ( (string) $size === \FlexTopBar\Options::ICON_COLUMN_IMAGE_SIZE ) {
+			return (string) ( $data['sized_url'] ?? '' );
+		}
+		return '';
+	}
+}
+
+if ( ! function_exists( 'wp_get_attachment_metadata' ) ) {
+	function wp_get_attachment_metadata( int $attachment_id ): array {
+		return is_array( $GLOBALS['wp_test_attachments'][ $attachment_id ]['metadata'] ?? null )
+			? $GLOBALS['wp_test_attachments'][ $attachment_id ]['metadata']
+			: [];
+	}
+}
+
+if ( ! function_exists( 'wp_update_attachment_metadata' ) ) {
+	function wp_update_attachment_metadata( int $attachment_id, array $data ): bool {
+		$GLOBALS['wp_test_attachments'][ $attachment_id ]['metadata'] = $data;
+		if ( isset( $data['sizes'][ \FlexTopBar\Options::ICON_COLUMN_IMAGE_SIZE ]['file'] ) ) {
+			$existing = (string) ( $GLOBALS['wp_test_attachments'][ $attachment_id ]['sized_url'] ?? '' );
+			if ( $existing === '' ) {
+				$GLOBALS['wp_test_attachments'][ $attachment_id ]['sized_url'] =
+					'http://example.test/uploads/icon-64x64.jpg';
+			}
+		}
+		return true;
+	}
+}
+
+if ( ! function_exists( 'wp_generate_attachment_metadata' ) ) {
+	function wp_generate_attachment_metadata( int $attachment_id, string $file ): array {
+		unset( $file );
+		$meta = $GLOBALS['wp_test_attachments'][ $attachment_id ]['generated_metadata'] ?? [
+			'width'  => 64,
+			'height' => 64,
+			'sizes'  => [
+				\FlexTopBar\Options::ICON_COLUMN_IMAGE_SIZE => [
+					'file' => 'icon-64x64.jpg',
+				],
+			],
+		];
+		return is_array( $meta ) ? $meta : [];
+	}
+}
+
 if ( ! defined( 'FLEX_TOP_BAR_PLUGIN_FILE' ) ) {
 	define( 'FLEX_TOP_BAR_PLUGIN_FILE', dirname( __DIR__ ) . '/flex-top-bar.php' );
 }

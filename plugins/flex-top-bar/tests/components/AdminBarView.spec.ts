@@ -2,8 +2,9 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import AdminBarView from '@/components/AdminBarView.vue'
 import ColumnTypeSelector from '@/components/ColumnTypeSelector.vue'
+import IconColumnEditor from '@/components/IconColumnEditor.vue'
 import TextColumnEditor from '@/components/TextColumnEditor.vue'
-import type { Bar, BarColumn, TextBarColumn } from '@/types'
+import type { Bar, BarColumn, IconBarColumn, TextBarColumn } from '@/types'
 
 // Mock @wordpress/i18n
 vi.mock('@wordpress/i18n', () => ({
@@ -335,6 +336,74 @@ describe('AdminBarView', () => {
       expect(editor.props('effect')).toBe('none')
       expect(editor.props('messages')).toEqual(['Hello', 'World'])
       expect(editor.props('maxMessages')).toBe(4)
+    })
+  })
+
+  describe('icon column', () => {
+    const iconColumn: IconBarColumn = {
+      id: 'col_icon',
+      type: 'icon',
+      icon_attachment_id: 12,
+      icon_url: 'http://example.test/icon.png',
+      text: 'Sale',
+      icon_position: 'after',
+      size_percent: 100,
+      content_position: 'left',
+      messages_mobile_visible: true,
+    }
+
+    const iconBar: Bar = {
+      ...mockBar,
+      effect: 'none',
+      messages: ['', ''],
+      columns: [iconColumn],
+    }
+
+    it('mounts IconColumnEditor for icon column type', () => {
+      const wrapper = mount(AdminBarView, {
+        props: { ...defaultProps, bar: iconBar },
+      })
+
+      const editor = wrapper.findComponent(IconColumnEditor)
+      expect(editor.exists()).toBe(true)
+      expect(editor.props('column')).toMatchObject({
+        type: 'icon',
+        text: 'Sale',
+        icon_position: 'after',
+      })
+      expect(wrapper.findComponent(TextColumnEditor).exists()).toBe(false)
+    })
+
+    it('persists icon_position after when IconColumnEditor commits', async () => {
+      const wrapper = mount(AdminBarView, {
+        props: { ...defaultProps, bar: { ...iconBar, columns: [{ ...iconColumn, icon_position: 'before' }] } },
+      })
+
+      const editor = wrapper.findComponent(IconColumnEditor)
+      await editor.vm.$emit('patch', { icon_position: 'after' })
+      await editor.vm.$emit('commit')
+
+      const updates = wrapper.emitted('update')
+      expect(updates).toBeTruthy()
+      const last = updates?.[updates.length - 1]?.[1] as Partial<Bar>
+      const col = (last.columns?.[0] ?? {}) as IconBarColumn
+      expect(col.icon_position).toBe('after')
+    })
+
+    it('resets to default icon column when type changes to icon', async () => {
+      const wrapper = mount(AdminBarView, { props: defaultProps })
+      const selector = wrapper.findComponent(ColumnTypeSelector)
+
+      await selector.vm.$emit('update:columnType', 'icon')
+
+      const updates = wrapper.emitted('update')
+      expect(updates).toBeTruthy()
+      const last = updates?.[updates.length - 1]?.[1] as Partial<Bar>
+      const col = (last.columns?.[0] ?? {}) as IconBarColumn
+      expect(col.type).toBe('icon')
+      expect(col.icon_attachment_id).toBe(0)
+      expect(col.icon_url).toBe('')
+      expect(col.icon_position).toBe('before')
     })
   })
 

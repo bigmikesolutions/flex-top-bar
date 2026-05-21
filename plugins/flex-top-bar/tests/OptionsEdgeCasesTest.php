@@ -515,4 +515,89 @@ final class OptionsEdgeCasesTest extends TestCase {
 
 		$this->assertSame( 'none', $bar['effect'] );
 	}
+
+	/**
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
+	 */
+	public function test_normalize_bar_preserves_icon_column_payload(): void {
+		if ( ! defined( 'FF_PLAN' ) ) {
+			define( 'FF_PLAN', 'pro' );
+		}
+		FeatureFlags::reset_for_tests();
+
+		$bar = Options::normalize_bar(
+			[
+				'columns' => [
+					[
+						'id'                      => 'ico_1',
+						'type'                    => 'icon',
+						'icon_attachment_id'      => 0,
+						'icon_url'                => '',
+						'text'                    => 'Free shipping',
+						'icon_position'           => 'before',
+						'size_percent'            => 100,
+						'content_position'        => 'left',
+						'messages_mobile_visible' => true,
+					],
+				],
+			]
+		);
+
+		$this->assertSame( 'icon', $bar['columns'][0]['type'] );
+		$this->assertSame( 'Free shipping', $bar['columns'][0]['text'] );
+		$this->assertSame( 'before', $bar['columns'][0]['icon_position'] );
+		$this->assertSame( 0, $bar['columns'][0]['icon_attachment_id'] );
+		$this->assertSame( '', $bar['columns'][0]['icon_url'] );
+	}
+
+	/**
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
+	 */
+	public function test_normalize_icon_column_preserves_after_position(): void {
+		if ( ! defined( 'FF_PLAN' ) ) {
+			define( 'FF_PLAN', 'pro' );
+		}
+		FeatureFlags::reset_for_tests();
+
+		$bar = Options::normalize_bar(
+			[
+				'columns' => [
+					[
+						'type'          => 'icon',
+						'icon_position' => 'after',
+						'text'          => 'Sale',
+					],
+				],
+			]
+		);
+
+		$this->assertSame( 'after', $bar['columns'][0]['icon_position'] );
+	}
+
+	/**
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
+	 */
+	public function test_normalize_icon_column_rejects_invalid_position(): void {
+		if ( ! defined( 'FF_PLAN' ) ) {
+			define( 'FF_PLAN', 'pro' );
+		}
+		FeatureFlags::reset_for_tests();
+
+		$bar = Options::normalize_bar(
+			[
+				'columns' => [
+					[
+						'type'          => 'icon',
+						'icon_position' => 'invalid',
+						'text'          => 'Hi',
+					],
+				],
+			]
+		);
+
+		$this->assertSame( 'before', $bar['columns'][0]['icon_position'] );
+	}
 }

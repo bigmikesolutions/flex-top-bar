@@ -264,24 +264,43 @@ export async function resetToTwoColumnBar(page: Page): Promise<void> {
 /**
  * One visible bar with a single column of the requested type for frontend E2E tests.
  */
+function seedSingleIconColumnBar(composeFile: string, root: string): void {
+  const iconSrc = `${root}/scripts/bms.png`;
+  const seedPhp = `${root}/e2e/scripts/seed-single-icon-column.php`;
+  execSync(`docker compose -f "${composeFile}" cp "${iconSrc}" wordpress:/tmp/bms-e2e.png`, {
+    stdio: 'pipe',
+  });
+  execSync(`docker compose -f "${composeFile}" cp "${seedPhp}" wordpress:/tmp/seed-single-icon-column.php`, {
+    stdio: 'pipe',
+  });
+  execSync(`docker compose -f "${composeFile}" exec -T wordpress php /tmp/seed-single-icon-column.php`, {
+    stdio: 'pipe',
+  });
+}
+
 export async function resetToSingleColumnBar(
   page: Page,
-  type: 'text' | 'social' | 'contact'
+  type: 'text' | 'social' | 'contact' | 'icon'
 ): Promise<void> {
   const root = process.cwd();
   const composeFile = `${root}/docker-compose.yml`;
   clearTopBarSeedOptions(composeFile);
 
-  // Keep bar-level legacy fields consistent with the first column (for backward compat).
-  const command = `docker compose -f "${composeFile}" exec -T wordpress php -r 'require_once "/var/www/html/wp-load.php"; $bars = [[ "id" => "bar_single_col", "name" => "Single column", "visible" => true, "admin_visibile" => true, "scheduled_enabled" => false, "scheduled_from_datetime" => "", "scheduled_to_datetime" => "", "position" => "top", "effect" => "none", "messages" => ["", ""], "messages_mobile_visible" => true, "columns" => [ ${
-    type === 'text'
-      ? `[ "id" => "col_front_text", "type" => "text", "effect" => "none", "messages" => ["Front text", ""], "size_percent" => 100, "messages_mobile_visible" => true ]`
-      : type === 'social'
-        ? `[ "id" => "col_front_social", "type" => "social", "icon_style" => "rounded", "background_color" => "#ffffff", "icon_color" => "#ff0000", "icon_border_width" => 0, "icon_border_color" => "#1d2327", "links" => [ [ "platform" => "youtube", "url" => "https://www.youtube.com/" ] ], "size_percent" => 100, "messages_mobile_visible" => true ]`
-        : `[ "id" => "col_front_contact", "type" => "contact", "icon_style" => "rounded", "background_color" => "#ffffff", "icon_color" => "#1d2327", "icon_border_width" => 0, "icon_border_color" => "#1d2327", "contacts" => [ [ "kind" => "email", "value" => "hello@example.com" ] ], "size_percent" => 100, "messages_mobile_visible" => true ]`
-  } ], "bg_color" => "#389339", "frame_color" => "", "frame_width" => 0, "hide_on_scroll" => false ]]; update_option("flex_top_bar_bars", $bars); /* Admin edits drafts; keep draft in sync with published for seeds. */ update_option("flex_top_bar_bars_draft", $bars);'`;
+  if (type === 'icon') {
+    seedSingleIconColumnBar(composeFile, root);
+  } else {
+    // Keep bar-level legacy fields consistent with the first column (for backward compat).
+    const command = `docker compose -f "${composeFile}" exec -T wordpress php -r 'require_once "/var/www/html/wp-load.php"; $bars = [[ "id" => "bar_single_col", "name" => "Single column", "visible" => true, "admin_visibile" => true, "scheduled_enabled" => false, "scheduled_from_datetime" => "", "scheduled_to_datetime" => "", "position" => "top", "effect" => "none", "messages" => ["", ""], "messages_mobile_visible" => true, "columns" => [ ${
+      type === 'text'
+        ? `[ "id" => "col_front_text", "type" => "text", "effect" => "none", "messages" => ["Front text", ""], "size_percent" => 100, "messages_mobile_visible" => true ]`
+        : type === 'social'
+          ? `[ "id" => "col_front_social", "type" => "social", "icon_style" => "rounded", "background_color" => "#ffffff", "icon_color" => "#ff0000", "icon_border_width" => 0, "icon_border_color" => "#1d2327", "links" => [ [ "platform" => "youtube", "url" => "https://www.youtube.com/" ] ], "size_percent" => 100, "messages_mobile_visible" => true ]`
+          : `[ "id" => "col_front_contact", "type" => "contact", "icon_style" => "rounded", "background_color" => "#ffffff", "icon_color" => "#1d2327", "icon_border_width" => 0, "icon_border_color" => "#1d2327", "contacts" => [ [ "kind" => "email", "value" => "hello@example.com" ] ], "size_percent" => 100, "messages_mobile_visible" => true ]`
+    } ], "bg_color" => "#389339", "frame_color" => "", "frame_width" => 0, "hide_on_scroll" => false ]]; update_option("flex_top_bar_bars", $bars); /* Admin edits drafts; keep draft in sync with published for seeds. */ update_option("flex_top_bar_bars_draft", $bars);'`;
 
-  execSync(command, { stdio: 'pipe' });
+    execSync(command, { stdio: 'pipe' });
+  }
+
   await loginAndOpenTopBarSettings(page);
 }
 
