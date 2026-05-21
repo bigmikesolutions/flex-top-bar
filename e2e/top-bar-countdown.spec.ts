@@ -1,9 +1,11 @@
 import { expect, test } from '@playwright/test';
 import {
   getBarIdByIndex,
+  getCountdownTimezoneValue,
   loginAndOpenTopBarSettings,
   openPanel,
   resetToSingleColumnBar,
+  setCountdownTimezone,
   toDatetimeLocalValue,
   waitForTopBarPut,
   waitForTopBarPutWhere,
@@ -265,5 +267,49 @@ test.describe('countdown timer - settings and frontend', () => {
     const countdown = page.locator(`[data-top-bar-id="${barId}"] .top-bar-countdown-column`);
     await expect(countdown.locator('.top-bar-countdown-column__text')).toHaveText('Promo running for');
     await expect(countdown.locator('.top-bar-countdown-column__plain, .top-bar-countdown-column__unit').first()).toBeVisible();
+  });
+
+  test.describe('timezone', () => {
+    test.use({ timezoneId: 'Europe/Warsaw' });
+
+    const columnId = 'col_front_countdown';
+
+    test('should save Europe/Warsaw countdown timezone and persist after reload', async ({ page }) => {
+      await loginAndOpenTopBarSettings(page);
+      await resetToSingleColumnBar(page, 'countdown');
+      await openPanel(page, 0);
+
+      const barId = await getBarIdByIndex(page, 0);
+      const timezoneSelect = page.locator(`#countdown_timezone_${barId}_${columnId}`);
+
+      await expect(timezoneSelect).toBeVisible({ timeout: 15000 });
+      await setCountdownTimezone(page, 0, columnId, 'Europe/Warsaw');
+      await expect(timezoneSelect).toHaveValue('Europe/Warsaw');
+
+      await page.reload();
+      await openPanel(page, 0);
+      await expect(timezoneSelect).toHaveValue('Europe/Warsaw');
+      await expect(await getCountdownTimezoneValue(page, 0, columnId)).toBe('Europe/Warsaw');
+    });
+
+    test('should save UTC countdown timezone and persist after reload', async ({ page }) => {
+      await loginAndOpenTopBarSettings(page);
+      await resetToSingleColumnBar(page, 'countdown');
+      await openPanel(page, 0);
+
+      const barId = await getBarIdByIndex(page, 0);
+      const timezoneSelect = page.locator(`#countdown_timezone_${barId}_${columnId}`);
+
+      await expect(timezoneSelect).toBeVisible({ timeout: 15000 });
+      // Seed uses UTC; switch away first so selecting UTC triggers a save.
+      await setCountdownTimezone(page, 0, columnId, 'Europe/Warsaw');
+      await setCountdownTimezone(page, 0, columnId, 'UTC');
+      await expect(timezoneSelect).toHaveValue('UTC');
+
+      await page.reload();
+      await openPanel(page, 0);
+      await expect(timezoneSelect).toHaveValue('UTC');
+      await expect(await getCountdownTimezoneValue(page, 0, columnId)).toBe('UTC');
+    });
   });
 });

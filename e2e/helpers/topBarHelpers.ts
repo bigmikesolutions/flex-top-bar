@@ -436,6 +436,30 @@ export async function getScheduleTimezoneValue(page: Page, barIndex: number): Pr
   return page.locator(`#scheduled_timezone_${barId}`).inputValue();
 }
 
+export async function setCountdownTimezone(
+  page: Page,
+  barIndex: number,
+  columnId: string,
+  timeZone: string
+): Promise<void> {
+  const barId = await getBarIdByIndex(page, barIndex);
+  const tzSelect = page.locator(`#countdown_timezone_${barId}_${columnId}`);
+
+  await tzSelect.waitFor({ state: 'visible', timeout: 15000 });
+  await tzSelect.selectOption({ value: timeZone });
+  await expect(tzSelect).toHaveValue(timeZone);
+  await waitForTopBarPutWhere(page, (body) => body.includes(`"countdown_timezone":"${timeZone}"`));
+}
+
+export async function getCountdownTimezoneValue(
+  page: Page,
+  barIndex: number,
+  columnId: string
+): Promise<string> {
+  const barId = await getBarIdByIndex(page, barIndex);
+  return page.locator(`#countdown_timezone_${barId}_${columnId}`).inputValue();
+}
+
 export async function publishBar(page: Page, barIndex: number, barId: string): Promise<void> {
   page.once('dialog', (d) => d.accept());
   const publishBtn = page.locator('.top-bar-row.bg').nth(barIndex).locator('button.top-bar-icons.publish');
