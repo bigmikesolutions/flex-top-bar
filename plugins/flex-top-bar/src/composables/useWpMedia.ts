@@ -64,14 +64,6 @@ export function validateIconMediaAttachment(
     return `File must be ${maxKb} KB or smaller.`
   }
 
-  if (mime !== 'image/svg+xml') {
-    const width = attachment.width ?? 0
-    const height = attachment.height ?? 0
-    if (width > limits.maxWidth || height > limits.maxHeight) {
-      return `Image must be at most ${limits.maxWidth}×${limits.maxHeight} px.`
-    }
-  }
-
   return null
 }
 

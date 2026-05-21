@@ -31,7 +31,7 @@
           <p class="xs top-bar-icon-column-editor__hint">
             {{
               sprintf(
-                __('Max %1$d×%2$d px, %3$d KB. PNG, JPG, GIF, WebP, or SVG.', 'flex-top-bar'),
+                __('Larger images are scaled down to %1$d×%2$d px. Max %3$d KB. PNG, JPG, GIF, WebP, or SVG.', 'flex-top-bar'),
                 limits.maxWidth,
                 limits.maxHeight,
                 Math.round(limits.maxFileBytes / 1024),

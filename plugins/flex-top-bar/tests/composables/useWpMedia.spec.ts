@@ -25,7 +25,7 @@ describe('validateIconMediaAttachment', () => {
     expect(result).toBeNull()
   })
 
-  it('rejects oversized dimensions', () => {
+  it('allows oversized dimensions (scaled on save)', () => {
     const result = validateIconMediaAttachment(
       {
         id: 1,
@@ -37,7 +37,7 @@ describe('validateIconMediaAttachment', () => {
       },
       limits,
     )
-    expect(result).toContain('64')
+    expect(result).toBeNull()
   })
 
   it('rejects oversized file', () => {

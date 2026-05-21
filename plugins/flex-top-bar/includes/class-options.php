@@ -27,6 +27,9 @@ final class Options {
 	/** Max file size (bytes) for icon column uploads — 512 KB. */
 	public const ICON_COLUMN_MAX_FILE_BYTES = 524288;
 
+	/** Registered attachment size for icon column (soft crop — fits within max box). */
+	public const ICON_COLUMN_IMAGE_SIZE = 'flex_top_bar_icon';
+
 	public static function new_bar_id(): string {
 		return 'bar_' . wp_generate_password( 8, false, false );
 	}
@@ -683,6 +686,15 @@ final class Options {
 		];
 	}
 
+	public static function register_icon_image_size(): void {
+		add_image_size(
+			self::ICON_COLUMN_IMAGE_SIZE,
+			self::ICON_COLUMN_MAX_WIDTH,
+			self::ICON_COLUMN_MAX_HEIGHT,
+			false
+		);
+	}
+
 	/**
 	 * @return array{attachment_id: int, url: string}
 	 */
@@ -722,24 +734,23 @@ final class Options {
 		}
 
 		if ( $mime !== 'image/svg+xml' ) {
-			$meta = wp_get_attachment_metadata( $attachment_id );
-			if ( is_array( $meta ) ) {
-				$width  = isset( $meta['width'] ) ? (int) $meta['width'] : 0;
-				$height = isset( $meta['height'] ) ? (int) $meta['height'] : 0;
-				if (
-					$width > self::ICON_COLUMN_MAX_WIDTH
-					|| $height > self::ICON_COLUMN_MAX_HEIGHT
-				) {
-					return [
-						'attachment_id' => 0,
-						'url'           => '',
-					];
-				}
-			}
+			self::ensure_icon_attachment_scaled( $attachment_id );
 		}
 
-		$url = wp_get_attachment_url( $attachment_id );
-		if ( ! is_string( $url ) || $url === '' ) {
+		$url = '';
+		if ( $mime !== 'image/svg+xml' && function_exists( 'wp_get_attachment_image_url' ) ) {
+			$sized = wp_get_attachment_image_url( $attachment_id, self::ICON_COLUMN_IMAGE_SIZE );
+			if ( is_string( $sized ) && $sized !== '' ) {
+				$url = $sized;
+			}
+		}
+		if ( $url === '' ) {
+			$full = wp_get_attachment_url( $attachment_id );
+			if ( is_string( $full ) && $full !== '' ) {
+				$url = $full;
+			}
+		}
+		if ( $url === '' ) {
 			return [
 				'attachment_id' => 0,
 				'url'           => '',
@@ -750,6 +761,35 @@ final class Options {
 			'attachment_id' => $attachment_id,
 			'url'           => esc_url_raw( $url ),
 		];
+	}
+
+	private static function ensure_icon_attachment_scaled( int $attachment_id ): void {
+		if ( ! function_exists( 'wp_get_attachment_image_url' ) ) {
+			return;
+		}
+
+		$existing = wp_get_attachment_image_url( $attachment_id, self::ICON_COLUMN_IMAGE_SIZE );
+		if ( is_string( $existing ) && $existing !== '' ) {
+			return;
+		}
+
+		$file = get_attached_file( $attachment_id );
+		if ( ! is_string( $file ) || $file === '' || ! file_exists( $file ) ) {
+			return;
+		}
+
+		if ( defined( 'ABSPATH' ) && file_exists( ABSPATH . 'wp-admin/includes/image.php' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/image.php';
+		}
+
+		if ( ! function_exists( 'wp_generate_attachment_metadata' ) ) {
+			return;
+		}
+
+		$metadata = wp_generate_attachment_metadata( $attachment_id, $file );
+		if ( is_array( $metadata ) && $metadata !== [] && function_exists( 'wp_update_attachment_metadata' ) ) {
+			wp_update_attachment_metadata( $attachment_id, $metadata );
+		}
 	}
 
 	/**
