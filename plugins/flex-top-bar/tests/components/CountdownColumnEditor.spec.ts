@@ -107,6 +107,21 @@ describe('CountdownColumnEditor', () => {
     ).toBe(true)
   })
 
+  it('emits patch and commit when timezone changes', async () => {
+    const wrapper = mount(CountdownColumnEditor, {
+      props: { barId: 'bar_1', columnId: 'col_1', column },
+    })
+
+    await wrapper.findComponent({ name: 'TimezoneSelect' }).vm.$emit('update:modelValue', 'Europe/Warsaw')
+
+    expect(
+      wrapper.emitted('patch')?.some(
+        (args) => (args[0] as { countdown_timezone?: string }).countdown_timezone === 'Europe/Warsaw',
+      ),
+    ).toBe(true)
+    expect(wrapper.emitted('commit')).toBeTruthy()
+  })
+
   it('emits patch and commit when count direction changes', async () => {
     const wrapper = mount(CountdownColumnEditor, {
       props: { barId: 'bar_1', columnId: 'col_1', column },

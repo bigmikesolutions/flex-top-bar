@@ -65,8 +65,8 @@
           <label :for="`countdown_timezone_${barId}_${columnId}`">
             <TimezoneSelect
               :select-id="`countdown_timezone_${barId}_${columnId}`"
-              v-model="timezoneModel"
-              @change="emit('commit')"
+              :model-value="column.countdown_timezone"
+              @update:model-value="onTimezoneUpdate"
             />
           </label>
           <p class="xs">
@@ -159,7 +159,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed } from 'vue'
 import { __ } from '@wordpress/i18n'
 import TimezoneSelect from '@/components/TimezoneSelect.vue'
 import type { CountdownBarColumn, CountdownDirection, CountdownStyle, CountdownTextPosition } from '@/types'
@@ -201,19 +201,6 @@ const directionDatetimeValue = computed(() =>
     : props.column.countup_from_datetime,
 )
 
-const timezoneModel = computed({
-  get: () => props.column.countdown_timezone,
-  set: (value: string) => {
-    emit('patch', { countdown_timezone: value })
-  },
-})
-
-onMounted(() => {
-  if (!props.column.countdown_timezone.trim()) {
-    emit('patch', { countdown_timezone: getDefaultScheduleTimezone() })
-  }
-})
-
 function patch(updates: Partial<CountdownBarColumn>) {
   emit('patch', updates)
 }
@@ -230,6 +217,15 @@ function setCountDirection(direction: CountdownDirection) {
 
 function setTextPosition(position: CountdownTextPosition) {
   patch({ text_position: position })
+  emit('commit')
+}
+
+function onTimezoneUpdate(value: string) {
+  const timezone = getDefaultScheduleTimezone(value)
+  if (timezone === props.column.countdown_timezone) {
+    return
+  }
+  patch({ countdown_timezone: timezone })
   emit('commit')
 }
 
