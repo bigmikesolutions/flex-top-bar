@@ -29,6 +29,15 @@ describe('ColumnTypeSelector', () => {
     expect(wrapper.find('.item-creator').exists()).toBe(true)
   })
 
+  it('emits update:columnType when icon type is selected', async () => {
+    const wrapper = mount(ColumnTypeSelector, { props: defaultProps })
+    const radios = wrapper.findAll('input[type="radio"]')
+
+    await radios[1].setValue('icon')
+
+    expect(wrapper.emitted('update:columnType')?.[0]).toEqual(['icon'])
+  })
+
   it('emits update:columnType when a different type is selected', async () => {
     const wrapper = mount(ColumnTypeSelector, { props: defaultProps })
     const radios = wrapper.findAll('input[type="radio"]')

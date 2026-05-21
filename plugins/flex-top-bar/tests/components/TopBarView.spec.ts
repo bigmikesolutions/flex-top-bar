@@ -300,6 +300,81 @@ describe('TopBarView', () => {
     consoleError.mockRestore()
   })
 
+  const iconColumnBar: Bar = {
+    ...mockBars[0],
+    effect: 'none',
+    messages: ['', ''],
+    columns: [
+      {
+        id: 'col_icon',
+        type: 'icon',
+        icon_attachment_id: 1,
+        icon_url: 'http://example.test/icon-64x64.png',
+        text: 'Free delivery',
+        icon_position: 'before',
+        size_percent: 100,
+        content_position: 'center',
+        messages_mobile_visible: true,
+      },
+    ],
+  }
+
+  it('renders icon column with image and text', async () => {
+    vi.mocked(fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => [iconColumnBar],
+    } as Response)
+
+    const wrapper = mount(TopBarView)
+    await wrapper.vm.$nextTick()
+    await new Promise(resolve => setTimeout(resolve, 0))
+
+    const col = wrapper.find('.top-bar-icon-text-column')
+    expect(col.exists()).toBe(true)
+    expect(col.classes()).toContain('top-bar-icon-text-column--icon-before')
+    expect(col.find('.top-bar-icon-text-column__img').attributes('src'))
+      .toBe('http://example.test/icon-64x64.png')
+    expect(col.text()).toContain('Free delivery')
+  })
+
+  it('applies icon-after class when icon_position is after', async () => {
+    const barAfter: Bar = {
+      ...iconColumnBar,
+      columns: [
+        {
+          ...(iconColumnBar.columns[0] as typeof iconColumnBar.columns[0]),
+          icon_position: 'after',
+        },
+      ],
+    }
+
+    vi.mocked(fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => [barAfter],
+    } as Response)
+
+    const wrapper = mount(TopBarView)
+    await wrapper.vm.$nextTick()
+    await new Promise(resolve => setTimeout(resolve, 0))
+
+    expect(wrapper.find('.top-bar-icon-text-column').classes())
+      .toContain('top-bar-icon-text-column--icon-after')
+  })
+
+  it('renders icon column in preview mode via barsOverride', async () => {
+    const wrapper = mount(TopBarView, {
+      props: {
+        barsOverride: [iconColumnBar],
+        preview: true,
+      },
+    })
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.find('.top-bar-icon-text-column').exists()).toBe(true)
+    expect(wrapper.find('.top-bar-container--preview').exists()).toBe(true)
+    expect(fetch).not.toHaveBeenCalled()
+  })
+
   it('sets correct data attributes on bar element', async () => {
     vi.mocked(fetch).mockResolvedValueOnce({
       ok: true,
