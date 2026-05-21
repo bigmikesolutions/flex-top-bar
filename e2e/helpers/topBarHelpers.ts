@@ -24,6 +24,12 @@ export function toDatetimeLocalValue(date: Date): string {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
+/** datetime-local string using UTC wall-clock fields (for stored timezone UTC). */
+export function toDatetimeLocalUtc(date: Date): string {
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())}T${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())}`;
+}
+
 /** True when response is a successful PUT updating a single bar (matches pretty and plain permalink REST URLs). */
 function isTopBarBarPut(response: Response): boolean {
   if (response.request().method() !== 'PUT' || !response.ok()) {
