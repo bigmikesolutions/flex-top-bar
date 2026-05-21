@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Flex Top Bar
  * Description: Build and publish customizable notification bars (top or bottom) with scheduling, icons, message effects/animations, multi-bar support, modern admin UI and more.
- * Version:     0.1.0
+ * Version:     0.1.2
  * Author:      Big Mike Solutions
  * Plugin URI:  https://github.com/bigmikesolutions/flex-top-bar
  * License:     GPL-2.0-or-later
