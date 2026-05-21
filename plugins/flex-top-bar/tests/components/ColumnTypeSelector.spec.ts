@@ -20,6 +20,7 @@ describe('ColumnTypeSelector', () => {
     expect(wrapper.text()).toContain('Icon + text')
     expect(wrapper.text()).toContain('Social media')
     expect(wrapper.text()).toContain('Contact data')
+    expect(wrapper.text()).toContain('Countdown timer')
     expect(wrapper.find('input[type="radio"]').exists()).toBe(true)
   })
 

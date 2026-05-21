@@ -371,7 +371,7 @@ final class Options {
 		}
 
 		$type = isset( $col['type'] ) ? sanitize_key( (string) $col['type'] ) : 'text';
-		if ( ! in_array( $type, [ 'text', 'social', 'contact', 'icon' ], true ) ) {
+		if ( ! in_array( $type, [ 'text', 'social', 'contact', 'icon', 'countdown' ], true ) ) {
 			$type = 'text';
 		}
 
@@ -383,6 +383,9 @@ final class Options {
 		}
 		if ( $type === 'icon' ) {
 			return self::normalize_icon_column( $col, $id, $size_percent, $content_position, $mmv );
+		}
+		if ( $type === 'countdown' ) {
+			return self::normalize_countdown_column( $col, $id, $size_percent, $content_position, $mmv );
 		}
 
 		return self::normalize_text_column( $col, $id, $default_message, $max_messages, $size_percent, $content_position, $mmv );
@@ -795,6 +798,78 @@ final class Options {
 	/**
 	 * @return array<string, mixed>
 	 */
+	/**
+	 * @return array<string, mixed>
+	 */
+	private static function normalize_countdown_column(
+		array $col,
+		string $id,
+		int $size_percent,
+		string $content_position,
+		bool $mmv
+	): array {
+		$counter_style = isset( $col['counter_style'] ) ? sanitize_key( (string) $col['counter_style'] ) : 'boxed';
+		if ( ! in_array( $counter_style, [ 'plain', 'boxed' ], true ) ) {
+			$counter_style = 'boxed';
+		}
+
+		$count_direction = isset( $col['count_direction'] ) ? sanitize_key( (string) $col['count_direction'] ) : 'down';
+		if ( ! in_array( $count_direction, [ 'up', 'down' ], true ) ) {
+			$count_direction = 'down';
+		}
+
+		$countdown_to = isset( $col['countdown_to_datetime'] )
+			? self::sanitize_iso_datetime( sanitize_text_field( (string) $col['countdown_to_datetime'] ) )
+			: '';
+		$countup_from = isset( $col['countup_from_datetime'] )
+			? self::sanitize_iso_datetime( sanitize_text_field( (string) $col['countup_from_datetime'] ) )
+			: '';
+
+		$countdown_timezone = isset( $col['countdown_timezone'] )
+			? self::sanitize_timezone( sanitize_text_field( (string) $col['countdown_timezone'] ) )
+			: '';
+
+		$text = isset( $col['text'] ) ? sanitize_text_field( (string) $col['text'] ) : '';
+
+		$text_position = isset( $col['text_position'] ) ? sanitize_key( (string) $col['text_position'] ) : 'before';
+		if ( ! in_array( $text_position, [ 'before', 'after' ], true ) ) {
+			$text_position = 'before';
+		}
+
+		$background_color = isset( $col['background_color'] ) ? self::sanitize_hex_color( (string) $col['background_color'] ) : '';
+		if ( $background_color === '' ) {
+			$background_color = '#1d2327';
+		}
+
+		$counter_color = isset( $col['counter_color'] ) ? self::sanitize_hex_color( (string) $col['counter_color'] ) : '';
+		if ( $counter_color === '' ) {
+			$counter_color = '#ffffff';
+		}
+
+		$text_color = isset( $col['text_color'] ) ? self::sanitize_hex_color( (string) $col['text_color'] ) : '';
+		if ( $text_color === '' ) {
+			$text_color = '#1d2327';
+		}
+
+		return [
+			'id'                      => $id,
+			'type'                    => 'countdown',
+			'counter_style'           => $counter_style,
+			'count_direction'         => $count_direction,
+			'countdown_to_datetime'   => $countdown_to,
+			'countup_from_datetime'   => $countup_from,
+			'countdown_timezone'      => $countdown_timezone,
+			'text'                    => $text,
+			'text_position'           => $text_position,
+			'background_color'        => $background_color,
+			'counter_color'           => $counter_color,
+			'text_color'              => $text_color,
+			'size_percent'            => $size_percent,
+			'content_position'        => $content_position,
+			'messages_mobile_visible' => $mmv,
+		];
+	}
+
 	private static function normalize_icon_column(
 		array $col,
 		string $id,

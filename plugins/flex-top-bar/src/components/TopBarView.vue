@@ -79,6 +79,11 @@
                 <span v-if="column.text" class="top-bar-icon-text-column__text">{{ column.text }}</span>
               </div>
             </template>
+            <template v-else-if="column.type === 'countdown'">
+              <div :style="getFlexAlignStyle(column)">
+                <CountdownDisplay :column="column" />
+              </div>
+            </template>
             <template v-else-if="column.type === 'contact'">
               <div
                 class="top-bar-contact-column"
@@ -124,6 +129,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import CountdownDisplay from '@/components/CountdownDisplay.vue'
 import type {
   Bar,
   BarColumn,
@@ -835,5 +841,80 @@ body.admin-bar .top-bar--top {
 
 .top-bar-icon-text-column__text {
   line-height: 1.3;
+}
+
+.top-bar-countdown-column {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  gap: 10px;
+  flex-wrap: wrap;
+  text-align: center;
+  color: var(--top-bar-countdown-text, inherit);
+}
+
+.top-bar-countdown-column--text-after {
+  flex-direction: row-reverse;
+}
+
+.top-bar-countdown-column__text {
+  color: var(--top-bar-countdown-text, inherit);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.top-bar-countdown-column__timer {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.top-bar-countdown-column__plain {
+  color: var(--top-bar-countdown-counter, inherit);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+
+.top-bar-countdown-column__unit {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.top-bar-countdown-column__digits {
+  display: inline-flex;
+  gap: 3px;
+}
+
+.top-bar-countdown-column__digit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.35em;
+  padding: 2px 4px;
+  border-radius: 4px;
+  background: var(--top-bar-countdown-bg, #1d2327);
+  color: var(--top-bar-countdown-counter, #fff);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+
+.top-bar-countdown-column--plain .top-bar-countdown-column__digit {
+  background: transparent;
+  padding: 0;
+  min-width: auto;
+}
+
+.top-bar-countdown-column__unit-label {
+  font-size: 0.75em;
+  font-weight: 600;
+  color: var(--top-bar-countdown-counter, inherit);
+  text-transform: lowercase;
 }
 </style>

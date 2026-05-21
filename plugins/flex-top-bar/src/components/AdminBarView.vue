@@ -189,6 +189,15 @@
                   @commit="saveChanges"
                 />
 
+                <CountdownColumnEditor
+                  v-else-if="column.type === 'countdown'"
+                  :bar-id="bar.id"
+                  :column-id="column.id"
+                  :column="column"
+                  @patch="onCountdownColumnPatch(columnIndex, $event)"
+                  @commit="saveChanges"
+                />
+
                 <div class="item item-creator">
                   <fieldset>
                     <legend class="bold">{{ __('Size column', 'flex-top-bar') }}</legend>
@@ -254,13 +263,16 @@ import type {
   ColumnType,
   ContactBarColumn,
   ContentPosition,
+  CountdownBarColumn,
   IconBarColumn,
   SocialBarColumn,
 } from '@/types'
+import { getDefaultScheduleTimezone } from '@/utils/scheduleDateTime'
 import { __, sprintf } from '@wordpress/i18n'
 import BasicSettingsSection from './BasicSettingsSection.vue'
 import ColumnTypeSelector from './ColumnTypeSelector.vue'
 import ContactColumnEditor from './ContactColumnEditor.vue'
+import CountdownColumnEditor from './CountdownColumnEditor.vue'
 import IconColumnEditor from './IconColumnEditor.vue'
 import ScheduleSection from './ScheduleSection.vue'
 import SocialColumnEditor from './SocialColumnEditor.vue'
@@ -335,6 +347,25 @@ function defaultColumnForType(
       icon_url: '',
       text: '',
       icon_position: 'before',
+      size_percent: sizePercent,
+      content_position: 'center',
+      messages_mobile_visible: messagesMobileVisible,
+    }
+  }
+  if (type === 'countdown') {
+    return {
+      id,
+      type: 'countdown',
+      counter_style: 'boxed',
+      count_direction: 'down',
+      countdown_to_datetime: '',
+      countup_from_datetime: '',
+      countdown_timezone: getDefaultScheduleTimezone(),
+      text: '',
+      text_position: 'before',
+      background_color: '#1d2327',
+      counter_color: '#ffffff',
+      text_color: '#1d2327',
       size_percent: sizePercent,
       content_position: 'center',
       messages_mobile_visible: messagesMobileVisible,
@@ -634,6 +665,16 @@ function onIconColumnPatch(columnIndex: number, partial: Partial<IconBarColumn>)
   const cols = [...localBar.value.columns]
   const cur = cols[columnIndex]
   if (cur.type !== 'icon') {
+    return
+  }
+  cols[columnIndex] = { ...cur, ...partial }
+  localBar.value = { ...localBar.value, columns: cols }
+}
+
+function onCountdownColumnPatch(columnIndex: number, partial: Partial<CountdownBarColumn>) {
+  const cols = [...localBar.value.columns]
+  const cur = cols[columnIndex]
+  if (cur.type !== 'countdown') {
     return
   }
   cols[columnIndex] = { ...cur, ...partial }
