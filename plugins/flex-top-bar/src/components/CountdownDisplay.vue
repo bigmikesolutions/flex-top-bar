@@ -71,10 +71,10 @@ const parts = computed(() => {
 const plainLabel = computed(() => formatPlainCountdown(parts.value))
 
 const boxedUnits = computed(() => [
-  { label: 'd', digits: digitChars(parts.value.days, 2) },
-  { label: 'h', digits: digitChars(parts.value.hours, 2) },
-  { label: 'm', digits: digitChars(parts.value.minutes, 2) },
-  { label: 's', digits: digitChars(parts.value.seconds, 2) },
+  { label: 'days', digits: digitChars(parts.value.days, 2) },
+  { label: 'hours', digits: digitChars(parts.value.hours, 2) },
+  { label: 'minutes', digits: digitChars(parts.value.minutes, 2) },
+  { label: 'seconds', digits: digitChars(parts.value.seconds, 2) },
 ])
 
 const columnStyle = computed(() => {
@@ -105,80 +105,99 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.top-bar-countdown-column {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  gap: 10px;
-  flex-wrap: wrap;
-  text-align: center;
-  color: var(--top-bar-countdown-text, inherit);
-}
 
-.top-bar-countdown-column--text-after {
-  flex-direction: row-reverse;
-}
+  .top-bar-countdown-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    gap: 10px;
+    flex-wrap: wrap;
+    text-align: center;
+    color: var(--top-bar-countdown-text, inherit);
+  }
 
-.top-bar-countdown-column__text {
-  color: var(--top-bar-countdown-text, inherit);
-  font-weight: 600;
-  line-height: 1.3;
-  white-space: nowrap;
-}
+  .top-bar-countdown-column--text-after {
+    flex-direction: column-reverse;
+  }
 
-.top-bar-countdown-column__timer {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: nowrap;
-  justify-content: center;
-}
 
-.top-bar-countdown-column__plain {
-  color: var(--top-bar-countdown-counter, inherit);
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.02em;
-  white-space: nowrap;
-}
 
-.top-bar-countdown-column__unit {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  flex-shrink: 0;
-}
+  .top-bar-countdown-column--text-after .top-bar-countdown-column__unit {
+    flex-direction: column-reverse;
+  }
 
-.top-bar-countdown-column__digits {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 3px;
-}
 
-.top-bar-countdown-column__digit {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 1.35em;
-  padding: 2px 4px;
-  border-radius: 4px;
-  background: var(--top-bar-countdown-bg, #1d2327);
-  color: var(--top-bar-countdown-counter, #fff);
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  line-height: 1.2;
-}
+  .top-bar-countdown-column__text {
+    color: var(--top-bar-countdown-text, inherit);
+    font-weight: 400;
+    line-height: 100%;
+    white-space: nowrap;
+  }
 
-.top-bar-countdown-column__unit-label {
-  font-size: 0.75em;
-  font-weight: 600;
-  color: var(--top-bar-countdown-counter, inherit);
-  text-transform: lowercase;
-  line-height: 1;
-}
+  .top-bar-countdown-column__timer {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: nowrap;
+    justify-content: center;
+  }
+
+  .top-bar-countdown-column__plain {
+    color: var(--top-bar-countdown-counter, inherit);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 1px;
+    white-space: nowrap;
+  }
+
+  .top-bar-countdown-column__unit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    flex-shrink: 0;
+  }
+
+  .top-bar-countdown-column__digits {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 3px;
+  }
+
+  .top-bar-countdown-column__digit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 9px;
+    border-radius: 4px;
+    background: var(--top-bar-countdown-bg, #1d2327);
+    color: var(--top-bar-countdown-counter, #fff);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.2;
+    position: relative;
+  }
+
+  .top-bar-countdown-column__digit:before {
+    content:'';
+    width: 100%;
+    height: 1px;
+    background: rgba(255,255,255,0.1);
+    position: absolute;
+    top:50%;
+    margin-top: -1px;
+  }
+
+  .top-bar-countdown-column__unit-label {
+    font-size: 8px;
+    text-transform: uppercase;
+    font-weight: 400;
+    color: var(--top-bar-countdown-text, inherit);
+    line-height: 1;
+  }
+
 </style>

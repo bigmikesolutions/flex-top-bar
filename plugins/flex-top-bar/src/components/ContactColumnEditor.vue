@@ -1,5 +1,5 @@
 <template>
-  <div class="item-creator grid-3">
+  <div class="item-creator grid-3 hide">
     <fieldset class="line">
       <legend class="bold">{{ __('Choose the icon appearance', 'flex-top-bar') }}</legend>
       <label v-for="opt in iconStyleOptions" :key="opt.value" :class="['radio', { 'bg-grey radio': opt.value === 'white' }]">
@@ -11,20 +11,22 @@
         />
       <span></span>
        <div class="item icons">
-        <span
-          v-for="platform in CONTACT_KINDS"
-          :key="platform"
-          class="top-bar-icons contact"
-          :class="{
-            circle: opt.value === 'rounded',
-            square: opt.value === 'square',
-            'mask black': opt.value === 'black',
-            'mask white': opt.value === 'white',
-            'no-mask': opt.value === 'color',
-            [platform]: true
-          }"
-          :title="kindLabel(platform)"
-        ></span>
+        <div class="scroll">
+          <span
+            v-for="platform in CONTACT_KINDS"
+            :key="platform"
+            class="top-bar-icons contact"
+            :class="{
+              circle: opt.value === 'rounded',
+              square: opt.value === 'square',
+              'mask black': opt.value === 'black',
+              'mask white': opt.value === 'white',
+              'no-mask': opt.value === 'color',
+              [platform]: true
+            }"
+            :title="kindLabel(platform)"
+          ></span>
+        </div>
       </div>
       </label>
     </fieldset>

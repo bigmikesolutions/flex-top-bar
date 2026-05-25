@@ -121,7 +121,19 @@
     box-sizing: border-box;
     width: 100%;
     margin-top: 20px;
-  
+    
+    .item {
+      width: 100%;
+
+      &.no-line {
+        border: 0;
+        padding: 0;
+      }
+
+      &.top {
+        margin-top: 10px;
+      }
+    }
 
     &.center {
       justify-content: center;
@@ -160,7 +172,7 @@
   
 
   // Grid
-
+  
   .top-bar-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
@@ -312,37 +324,11 @@
         }
       }
 
-      &.icons {
+      &.icons { 
         display: flex;
-        flex-wrap: wrap;
-
-        @media (max-width: 600px) {     
-          flex-wrap: nowrap;
-          overflow: hidden;
-        
-          span:nth-child(n+7) {
-            display: none;
-          }
-        }
-      }
-    }  
-    
-
-    
-    &.bg-blue {
-      background: fade(@blue,20);
-      padding: 10px;
-      box-sizing: border-box;
-      border:1px solid fade(@black,5);
-      border-radius: 10px;
-    }
-
-    &.bg-amber {
-      background: fade(@amber,20);
-      padding: 10px;
-      box-sizing: border-box;
-      border:1px solid fade(@black,5);
-      border-radius: 10px;
+        width: 100%;
+        overflow: hidden;
+      }  
     }
 
     .top-bar-message-list {
@@ -389,6 +375,10 @@
         }
       }
 
+      &.no-number {
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      }
+
       &[data-dragging=true] {
         .item-creator.no {
             background:fade(@amber,40)!important;
@@ -396,7 +386,7 @@
       }
 
       &.responsive {
-        grid-template-columns: repeat(auto-fit, minmax(0, 1fr) 80px);
+        grid-template-columns:  repeat(auto-fit, minmax(0, 1fr) 80px);
         border:0;
         background: none;
 
@@ -454,7 +444,10 @@
         @media (max-width: 1024px) {     
           grid-column:initial;
         }
+      }
 
+      &.hide {
+        overflow-x: hidden;
       }
 
       // &.lg {
@@ -513,6 +506,7 @@
   }
 
   /* Border frame: same structure as Position / Background so controls align in the grid row */
+  
   .top-bar-border-frame-controls {
     display: flex;
     flex-wrap: wrap;
@@ -531,6 +525,18 @@
     input[type="color"] {
       flex: 0 0 auto;
     }
+  }
+
+  // Other 
+
+  .scroll {
+    display: flex;
+    flex-wrap: nowrap;
+    width: 100%;
+    min-width: 0;
+    width: 0;
+    flex-grow: 1;
+    overflow-x: auto;
   }
 
   // Form elements, Input, Select, etc
@@ -553,6 +559,10 @@
         box-sizing: border-box;
         // background: @white;
       }
+    }
+
+    &.top {
+      margin-top: 10px;
     }
 
     &.clear {
@@ -597,10 +607,16 @@
   }
 
   input {
+    outline: none;
+
     &[type=color], &[type=datetime-local] {
       height: 46px;
       min-width: 46px;
     }    
+
+    &.full {
+      width: 100%;
+    }
   }
   
   input, select {
@@ -769,17 +785,17 @@
 
     &.sm {
       font-size: 14px;
-       padding: 10px 18px;
+      padding: 14px 18px 15px
     }
 
     &.md {
       font-size: 16px;
-       padding: 14px 24px;
+      padding: 14px 24px 15px
     }
 
     &.lg {
       font-size: 18px;
-       padding: 16px 28px;
+      padding: 16px 28px;
     }
 
     &.mint {
@@ -811,6 +827,25 @@
       }
     }
   }
+  
+  // Backround 
+  
+  .bg-blue {
+    background: fade(@blue,20);
+    padding: 10px;
+    box-sizing: border-box;
+    border:1px solid fade(@black,5);
+    border-radius: 10px;
+  }
+
+  .bg-amber {
+    background: fade(@amber,20);
+    padding: 10px;
+    box-sizing: border-box;
+    border:1px solid fade(@black,5);
+    border-radius: 10px;
+  }
+
 
   // Copyright
 
@@ -872,6 +907,7 @@
 
     &.social-media, &.contact {
       width: 24px;
+      min-width: 24px;
       height: 24px;
       margin: 3px;
       position: relative;

@@ -42,7 +42,7 @@
       </label>
     </fieldset>
 
-    <div class="top-bar-grid bg bg-amber top-bar-lifetime-panel options">
+    <div class="top-bar-row bg-amber">
       <div class="item">
         <fieldset class="clear">
           <legend class="bold">{{ directionDatetimeLegend }}</legend>
@@ -50,7 +50,7 @@
             <input
               :id="directionDatetimeId"
               type="datetime-local"
-              class="top-bar-life-time-datetime"
+              class="top-bar-life-time-datetime full"
               :value="directionDatetimeValue"
               @input="onDirectionDatetimeInput"
               @click="openPicker"
@@ -59,7 +59,7 @@
           </label>
         </fieldset>
       </div>
-      <div class="item">
+      <div class="item no-line top">
         <fieldset class="clear">
           <legend class="bold">{{ __('Timezone', 'flex-top-bar') }}</legend>
           <label :for="`countdown_timezone_${barId}_${columnId}`">
@@ -81,7 +81,7 @@
       </div>
     </div>
 
-    <fieldset class="line">
+    <fieldset class="line top">
       <legend class="bold">{{ __('Text', 'flex-top-bar') }}</legend>
       <input
         :id="`countdown_text_${barId}_${columnId}`"

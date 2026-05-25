@@ -23,21 +23,21 @@
         <span>{{ __('After text', 'flex-top-bar') }}</span>
       </label>
     </fieldset>
-
+    <p class="xs top-bar-icon-column-editor__hint">
+      {{
+        sprintf(
+          __('Larger images are scaled down to %1$d×%2$d px. Max %3$d KB. PNG, JPG, GIF, WebP, or SVG.', 'flex-top-bar'),
+          limits.maxWidth,
+          limits.maxHeight,
+          Math.round(limits.maxFileBytes / 1024),
+        )
+      }}
+    </p>
+        
     <div class="top-bar-icon-column-editor__row">
       <div class="top-bar-icon-column-editor__icon">
         <fieldset class="line">
           <legend class="bold">{{ __('Icon', 'flex-top-bar') }}</legend>
-          <p class="xs top-bar-icon-column-editor__hint">
-            {{
-              sprintf(
-                __('Larger images are scaled down to %1$d×%2$d px. Max %3$d KB. PNG, JPG, GIF, WebP, or SVG.', 'flex-top-bar'),
-                limits.maxWidth,
-                limits.maxHeight,
-                Math.round(limits.maxFileBytes / 1024),
-              )
-            }}
-          </p>
           <div v-if="column.icon_url" class="top-bar-icon-column-editor__preview">
             <img
               :src="column.icon_url"
@@ -73,7 +73,7 @@
             @blur="emit('commit')"
           />
         </fieldset>
-      </div>
+      </div>  
     </div>
   </div>
 </template>
@@ -136,13 +136,17 @@ function onTextInput(e: Event) {
   grid-template-columns: minmax(150px, 32%) minmax(0, 1fr);
   gap: 0;
   width: 100%;
+  margin-top: 20px;
   align-items: stretch;
 }
 
-.top-bar-icon-column-editor__icon,
+.top-bar-icon-column-editor__icon {
+  padding: 0 16px 0 0;  
+}
+
 .top-bar-icon-column-editor__text {
   min-width: 0;
-  padding: 16px;
+  padding: 0 16px;
   box-sizing: border-box;
 }
 

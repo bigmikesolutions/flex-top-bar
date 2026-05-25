@@ -1,7 +1,7 @@
 <template>
   <div class="item-creator grid-3">
     <fieldset class="line">
-      <legend class="bold">{{ __('Choose the icon appearance', 'flex-top-bar') }}</legend>
+      <legend class="bold">{{ __('Choose the icon appearance (scroll left to show all icons)', 'flex-top-bar') }}</legend>
       <label v-for="opt in iconStyleOptions" :key="opt.value" :class="['radio', { 'bg-grey radio': opt.value === 'white' }]">
         <input
           type="radio"
@@ -11,22 +11,24 @@
         />
         <span></span>
         <div class="item icons">
-        <span
-          v-for="platform in SOCIAL_PLATFORMS"
-          :key="platform"
-          class="top-bar-icons social-media"
-          :class="{
-            circle: opt.value === 'rounded',
-            square: opt.value === 'square',
-            'no-mask': opt.value === 'color',
-            'mask black': opt.value === 'black',
-            'mask white': opt.value === 'white',
-            color: platformLabel(platform) === 'Instagram' && opt.value === 'color',
-            monochrome: platformLabel(platform) === 'Instagram' && (opt.value === 'black' || opt.value === 'white' || opt.value === 'rounded' || opt.value === 'square'),
+          <div class="scroll">
+          <span
+            v-for="platform in SOCIAL_PLATFORMS"
+            :key="platform"
+            class="top-bar-icons social-media"
+            :class="{
+              circle: opt.value === 'rounded',
+              square: opt.value === 'square',
+              'no-mask': opt.value === 'color',
+              'mask black': opt.value === 'black',
+              'mask white': opt.value === 'white',
+              color: platformLabel(platform) === 'Instagram' && opt.value === 'color',
+              monochrome: platformLabel(platform) === 'Instagram' && (opt.value === 'black' || opt.value === 'white' || opt.value === 'rounded' || opt.value === 'square'),
 
-            [platform === 'twitterX' ? 'twitterX' : platform]: true
-          }"
-          :title="platformLabel(platform)"></span>
+              [platform === 'twitterX' ? 'twitterX' : platform]: true
+            }"
+            :title="platformLabel(platform)"></span>
+          </div>
         </div>
       </label>
     </fieldset>
