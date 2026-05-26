@@ -88,7 +88,7 @@ $bars = [
 		"id" => "bar_top_1",
 		"name" => "1st - top",
 		"visible" => true,
-		"admin_visibile" => true,
+		"admin_visibile" => false,
 		"scheduled_enabled" => false,
 		"scheduled_from_datetime" => "",
 		"scheduled_to_datetime" => "",
@@ -236,7 +236,7 @@ $bars = [
 	],
 	[
 		"id" => "bar_bottom_1",
-		"name" => "2nd - bottom (hidden on scroll)",
+		"name" => "3rd - bottom (hidden on scroll)",
 		"visible" => true,
 		"admin_visibile" => false,
 		"scheduled_enabled" => false,
@@ -315,7 +315,7 @@ $bars = [
 	],
 	[
 		"id" => "bar_bottom_scheduled_1",
-		"name" => "3rd - bottom scheduled",
+		"name" => "4th - bottom scheduled",
 		"visible" => true,
 		"admin_visibile" => false,
 		"scheduled_enabled" => true,
