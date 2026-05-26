@@ -93,9 +93,6 @@ $bars = [
 		"scheduled_from_datetime" => "",
 		"scheduled_to_datetime" => "",
 		"position" => "top",
-		"effect" => "fadein",
-		"messages" => ["Top bar.", "Top position.", "Scroll is off."],
-		"messages_mobile_visible" => true,
 		"columns" => [
 			[
 				"id" => "image_0",
@@ -167,9 +164,6 @@ $bars = [
 		"scheduled_from_datetime" => "",
 		"scheduled_to_datetime" => "",
 		"position" => "top",
-		"effect" => "blink",
-		"messages" => ["2nd top bar.", "Hidden on scroll."],
-		"messages_mobile_visible" => false,
 		"columns" => [
 			[
 				"id" => "image_0",
@@ -249,9 +243,6 @@ $bars = [
 		"scheduled_from_datetime" => "",
 		"scheduled_to_datetime" => "",
 		"position" => "bottom",
-		"effect" => "blink",
-		"messages" => ["Bottom bar.", "Hidden on scroll."],
-		"messages_mobile_visible" => false,
 		"columns" => [
 			[
 				"id" => "image_0",
