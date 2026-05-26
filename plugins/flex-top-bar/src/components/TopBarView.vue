@@ -4,122 +4,128 @@
     :class="['top-bar-container', { 'top-bar-container--preview': !!props.preview }]"
   >
     <div
-      v-for="bar in visibleBars"
-      :key="bar.id"
-      :id="`top-bar-${bar.id}`"
-      :class="['top-bar', props.preview ? 'top-bar--preview' : `top-bar--${bar.position}`]"
-      :style="getBarStyles(bar)"
-      role="banner"
-      :data-top-bar-id="bar.id"
-      :data-top-bar-position="bar.position"
-      :data-top-bar-effect="getBarEffect(bar)"
-      :data-top-bar-hide-on-scroll="bar.hide_on_scroll ? '1' : '0'"
+      v-for="group in visibleBarGroups"
+      :key="group.position"
+      :class="['top-bar-stack', props.preview ? 'top-bar-stack--preview' : `top-bar-stack--${group.position}`]"
     >
-    <div class="top-bar__inner">
-        <div class="top-bar__columns" >
-          <div
-            v-for="column in getColumns(bar)"
-            :key="column.id"
-            class="top-bar__column"
-            :class="{ 'top-bar__column--mobile-hidden': !column.messages_mobile_visible }"
-            :style="getColumnStyle(column)"
-          >
-            <template v-if="column.type === 'text'">
-              <div class="top-bar-text-column" :style="getTextAlignStyle(column)">
-                <template v-if="column.effect === 'none'">
-                  {{ getFirstMessage(column) }}
-                </template>
-                <template v-else>
-                  <transition :name="getTransitionName(column.effect)" mode="out-in">
-                    <div :key="currentMessageIndex[columnKey(bar.id, column.id)] ?? 0">
-                      {{ getCurrentMessage(bar, column) }}
-                    </div>
-                  </transition>
-                </template>
-              </div>
-            </template>
-            <template v-else-if="column.type === 'social'">
-              <div
-                class="top-bar-social-column"
-                :class="socialColumnClass(column)"
-                :style="{ ...socialColumnStyle(column), ...getFlexAlignStyle(column) }"
-              >
-                <a
-                  v-for="(link, i) in column.links.filter(l => l.url.trim() !== '')"
-                  :key="`${column.id}-link-${i}`"
-                  class="top-bar-social-column__link"
-                  :href="safeHref(link.url)"
-                  target="_blank"
-                  :title="socialPlatformLabel(link.platform)"
-                  rel="noopener noreferrer"
+      <div
+        v-for="bar in group.items"
+        :key="bar.id"
+        :id="`top-bar-${bar.id}`"
+        :class="['top-bar', props.preview ? 'top-bar--preview' : `top-bar--${bar.position}`]"
+        :style="getBarStyles(bar)"
+        role="banner"
+        :data-top-bar-id="bar.id"
+        :data-top-bar-position="bar.position"
+        :data-top-bar-effect="getBarEffect(bar)"
+        :data-top-bar-hide-on-scroll="bar.hide_on_scroll ? '1' : '0'"
+      >
+        <div class="top-bar__inner">
+          <div class="top-bar__columns" >
+            <div
+              v-for="column in getColumns(bar)"
+              :key="column.id"
+              class="top-bar__column"
+              :class="{ 'top-bar__column--mobile-hidden': !column.messages_mobile_visible }"
+              :style="getColumnStyle(column)"
+            >
+              <template v-if="column.type === 'text'">
+                <div class="top-bar-text-column" :style="getTextAlignStyle(column)">
+                  <template v-if="column.effect === 'none'">
+                    {{ getFirstMessage(column) }}
+                  </template>
+                  <template v-else>
+                    <transition :name="getTransitionName(column.effect)" mode="out-in">
+                      <div :key="currentMessageIndex[columnKey(bar.id, column.id)] ?? 0">
+                        {{ getCurrentMessage(bar, column) }}
+                      </div>
+                    </transition>
+                  </template>
+                </div>
+              </template>
+              <template v-else-if="column.type === 'social'">
+                <div
+                  class="top-bar-social-column"
+                  :class="socialColumnClass(column)"
+                  :style="{ ...socialColumnStyle(column), ...getFlexAlignStyle(column) }"
                 >
-                  <span
-                    class="top-bar-icon top-bar-icon--social"
-                    :style="iconStyleFromClass(socialIconClass(link.platform, column.icon_style), column.icon_style, usesIconColors(column.icon_style) ? column.icon_color : '')"
-                    aria-hidden="true"
-                  ></span>
-                  <!-- {{ socialPlatformLabel(link.platform) }} -->
-                </a>
-              </div>
-            </template>
-            <template v-else-if="column.type === 'icon'">
-              <div
-                class="top-bar-icon-text-column"
-                :class="`top-bar-icon-text-column--icon-${column.icon_position}`"
-                :style="getFlexAlignStyle(column)"
-              >
-                <img
-                  v-if="column.icon_url"
-                  :src="column.icon_url"
-                  alt=""
-                  class="top-bar-icon-text-column__img"
-                  width="24"
-                  height="24"
-                />
-                <span v-if="column.text" class="top-bar-icon-text-column__text">{{ column.text }}</span>
-              </div>
-            </template>
-            <template v-else-if="column.type === 'countdown'">
-              <div :style="getFlexAlignStyle(column)">
-                <CountdownDisplay :column="column" />
-              </div>
-            </template>
-            <template v-else-if="column.type === 'contact'">
-              <div
-                class="top-bar-contact-column"
-                :class="contactColumnClass(column)"
-                :style="{ ...contactColumnStyle(column), ...getFlexAlignStyle(column) }"
-              >
-                <template v-for="(entry, i) in column.contacts.filter(e => e.value.trim() !== '')" :key="`${column.id}-c-${i}`">
                   <a
-                    v-if="contactHref(entry.kind, entry.value) !== '#'"
-                    class="top-bar-contact-column__link"
-                    :href="contactHref(entry.kind, entry.value)"
-                    :title="`${contactLabel(entry.kind)}`"
-                    :target="entry.kind === 'website' || entry.kind === 'location'  || entry.kind === 'support' || entry.kind === 'chat' ? '_blank' : undefined"
-                    :rel="entry.kind === 'website' || entry.kind === 'location'  || entry.kind === 'support' || entry.kind === 'chat' ? 'noopener noreferrer' : undefined"
+                    v-for="(link, i) in column.links.filter(l => l.url.trim() !== '')"
+                    :key="`${column.id}-link-${i}`"
+                    class="top-bar-social-column__link"
+                    :href="safeHref(link.url)"
+                    target="_blank"
+                    :title="socialPlatformLabel(link.platform)"
+                    rel="noopener noreferrer"
                   >
                     <span
-                      class="top-bar-icon top-bar-icon--contact"
-                      :style="iconStyleFromClass(contactIconClass(entry.kind), column.icon_style, usesIconColors(column.icon_style) ? column.icon_color : '')"
+                      class="top-bar-icon top-bar-icon--social"
+                      :style="iconStyleFromClass(socialIconClass(link.platform, column.icon_style), column.icon_style, usesIconColors(column.icon_style) ? column.icon_color : '')"
                       aria-hidden="true"
                     ></span>
-                    <!-- {{ contactDisplayLabel(entry.kind, entry.value) }} -->
+                    <!-- {{ socialPlatformLabel(link.platform) }} -->
                   </a>
-                  <span
-                    v-else
-                    class="top-bar-contact-column__text"
-                  >
+                </div>
+              </template>
+              <template v-else-if="column.type === 'icon'">
+                <div
+                  class="top-bar-icon-text-column"
+                  :class="`top-bar-icon-text-column--icon-${column.icon_position}`"
+                  :style="getFlexAlignStyle(column)"
+                >
+                  <img
+                    v-if="column.icon_url"
+                    :src="column.icon_url"
+                    alt=""
+                    class="top-bar-icon-text-column__img"
+                    width="24"
+                    height="24"
+                  />
+                  <span v-if="column.text" class="top-bar-icon-text-column__text">{{ column.text }}</span>
+                </div>
+              </template>
+              <template v-else-if="column.type === 'countdown'">
+                <div :style="getFlexAlignStyle(column)">
+                  <CountdownDisplay :column="column" />
+                </div>
+              </template>
+              <template v-else-if="column.type === 'contact'">
+                <div
+                  class="top-bar-contact-column"
+                  :class="contactColumnClass(column)"
+                  :style="{ ...contactColumnStyle(column), ...getFlexAlignStyle(column) }"
+                >
+                  <template v-for="(entry, i) in column.contacts.filter(e => e.value.trim() !== '')" :key="`${column.id}-c-${i}`">
+                    <a
+                      v-if="contactHref(entry.kind, entry.value) !== '#'"
+                      class="top-bar-contact-column__link"
+                      :href="contactHref(entry.kind, entry.value)"
+                      :title="`${contactLabel(entry.kind)}`"
+                      :target="entry.kind === 'website' || entry.kind === 'location'  || entry.kind === 'support' || entry.kind === 'chat' ? '_blank' : undefined"
+                      :rel="entry.kind === 'website' || entry.kind === 'location'  || entry.kind === 'support' || entry.kind === 'chat' ? 'noopener noreferrer' : undefined"
+                    >
+                      <span
+                        class="top-bar-icon top-bar-icon--contact"
+                        :style="iconStyleFromClass(contactIconClass(entry.kind), column.icon_style, usesIconColors(column.icon_style) ? column.icon_color : '')"
+                        aria-hidden="true"
+                      ></span>
+                      <!-- {{ contactDisplayLabel(entry.kind, entry.value) }} -->
+                    </a>
                     <span
-                      class="top-bar-icon top-bar-icon--contact"
-                      :style="iconStyleFromClass(contactIconClass(entry.kind), column.icon_style, usesIconColors(column.icon_style) ? column.icon_color : '')"
-                      aria-hidden="true"
-                    ></span>
-                    <!-- {{ contactDisplayLabel(entry.kind, entry.value) }} -->
-                  </span>
-                </template>
-              </div>
-            </template>
+                      v-else
+                      class="top-bar-contact-column__text"
+                    >
+                      <span
+                        class="top-bar-icon top-bar-icon--contact"
+                        :style="iconStyleFromClass(contactIconClass(entry.kind), column.icon_style, usesIconColors(column.icon_style) ? column.icon_color : '')"
+                        aria-hidden="true"
+                      ></span>
+                      <!-- {{ contactDisplayLabel(entry.kind, entry.value) }} -->
+                    </span>
+                  </template>
+                </div>
+              </template>
+            </div>
           </div>
         </div>
       </div>
@@ -151,6 +157,7 @@ const props = defineProps<{
   preview?: boolean
 }>()
 
+const BAR_POSITIONS: Array<Bar['position']> = ['top', 'bottom']
 const bars = ref<Bar[]>([])
 const currentMessageIndex = ref<Record<string, number>>({})
 const intervals = ref<Record<string, number>>({})
@@ -283,6 +290,15 @@ const visibleBars = computed(() => {
     return true
   })
 })
+
+const visibleBarGroups = computed(() =>
+  BAR_POSITIONS
+    .map(position => ({
+      position,
+      items: visibleBars.value.filter(bar => bar.position === position),
+    }))
+    .filter(group => group.items.length > 0)
+)
 
 function getBarStyles(bar: Bar) {
   const styles: Record<string, string> = {
@@ -560,6 +576,13 @@ watch(
   z-index: 99998;
 }
 
+.top-bar-stack {
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 99998;
+}
+
 .top-bar {
   width: 100%;
   padding: 12px 20px;
@@ -568,29 +591,32 @@ watch(
   z-index: 99998;
 }
 
-.top-bar--top {
+.top-bar-stack--top {
   position: fixed;
   top: 0;
-  left: 0;
-  right: 0;
 }
 
 /* Adjust for WordPress admin bar (32px on desktop, 46px on mobile) */
-body.admin-bar .top-bar--top {
+body.admin-bar .top-bar-stack--top {
   top: 32px;
 }
 
 @media screen and (max-width: 782px) {
-  body.admin-bar .top-bar--top {
+  body.admin-bar .top-bar-stack--top {
     top: 46px;
   }
 }
 
-.top-bar--bottom {
+.top-bar-stack--bottom {
   position: fixed;
   bottom: 0;
-  left: 0;
-  right: 0;
+  display: flex;
+  flex-direction: column-reverse;
+}
+
+.top-bar--top,
+.top-bar--bottom {
+  position: relative;
 }
 
 /* Admin preview must not be fixed to viewport */
@@ -603,6 +629,7 @@ body.admin-bar .top-bar--top {
   z-index: auto !important;
 }
 
+.top-bar-stack--preview,
 .top-bar-container--preview {
   position: relative;
   z-index: auto;

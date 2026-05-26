@@ -25,7 +25,7 @@ test.describe('multi-bar', () => {
     await publishSave;
   }
 
-  test('should create 2 top bars and display both on frontend', async ({ page }) => {
+  test('should create top and bottom bars and display both on frontend', async ({ page }) => {
     await loginAndOpenTopBarSettings(page);
     await resetToSingleBar(page);
     await addBars(page, 1);
@@ -33,9 +33,9 @@ test.describe('multi-bar', () => {
     const ids = await getBarIds(page);
     expect(ids).toHaveLength(2);
 
-    // Set both to top position
+    // Set first bar to top and second to bottom.
     await setBarPosition(page, 0, 'top');
-    await setBarPosition(page, 1, 'top');
+    await setBarPosition(page, 1, 'bottom');
 
     // Publish both bars so frontend can see them (frontend reads published bars only).
     await publishBarByIndex(page, 0);
@@ -43,11 +43,15 @@ test.describe('multi-bar', () => {
 
     // Verify on frontend
     await page.goto('/');
-    for (const id of ids) {
-      const bar = page.locator(`[data-top-bar-id="${id}"]`);
-      await expect(bar).toHaveCount(1);
-      await expect(bar).toHaveAttribute('data-top-bar-position', 'top');
-    }
+    const topBar = page.locator(`[data-top-bar-id="${ids[0]}"]`);
+    const bottomBar = page.locator(`[data-top-bar-id="${ids[1]}"]`);
+
+    await expect(topBar).toHaveCount(1);
+    await expect(bottomBar).toHaveCount(1);
+    await expect(topBar).toHaveAttribute('data-top-bar-position', 'top');
+    await expect(bottomBar).toHaveAttribute('data-top-bar-position', 'bottom');
+    await expect(page.locator('.top-bar-stack--top').locator(`[data-top-bar-id="${ids[0]}"]`)).toHaveCount(1);
+    await expect(page.locator('.top-bar-stack--bottom').locator(`[data-top-bar-id="${ids[1]}"]`)).toHaveCount(1);
   });
 
   test('should create 3 bars, remove one, and keep 2 displayed', async ({ page }) => {
@@ -84,6 +88,52 @@ test.describe('multi-bar', () => {
     await expect(page.locator(`[data-top-bar-id="${removedId}"]`)).toHaveCount(0);
     await expect(page.locator(`[data-top-bar-id="${createdIds[1]}"]`)).toHaveCount(1);
     await expect(page.locator(`[data-top-bar-id="${createdIds[2]}"]`)).toHaveCount(1);
+  });
+
+  test('should stack 2 top bars one below another on frontend', async ({ page }) => {
+    await loginAndOpenTopBarSettings(page);
+    await resetToSingleBar(page);
+    await addBars(page, 1);
+
+    const ids = await getBarIds(page);
+    expect(ids).toHaveLength(2);
+
+    await setBarPosition(page, 0, 'top');
+    await setBarPosition(page, 1, 'top');
+
+    await publishBarByIndex(page, 0);
+    await publishBarByIndex(page, 1);
+
+    await page.goto('/');
+
+    const topStack = page.locator('.top-bar-stack--top');
+    await expect(topStack).toHaveCount(1);
+
+    const firstBar = page.locator(`[data-top-bar-id="${ids[0]}"]`);
+    const secondBar = page.locator(`[data-top-bar-id="${ids[1]}"]`);
+
+    await expect(firstBar).toBeVisible();
+    await expect(secondBar).toBeVisible();
+    await expect(firstBar).toHaveAttribute('data-top-bar-position', 'top');
+    await expect(secondBar).toHaveAttribute('data-top-bar-position', 'top');
+
+    const stackedBars = topStack.locator('.top-bar');
+    await expect(stackedBars).toHaveCount(2);
+    await expect(stackedBars.nth(0)).toHaveAttribute('data-top-bar-id', ids[0]);
+    await expect(stackedBars.nth(1)).toHaveAttribute('data-top-bar-id', ids[1]);
+
+    const firstBox = await firstBar.boundingBox();
+    const secondBox = await secondBar.boundingBox();
+
+    expect(firstBox).not.toBeNull();
+    expect(secondBox).not.toBeNull();
+
+    if (!firstBox || !secondBox) {
+      throw new Error('Expected both top bars to have bounding boxes on frontend.');
+    }
+
+    expect(secondBox.y).toBeGreaterThanOrEqual(firstBox.y + firstBox.height - 1);
+    expect(Math.abs(secondBox.x - firstBox.x)).toBeLessThanOrEqual(1);
   });
 
   test('should not allow creating more than max bars from UI', async ({ page }) => {
