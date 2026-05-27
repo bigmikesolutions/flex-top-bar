@@ -89,6 +89,19 @@ The plugin is provided “AS IS” and “AS AVAILABLE” without warranties of 
 
 More detailed EULA and disclaimer texts are included in the plugin package under `assets/doc/`.
 
+== Source code (uncompressed) and build instructions ==
+
+The JavaScript/CSS shipped in this plugin is built (bundled/minified) from human-readable source code.
+
+**Source repository (public):** https://github.com/bigmikesolutions/flex-top-bar
+
+**Primary plugin source location:** https://github.com/bigmikesolutions/flex-top-bar/tree/main/plugins/flex-top-bar
+
+To rebuild the distributed assets locally:
+
+1. From the repo root, install dependencies: `npm install`
+2. Build the plugin assets: `npm run build:flex-top-bar`
+
 == Changelog ==
 
 = 0.2.0 =
