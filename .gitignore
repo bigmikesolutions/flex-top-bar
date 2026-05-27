@@ -20,6 +20,7 @@ composer.lock
 node_modules/
 test-results/
 .idea
+plugins/plugin-check/
 
 # Plugin release zips (npm run package:top-bar)
 /release/
