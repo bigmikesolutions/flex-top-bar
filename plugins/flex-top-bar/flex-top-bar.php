@@ -67,20 +67,24 @@ if ( ! function_exists( 'ftb_fs' ) ) {
         static $ftb_fs_instance = null;
 
         if ( $ftb_fs_instance === null ) {
-            // Include Freemius SDK.
+            // Include Freemius SDK (if not already loaded by another plugin).
             $sdk_paths = [
                 dirname( __FILE__ ) . '/freemius/start.php',
                 dirname( __FILE__ ) . '/vendor/freemius/start.php',
             ];
-            $loaded = false;
-            foreach ( $sdk_paths as $sdk_path ) {
-                if ( file_exists( $sdk_path ) ) {
-                    require_once $sdk_path;
-                    $loaded = true;
-                    break;
+            $loaded = function_exists( 'fs_dynamic_init' );
+            if ( ! $loaded ) {
+                foreach ( $sdk_paths as $sdk_path ) {
+                    if ( file_exists( $sdk_path ) ) {
+                        require_once $sdk_path;
+                        if ( function_exists( 'fs_dynamic_init' ) ) {
+                            $loaded = true;
+                            break;
+                        }
+                    }
                 }
             }
-            if ( ! $loaded ) {
+            if ( ! $loaded || ! function_exists( 'fs_dynamic_init' ) ) {
                 // Fail gracefully: plugin can still run without Freemius.
                 return null;
             }
