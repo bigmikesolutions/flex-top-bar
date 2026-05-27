@@ -7,6 +7,7 @@ Requires PHP: 8.1
 Stable tag: 0.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
+Plugin repository: https://github.com/bigmikesolutions/flex-top-bar
 
 Build and publish customizable notification bars (top or bottom) with a modern admin UI.
 

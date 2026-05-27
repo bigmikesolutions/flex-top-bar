@@ -45,7 +45,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Namespaced constants to avoid collisions with other plugins.
-define( 'FLEX_TOP_BAR_VERSION', '0.1.0' );
+define( 'FLEX_TOP_BAR_VERSION', '0.2.0' );
 define( 'FLEX_TOP_BAR_PLUGIN_FILE', __FILE__ );
 define( 'FLEX_TOP_BAR_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 
