@@ -19,7 +19,10 @@ Flex Top Bar lets you add a configurable notification/announcement bar to the to
 
 - Display a bar at the **top or bottom** of the site.
 - Edit the message with a **WYSIWYG editor** (text, links, formatting, media).
-- Build the bar layout using **columns**, each containing **text or an icon**.
+- Build the bar layout using **columns** (text, social links, contact, icons, countdown timer, and more).
+- Add an **icon** column with optional short text—use bundled icons or **upload your own** (PNG, JPG, GIF, WebP, or SVG).
+- Add a **countdown timer** column to count **down** to an end date/time or **up** from a start date/time, with timezone support and configurable display styles.
+- **Schedule** when a bar is visible with optional start and end date/time; configure times in your chosen timezone, and on the front end the bar is shown to each visitor according to their browser timezone.
 - Customize **background color** and optional **border/frame color**.
 - Changes are saved from the settings screen and you can **publish** when ready.
 
@@ -72,6 +75,8 @@ By default, WordPress deactivation does not remove saved settings. If you need a
 3. Message editor (WYSIWYG).
 4. Social media/icons configuration.
 5. Example bars displayed on the front-end.
+6. Countdown timer column settings in the admin.
+7. Countdown timer displayed on the front-end.
 
 == Privacy ==
 
